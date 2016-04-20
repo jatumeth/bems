@@ -433,7 +433,7 @@ class API:
                     msgToDevice['t_heat'] = schedule_setpoint[1]
                 elif postmsg.get('thermostat_mode') == "COOL":
                     self.set_variable("t_cool",schedule_setpoint[0])
-                    msgToDevice['t_heat'] = schedule_setpoint[0]
+                    msgToDevice['t_cool'] = schedule_setpoint[0]
         return msgToDevice
 
     def setDeviceSchedule(self, scheduleData):
