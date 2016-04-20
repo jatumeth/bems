@@ -137,7 +137,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                 self.discovery_list.append('Socket')
                 self.discovery_list.append('LightSwitch')
                 self.discovery_list.append('Insight')
-            if self.findWiFiHue: self.discovery_list.append('Philips hue bridge 2012')
+            if self.findWiFiHue: self.discovery_list.append('Philips hue bridge')
             if self.findBACnet:
                 self.discovery_list.append('LMPL-201')
                 self.discovery_list.append('LMRC-212')
