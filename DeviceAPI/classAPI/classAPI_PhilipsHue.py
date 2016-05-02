@@ -56,7 +56,7 @@ class API:
     def __init__(self,**kwargs):  # default color is white
         # Initialized common attributes
         self.variables = kwargs
-        self.debug = False
+        self.debug = True
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
     def renewConnection(self):
@@ -111,7 +111,8 @@ class API:
                 self.set_variable('offline_count', 0)
             else:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
-        except:
+        except Exception as er:
+            print er
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
