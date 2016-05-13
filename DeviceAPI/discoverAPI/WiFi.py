@@ -178,6 +178,8 @@ def getmodelvendor(type,ipaddress):
         deviceUrl = urllib2.urlopen(ipaddress)
         dom=minidom.parse(deviceUrl)
         deviceModel=dom.getElementsByTagName('modelName')[0].firstChild.data
+        if "Philips hue bridge" in deviceModel:
+            deviceModel = "Philips hue bridge"
         deviceVendor=dom.getElementsByTagName('manufacturer')[0].firstChild.data
         deviceUrl.close()
         return {'model':deviceModel,'vendor':deviceVendor}
@@ -200,7 +202,7 @@ def getmodelvendor(type,ipaddress):
 
 # This main method will not be executed when this class is used as a module
 def main():
-    print discover('WeMo')
+    print discover('Philips')
     # print discover('thermostat')
     # print getMACaddress('Philips','http://192.168.1.102:80/description.xml')
     # print type(getMACaddress('Philips','http://192.168.102.:80'))

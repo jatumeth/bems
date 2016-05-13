@@ -343,7 +343,7 @@ cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
 cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             ("LightSwitch","Belkin International Inc.","WiFi","lighting","WeMo","2WL","classAPI_WeMo",True,False,4,4,True))
 cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-            ("Philips hue bridge 2012","Royal Philips Electronics","WiFi","lighting","Philips","2HUE","classAPI_PhilipsHue",True,False,4,4,True))
+            ("Philips hue bridge","Royal Philips Electronics","WiFi","lighting","Philips","2HUE","classAPI_PhilipsHue",True,False,4,4,True))
 cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
             ("LMRC-212","WattStopper","BACnet","lighting","WattStopper","2WSL","classAPI_BACnet_WattStopper",True,False,4,4,True))
 cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",

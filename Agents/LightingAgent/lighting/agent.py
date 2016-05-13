@@ -89,7 +89,7 @@ def LightingAgent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    if model == "Philips hue bridge 2012":
+    if model == "Philips hue bridge":
         hue_username = get_config('username')
     else:
         hue_username = ''

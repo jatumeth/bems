@@ -56,9 +56,12 @@ class API:
     def __init__(self,**kwargs):  # default color is white
         # Initialized common attributes
         self.variables = kwargs
-        self.debug = False
+        self.debug = True
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
+        self.only_white_bulb = None
+        # to initialize the only white bulb value
+        self.getDeviceStatus()
     def renewConnection(self):
         pass
 
@@ -111,7 +114,8 @@ class API:
                 self.set_variable('offline_count', 0)
             else:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
-        except:
+        except Exception as er:
+            print er
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
@@ -125,18 +129,21 @@ class API:
             self.set_variable('status',"OFF")
         # 2. brightness convert to %
         self.set_variable('brightness',int(round(float(_theJSON["action"]["bri"])*100/255,0)))
-        # 3. color convert to RGB 0-255
-        self.set_variable('hue', _theJSON["action"]["hue"])
-        self.set_variable('xy', _theJSON["action"]["xy"])
-        self.set_variable('ct', _theJSON["action"]["ct"])
-        x=_theJSON["action"]["xy"][0]
-        y=_theJSON["action"]["xy"][1]
-        self.set_variable('color', rgb_cie.ColorHelper.getRGBFromXYAndBrightness(x,y,_theJSON["action"]["bri"]))
-        self.set_variable('hexcolor', '#%02x%02x%02x' % self.get_variable('color'))
-        # 4. saturation convert to %
-        self.set_variable('saturation',int(round(float(_theJSON["action"]["sat"])*100/255,0)))
-        self.set_variable('effect',_theJSON["action"]["effect"])
-        self.set_variable('colormode',_theJSON["action"]["colormode"])
+        # update only white variable every round is necessary in case user add a/take away all color bulb(s).
+        self.only_white_bulb = False if 'hue' in _theJSON["action"].keys() else True
+        if self.only_white_bulb is False:
+            # 3. color convert to RGB 0-255
+            self.set_variable('hue', _theJSON["action"]["hue"])
+            self.set_variable('xy', _theJSON["action"]["xy"])
+            self.set_variable('ct', _theJSON["action"]["ct"])
+            x=_theJSON["action"]["xy"][0]
+            y=_theJSON["action"]["xy"][1]
+            self.set_variable('color', rgb_cie.ColorHelper.getRGBFromXYAndBrightness(x,y,_theJSON["action"]["bri"]))
+            self.set_variable('hexcolor', '#%02x%02x%02x' % self.get_variable('color'))
+            # 4. saturation convert to %
+            self.set_variable('saturation',int(round(float(_theJSON["action"]["sat"])*100/255,0)))
+            self.set_variable('effect',_theJSON["action"]["effect"])
+            self.set_variable('colormode',_theJSON["action"]["colormode"])
         for k in _theJSON["lights"]:
             self.set_variable("lights{}".format(k), k)
         self.set_variable('number_lights', len(_theJSON["lights"]))
@@ -149,13 +156,14 @@ class API:
         print(" number_lights = {}".format(self.get_variable('number_lights')))
         print(" status = {}".format(self.get_variable('status')))
         print(" brightness = {}".format(self.get_variable('brightness')))
-        print(" hue = {}".format(self.get_variable('hue')))
-        print(" color = {}".format(self.get_variable('color')))
-        print(" saturation = {}".format(self.get_variable('saturation')))
-        print(" xy= {}".format(self.get_variable('xy')))
-        print(" ct = {}".format(self.get_variable('ct')))
-        print(" effect = {}".format(self.get_variable('effect')))
-        print(" colormode = {}\n".format(self.get_variable('colormode')))
+        if self.only_white_bulb is False:
+            print(" hue = {}".format(self.get_variable('hue')))
+            print(" color = {}".format(self.get_variable('color')))
+            print(" saturation = {}".format(self.get_variable('saturation')))
+            print(" xy= {}".format(self.get_variable('xy')))
+            print(" ct = {}".format(self.get_variable('ct')))
+            print(" effect = {}".format(self.get_variable('effect')))
+            print(" colormode = {}\n".format(self.get_variable('colormode')))
     # ----------------------------------------------------------------------
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
@@ -203,18 +211,19 @@ class API:
             elif k == 'brightness':
                 msgToDevice['bri'] = int(round(float(postmsg.get('brightness'))*255.0/100.0,0))
             elif k == 'color':
-                print(type(postmsg['color']))
-                _red = postmsg['color'][0]
-                _green = postmsg['color'][1]
-                _blue = postmsg['color'][2]
-                _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
-                msgToDevice['xy'] = [_xyY.x, _xyY.y]
-                #msgToDevice['bri']= int(round(_xyY.y*255,0))
+                if self.only_white_bulb is False:
+                    print(type(postmsg['color']))
+                    _red = postmsg['color'][0]
+                    _green = postmsg['color'][1]
+                    _blue = postmsg['color'][2]
+                    _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
+                    msgToDevice['xy'] = [_xyY.x, _xyY.y]
+                    #msgToDevice['bri']= int(round(_xyY.y*255,0))
             elif k == 'hue':
-                if datacontainsRGB==False:
+                if datacontainsRGB==False and self.only_white_bulb is False:
                     msgToDevice['hue'] = postmsg.get('hue')
             elif k == 'saturation':
-                if datacontainsRGB==False:
+                if datacontainsRGB==False and self.only_white_bulb is False:
                     msgToDevice['sat'] = int(round(float(postmsg.get('saturation'))*255.0/100.0,0))
             else:
                 msgToDevice[k] = v
@@ -230,8 +239,14 @@ class API:
             if self.get_variable('status')=="OFF":
                 devicewasoff=1
                 self.setDeviceStatus({"status":"ON"})
-            self.setDeviceStatus({"effect": "colorloop"})
-            time_iden = 10 #time to do identification
+            elif self.only_white_bulb:
+                self.setDeviceStatus({"status":"OFF"})
+            if self.only_white_bulb is False:
+                self.setDeviceStatus({"effect": "colorloop"})
+            if self.only_white_bulb:
+                time_iden = 3
+            else:
+                time_iden = 10 #time to do identification
             t0 = time.time()
             self.seconds = time_iden
             while time.time() - t0 <= time_iden:
@@ -241,6 +256,8 @@ class API:
             self.setDeviceStatus({"effect": "none"})
             if devicewasoff==1:
                 self.setDeviceStatus({"status":"OFF"})
+            else:
+                self.setDeviceStatus({"status":"ON"})
             identifyDeviceResult = True
         except:
             print("ERROR: classAPI_PhilipsHue connection failure! @ identifyDevice")
@@ -254,6 +271,7 @@ def main():
     PhilipsHue = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.10.14:80',username='acquired username',agent_id='LightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),PhilipsHue.get_variable('model'),PhilipsHue.get_variable('api'),PhilipsHue.get_variable('address')))
 
+    PhilipsHue.getDeviceStatus()
     PhilipsHue.setDeviceStatus({"status":"ON","color":(155,113,255)})
     PhilipsHue.identifyDevice()
 
