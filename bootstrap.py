@@ -45,8 +45,12 @@ def stage1(directory=_envdir, prompt=_prompt):
         def download(self, directory):
             if self.version is None:
                 self.get_version()
-            url = ('https://pypi.python.org/packages/source/v/virtualenv/' +
-                   'virtualenv-{}.tar.gz'.format(self.version))
+            # Please refer to the link below for the update:
+            # https://github.com/VOLTTRON/volttron/issues/600
+            # url = ('https://pypi.python.org/packages/source/v/virtualenv/' +
+            #        'virtualenv-{}.tar.gz'.format(self.version))
+            url = ('https://github.com/pypa/virtualenv/archive/' +
+                    '{}.tar.gz'.format(self.version))
             print('Downloading virtualenv')
             tarball = os.path.join(directory, 'virtualenv.tar.gz')
             with contextlib.closing(self._fetch(url)) as response:
