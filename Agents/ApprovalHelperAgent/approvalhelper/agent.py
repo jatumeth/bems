@@ -207,6 +207,7 @@ def ApprovalHelperAgent(config_path, **kwargs):
                         json.dump(data, outfile, indent=4, sort_keys=True)
                     outfile.close()
                     reply['flag'] = 1
+                    reply['mac'] = hue_id[4:].lower()
                 else:
                     reply['flag'] = 0
 
