@@ -146,11 +146,13 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     Airsaijo = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.1.13',username='acquired username',agent_id='LightingAgent')
     #Airsaijo.getDeviceStatus()
-    Airsaijo.setDeviceStatus({"status":"ON"})
-    time.sleep(10)
-    Airsaijo.setDeviceStatus({"fan_speed": "5"})
-    time.sleep(10)
-    Airsaijo.setDeviceStatus({"mode": "auto"})
+    #Airsaijo.setDeviceStatus({"status":"ON"})
+    #time.sleep(10)
+    Airsaijo.setDeviceStatus({"fan_speed": "3", "temp" : "25"})
+   # time.sleep(10)
+    #Airsaijo.setDeviceStatus({"mode": "cool"})
+    #time.sleep(10)
+    #Airsaijo.setDeviceStatus({"temp": "18"})
 
 
 
