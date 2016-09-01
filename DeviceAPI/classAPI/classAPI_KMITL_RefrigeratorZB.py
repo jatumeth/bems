@@ -79,6 +79,7 @@ class API:
         msgToDevice = {}
         for k,v in postmsg.items():
             if k == 'temp':
+                +++
                 msgToDevice['temp'] = postmsg.get('temp')
             elif k == 'motor_speed':
                 msgToDevice['motor_speed'] = postmsg.get('motor_speed')
