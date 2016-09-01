@@ -79,7 +79,6 @@ class API:
         msgToDevice = {}
         for k,v in postmsg.items():
             if k == 'temp':
-                +++
                 msgToDevice['temp'] = postmsg.get('temp')
             elif k == 'motor_speed':
                 msgToDevice['motor_speed'] = postmsg.get('motor_speed')
@@ -92,7 +91,7 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     RefrigeratorZB = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.1.13',username='acquired username',agent_id='LightingAgent')
     RefrigeratorZB.getDeviceStatus()
-    #RefrigeratorZB.setDeviceStatus({"temp":"-5", "motor_speed": "128"})
+    RefrigeratorZB.setDeviceStatus({"temp":"-5"})
     #RefrigeratorZB.identifyDevice()
 
 
