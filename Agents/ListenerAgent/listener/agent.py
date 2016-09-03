@@ -93,6 +93,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
                          topic=topic, headers=headers, message=message))
         print("")
 
+    # BIRD Comment
+
     # @matching.match_start("/ui/agent/")
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
