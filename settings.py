@@ -77,7 +77,8 @@ PLATFORM = {
 }
 
 DEVICES = {
-    'device_monitor_time': 20,'max_monitor_time':1800
+    'device_monitor_time': 20,
+    'max_monitor_time': 1800
 }
 
 DATABASES = {
@@ -115,7 +116,8 @@ DATABASES = {
         'TABLE_temp_time_counter': 'temp_time_counter',
         'TABLE_temp_failure_time': 'temp_failure_time',
         'TABLE_priority': 'priority',
-        'TABLE_seen_notifications_counter': 'seen_notifications_counter'
+        'TABLE_seen_notifications_counter': 'seen_notifications_counter',
+        'TABLE_powermeter': 'powermeter',
     }
 }
 

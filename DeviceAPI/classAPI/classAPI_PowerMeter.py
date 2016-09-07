@@ -60,8 +60,6 @@ class API:
         self.debug = True
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
-        # to initialize the only white bulb value
-        self.getDeviceStatus()
     def renewConnection(self):
         pass
 
@@ -96,27 +94,15 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
-        getDeviceStatusResult = True
-
-        #login
-        urlDatal = self.get_variable("addressl")
-        hue_usernamel = self.get_variable("usernamel")
-
-        #Url for queliy data
-        urlData = self.get_variable("addressq")
-        hue_username = self.get_variable("usernameq")
 
         try:
-            requests.post(urlDatal, data=hue_usernamel)
-            request = urllib2.Request(urlData, headers=hue_username) #addtime out
-            contents = urllib2.urlopen(request).read()
-            print(" {0}Agent is querying its current status (status:{1}) please wait ...")
-            checkconnect = urllib2.urlopen(request).getcode()
-            format(self.variables.get('agent_id', None), str(checkconnect))
+            request = requests.get("http://Smappee1006003343.local/gateway/apipublic/reportInstantaneousValues")
+            checkconnect = request.status_code
+            print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
             if checkconnect == 200:
                 getDeviceStatusResult = False
-                self.getDeviceStatusJson(contents)
+                self.getDeviceStatusJson(request.content)
                 if self.debug is True:
                     self.printDeviceStatus()
             else:
@@ -135,59 +121,117 @@ class API:
     def getDeviceStatusJson(self,data):
 
         x = json.loads(data, "utf-8")
-        z1 = ((x['report'].split('<BR>'))[4]).split(',')
-
-        current1 = float(((z1[0].split('='))[1])[0:4])
-        activePower1 = float(((z1[1].split('='))[1])[0:5])
-        reactivePower1 = float(((z1[2].split('='))[1])[0:5])
-        apparentPower1 = float(((z1[3].split('='))[1])[0:5])
-        powerfactor = float((z1[4].split('='))[1]) / 100
-
-        z2 = ((x['report'].split('<BR>'))[7]).split(',')
-        current2 = float(((z2[0].split('='))[1])[0:4])
-        activePower2 = float(((z2[1].split('='))[1])[0:5])
-        reactivePower2 = float(((z2[2].split('='))[1])[0:5])
-        apparentPower2 = float(((z2[3].split('='))[1])[0:5])
-
-        current=current1+current2
-        activePower=activePower1+activePower2
-        reactivePower=reactivePower1+reactivePower2
-        apparentPower=apparentPower1+apparentPower2
-
+        print x
+        volttage = float((x['report'].split('<BR>'))[1][8:13])
+        self.set_variable('volttage', volttage)
         ts = time.time()
-
         self.set_variable('time', ts)
-        self.set_variable('current', current)
-        self.set_variable('activePower', activePower)
-        self.set_variable('reactivePower', reactivePower)
-        self.set_variable('apparentPower', apparentPower)
-        self.set_variable('powerfactor', powerfactor)
+
+        # Grid
+        z1 = ((x['report'].split('<BR>'))[4]).split(',')
+        grid_current = float(((z1[0].split('='))[1])[0:4])
+        grid_activePower = float(((z1[1].split('='))[1])[0:5])
+        grid_reactivePower = float(((z1[2].split('='))[1])[0:5])
+        grid_apparentPower = float(((z1[3].split('='))[1])[0:5])
+        grid_powerfactor = float((z1[4].split('='))[1]) / 100
+        grid_quadrant = float((z1[5].split('='))[1])
+        grid_phaseshift = float((z1[6].split('='))[1])
+        grid_phasediff = float((z1[7].split('='))[1])
+
+        self.set_variable('grid_current', grid_current)
+        self.set_variable('grid_activePower', grid_activePower)
+        self.set_variable('grid_reactivePower', grid_reactivePower)
+        self.set_variable('grid_apparentPower', grid_apparentPower)
+        self.set_variable('grid_powerfactor', grid_powerfactor)
+        self.set_variable('grid_quadrant', grid_quadrant)
+        self.set_variable('grid_phaseshift', grid_phaseshift)
+        self.set_variable('grid_phasediff', grid_phasediff)
+
+        # Solar
+        z2 = ((x['report'].split('<BR>'))[7]).split(',')
+        solar_current = float(((z2[0].split('='))[1])[0:4])
+        solar_activePower = float(((z2[1].split('='))[1])[0:5])
+        solar_reactivePower = float(((z2[2].split('='))[1])[0:5])
+        solar_apparentPower = float(((z2[3].split('='))[1])[0:5])
+        solar_powerfactor = float((z2[4].split('='))[1]) / 100
+        solar_quadrant = float((z2[5].split('='))[1])
+        solar_phaseshift = float((z2[6].split('='))[1])
+        solar_phasediff = float((z2[7].split('='))[1])
+
+        self.set_variable('solar_current', solar_current)
+        self.set_variable('solar_activePower', solar_activePower)
+        self.set_variable('solar_reactivePower', solar_reactivePower)
+        self.set_variable('solar_apparentPower', solar_apparentPower)
+        self.set_variable('solar_powerfactor', solar_powerfactor)
+        self.set_variable('solar_quadrant', solar_quadrant)
+        self.set_variable('solar_phaseshift', solar_phaseshift)
+        self.set_variable('solar_phasediff', solar_phasediff)
+
+        # Load
+
+        z3 = ((x['report'].split('<BR>'))[10]).split(',')
+        load_current = float(((z3[0].split('='))[1])[0:4])
+        load_activePower = float(((z3[1].split('='))[1])[0:5])
+        load_reactivePower = float(((z3[2].split('='))[1])[0:5])
+        load_apparentPower = float(((z3[3].split('='))[1])[0:5])
+        load_powerfactor = float((z3[4].split('='))[1]) / 100
+        load_quadrant = float((z3[5].split('='))[1])
+        load_phaseshift = float((z3[6].split('='))[1])
+        load_phasediff = float((z3[7].split('='))[1])
+
+        self.set_variable('load_current', load_current)
+        self.set_variable('load_activePower', load_activePower)
+        self.set_variable('load_reactivePower', load_reactivePower)
+        self.set_variable('load_apparentPower', load_apparentPower)
+        self.set_variable('load_powerfactor', load_powerfactor)
+        self.set_variable('load_quadrant', load_quadrant)
+        self.set_variable('load_phaseshift', load_phaseshift)
+        self.set_variable('load_phasediff', load_phasediff)
 
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        print(" Power Meter parameter reading  as are follows:")
         print(" Time(Unix) = {}".format(self.get_variable('time')))
-        print(" Current(A) = {}".format(self.get_variable('current')))
-        print(" ActivePower(W) = {}".format(self.get_variable('activePower')))
-        print(" ReactivePower(Var) = {}".format(self.get_variable('reactivePower')))
-        print(" ApparentPower(VA) = {}".format(self.get_variable('apparentPower')))
-        print(" Powerfactor = {}".format(self.get_variable('powerfactor')))
+        print(" Volttage(V) = {}".format(self.get_variable('volttage')))
+
+        print ("current grid status--------------------------------")
+        print(" Current(A) = {}".format(self.get_variable('grid_current')))
+        print(" ActivePower(W) = {}".format(self.get_variable('grid_activePower')))
+        print(" ReactivePower(Var) = {}".format(self.get_variable('grid_reactivePower')))
+        print(" ApparentPower(VA) = {}".format(self.get_variable('grid_apparentPower')))
+        print(" Powerfactor = {}".format(self.get_variable('grid_powerfactor')))
+        print(" quadrant = {}".format(self.get_variable('grid_quadrant')))
+        print(" phaseshift = {}".format(self.get_variable('grid_phaseshift')))
+        print(" phasediff = {}".format(self.get_variable('grid_phasediff')))
+
+        print ("current solar status------------------------------")
+        print(" Current(A) = {}".format(self.get_variable('solar_current')))
+        print(" ActivePower(W) = {}".format(self.get_variable('solar_activePower')))
+        print(" ReactivePower(Var) = {}".format(self.get_variable('solar_reactivePower')))
+        print(" ApparentPower(VA) = {}".format(self.get_variable('solar_apparentPower')))
+        print(" Powerfactor = {}".format(self.get_variable('solar_powerfactor')))
+        print(" quadrant = {}".format(self.get_variable('solar_quadrant')))
+        print(" phaseshift = {}".format(self.get_variable('solar_phaseshift')))
+        print(" phasediff = {}".format(self.get_variable('solar_phasediff')))
+
+        print ("current load status-------------------------------")
+        print(" Current(A) = {}".format(self.get_variable('load_current')))
+        print(" ActivePower(W) = {}".format(self.get_variable('load_activePower')))
+        print(" ReactivePower(Var) = {}".format(self.get_variable('load_reactivePower')))
+        print(" ApparentPower(VA) = {}".format(self.get_variable('load_apparentPower')))
+        print(" Powerfactor = {}".format(self.get_variable('load_powerfactor')))
+        print(" quadrant = {}".format(self.get_variable('load_quadrant')))
+        print(" phaseshift = {}".format(self.get_variable('load_phaseshift')))
+        print(" phasediff = {}".format(self.get_variable('load_phasediff')))
+
     # ----------------------------------------------------------------------
 
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    #Url for queliy data#Url for queliy data
-    url_q = "http://Smappee1006003343.local/gateway/apipublic/reportInstantaneousValues"
-    head_q = {"Authorization" : "admin"}
-
-    #Url for login
-    url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
-    head_l = "admin"
-
-    PowerMeter = API(model='Smappee',type='PowerMeter',api='API3',addressq=url_q,usernameq=head_q,addressl=url_l,usernamel=head_l, agent_id='Smappee')
+    PowerMeter = API(model='Smappee', type='PowerMeter', api='API3', agent_id='Smappee')
+    PowerMeter.getDeviceStatus()
 
 if __name__ == "__main__": main()
