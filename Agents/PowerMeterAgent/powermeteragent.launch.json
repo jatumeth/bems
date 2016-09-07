@@ -1,0 +1,22 @@
+{
+    "agent": {
+        "exec": "powermeter2agent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "PowerMeterSmappee",
+    "device_monitor_time":5,
+    "building_name": "bemoss",
+    "zone_id": 999,
+    "url_q": "http://Smappee1006003343.local/gateway/apipublic/reportInstantaneousValues",
+    "head_q": {"Authorization" : "admin"},
+    "url_l": "http://Smappee1006003343.local/gateway/apipublic/logon",
+    "head_l": "admin",
+    "model": "Smappee",
+    "type": "power_meter",
+    "api": "classAPI_PowerMeter",
+    "identifiable": "False",
+    "db_host": "localhost",
+    "db_port": "5432",
+    "db_database": "bemossdb",
+    "db_user": "admin",
+    "db_password": "admin"
+}
