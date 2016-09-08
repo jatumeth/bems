@@ -1,6 +1,6 @@
 {
     "agent": {
-        "exec": "listeneragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "evappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agentid": "EVAppAgent",
     "message": "hello my name is EVAppAgent"
