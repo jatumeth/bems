@@ -101,22 +101,15 @@ class API:
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
             if checkconnect == 200:
-                getDeviceStatusResult = False
                 self.getDeviceStatusJson(request.content)
                 if self.debug is True:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
-                getDeviceStatusResult = False
             # Check the connectivity
-            if getDeviceStatusResult==True:
-                self.wset_variable('offline_count', 0)
-            else:
-                self.set_variable('offline_count', self.get_variable('offline_count')+1)
         except Exception as er:
             print er
             print('ERROR: classAPI_PowerMeter failed to getDeviceStatus')
-            self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
     def getDeviceStatusJson(self,data):
 
@@ -129,14 +122,14 @@ class API:
 
         # Grid
         z1 = ((x['report'].split('<BR>'))[4]).split(',')
-        grid_current = float(((z1[0].split('='))[1])[0:4])
-        grid_activePower = float(((z1[1].split('='))[1])[0:5])
-        grid_reactivePower = float(((z1[2].split('='))[1])[0:5])
-        grid_apparentPower = float(((z1[3].split('='))[1])[0:5])
-        grid_powerfactor = float((z1[4].split('='))[1]) / 100
-        grid_quadrant = float((z1[5].split('='))[1])
-        grid_phaseshift = float((z1[6].split('='))[1])
-        grid_phasediff = float((z1[7].split('='))[1])
+        grid_current = float(((z1[0].split('='))[1]).split(' ')[0])
+        grid_activePower = float(((z1[1].split('='))[1]).split(' ')[0])
+        grid_reactivePower = float(((z1[2].split('='))[1]).split(' ')[0])
+        grid_apparentPower = float(((z1[3].split('='))[1]).split(' ')[0])
+        grid_powerfactor = float((z1[4].split('='))[1].split(' ')[0]) / 100
+        grid_quadrant = float((z1[5].split('='))[1].split(' ')[0])
+        grid_phaseshift = float((z1[6].split('='))[1].split(' ')[0])
+        grid_phasediff = float((z1[7].split('='))[1].split(' ')[0])
 
         self.set_variable('grid_current', grid_current)
         self.set_variable('grid_activePower', grid_activePower)
@@ -149,14 +142,14 @@ class API:
 
         # Solar
         z2 = ((x['report'].split('<BR>'))[7]).split(',')
-        solar_current = float(((z2[0].split('='))[1])[0:4])
-        solar_activePower = float(((z2[1].split('='))[1])[0:5])
-        solar_reactivePower = float(((z2[2].split('='))[1])[0:5])
-        solar_apparentPower = float(((z2[3].split('='))[1])[0:5])
-        solar_powerfactor = float((z2[4].split('='))[1]) / 100
-        solar_quadrant = float((z2[5].split('='))[1])
-        solar_phaseshift = float((z2[6].split('='))[1])
-        solar_phasediff = float((z2[7].split('='))[1])
+        solar_current = float(((z2[0].split('='))[1]).split(' ')[0])
+        solar_activePower = float(((z2[1].split('='))[1]).split(' ')[0])
+        solar_reactivePower = float(((z2[2].split('='))[1]).split(' ')[0])
+        solar_apparentPower = float(((z2[3].split('='))[1]).split(' ')[0])
+        solar_powerfactor = float((z2[4].split('='))[1].split(' ')[0]) / 100
+        solar_quadrant = float((z2[5].split('='))[1].split(' ')[0])
+        solar_phaseshift = float((z2[6].split('='))[1].split(' ')[0])
+        solar_phasediff = float((z2[7].split('='))[1].split(' ')[0])
 
         self.set_variable('solar_current', solar_current)
         self.set_variable('solar_activePower', solar_activePower)
@@ -170,14 +163,14 @@ class API:
         # Load
 
         z3 = ((x['report'].split('<BR>'))[10]).split(',')
-        load_current = float(((z3[0].split('='))[1])[0:4])
-        load_activePower = float(((z3[1].split('='))[1])[0:5])
-        load_reactivePower = float(((z3[2].split('='))[1])[0:5])
-        load_apparentPower = float(((z3[3].split('='))[1])[0:5])
-        load_powerfactor = float((z3[4].split('='))[1]) / 100
-        load_quadrant = float((z3[5].split('='))[1])
-        load_phaseshift = float((z3[6].split('='))[1])
-        load_phasediff = float((z3[7].split('='))[1])
+        load_current = float(((z3[0].split('='))[1]).split(' ')[0])
+        load_activePower = float(((z3[1].split('='))[1]).split(' ')[0])
+        load_reactivePower = float(((z3[2].split('='))[1]).split(' ')[0])
+        load_apparentPower = float(((z3[3].split('='))[1]).split(' ')[0])
+        load_powerfactor = float((z3[4].split('='))[1].split(' ')[0]) / 100
+        load_quadrant = float((z3[5].split('='))[1].split(' ')[0])
+        load_phaseshift = float((z3[6].split('='))[1].split(' ')[0])
+        load_phasediff = float((z3[7].split('='))[1].split(' ')[0])
 
         self.set_variable('load_current', load_current)
         self.set_variable('load_activePower', load_activePower)
