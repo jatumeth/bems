@@ -1,6 +1,6 @@
 {
     "agent": {
-        "exec": "powermeter2agent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "powermeteragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "PowerMeterSmappee",
     "device_monitor_time":5,

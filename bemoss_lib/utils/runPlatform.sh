@@ -58,8 +58,18 @@ volttron-ctl start --tag approvalhelperagent
 #Run network agent
 sleep 2
 volttron-ctl start --tag networkagent
-#sleep 2
-#volttron-ctl start --tag launcheragent
+sleep 2
+volttron-ctl start --tag gridappagent
+sleep 2
+volttron-ctl start --tag powermeteragent
+sleep 2
+volttron-ctl start --tag powermeterappagent
+sleep 2
+volttron-ctl start --tag evappagent
+sleep 2
+volttron-ctl start --tag modeappagent
+sleep 2
+volttron-ctl start --tag devicestatusappagent
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish
