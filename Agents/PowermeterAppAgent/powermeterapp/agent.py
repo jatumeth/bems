@@ -93,7 +93,10 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         monthly_bill_light_compare_percent = round(((daily_bill_light - last_month_bill_light) / last_month_bill_light * 100), 2)
         monthly_bill_plug_compare_percent = round(((daily_bill_plug - last_month_bill_plug) / last_month_bill_plug * 100), 2)
         monthly_bill_EV_compare_percent = round(((daily_bill_EV - last_month_bill_EV) / last_month_bill_EV * 100), 2)
+        daily_energy_usage = round(daily_electricity_bill/ 3.5, 2)
+        last_day_energy_usage = round(last_day_bill/ 3.5, 2)
         monthly_energy_usage = round(monthly_electricity_bill/3.5, 2)
+        last_month_energy_usage = round(last_month_bill/3.5, 2)
         max_monthly_energy_usage = 300
         month = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         max_energy_usage_month = month[random.randint(0, 11)]
@@ -127,7 +130,10 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
                               "monthly_bill_light_compare_percent": monthly_bill_light_compare_percent,
                               "monthly_bill_plug_compare_percent": monthly_bill_plug_compare_percent,
                               "monthly_bill_EV_compare_percent": monthly_bill_EV_compare_percent,
+                              "daily_energy_usage": daily_energy_usage,
+                              "last_day_energy_usage": last_day_energy_usage,
                               "monthly_energy_usage": monthly_energy_usage,
+                              "last_month_energy_usage": last_month_energy_usage,
                               "max_monthly_energy_usage": max_monthly_energy_usage,
                               "max_energy_usage_month": max_energy_usage_month,
                               "max_energy_usage_year": max_energy_usage_year,
