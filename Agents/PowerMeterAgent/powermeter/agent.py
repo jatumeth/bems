@@ -54,12 +54,19 @@ def powermeteragent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
+    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
 
     debug_agent = False
 
-    log_variables = dict(activepower='double', reactivepower='double', apparentpower='double',
-                         powerfactor='double', current='double', quadrant='double', phaseshift='double',
-                         phasediff='double')
+    log_variables = dict(grid_current='double', grid_activePower='double', grid_reactivePower='double',
+                         grid_apparentPower='double', grid_powerfactor='double', grid_quadrant='double',
+                         grid_phaseshift='double', grid_phasediff='double',
+                         solar_current='double', solar_activePower='double', solar_reactivePower='double',
+                         solar_apparentPower='double', solar_powerfactor='double', solar_quadrant='double',
+                         solar_phaseshift='double', solar_phasediff='double',
+                         load_current='double', load_activePower='double', load_reactivePower='double',
+                         load_apparentPower='double', load_powerfactor='double', load_quadrant='double',
+                         load_phaseshift='double', load_phasediff='double')
     # 2. @params device_info
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
@@ -169,7 +176,7 @@ def powermeteragent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": PowerMeter.identifyDevice()
 
-        @periodic(max_monitor_time) #save all data every max_monitor_time
+        @periodic(cassandra_update_time) #save all data every max_monitor_time
         def backupSaveData(self):
             try:
                 PowerMeter.getDeviceStatus()

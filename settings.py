@@ -78,7 +78,8 @@ PLATFORM = {
 
 DEVICES = {
     'device_monitor_time': 20,
-    'max_monitor_time': 1800
+    'max_monitor_time': 1800,
+    'cassandra_update_time': 10
 }
 
 DATABASES = {
