@@ -53,6 +53,7 @@ import re
 from bemoss_lib.databases.cassandraAPI import cassandraHelper
 from bemoss_lib.utils.catcherror import catcherror
 import json
+import itertools
 connection_established = False
 
 #Global variables
@@ -398,7 +399,51 @@ def retrieve_for_export(agentID, vars=None, startTime=None, endTime=None):
     a,b = retrieve(agentID,vars,startTime,endTime,export=True)
     return a,b
 
+def parse_resultset(variables, data_point, result_set):
+    x = [[lst[variables.index('time')], lst[variables.index(data_point)]+0.0]
+            for lst in result_set if lst[variables.index(data_point)] is not None]
+
+    y = [lst[variables.index('time')]
+            for lst in result_set if lst[variables.index(data_point)] is not None]
+
+    z = [int(x)/1000 for x in y]
+
+    y2 = [lst[variables.index(data_point)]+0.0
+            for lst in result_set if lst[variables.index(data_point)] is not None]
+
+
+    print ("x={}".format(x))
+    print (result_set)
+    print ("z {}".format(z))
+    return x, z, y2
+    # if len(x) == 0:
+    #     return []
+    # #interleave redundant data to make it step-plot
+    # currentTime = int((datetime.datetime.utcnow()-datetime.datetime(1970,1,1)).total_seconds()*1000)
+    # old = numpy.array(x)
+    # newTime = numpy.append(old[1:,0],currentTime)-1.0 #decrease one millisecond time to arrange for chronological order
+    # newList = numpy.vstack((newTime,old[:,1])).transpose().tolist()
+    # old = old.tolist()
+    # finalResult = list(itertools.chain(*zip(old,newList)))
+    # print 'new things againins'
+    # print finalResult
+    # return finalResult
+
 if __name__ == '__main__':
     x = get_replication('system_auth')
-    set_replication('system_auth',2)
-    print x
+    set_replication('system_auth', 2)
+    #/////////Start test///////////////////////////
+
+    data_points, rs = retrieve('3WIS221445K1200321', vars=None, startTime=None, endTime=None,export=False)
+    # print ("rs={}".format(rs))
+    # rs_status = parse_resultset(data_points, 'status', rs)
+    rs_power, time, data = parse_resultset(data_points, 'power', rs)
+    # print ("rs_status={}".format(rs_status))
+    print ("rs_power={}".format(rs_power))
+    import math
+
+    print ("time={}".format(time))
+
+    print ("data={}".format(data))
+    #//////////////End test/////////////////////
+    # print x
