@@ -9,6 +9,11 @@ from volttron.platform.messaging import headers as headers_mod
 import settings
 import json
 import random
+from bemoss_lib.databases.cassandraAPI.cassandraDB import retrieve
+import scipy
+from scipy import integrate
+import datetime
+from dateutil.relativedelta import relativedelta
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -30,6 +35,82 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         self._agent_id = self.config['agentid']
         # Always call the base class setup()
         super(PowermeterAppAgent, self).setup()
+
+    def parse_resultset(self, variables, data_point, result_set):
+        print data_point
+        x = [[lst[variables.index('time')], lst[variables.index(data_point)] + 0.0]
+             for lst in result_set if lst[variables.index(data_point)] is not None]
+
+        y = [lst[variables.index('time')]
+             for lst in result_set if lst[variables.index(data_point)] is not None]
+
+        newTime = []
+        checkEle = x[0][0]
+        newTime.append(checkEle)
+
+        newData = []
+        newData.append(x[0][1])
+        import math
+        for lst in x:
+            if (lst[0] != checkEle):
+                newTime.append(int(checkEle))
+                newData.append(lst[1])
+            # else:
+            #     print "same"
+            checkEle = lst[0]
+
+        del newTime[0]
+        del newData[0]
+
+        return newTime, newData
+
+    def daily_energy_usage_calculate(self):
+        end_time = datetime.datetime.now()
+        start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
+                                   endTime=end_time)
+        try:
+            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
+            wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
+            energy_kWh = wattsec / (3600 * 1000 * 1000)
+        except:
+            energy_kWh = 0
+
+        return energy_kWh
+
+    def last_day_energy_usage_calculate(self):
+        time_now = datetime.datetime.now()
+        delta_time = datetime.timedelta(days=1)
+        time = time_now - delta_time
+        end_time = time.replace(hour=23, minute=59, second=59)
+        start_time = time.replace(hour=0, minute=0, second=0)
+        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
+                                   endTime=end_time)
+
+        try:
+            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
+            wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
+            energy_kWh = wattsec / (3600 * 1000 * 1000)
+        except:
+            energy_kWh = 0
+
+        return energy_kWh
+
+    def monthly_energy_usage_calculate(self):
+        date_end_month = datetime.datetime.now() + relativedelta(day=31)
+        end_time = date_end_month.replace(hour=23, minute=59, second=59)
+        start_time = date_end_month.replace(day=1, hour=0, minute=0, second=0)
+        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
+                                   endTime=end_time)
+
+        try:
+            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
+            wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
+            energy_kWh = wattsec / (3600 * 1000 * 1000)
+        except:
+            energy_kWh = 0
+
+        return energy_kWh
 
     # @matching.match_all
     # def on_match(self, topic, headers, message, match):
@@ -55,7 +136,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
         '''
         topic = "/agent/ui/dashboard"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
+        now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
@@ -63,11 +144,18 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
             'data_source': "powermeterApp",
         }
 
-        monthly_electricity_bill = round(random.uniform(0, 1000), 2)
+        daily_energy_usage = round(self.daily_energy_usage_calculate(), 2)
+        last_day_energy_usage = round(self.last_day_energy_usage_calculate(), 2)
+        monthly_energy_usage = round(self.monthly_energy_usage_calculate(), 2)
+        daily_electricity_bill = round(daily_energy_usage * 3.5, 2)
+        last_day_bill = round(last_day_energy_usage * 3.5, 2)
+        monthly_electricity_bill = round(monthly_energy_usage * 3.5, 2)
+
+        # monthly_electricity_bill = round(random.uniform(0, 1000), 2)
         last_month_bill = round(random.uniform(800, 1000), 2)
         last_month_bill_compare = round(monthly_electricity_bill-last_month_bill, 2)
-        daily_electricity_bill = round(random.uniform(0, 200), 2)
-        last_day_bill = round(random.uniform(100, 200), 2)
+        # daily_electricity_bill = round(random.uniform(0, 200), 2)
+        # last_day_bill = round(random.uniform(100, 200), 2)
         last_day_bill_compare = round(daily_electricity_bill-last_day_bill, 2)
         daily_bill_AC = round(daily_electricity_bill*0.5, 2)
         daily_bill_light = round(daily_electricity_bill*0.1, 2)
