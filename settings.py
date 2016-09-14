@@ -119,6 +119,8 @@ DATABASES = {
         'TABLE_priority': 'priority',
         'TABLE_seen_notifications_counter': 'seen_notifications_counter',
         'TABLE_powermeter': 'powermeter',
+        'TABLE_AC': 'ac',
+        'TABLE_Fridge': 'fridge',
     }
 }
 

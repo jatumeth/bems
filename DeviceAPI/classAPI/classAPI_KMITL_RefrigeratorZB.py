@@ -50,13 +50,13 @@ class API:
         r = requests.get(_url_append)
         #print _url_append
         _theJSON = json.loads(r.content)
-        #print _theJSON
+        # print _theJSON
         self.set_variable('current_temperature', _theJSON[0]["value"])
         self.set_variable('power', _theJSON[1]["value"])
 
         print(" Current_temperature = {}".format(self.get_variable('current_temperature')))
         print(" Power = {}".format(self.get_variable('power')))
-
+        print("-----------------------------------------------------------------------------------")
 
     def setDeviceStatus(self, postmsg):
         _url_append = self._address + '/api/appliances/' + self._id + '/command/?username=' + self._username + '&api_key=' + self._api_key
@@ -90,8 +90,14 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     RefrigeratorZB = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.1.13',username='acquired username',agent_id='LightingAgent')
+
+    print RefrigeratorZB.variables
+
     RefrigeratorZB.getDeviceStatus()
-    RefrigeratorZB.setDeviceStatus({"temp":"-5"})
+
+    print RefrigeratorZB.variables
+
+    # RefrigeratorZB.setDeviceStatus({"temp":"-5"})
     #RefrigeratorZB.identifyDevice()
 
 

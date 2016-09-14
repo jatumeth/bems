@@ -110,6 +110,17 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/DeviceStatusAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/devicestatusappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DeviceStatusAppAgent/devicestatusappagent.launch.json
 volttron-ctl install devicestatusappagent=/tmp/volttron_wheels/devicestatusappagent-0.1-py2-none-any.whl
 
+# Run ACAgent
+volttron-pkg package ~/workspace/bemoss_os/Agents/ACAgent/
+volttron-pkg configure /tmp/volttron_wheels/acagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACAgent/1TH221445K1living1.launch.json
+volttron-ctl install LivingroomAir1=/tmp/volttron_wheels/acagent-0.1-py2-none-any.whl
+
+volttron-pkg configure /tmp/volttron_wheels/acagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACAgent/1TH221445K1living2.launch.json
+volttron-ctl install LivingroomAir2=/tmp/volttron_wheels/acagent-0.1-py2-none-any.whl
+
+volttron-pkg configure /tmp/volttron_wheels/acagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACAgent/1TH221445K12bedroom.launch.json
+volttron-ctl install BedroomAir=/tmp/volttron_wheels/acagent-0.1-py2-none-any.whl
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent

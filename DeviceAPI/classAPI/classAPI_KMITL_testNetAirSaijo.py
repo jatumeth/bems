@@ -6,7 +6,7 @@ import requests
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    def __init__(self,**kwargs):  # default color is white
+    def __init__(self, **kwargs):  # default color is white
         # Initialized common attributes
         self.variables = kwargs
         self._username = "test"
@@ -15,6 +15,7 @@ class API:
         self._id_AirBedroom = "8"
         self._id_AirLiving1 = "17"
         self._id_AirLiving2 = "18"
+        self.device_id = self.variables['device_id']
         #self.getDeviceStatus()
     def renewConnection(self):
         pass
@@ -47,45 +48,48 @@ class API:
 
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
-    def getDeviceStatus(self, portmsg1):
-         for k in portmsg1 :
-            if k == 'BedroomAir':
-                self._id   = self._id_AirBedroom
-            elif k == 'LivingroomAir1':
-                 self._id   = self._id_AirLiving1
-            elif k == 'LivingroomAir2':
-                 self._id   = self._id_AirLiving2
-         self._url_append = self._address + '/api/appliances/' + self._id + '/info/?format=json&username=test&api_key=' + self._api_key
-         r = requests.get(self._url_append)
-         # print _url_append
-         _theJSON = json.loads(r.content)
-         # print _theJSON
-         self.set_variable('status', _theJSON[0]["value"])
-         self.set_variable('current_temperature', _theJSON[1]["value"])
-         self.set_variable('set_temperature', _theJSON[2]["value"])
-         self.set_variable('current_humidity', _theJSON[3]["value"])
-         self.set_variable('set_humidity', _theJSON[4]["value"])
-         self._mode = _theJSON[5]["value"]
-         if self._mode == 0 :
-            self.set_variable('mode' , "Cool")
-         elif self._mode == 1 :
-             self.set_variable('mode', "Fan")
-         elif self._mode == 2:
-            self.set_variable('mode', "Dry")
-         elif self._mode == 3 :
-            self.set_variable('mode', "Heat")
-         elif self._mode == 4 :
-            self.set_variable('mode', "Auto")
-         self.set_variable('fan_speed', _theJSON[6]["value"])
-         self.set_variable('fin_angle', _theJSON[7]["value"])
+    def getDeviceStatus(self):
 
-         print(" status = {}".format(self.get_variable('status')))
-         print(" current_temperature = {}".format(self.get_variable('current_temperature')))
-         print(" set_temperature = {}".format(self.get_variable('set_temperature')))
-         print(" current_humidity = {}".format(self.get_variable('current_humidity')))
-         print(" mode = {}".format(self.get_variable('mode')))
-         print(" fan_speed = {}".format(self.get_variable('fan_speed')))
-         print(" fin_angle = {}".format(self.get_variable('fin_angle')))
+        # select id of device from its name and initiator
+        if (self.device_id == "LivingroomAir1"):
+            self._id = "17"
+        elif (self.device_id == "LivingroomAir2"):
+            self._id = "18"
+        elif (self.device_id == "BedroomAir"):
+            self._id = "8"
+
+        self._url_append = self._address + '/api/appliances/' + self._id + '/info/?format=json&username=test&api_key=' + self._api_key
+        r = requests.get(self._url_append)
+        # print _url_append
+        _theJSON = json.loads(r.content)
+        # print _theJSON
+        self.set_variable('status', _theJSON[0]["value"])
+        self.set_variable('current_temperature', _theJSON[1]["value"])
+        self.set_variable('set_temperature', _theJSON[2]["value"])
+        self.set_variable('current_humidity', _theJSON[3]["value"])
+        self.set_variable('set_humidity', _theJSON[4]["value"])
+        self._mode = _theJSON[5]["value"]
+        if self._mode == 0 :
+            self.set_variable('mode' , "Cool")
+        elif self._mode == 1 :
+            self.set_variable('mode', "Fan")
+        elif self._mode == 2:
+            self.set_variable('mode', "Dry")
+        elif self._mode == 3 :
+            self.set_variable('mode', "Heat")
+        elif self._mode == 4 :
+            self.set_variable('mode', "Auto")
+        self.set_variable('fan_speed', _theJSON[6]["value"])
+        self.set_variable('fin_angle', _theJSON[7]["value"])
+
+        print(" status = {}".format(self.get_variable('status')))
+        print(" current_temperature = {}".format(self.get_variable('current_temperature')))
+        print(" set_temperature = {}".format(self.get_variable('set_temperature')))
+        print(" current_humidity = {}".format(self.get_variable('current_humidity')))
+        print(" mode = {}".format(self.get_variable('mode')))
+        print(" fan_speed = {}".format(self.get_variable('fan_speed')))
+        print(" fin_angle = {}".format(self.get_variable('fin_angle')))
+        print("-------------------------")
 
     def setDeviceStatus(self, postmsg):
 
@@ -112,7 +116,16 @@ class API:
             elif k == 'status':
                 _command = json.dumps({"cmd_name": "set_On_Off", "parameters": {"setTo": _data['status']}})
                 _body.append(_command)
+
+        # select id of device from its name and initiator
+        if (self.device_id == "LivingroomAir1"):
+            _data['_id'] = "17"
+        elif (self.device_id == "LivingroomAir2"):
+            _data['_id'] = "18"
+        elif (self.device_id == "BedroomAir"):
+            _data['_id'] = "8"
         print _data['_id']
+
         _url_append = self._address + '/api/appliances/' + _data['_id'] + '/command/?username=' + self._username + '&api_key=' + self._api_key
         for n in _body:
             r = requests.post(_url_append, data=n)
@@ -159,17 +172,23 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    Airsaijo = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.1.13',username='acquired username',agent_id='LightingAgent')
-    Airsaijo.getDeviceStatus({"LivingroomAir2":"0"})
-    #Airsaijo.setDeviceStatus({"status":"ON", "LivingroomAir1":"0"})
+    Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
+                   address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
+                   device_id="LivingroomAir2")
+
+    # print Airsaijo.variables
+
+    Airsaijo.getDeviceStatus()
+    # Airsaijo.setDeviceStatus({"status":"OFF", "LivingroomAir2":"0"})
+    # Airsaijo.setDeviceStatus({"status": "ON", "temp" : "23"})
     #time.sleep(10)
     #Airsaijo.setDeviceStatus({"BedroomAir":"0","fan_speed": "2", "temp" : "23"})
-   # time.sleep(10)
+    # time.sleep(10)
     #Airsaijo.setDeviceStatus({"BedroomAir":"0","mode": "fan"})
     #time.sleep(10)
     #Airsaijo.setDeviceStatus({"temp": "18"})
 
-
+    # print Airsaijo.variables
 
     #Airsaijo.identifyDevice()
 
