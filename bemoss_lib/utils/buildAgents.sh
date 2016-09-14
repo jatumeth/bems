@@ -121,6 +121,11 @@ volttron-ctl install LivingroomAir2=/tmp/volttron_wheels/acagent-0.1-py2-none-an
 volttron-pkg configure /tmp/volttron_wheels/acagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACAgent/1TH221445K12bedroom.launch.json
 volttron-ctl install BedroomAir=/tmp/volttron_wheels/acagent-0.1-py2-none-any.whl
 
+# Run Refridgerator Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/FridgeAgent/
+volttron-pkg configure /tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FridgeAgent/1FR221445K1200111.launch.json
+volttron-ctl install 1FR221445K1200111=/tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent
