@@ -1,0 +1,21 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "acagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "1TH20000000000002",
+    "device_id": "LivingroomAir2",
+    "api": "classAPI_KMITL_testNetAirSaijo",
+    "building_name": "bemoss",
+    "db_database": "bemossdb", 
+    "db_host": "localhost", 
+    "db_password": "admin", 
+    "db_port": "5432", 
+    "db_user": "admin", 
+    "device_monitor_time": 20, 
+    "macaddress": "20000000000002",
+    "model": "Saijo Denki GPS",
+    "type": "airconditioner",
+    "vendor": "Saijo Denki",
+    "zone_id": 999
+}

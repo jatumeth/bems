@@ -70,6 +70,12 @@ sleep 2
 volttron-ctl start --tag modeappagent
 sleep 2
 volttron-ctl start --tag devicestatusappagent
+sleep 2
+volttron-ctl start --tag LivingroomAir1
+sleep 2
+volttron-ctl start --tag LivingroomAir2
+sleep 2
+volttron-ctl start --tag BedroomAir
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish

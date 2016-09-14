@@ -59,6 +59,7 @@
 from datetime import datetime
 import logging
 import sys
+import json
 
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
 from volttron.platform.agent import utils, matching
@@ -84,18 +85,18 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # Demonstrate accessing a value from the config file
         _log.info(self.config['message'])
         self._agent_id = self.config['agentid']
+        # test control air
+        self.publish_heartbeat()
         # Always call the base class setup()
         super(ListenerAgent, self).setup()
 
-    @matching.match_all
+    @matching.match_start('/ui/agent/airconditioner/')
     def on_match(self, topic, headers, message, match):
         '''Use match_all to receive all messages and print them out.'''
         _log.debug("Topic: {topic}, Headers: {headers}, "
                          "Message: {message}".format(
                          topic=topic, headers=headers, message=message))
         print("")
-
-    # BIRD Comment
 
     # @matching.match_start("/ui/agent/")
     # def on_match(self, topic, headers, message, match):
@@ -107,18 +108,27 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     # Demonstrate periodic decorator and settings access
     # @periodic(settings.HEARTBEAT_PERIOD)
-    # def publish_heartbeat(self):
-    #     '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
-    #
-    #     HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
-    #     '''
-    #     now = datetime.utcnow().isoformat(' ') + 'Z'
-    #     headers = {
-    #         'AgentID': self._agent_id,
-    #         headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-    #         headers_mod.DATE: now,
-    #     }
-    #     self.publish('heartbeat/listeneragent', headers, now)
+    # @periodic(10)
+    def publish_heartbeat(self):
+        '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
+
+        HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
+        '''
+
+        # TODO this is example how to write an app to control AC
+        topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        import time
+        # message = json.dumps({"status": "OFF"});
+        # self.publish(topic, headers, message)
+        # time.sleep(30)
+        message = json.dumps({"status": "ON"});
+        self.publish(topic, headers, message)
 
 
 def main(argv=sys.argv):
