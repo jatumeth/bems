@@ -108,7 +108,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     # Demonstrate periodic decorator and settings access
     # @periodic(settings.HEARTBEAT_PERIOD)
-    # @periodic(10)
+    @periodic(10)
     def publish_heartbeat(self):
         '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
 
@@ -116,20 +116,30 @@ class ListenerAgent(PublishMixin, BaseAgent):
         '''
 
         # TODO this is example how to write an app to control AC
-        topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
+        # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
+        # now = datetime.utcnow().isoformat(' ') + 'Z'
+        # headers = {
+        #     'AgentID': self._agent_id,
+        #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+        #     headers_mod.DATE: now,
+        # }
+        # import time
+        # # message = json.dumps({"status": "OFF"});
+        # # self.publish(topic, headers, message)
+        # # time.sleep(30)
+        # message = json.dumps({"status": "ON"});
+        # self.publish(topic, headers, message)
+
+        # TODO this is example how to write an app to control Refrigerator
+        topic = '/ui/agent/refridgerator/update/bemoss/999/1FR221445K1200111'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        import time
-        # message = json.dumps({"status": "OFF"});
-        # self.publish(topic, headers, message)
-        # time.sleep(30)
-        message = json.dumps({"status": "ON"});
+        message = json.dumps({"temp":"-5"})
         self.publish(topic, headers, message)
-
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''

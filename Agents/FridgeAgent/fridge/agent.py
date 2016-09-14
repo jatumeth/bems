@@ -62,7 +62,7 @@ import socket
 import threading
 from bemoss_lib.databases.cassandraAPI import cassandraDB
 
-def ACAgent(config_path, **kwargs):
+def RefrigeratorAgent(config_path, **kwargs):
     
     threadingLock = threading.Lock()
     
@@ -84,9 +84,7 @@ def ACAgent(config_path, **kwargs):
     agentAPImapping = dict(status=[], power=[], energy=[])
 
     #Dictionary of Variables supposed to be saved into timeseries database
-    log_variables = dict(status='double', fin_angle='double', current_humidity='double',
-                         current_temperature='double', fan_speed='double', set_humidity='double',
-                         set_temperature='double', mode='text')
+    log_variables = dict(power='double', current_temperature='double')
 
     tolerance = 0.5 #if the numerical variables change less than this percent, its not conisdered change and not logged
 
@@ -122,7 +120,7 @@ def ACAgent(config_path, **kwargs):
     db_database = get_config('db_database')
     db_user = get_config('db_user')
     db_password = get_config('db_password')
-    db_table_AC = settings.DATABASES['default']['TABLE_AC']
+    db_table_Refrigerator = settings.DATABASES['default']['TABLE_Refrigerator']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
@@ -139,17 +137,17 @@ def ACAgent(config_path, **kwargs):
 
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize AC device object
-    AC = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress, 
+    #4.1 initialize Refrigerator device object
+    Refrigerator = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
                     db_database=db_database, config_path=config_path)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
-                                                                        AC.get_variable('model'),
-                                                                        AC.get_variable('api'),
-                                                               AC.get_variable('address')))
+                                                                        Refrigerator.get_variable('model'),
+                                                                        Refrigerator.get_variable('api'),
+                                                                        Refrigerator.get_variable('address')))
 
-    # connection_renew_interval = AC.variables['connection_renew_interval']
+    # connection_renew_interval = Refrigerator.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -208,27 +206,27 @@ def ACAgent(config_path, **kwargs):
             if api == 'classAPI_WeMo':
                 #Do a one time push when we start up so we don't have to wait for the periodic polling
                 try:
-                    AC.startListeningEvents(threadingLock,self.updateStatus)
+                    Refrigerator.startListeningEvents(threadingLock,self.updateStatus)
                     self.subscriptionTime=datetime.datetime.now()
                 except Exception as er:
                     print "Can't subscribe.", er
                 
         def updatePostgresDB(self):
             try:
-                self.cur.execute("UPDATE "+db_table_AC+" SET status=%s "
-                                 "WHERE AC_id=%s",
+                self.cur.execute("UPDATE "+db_table_Refrigerator+" SET status=%s "
+                                 "WHERE Refrigerator_id=%s",
                                  (self.get_variable('status'), agent_id))
                 self.con.commit()
                 if self.get_variable('power')!=None:
                     #self.set_variable('power', int(self.get_variable('power')))
-                    self.cur.execute("UPDATE "+db_table_AC+" SET power=%s "
-                                     "WHERE AC_id=%s",
+                    self.cur.execute("UPDATE "+db_table_Refrigerator+" SET power=%s "
+                                     "WHERE Refrigerator_id=%s",
                                      (int(self.get_variable('power')), agent_id))
                     self.con.commit()
                 if self.ip_address != None:
                     psycopg2.extras.register_inet()
                     _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_AC+" SET ip_address=%s WHERE AC_id=%s",
+                    self.cur.execute("UPDATE "+db_table_Refrigerator+" SET ip_address=%s WHERE Refrigerator_id=%s",
                                      (_ip_address, agent_id))
                     self.con.commit()
 
@@ -240,18 +238,18 @@ def ACAgent(config_path, **kwargs):
         #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
         # @periodic(connection_renew_interval)
         # def renewConnection(self):
-        #     AC.renewConnection()
+        #     Refrigerator.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
             try:
-                AC.getDeviceStatus(device_id)
+                Refrigerator.getDeviceStatus()
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            #TODO make tolerance more accessible
+            # TODO make tolerance more accessible
             # tolerance = 1
             #
             # def isChanged(variable_name,value1,value2):
@@ -266,9 +264,9 @@ def ACAgent(config_path, **kwargs):
             #
             # self.changed_variables = dict()
             # for v in log_variables:
-            #     if v in AC.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],AC.variables[v]):
-            #             self.variables[v] = AC.variables[v]
+            #     if v in Refrigerator.variables:
+            #         if v not in self.variables or isChanged(v, self.variables[v],Refrigerator.variables[v]):
+            #             self.variables[v] = Refrigerator.variables[v]
             #             self.changed_variables[v] = log_variables[v]
             #     else:
             #         if v not in self.variables: #it won't be in self.variables either (in the first time)
@@ -278,19 +276,19 @@ def ACAgent(config_path, **kwargs):
             # try:
             #     with threadingLock:
             #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_AC+" SET network_status=%s WHERE AC_id=%s",
+            #             self.cur.execute("UPDATE "+db_table_Refrigerator+" SET network_status=%s WHERE Refrigerator_id=%s",
             #                              ('OFFLINE', agent_id))
             #             self.con.commit()
             #             if self.already_offline is False:
             #                 self.already_offline = True
             #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_AC+" SET last_offline_time=%s "
-            #                                  "WHERE AC_id=%s",
+            #                 self.cur.execute("UPDATE "+db_table_Refrigerator+" SET last_offline_time=%s "
+            #                                  "WHERE Refrigerator_id=%s",
             #                                  (_time_stamp_last_offline, agent_id))
             #                 self.con.commit()
             #         else:
             #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_AC+" SET network_status=%s WHERE AC_id=%s",
+            #             self.cur.execute("UPDATE "+db_table_Refrigerator+" SET network_status=%s WHERE Refrigerator_id=%s",
             #                              ('ONLINE', agent_id))
             #             self.con.commit()
             #
@@ -301,8 +299,8 @@ def ACAgent(config_path, **kwargs):
             #
             #     # Update scan time
             #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_AC+" SET last_scanned_time=%s "
-            #                      "WHERE AC_id=%s",
+            #     self.cur.execute("UPDATE "+db_table_Refrigerator+" SET last_scanned_time=%s "
+            #                      "WHERE Refrigerator_id=%s",
             #                      (_time_stamp_last_scanned, agent_id))
             #     self.con.commit()
             # except Exception as er:
@@ -324,7 +322,7 @@ def ACAgent(config_path, **kwargs):
             self.backupSaveData()
 
         def device_offline_detection(self):
-            self.cur.execute("SELECT nickname FROM " + db_table_AC + " WHERE AC_id=%s",
+            self.cur.execute("SELECT nickname FROM " + db_table_Refrigerator + " WHERE Refrigerator_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
@@ -335,7 +333,7 @@ def ACAgent(config_path, **kwargs):
             _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            self.cur.execute("SELECT network_status FROM " + db_table_AC + " WHERE AC_id=%s",
+            self.cur.execute("SELECT network_status FROM " + db_table_Refrigerator + " WHERE Refrigerator_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
@@ -487,7 +485,7 @@ def ACAgent(config_path, **kwargs):
 
         def backupSaveData(self):
             try:
-                cassandraDB.insert(agent_id, AC.variables, log_variables)
+                cassandraDB.insert(agent_id, Refrigerator.variables, log_variables)
                 print('Data Pushed to cassandra as a backup')
             except Exception as er:
                 print("ERROR: {} fails to update cassandra database".format(agent_id))
@@ -551,7 +549,7 @@ def ACAgent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
-                setDeviceStatusResult = AC.setDeviceStatus(json.loads(message[0]))
+                setDeviceStatusResult = Refrigerator.setDeviceStatus(json.loads(message[0]))
                 #send reply message back to the UI
                 topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -592,7 +590,7 @@ def ACAgent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
-            identifyDeviceResult = AC.identifyDevice()
+            identifyDeviceResult = Refrigerator.identifyDevice()
             #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
             #step2: send reply message back to the UI
             topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
@@ -609,13 +607,13 @@ def ACAgent(config_path, **kwargs):
             self.publish(topic, headers, message)
 
 
-    Agent.__name__ = 'ACAgent'
+    Agent.__name__ = 'RefrigeratorAgent'
     return Agent(**kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
-    utils.default_main(ACAgent,
-                       description='AC agent',
+    utils.default_main(RefrigeratorAgent,
+                       description='Refrigerator agent',
                        argv=argv)
 
 if __name__ == '__main__':
