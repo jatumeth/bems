@@ -50,7 +50,7 @@ class API:
         r = requests.get(_url_append)
         #print _url_append
         _theJSON = json.loads(r.content)
-        # print _theJSON
+        print _theJSON
         self.set_variable('current_temperature', _theJSON[0]["value"])
         self.set_variable('power', _theJSON[1]["value"])
 
@@ -91,14 +91,20 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     RefrigeratorZB = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.1.13',username='acquired username',agent_id='LightingAgent')
 
-    print RefrigeratorZB.variables
+    # print RefrigeratorZB.variables
+
+    # RefrigeratorZB.getDeviceStatus()
+
+    # print RefrigeratorZB.variables
+
+    RefrigeratorZB.setDeviceStatus({"temp":"-5"})
+
+    #RefrigeratorZB.identifyDevice()
+
+    import time
+    time.sleep(10)
 
     RefrigeratorZB.getDeviceStatus()
-
-    print RefrigeratorZB.variables
-
-    # RefrigeratorZB.setDeviceStatus({"temp":"-5"})
-    #RefrigeratorZB.identifyDevice()
 
 
 if __name__ == "__main__": main()
