@@ -489,7 +489,6 @@ def PlugloadAgent(config_path, **kwargs):
             try:
                 with threadingLock:
                     Plugload.getDeviceStatus()
-                    print Plugload.variables
                     cassandraDB.insert(agent_id,Plugload.variables,log_variables)
                 print('Data Pushed to cassandra as a backup')
             except Exception as er:
