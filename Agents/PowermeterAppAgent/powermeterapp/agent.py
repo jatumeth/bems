@@ -19,6 +19,8 @@ utils.setup_logging()
 _log = logging.getLogger(__name__)
 
 publish_periodic = 5
+OFFPEAK_RATE = 2.6369
+PEAK_RATE = 5.7982
 
 class PowermeterAppAgent(PublishMixin, BaseAgent):
     '''Listens to everything and publishes a heartbeat according to the
@@ -37,7 +39,6 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         super(PowermeterAppAgent, self).setup()
 
     def parse_resultset(self, variables, data_point, result_set):
-        print data_point
         x = [[lst[variables.index('time')], lst[variables.index(data_point)] + 0.0]
              for lst in result_set if lst[variables.index(data_point)] is not None]
 
@@ -64,19 +65,38 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
         return newTime, newData
 
-    def daily_energy_usage_calculate(self):
-        end_time = datetime.datetime.now()
-        start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
-        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
+    def integrate_power(self, AgentID, variable, start_time, end_time, ):
+        data_points, rs = retrieve(AgentID, vars=['time', variable], startTime=start_time,
                                    endTime=end_time)
         try:
-            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
+            time, data = self.parse_resultset(data_points, variable, rs)
             wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
             energy_kWh = wattsec / (3600 * 1000 * 1000)
         except:
             energy_kWh = 0
-
         return energy_kWh
+
+    def daily_energy_usage_calculate(self):
+        time_now = datetime.datetime.now()
+        weekday = time_now.weekday()
+        if (weekday == 5)|(weekday == 6)|(weekday == 7): #provide "weekday = 7" for holiday rate
+            end_time = time_now
+            start_time = end_time.replace(hour=0, minute=0, second=0)
+            daily_energy = self.integrate_power('SmappeePowerMeter', 'load_activepower', start_time, end_time)
+            daily_bill = daily_energy * OFFPEAK_RATE
+        else:
+            end_time = time_now.replace(hour=22, minute=0, second=0)
+            start_time = time_now.replace(hour=9, minute=0, second=1)
+            daily_energy_peak = self.integrate_power('SmappeePowerMeter', 'load_activepower', start_time, end_time)
+            daily_bill_peak = daily_energy_peak * PEAK_RATE
+            end_time = time_now.replace(hour=9, minute=0, second=0)
+            start_time = time_now.replace(hour=0, minute=0, second=0)
+            daily_energy_offpeak = self.integrate_power('SmappeePowerMeter', 'load_activepower', start_time, end_time)
+            daily_bill_offpeak = daily_energy_peak * OFFPEAK_RATE
+            daily_energy = daily_energy_peak+daily_energy_offpeak
+            daily_bill = daily_bill_peak + daily_bill_offpeak
+
+        return daily_energy, daily_bill
 
     def last_day_energy_usage_calculate(self):
         time_now = datetime.datetime.now()
@@ -162,13 +182,13 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
             'data_source': "powermeterApp",
         }
 
-        daily_energy_usage = round(self.daily_energy_usage_calculate(), 2)
+        daily_energy_usage, daily_electricity_bill = self.daily_energy_usage_calculate()
         last_day_energy_usage = round(self.last_day_energy_usage_calculate(), 2)
 
         monthly_energy_usage = round(self.monthly_energy_usage_calculate(), 2)
         last_month_energy_usage = round(self.last_month_energy_usage_calculate(), 2)
 
-        daily_electricity_bill = round(daily_energy_usage * 3.5, 2)
+        # daily_electricity_bill = round(daily_energy_usage * 3.5, 2)
         last_day_bill = round(last_day_energy_usage * 3.5, 2)
 
         monthly_electricity_bill = round(monthly_energy_usage * 3.5, 2)
@@ -250,7 +270,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         message = json.dumps({"monthly_electricity_bill": monthly_electricity_bill,
                               "last_month_bill": last_month_bill,
                               "last_month_bill_compare": last_month_bill_compare,
-                              "daily_electricity_bill": daily_electricity_bill,
+                              "daily_electricity_bill": round(daily_electricity_bill, 2),
                               "last_day_bill": last_day_bill,
                               "last_day_bill_compare": last_day_bill_compare,
                               "daily_bill_AC": daily_bill_AC,
@@ -269,7 +289,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
                               "monthly_bill_light_compare_percent": monthly_bill_light_compare_percent,
                               "monthly_bill_plug_compare_percent": monthly_bill_plug_compare_percent,
                               "monthly_bill_EV_compare_percent": monthly_bill_EV_compare_percent,
-                              "daily_energy_usage": daily_energy_usage,
+                              "daily_energy_usage": round(daily_energy_usage, 2),
                               "last_day_energy_usage": last_day_energy_usage,
                               "monthly_energy_usage": monthly_energy_usage,
                               "last_month_energy_usage": last_month_energy_usage,
