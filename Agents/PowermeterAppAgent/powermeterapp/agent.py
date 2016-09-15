@@ -112,6 +112,24 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
         return energy_kWh
 
+    def last_month_energy_usage_calculate(self):
+        last_month = datetime.datetime.now() - relativedelta(months=1)
+        end_day_in_last_month = last_month + relativedelta(day=31)
+
+        end_time = end_day_in_last_month.replace(hour=23, minute=59, second=59)
+        start_time = last_month.replace(day=1, hour=0, minute=0, second=0)
+        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
+                                   endTime=end_time)
+
+        try:
+            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
+            wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
+            energy_kWh = wattsec / (3600 * 1000 * 1000)
+        except:
+            energy_kWh = 0
+
+        return energy_kWh
+
     # @matching.match_all
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
@@ -146,45 +164,78 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
         daily_energy_usage = round(self.daily_energy_usage_calculate(), 2)
         last_day_energy_usage = round(self.last_day_energy_usage_calculate(), 2)
+
         monthly_energy_usage = round(self.monthly_energy_usage_calculate(), 2)
+        last_month_energy_usage = round(self.last_month_energy_usage_calculate(), 2)
+
         daily_electricity_bill = round(daily_energy_usage * 3.5, 2)
         last_day_bill = round(last_day_energy_usage * 3.5, 2)
+
         monthly_electricity_bill = round(monthly_energy_usage * 3.5, 2)
+        last_month_bill = round(last_month_energy_usage * 3.5, 2)
 
         # monthly_electricity_bill = round(random.uniform(0, 1000), 2)
-        last_month_bill = round(random.uniform(800, 1000), 2)
+        # last_month_bill = round(random.uniform(800, 1000), 2)
         last_month_bill_compare = round(monthly_electricity_bill-last_month_bill, 2)
         # daily_electricity_bill = round(random.uniform(0, 200), 2)
         # last_day_bill = round(random.uniform(100, 200), 2)
         last_day_bill_compare = round(daily_electricity_bill-last_day_bill, 2)
         daily_bill_AC = round(daily_electricity_bill*0.5, 2)
         daily_bill_light = round(daily_electricity_bill*0.1, 2)
-        daily_bill_plug = round(daily_electricity_bill*0.2, 2)
-        daily_bill_EV = round(daily_electricity_bill*0.2, 2)
+        daily_bill_plug = round(daily_electricity_bill*0.1, 2)
+        daily_bill_EV = round(daily_electricity_bill*0.3, 2)
         last_day_bill_AC = last_day_bill*0.5
         last_day_bill_light = last_day_bill*0.1
         last_day_bill_plug = last_day_bill*0.2
         last_day_bill_EV = last_day_bill*0.2
-        daily_bill_AC_compare_percent = round(((daily_bill_AC - last_day_bill_AC)/last_day_bill_AC*100), 2)
-        daily_bill_light_compare_percent = round(((daily_bill_light - last_day_bill_light) / last_day_bill_light * 100), 2)
-        daily_bill_plug_compare_percent = round(((daily_bill_plug - last_day_bill_plug) / last_day_bill_plug * 100), 2)
-        daily_bill_EV_compare_percent = round(((daily_bill_EV - last_day_bill_EV) / last_day_bill_EV * 100), 2)
-        monthly_bill_AC = round(monthly_electricity_bill*0.5, 2)
-        monthly_bill_light = round(monthly_electricity_bill*0.1, 2)
-        monthly_bill_plug = round(monthly_electricity_bill*0.2, 2)
-        monthly_bill_EV = round(monthly_electricity_bill*0.2, 2)
+
+        try:
+            daily_bill_AC_compare_percent = round(((daily_bill_AC - last_day_bill_AC) / last_day_bill_AC * 100), 2)
+        except:
+            daily_bill_AC_compare_percent = 100
+        try:
+            daily_bill_light_compare_percent = round(((daily_bill_light - last_day_bill_light) / last_day_bill_light * 100), 2)
+        except:
+            daily_bill_light_compare_percent = 100
+        try:
+            daily_bill_plug_compare_percent = round(((daily_bill_plug - last_day_bill_plug) / last_day_bill_plug * 100),2)
+        except:
+            daily_bill_plug_compare_percent = 100
+        try:
+            daily_bill_EV_compare_percent = round(((daily_bill_EV - last_day_bill_EV) / last_day_bill_EV * 100), 2)
+        except:
+            daily_bill_EV_compare_percent = 100
+
+        monthly_bill_AC = round(monthly_electricity_bill * 0.5, 2)
+        monthly_bill_light = round(monthly_electricity_bill * 0.05, 2)
+        monthly_bill_plug = round(monthly_electricity_bill * 0.15, 2)
+        monthly_bill_EV = round(monthly_electricity_bill * 0.3, 2)
+
         last_month_bill_AC = last_month_bill * 0.5
-        last_month_bill_light = last_month_bill * 0.1
-        last_month_bill_plug = last_month_bill * 0.2
+        last_month_bill_light = last_month_bill * 0.05
+        last_month_bill_plug = last_month_bill * 0.15
         last_month_bill_EV = last_month_bill * 0.2
-        monthly_bill_AC_compare_percent = round(((daily_bill_AC - last_month_bill_AC) / last_month_bill_AC * 100), 2)
-        monthly_bill_light_compare_percent = round(((daily_bill_light - last_month_bill_light) / last_month_bill_light * 100), 2)
-        monthly_bill_plug_compare_percent = round(((daily_bill_plug - last_month_bill_plug) / last_month_bill_plug * 100), 2)
-        monthly_bill_EV_compare_percent = round(((daily_bill_EV - last_month_bill_EV) / last_month_bill_EV * 100), 2)
-        daily_energy_usage = round(daily_electricity_bill/ 3.5, 2)
-        last_day_energy_usage = round(last_day_bill/ 3.5, 2)
-        monthly_energy_usage = round(monthly_electricity_bill/3.5, 2)
-        last_month_energy_usage = round(last_month_bill/3.5, 2)
+
+        try:
+            monthly_bill_AC_compare_percent = round(((daily_bill_AC - last_month_bill_AC) / last_month_bill_AC * 100), 2)
+        except:
+            monthly_bill_AC_compare_percent = 100
+        try:
+            monthly_bill_light_compare_percent = round(((daily_bill_light - last_month_bill_light) / last_month_bill_light * 100), 2)
+        except:
+            monthly_bill_light_compare_percent = 100
+        try:
+            monthly_bill_plug_compare_percent = round(((daily_bill_plug - last_month_bill_plug) / last_month_bill_plug * 100), 2)
+        except:
+            monthly_bill_plug_compare_percent = 100
+        try:
+            monthly_bill_EV_compare_percent = round(((daily_bill_EV - last_month_bill_EV) / last_month_bill_EV * 100), 2)
+        except:
+            monthly_bill_EV_compare_percent = 100
+        # daily_energy_usage = round(daily_electricity_bill/ 3.5, 2)
+        # last_day_energy_usage = round(last_day_bill/ 3.5, 2)
+        # monthly_energy_usage = round(monthly_electricity_bill/3.5, 2)
+        # last_month_energy_usage = round(last_month_bill/3.5, 2)
         max_monthly_energy_usage = 300
         month = ["Jan", "Feb", "Mar", "April", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         max_energy_usage_month = month[random.randint(0, 11)]
