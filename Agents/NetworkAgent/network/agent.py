@@ -153,7 +153,7 @@ class NetworkAgent(PublishMixin, BaseAgent):
                         print "Network Agent >> host name for multi-node communication subscription is {}".format(self.core_location)
 
         try:
-            self.con = psycopg2.connect(host=self.db_host, port=db_port, database=db_database, user=db_user,
+            self.con = psycopg2.connect(host='localhost', port=db_port, database=db_database, user=db_user,
                                         password=db_password)
             self.cur = self.con.cursor()  # open a cursor to perfomm database operations
             print("{} connects to the database name {} successfully".format(self.agent_id, db_database))
