@@ -121,6 +121,7 @@ DATABASES = {
         'TABLE_powermeter': 'powermeter',
         'TABLE_AC': 'ac',
         'TABLE_Refrigerator': 'Refrigerator',
+        'TABLE_MultiSensor': 'MultiSensor',
     }
 }
 

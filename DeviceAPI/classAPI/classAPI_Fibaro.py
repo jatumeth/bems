@@ -124,14 +124,14 @@ class API:
     def getDeviceStatusJson(self,data):
 
         conve_json = json.loads(data)
-        self.set_variable('label', conve_json["label"])
-        self.set_variable('illuminance', conve_json["illuminance"])
-        self.set_variable('temperature', conve_json["temperature"])
-        self.set_variable('battery', conve_json["battery"])
-        self.set_variable('motion', conve_json["motion"])
-        self.set_variable('tamper', conve_json["tamper"])
+        self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('illuminance', float(conve_json["illuminance"]))
+        self.set_variable('temperature', float(conve_json["temperature"]))
+        self.set_variable('battery', float(conve_json["battery"]))
+        self.set_variable('motion', str(conve_json["motion"]))
+        self.set_variable('tamper', str(conve_json["tamper"]))
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', conve_json["type"])
+        self.set_variable('type', str(conve_json["type"]))
 
 
     def printDeviceStatus(self):
@@ -146,6 +146,8 @@ class API:
         print(" tamper = {}".format(self.get_variable('tamper')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('type')))
+
+        print("---------------------------------------------")
 
 
     # ----------------------------------------------------------------------
