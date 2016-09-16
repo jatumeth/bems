@@ -119,7 +119,7 @@ class API:
     #method1: GET Open the port and read the data
     def getDeviceStatus(self):
         getDeviceStatusResult = True
-        filename = os.getcwd() + "/InvConfig .csv"
+        filename = os.getcwd() + "/InvConfig.csv"
         _pointer = 0
         _step = 20
         _param = {}
