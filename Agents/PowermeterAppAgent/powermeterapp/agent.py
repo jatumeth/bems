@@ -24,7 +24,9 @@ OFFPEAK_RATE = 2.6369
 PEAK_RATE = 5.7982
 
 #Dictionary of Variables supposed to be saved into timeseries database
-log_variables = dict(load_energy='double',solar_energy='double',load_bill='double')
+log_variables = dict(load_energy='double',solar_energy='double',load_bill='double', light_energy='double',
+                     light_bill='double', AC_energy='double', AC_bill='double', plug_energy='double',
+                     plug_bill='double', EV_energy='double', EV_bill='double')
 
 class PowermeterAppAgent(PublishMixin, BaseAgent):
     '''Listens to everything and publishes a heartbeat according to the
@@ -175,23 +177,42 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
         return data
 
-    def last_day_energy_usage_calculate(self):
+    def last_day_energy_calculate(self):
+        data = {}
         time_now = datetime.datetime.now()
         delta_time = datetime.timedelta(days=1)
         time = time_now - delta_time
         end_time = time.replace(hour=23, minute=59, second=59)
         start_time = time.replace(hour=0, minute=0, second=0)
-        data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time,
-                                   endTime=end_time)
-
         try:
-            time, data = self.parse_resultset(data_points, 'load_activepower', rs)
-            wattsec = scipy.integrate.simps(data, time, axis=-1, even='avg')
-            energy_kWh = wattsec / (3600 * 1000 * 1000)
+            data_points, rs = retrieve('DailyData', vars=['load_energy', 'solar_energy', 'load_bill', 'light_energy',
+                                                      'light_bill', 'AC_energy', 'AC_bill', 'plug_energy', 'plug_bill',
+                                                      'EV_energy', 'EV_bill'], startTime=start_time, endTime=end_time)
+            data['last_day_energy'] = rs[0]
+            data['solar_last_day_energy'] = rs[1]
+            data['last_day_bill'] = rs[2]
+            data['last_day_light_energy'] = rs[3]
+            data['last_day_light_bill'] = rs[4]
+            data['last_day_AC_energy'] = rs[5]
+            data['last_day_AC_bill'] = rs[6]
+            data['last_day_plug_energy'] = rs[7]
+            data['last_day_plug_bill'] = rs[8]
+            data['last_day_EV_energy'] = rs[9]
+            data['last_day_EV_bill'] = rs[10]
         except:
-            energy_kWh = 0
+            data['last_day_energy'] = 0
+            data['solar_day_energy'] = 0
+            data['last_day_bill'] = 0
+            data['last_day_light_energy'] = 0
+            data['last_day_light_bill'] = 0
+            data['last_day_AC_energy'] = 0
+            data['last_day_AC_bill'] = 0
+            data['last_day_plug_energy'] = 0
+            data['last_day_plug_bill'] = 0
+            data['last_day_EV_energy'] = 0
+            data['last_day_EV_bill'] = 0
 
-        return energy_kWh
+        return data
 
     def monthly_energy_usage_calculate(self):
         date_end_month = datetime.datetime.now() + relativedelta(day=31)
@@ -284,26 +305,20 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         daily_bill_plug = round(daily_data['daily_plug_bill'], 2)
         daily_bill_EV = round(daily_data['daily_EV_bill'], 2)
 
-        last_day_energy_usage = round(self.last_day_energy_usage_calculate(), 2)
+        last_day_data = self.last_day_energy_calculate()
+        last_day_energy_usage = round(last_day_data['last_day_energy'], 2)
+        last_day_bill = round(last_day_data['last_day_bill'], 2)
+        last_day_bill_compare = round(daily_electricity_bill - last_day_bill, 2)
+        last_day_bill_light = round(last_day_data['last_day_light_bill'], 2)
+        last_day_bill_AC = round(last_day_data['last_day_AC_bill'], 2)
+        last_day_bill_plug = round(last_day_data['last_day_plug_bill'], 2)
+        last_day_bill_EV = round(last_day_data['last_day_EV_bill'], 2)
 
         monthly_energy_usage = round(self.monthly_energy_usage_calculate(), 2)
         last_month_energy_usage = round(self.last_month_energy_usage_calculate(), 2)
-
-        last_day_bill = round(last_day_energy_usage * 3.5, 2)
-
         monthly_electricity_bill = round(monthly_energy_usage * 3.5, 2)
         last_month_bill = round(last_month_energy_usage * 3.5, 2)
-
-        # monthly_electricity_bill = round(random.uniform(0, 1000), 2)
-        # last_month_bill = round(random.uniform(800, 1000), 2)
         last_month_bill_compare = round(monthly_electricity_bill-last_month_bill, 2)
-        # last_day_bill = round(random.uniform(100, 200), 2)
-        last_day_bill_compare = round(daily_data['daily_bill']-last_day_bill, 2)
-
-        last_day_bill_AC = last_day_bill*0.5
-        last_day_bill_light = last_day_bill*0.1
-        last_day_bill_plug = last_day_bill*0.2
-        last_day_bill_EV = last_day_bill*0.2
 
         try:
             daily_bill_AC_compare_percent = round(((daily_bill_AC - last_day_bill_AC) / last_day_bill_AC * 100), 2)
