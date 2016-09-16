@@ -78,6 +78,7 @@ def PlugloadAgent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
+    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
 
     debug_agent = False
     #Dictionary of Variables supposed to be saved in postgress database
@@ -484,7 +485,7 @@ def PlugloadAgent(config_path, **kwargs):
                     "UPDATE " + db_table_temp_time_counter + " SET priority_counter=%s WHERE alert_id=%s AND device_id=%s",
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
-        @periodic(max_monitor_time) #save all data every max_monitor_time
+        @periodic(cassandra_update_time) #save all data every cassandra update time
         def backupSaveData(self):
             try:
                 with threadingLock:
