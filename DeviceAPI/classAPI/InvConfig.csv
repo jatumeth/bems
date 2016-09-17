@@ -20,8 +20,8 @@ PH1800/PH3000",1
 20016,RW,Load Current calibration coefficient,16384,1
 20017,RW,reserved,reserved,1
 20101,RW,Inverter offgrid work enable,0?OFF 1?ON  ,1
-20102,RW,Inverter output voltage Set,220.0V-240.0V,1
-20103,RW,Inverter output frequency Set,50.00Hz/60.00Hz,1
+20102,RW,Inverter output voltage Set,220.0V-240.0V,0.1
+20103,RW,Inverter output frequency Set,50.00Hz/60.00Hz,0.01
 20104,RW,Inverter search mode enable,0?OFF 1?ON  ,1
 20105,RW,Inverter ongrid work enable,0?OFF 1?ON  ,1
 20106,RW,Inverter charger from grid enable,0?OFF 1?ON  ,1
@@ -43,14 +43,14 @@ PH1800/PH3000",1
 20122,RW,reserved,reserved,1
 20123,RW,reserved,reserved,1
 20124,RW,reserved,reserved,1
-20125,RW,Grid max charger current set,0.1A(DC),1
-20126,RW,Absorb charger current set,0.1A(DC),1
-20127,RW,Battery low voltage,0.1V,1
-20128,RW,Battery high voltage,0.1V,1
+20125,RW,Grid max charger current set,0.1A(DC),0.1
+20126,RW,Absorb charger current set,0.1A(DC),0.1
+20127,RW,Battery low voltage,0.1V,0.1
+20128,RW,Battery high voltage,0.1V,0.1
 20129,RW,Battery type,0: no choose                                                          1?lead acid battery                                           2?lithium battery   ,1
 20130,RW,Battery AH,1AH           ,1
-20131,RW,battery low return voltage,0.1V,1
-20132,RW,Max Combine charger current,0.1A(DC),1
+20131,RW,battery low return voltage,0.1V,0.1
+20132,RW,Max Combine charger current,0.1A(DC),0.1
 25201,R0,work state,0:PowerOn 1:SelfTest 2:OffGrid 3:Grid-Tie 4:ByPass 5:Stop,1
 25202,R0,AC voltage grade,"230?230V
 120?120V",1
@@ -58,13 +58,13 @@ PH1800/PH3000",1
 PH1800 VA/PH3000 W",1
 25204,R0,reserved,,1
 25205,R0,Battery voltage,0.1V,0.1
-25206,R0,Inverter voltage,0.1V,1
-25207,R0,Grid voltage,0.1V,1
-25208,R0,BUS voltage,0.1V,1
-25209,R0,Control current,0.1A,1
-25210,R0,Inverter current,0.1A,1
-25211,R0,Grid current,0.1A,1
-25212,R0,Load current,0.1A,1
+25206,R0,Inverter voltage,0.1V,0.1
+25207,R0,Grid voltage,0.1V,0.1
+25208,R0,BUS voltage,0.1V,0.1
+25209,R0,Control current,0.1A,0.1
+25210,R0,Inverter current,0.1A,0.1
+25211,R0,Grid current,0.1A,0.1
+25212,R0,Load current,0.1A,0.1
 25213,R0,PInverter,1W,1
 25214,R0,Pgrid,1W,1
 25215,R0,Pload,1W,1
@@ -77,8 +77,8 @@ PH1800 VA/PH3000 W",1
 25222,R0,Qgrid,1var,1
 25223,R0,Qload,1var,1
 25224,R0,reserved,,1
-25225,R0,Inverter frequency,0.01Hz,1
-25226,R0,Grid frequency,0.01Hz,1
+25225,R0,Inverter frequency,0.01Hz,0.01
+25226,R0,Grid frequency,0.01Hz,0.01
 25227,R0,reserved,,1
 25228,R0,reserved,,1
 25229,R0,Inverter max number,,1
@@ -98,21 +98,21 @@ PH1800 VA/PH3000 W",1
 25243,R0,reserved,,1
 25244,R0,reserved,,1
 25245,R0,Accumulated charger power high,1000KWH,1
-25246,R0,Accumulated charger power low,0.1KWH,1
+25246,R0,Accumulated charger power low,0.1KWH,0.1
 25247,R0,Accumulated discharger power high,1000KWH,1
-25248,R0,Accumulated discharger power low,0.1KWH,1
+25248,R0,Accumulated discharger power low,0.1KWH,0.1
 25249,R0,Accumulated buy power high,1000KWH,1
-25250,R0,Accumulated buy power low,0.1KWH,1
+25250,R0,Accumulated buy power low,0.1KWH,0.1
 25251,R0,Accumulated sell power high,1000KWH,1
-25252,R0,Accumulated sell power low,0.1KWH,1
+25252,R0,Accumulated sell power low,0.1KWH,0.1
 25253,R0,Accumulated load power high,1000KWH,1
-25254,R0,Accumulated load power low,0.1KWH,1
+25254,R0,Accumulated load power low,0.1KWH,0.1
 25255,R0,Accumulated self_use power high,1000KWH,1
-25256,R0,Accumulated self_use power low,0.1KWH,1
+25256,R0,Accumulated self_use power low,0.1KWH,0.1
 25257,R0,Accumulated PV_sell power high,1000KWH,1
-25258,R0,Accumulated PV_sell power low,0.1KWH,1
+25258,R0,Accumulated PV_sell power low,0.1KWH,0.1
 25259,R0,Accumulated grid_charger power high,1000KWH,1
-25260,R0,Accumulated  grid_charger power low,0.1KWH,1
+25260,R0,Accumulated  grid_charger power low,0.1KWH,0.1
 25261,R0,Error message 1,Refer to frame Error message 1,1
 25262,R0,Error message 2,Refer to frame Error message 2,1
 25263,R0,Error message 3,Refer to frame Error message 3,1

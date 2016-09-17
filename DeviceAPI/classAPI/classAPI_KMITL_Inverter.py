@@ -75,6 +75,7 @@ class API:
         self.msg_get_fail = 'can not get Inverter status'
         self.result_fail = 'Fail'
         self.result_success = 'Success'
+        self.li_factor = []
 
     def renewConnection(self):
         pass
@@ -161,7 +162,8 @@ class API:
                     # print(i)
                     #print("name : " + str(self.li_key[(_pointer - (bit_length - 1)) + param_key]) + ",  Address : " + str(
                         #self.li_val[(_pointer - (bit_length - 1)) + param_key]))
-                    _param[self.li_key[(_pointer - (bit_length - 1)) + param_key]] = i
+                    factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
+                    _param[self.li_key[(_pointer - (bit_length - 1)) + param_key]] = round(int(i)*factor,1)
                     param_key = param_key + 1
                 # print("address:" + str(value) + ", name: " + key + " value:" + str(vv))
                 # pointer = pointer + step
@@ -178,14 +180,15 @@ class API:
                     exit()
                 param_key = 0
                 for i in li_reg:
-                    _param[self.li_key[_pointer + param_key]] = i
+                    factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
+                    _param[self.li_key[_pointer + param_key]] = round(int(i)*factor,1)
                     param_key = param_key + 1
 
                 #print _param
             self.client.close()
             for k,v in _param.items():
                 self.set_variable(k, v)
-
+            #print self.get_variable("Batt_current")
 
         except Exception as er:
             print "classAPI_KMITL_Inverter: ERROR: Reading Modbus registers at getDeviceStatus:"
@@ -231,6 +234,7 @@ class API:
                 # param[str_key] = csvdata['Address']
                 self.li_key.append(str_key)
                 self.li_val.append(csvdata['Address'])
+                self.li_factor.append(csvdata['factor'])
                 # print(param[str_key])
                 # print(csvdata['Name'])
             i = i + 1
@@ -312,8 +316,8 @@ class API:
 def main():
     Inverter = API(model='VC1000',type='VAV',api='API',address='192.168.1.60:4')
 
-    #Inverter.getDeviceStatus()
-    Inverter.setDeviceStatus({"mode":"Po"})
+    Inverter.getDeviceStatus()
+    #Inverter.setDeviceStatus({"mode":"Po"})
 
 
 
