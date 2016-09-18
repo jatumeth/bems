@@ -180,25 +180,25 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    # LGTV.getDeviceStatus()
+    LGTV.getDeviceStatus()
 
     import time
-    LGTV.setDeviceStatus({"status": "ON"})
-
-    time.sleep(10)
-
-    LGTV.setDeviceStatus({"status": "OFF"})
-
-    time.sleep(10)
-
-    LGTV.setDeviceStatus({"status": "ON"})
-
-    time.sleep(10)
-
-    LGTV.setDeviceStatus({"status": "OFF"})
-
-    time.sleep(10)
-
-    LGTV.setDeviceStatus({"status": "ON"})
+    # LGTV.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(10)
+    #
+    # LGTV.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(10)
+    #
+    # LGTV.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(10)
+    #
+    # LGTV.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(10)
+    #
+    # LGTV.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()

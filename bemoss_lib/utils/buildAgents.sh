@@ -126,6 +126,17 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/FridgeAgent/
 volttron-pkg configure /tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FridgeAgent/1FR221445K1200111.launch.json
 volttron-ctl install 1FR221445K1200111=/tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl
 
+# Run MultisensorAgent
+volttron-pkg package ~/workspace/bemoss_os/Agents/MultiSensorAgent/
+volttron-pkg configure /tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiSensorAgent/1MS221445K1200132.launch.json
+volttron-ctl install 1MS221445K1200132=/tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl
+
+# Run LGTVAgent
+volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/1LG221445K1200137.launch.json
+volttron-ctl install 1LG221445K1200137=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent

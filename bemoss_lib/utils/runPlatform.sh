@@ -78,6 +78,12 @@ sleep 2
 volttron-ctl start --tag BedroomAir
 sleep 2
 volttron-ctl start --tag 1FR221445K1200111
+sleep 2
+volttron-ctl start --tag 1MS221445K1200132
+sleep 2
+volttron-ctl start --tag 1LG221445K1200137
+sleep 2
+
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish

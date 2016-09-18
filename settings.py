@@ -122,6 +122,8 @@ DATABASES = {
         'TABLE_AC': 'ac',
         'TABLE_Refrigerator': 'Refrigerator',
         'TABLE_MultiSensor': 'MultiSensor',
+        'TABLE_LGTV': 'LGTV',
+
     }
 }
 
