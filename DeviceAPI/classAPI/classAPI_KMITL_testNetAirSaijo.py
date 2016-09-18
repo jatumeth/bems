@@ -70,10 +70,10 @@ class API:
         self.set_variable('set_humidity', _theJSON[4]["value"])
         self._mode = _theJSON[5]["value"]
         if self._mode == 0 :
-            self.set_variable('mode' , "Cool")
+            self.set_variable('mode', "Cool")
         elif self._mode == 1 :
             self.set_variable('mode', "Fan")
-        elif self._mode == 2:
+        elif self._mode == 2 :
             self.set_variable('mode', "Dry")
         elif self._mode == 3 :
             self.set_variable('mode', "Heat")
@@ -99,7 +99,7 @@ class API:
         for k in _data:
             print k
             if k == 'temp':
-                _command = json.dumps({"cmd_name" : "set_temp" , "parameters" : {"setTo" : _data['temp']}})
+                _command = json.dumps({"cmd_name": "set_temp", "parameters": {"setTo": _data['temp']}})
                 _body.append(_command)
             elif k == 'humidity':
                 _command = json.dumps({"cmd_name": "set_humidity", "parameters": {"setTo": _data['humidity']}})
@@ -174,12 +174,13 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
                    address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
-                   device_id="LivingroomAir2")
+                   device_id="BedroomAir")
 
     # print Airsaijo.variables
 
     Airsaijo.getDeviceStatus()
-    # Airsaijo.setDeviceStatus({"status":"OFF", "LivingroomAir2":"0"})
+    Airsaijo.setDeviceStatus({"status":"OFF"})
+    # Airsaijo.getDeviceStatus()
     # Airsaijo.setDeviceStatus({"status": "ON", "temp" : "23"})
     #time.sleep(10)
     #Airsaijo.setDeviceStatus({"BedroomAir":"0","fan_speed": "2", "temp" : "23"})
