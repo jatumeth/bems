@@ -120,7 +120,8 @@ class API:
     #method1: GET Open the port and read the data
     def getDeviceStatus(self):
         getDeviceStatusResult = True
-        filename = os.getcwd() + "/InvConfig.csv"
+        filename = os.getcwd() + "/DeviceAPI/classAPI/InvConfig.csv"
+
         _pointer = 0
         _step = 20
         _param = {}
@@ -188,7 +189,31 @@ class API:
             self.client.close()
             for k,v in _param.items():
                 self.set_variable(k, v)
-            #print self.get_variable("Batt_current")
+
+
+            _chargerpower = self.get_variable("Accumulated_charger_power_high") + self.get_variable("Accumulated_charger_power_low")
+            self.set_variable('Accumulated_charger_power', _chargerpower)
+            _dischargerpower = self.get_variable("Accumulated_discharger_power_high") + self.get_variable("Accumulated_discharger_power_low")
+            self.set_variable('Accumulated_discharger_power', _dischargerpower)
+            _buypower = self.get_variable("Accumulated_buy_power_high") + self.get_variable("Accumulated_buy_power_low")
+            self.set_variable('Accumulated_buy_power', _buypower)
+            _sellpower = self.get_variable("Accumulated_sell_power_high") + self.get_variable("Accumulated_sell_power_low")
+            self.set_variable('Accumulated_sell_power', _sellpower)
+            _loadpower = self.get_variable("Accumulated_load_power_high") + self.get_variable("Accumulated_load_power_low")
+            self.set_variable('Accumulated_load_power', _loadpower)
+            _usepower = self.get_variable("Accumulated_self_use_power_high") + self.get_variable("Accumulated_self_use_power_low")
+            self.set_variable('Accumulated_self_use_power', _usepower)
+
+            _sellpower = self.get_variable("Accumulated_PV_sell_power_high") + self.get_variable("Accumulated_PV_sell_power_low")
+            self.set_variable('Accumulated_PV_sell_power', _sellpower)
+
+            if self.get_variable("Accumulated_grid_charger_power_high") or self.get_variable("Accumulated_grid_charger_power_low")== None:
+                self.set_variable('Accumulated_grid_charger_power', 0)
+            else:
+                _gridpower = self.get_variable("Accumulated_grid_charger_power_high") + self.get_variable("Accumulated_grid_charger_power_low")
+                self.set_variable('Accumulated_grid_charger_power', _gridpower)
+
+            print self.variables
 
         except Exception as er:
             print "classAPI_KMITL_Inverter: ERROR: Reading Modbus registers at getDeviceStatus:"
@@ -318,6 +343,8 @@ def main():
 
     Inverter.getDeviceStatus()
     #Inverter.setDeviceStatus({"mode":"Po"})
+
+    #print Inverter.variables
 
 
 
