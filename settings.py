@@ -125,6 +125,7 @@ DATABASES = {
         'TABLE_LGTV': 'LGTV',
         'TABLE_Inverter': 'Inverter',
         'TABLE_Fan': 'Fan',
+        'TABLE_Weather': 'Weather',
     }
 }
 
