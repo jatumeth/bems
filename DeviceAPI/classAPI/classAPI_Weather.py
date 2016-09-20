@@ -61,7 +61,7 @@ class API:
         self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
         self.only_white_bulb = None
         # to initialize the only white bulb value
-        self.getDeviceStatus()
+        # self.getDeviceStatus()
     def renewConnection(self):
         pass
 
@@ -161,10 +161,10 @@ class API:
 
             tag = tag + 1
 
-        self.set_variable('wind_speed', msg["wind_speed"])
+        self.set_variable('wind_speed', float(msg["wind_speed"]))
         self.set_variable('city', msg["city"])
         self.set_variable('country', msg["country"])
-        self.set_variable('temp_c', msg["temp_c"])
+        self.set_variable('temp_c', float(msg["temp_c"]))
         self.set_variable('humidity', msg["humidity"])
         self.set_variable('observ_time', msg["observ_time"])
         self.set_variable('weather', msg["weather"])
