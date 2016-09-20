@@ -78,7 +78,7 @@ def init():
         casSettingsFile = open(os.path.expanduser("~")+"/workspace/bemoss_os/cassandra_settings.txt",'w')
         contents="""cluster_name: '%s'
 keyspace_name: bemossspace
-replication_factor: 2
+replication_factor: 1
 listen_address: %s
 rpc_address: %s
 seeds: "%s"
