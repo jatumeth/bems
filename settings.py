@@ -124,6 +124,7 @@ DATABASES = {
         'TABLE_MultiSensor': 'MultiSensor',
         'TABLE_LGTV': 'LGTV',
         'TABLE_Inverter': 'Inverter',
+        'TABLE_Fan': 'Fan',
     }
 }
 
