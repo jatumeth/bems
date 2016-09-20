@@ -85,6 +85,8 @@ volttron-ctl start --tag 1LG221445K1200137
 sleep 2
 volttron-ctl start --tag 1IN221445K1300011
 sleep 2
+volttron-ctl start --tag 1FN221445K1200138
+sleep 2
 
 
 volttron-ctl status

@@ -140,6 +140,13 @@ volttron-ctl install 1LG221445K1200137=/tmp/volttron_wheels/lgtvagent-0.1-py2-no
 volttron-pkg package ~/workspace/bemoss_os/Agents/InverterAgent/
 volttron-pkg configure /tmp/volttron_wheels/inverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/InverterAgent/1IN221445K1300011.launch.json
 volttron-ctl install 1IN221445K1300011=/tmp/volttron_wheels/inverteragent-0.1-py2-none-any.whl
+
+# Run Fan
+volttron-pkg package ~/workspace/bemoss_os/Agents/FanAgent/
+volttron-pkg configure /tmp/volttron_wheels/fanagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1FN221445K1200138.launch.json
+volttron-ctl install 1FN221445K1200138=/tmp/volttron_wheels/fanagent-0.1-py2-none-any.whl
+
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent
