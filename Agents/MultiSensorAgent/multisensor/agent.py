@@ -62,10 +62,10 @@ import socket
 import threading
 from bemoss_lib.databases.cassandraAPI import cassandraDB
 
+
 def MultiSensorAgent(config_path, **kwargs):
-    
     threadingLock = threading.Lock()
-    
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -74,19 +74,19 @@ def MultiSensorAgent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    #1. @params agent
+    # 1. @params agent
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
 
     debug_agent = False
-    #Dictionary of Variables supposed to be saved in postgress database
+    # Dictionary of Variables supposed to be saved in postgress database
     agentAPImapping = dict(status=[], power=[], energy=[])
 
-    #Dictionary of Variables supposed to be saved into timeseries database ,illuminance='double',battery='double',type='double'
+    # Dictionary of Variables supposed to be saved into timeseries database ,illuminance='double',battery='double',type='double'
     log_variables = dict(illuminance='double', temperature='double', battery='double', motion='text', tamper='text')
 
-    tolerance = 0.5 #if the numerical variables change less than this percent, its not conisdered change and not logged
+    tolerance = 0.5  # if the numerical variables change less than this percent, its not conisdered change and not logged
 
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
@@ -114,7 +114,7 @@ def MultiSensorAgent(config_path, **kwargs):
     identifiable = get_config('identifiable')
     # mac_address = get_config('mac_address')
 
-    #TODO get database parameters from settings.py, add db_table for specific table
+    # TODO get database parameters from settings.py, add db_table for specific table
     db_host = get_config('db_host')
     db_port = get_config('db_port')
     db_database = get_config('db_database')
@@ -130,17 +130,18 @@ def MultiSensorAgent(config_path, **kwargs):
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
-    #construct _topic_Agent_UI based on data obtained from DB
+    # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
 
     api = get_config('api')
 
-    apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
+    apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
 
-    #4.1 initialize MultiSensor device object
-    MultiSensor = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
-                    agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
-                    db_database=db_database, config_path=config_path)
+    # 4.1 initialize MultiSensor device object
+    MultiSensor = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress,
+                             agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user,
+                             db_password=db_password,
+                             db_database=db_database, config_path=config_path)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
                                                                         MultiSensor.get_variable('model'),
@@ -149,7 +150,7 @@ def MultiSensorAgent(config_path, **kwargs):
 
     # connection_renew_interval = MultiSensor.variables['connection_renew_interval']
 
-    #params notification_info
+    # params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
     email_recipients = settings.NOTIFICATION['email']['recipients']
@@ -163,7 +164,7 @@ def MultiSensorAgent(config_path, **kwargs):
 
         # 1. agent initialization
         def __init__(self, **kwargs):
-            #1. initialize all agent variables
+            # 1. initialize all agent variables
             super(Agent, self).__init__(**kwargs)
             self.variables = kwargs
             self.valid_data = False
@@ -177,7 +178,7 @@ def MultiSensorAgent(config_path, **kwargs):
             self.lastUpdateTime = None
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
-            #2. setup connection with db -> Connect to bemossdb database
+            # 2. setup connection with db -> Connect to bemossdb database
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                             password=db_password)
@@ -185,16 +186,16 @@ def MultiSensorAgent(config_path, **kwargs):
                 print("{} connects to the database name {} successfully".format(agent_id, db_database))
             except:
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            #3. send notification to notify building admin
+            # 3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
 
         # These set and get methods allow scalability
-        def set_variable(self,k,v): #k=key, v=value
+        def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
 
-        def get_variable(self,k):
-            return self.variables.get(k, None) #default of get_variable is none
+        def get_variable(self, k):
+            return self.variables.get(k, None)  # default of get_variable is none
 
         # 2. agent setup method
         def setup(self):
@@ -202,31 +203,31 @@ def MultiSensorAgent(config_path, **kwargs):
 
             self.timer(10, self.deviceMonitorBehavior)
 
-            #TODO do this for all devices that supports event subscriptions
+            # TODO do this for all devices that supports event subscriptions
             if api == 'classAPI_WeMo':
-                #Do a one time push when we start up so we don't have to wait for the periodic polling
+                # Do a one time push when we start up so we don't have to wait for the periodic polling
                 try:
-                    MultiSensor.startListeningEvents(threadingLock,self.updateStatus)
-                    self.subscriptionTime=datetime.datetime.now()
+                    MultiSensor.startListeningEvents(threadingLock, self.updateStatus)
+                    self.subscriptionTime = datetime.datetime.now()
                 except Exception as er:
                     print "Can't subscribe.", er
-                
+
         def updatePostgresDB(self):
             try:
-                self.cur.execute("UPDATE "+db_table_MultiSensor+" SET status=%s "
-                                 "WHERE MultiSensor_id=%s",
+                self.cur.execute("UPDATE " + db_table_MultiSensor + " SET status=%s "
+                                                                    "WHERE MultiSensor_id=%s",
                                  (self.get_variable('status'), agent_id))
                 self.con.commit()
-                if self.get_variable('power')!=None:
-                    #self.set_variable('power', int(self.get_variable('power')))
-                    self.cur.execute("UPDATE "+db_table_MultiSensor+" SET power=%s "
-                                     "WHERE MultiSensor_id=%s",
+                if self.get_variable('power') != None:
+                    # self.set_variable('power', int(self.get_variable('power')))
+                    self.cur.execute("UPDATE " + db_table_MultiSensor + " SET power=%s "
+                                                                        "WHERE MultiSensor_id=%s",
                                      (int(self.get_variable('power')), agent_id))
                     self.con.commit()
                 if self.ip_address != None:
                     psycopg2.extras.register_inet()
                     _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_MultiSensor+" SET ip_address=%s WHERE MultiSensor_id=%s",
+                    self.cur.execute("UPDATE " + db_table_MultiSensor + " SET ip_address=%s WHERE MultiSensor_id=%s",
                                      (_ip_address, agent_id))
                     self.con.commit()
 
@@ -235,7 +236,7 @@ def MultiSensorAgent(config_path, **kwargs):
             except:
                 print("ERROR: {} fails to update the database name {}".format(agent_id, db_database))
 
-        #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
+        # Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
         # @periodic(connection_renew_interval)
         # def renewConnection(self):
         #     MultiSensor.renewConnection()
@@ -311,7 +312,7 @@ def MultiSensorAgent(config_path, **kwargs):
             #     print 'nothing changed'
             #     return
             #
-            # self.updateStatus()
+            self.updateStatus()
             # #step6: debug agent knowledge
             # if debug_agent == True:
             #     print("printing agent's knowledge")
@@ -326,18 +327,18 @@ def MultiSensorAgent(config_path, **kwargs):
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
-                device_nickname=self.cur.fetchone()[0]
+                device_nickname = self.cur.fetchone()[0]
                 print device_nickname
             else:
                 device_nickname = ''
-            _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
+            _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
+            _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
+            _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname, agent_id)
             self.cur.execute("SELECT network_status FROM " + db_table_MultiSensor + " WHERE MultiSensor_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
-            if self.network_status=="OFFLINE":
+            if self.network_status == "OFFLINE":
                 print "Found Device OFFLINE"
                 self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
                 self._active_alert_id = self.cur.fetchone()[0]
@@ -354,7 +355,9 @@ def MultiSensorAgent(config_path, **kwargs):
                     self.con.commit()
                     self.send_device_notification_db(_db_notification_subject, self._active_alert_id)
                     # Send email if exist
-                    self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'1'))
+                    self.cur.execute(
+                        "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                        (self._active_alert_id, '1'))
                     if self.cur.rowcount != 0:
                         self._alert_email = self.cur.fetchall()
                         for single_email_1 in self._alert_email:
@@ -362,7 +365,9 @@ def MultiSensorAgent(config_path, **kwargs):
                             self.send_device_notification_email(single_email_1[0], _email_subject, _email_text)
 
                     # Send SMS if provided by user
-                    self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'2'))
+                    self.cur.execute(
+                        "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                        (self._active_alert_id, '2'))
                     if self.cur.rowcount != 0:
                         self._alert_sms_phone_no = self.cur.fetchall()
                         for single_number in self._alert_sms_phone_no:
@@ -409,9 +414,9 @@ def MultiSensorAgent(config_path, **kwargs):
             self.con.commit()
 
         def send_device_notification_email(self, _active_alert_email, _email_subject, _email_text):
-            #_email_subject = '#Attention: BEMOSS Device {} has detected a high level of CO2!!!'.format(agent_id)
+            # _email_subject = '#Attention: BEMOSS Device {} has detected a high level of CO2!!!'.format(agent_id)
             # _email_text = 'Here is the detail of device status\n' + str(_tampering_device_msg) \
-            #_email_text = 'The CO2 level has exceeded the defined range'
+            # _email_text = 'The CO2 level has exceeded the defined range'
             emailService = EmailService()
 
             # Send Email
@@ -422,8 +427,8 @@ def MultiSensorAgent(config_path, **kwargs):
             print "INSIDE send_device_notification_sms"
             print _active_alert_phone_number_misoperation
             smsService = SMSService()
-            smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
-
+            smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password,
+                               _sms_subject, email_mailServer)
 
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
@@ -463,7 +468,9 @@ def MultiSensorAgent(config_path, **kwargs):
 
                 print "INSIDE the priority counter exceeded the defined range"
                 # Send email if exist
-                self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'1'))
+                self.cur.execute(
+                    "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                    (self._active_alert_id, '1'))
                 if self.cur.rowcount != 0:
                     self._alert_email = self.cur.fetchall()
                     for single_email_1 in self._alert_email:
@@ -471,7 +478,9 @@ def MultiSensorAgent(config_path, **kwargs):
                         self.send_device_notification_email(single_email_1[0], _email_subject, _email_text)
 
                 # Send SMS if provided by user
-                self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'2'))
+                self.cur.execute(
+                    "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                    (self._active_alert_id, '2'))
                 if self.cur.rowcount != 0:
                     self._alert_sms_phone_no = self.cur.fetchall()
                     for single_number in self._alert_sms_phone_no:
@@ -491,66 +500,69 @@ def MultiSensorAgent(config_path, **kwargs):
                 print("ERROR: {} fails to update cassandra database".format(agent_id))
                 print er
 
-        def updateStatus(self,states=None):
+        def updateStatus(self, states=None):
 
-            if states is not None:
-                print "got state change:",states
-                self.changed_variables = dict()
-                if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
-                    self.set_variable('status','ON' if states['status']==1 else 'OFF')
-                    self.changed_variables['status'] = log_variables['status']
-                if 'power' in states:
-                    if(self.get_variable('power') != states['power']):
-                        self.changed_variables['power'] = log_variables['power']
-                        self.set_variable('power',states['power'])
+            # if states is not None:
+            #     print "got state change:",states
+            #     self.changed_variables = dict()
+            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
+            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
+            #         self.changed_variables['status'] = log_variables['status']
+            #     if 'power' in states:
+            #         if(self.get_variable('power') != states['power']):
+            #             self.changed_variables['power'] = log_variables['power']
+            #             self.set_variable('power',states['power'])
+            #
+            #
+            #
+            #     with threadingLock:
+            #         try:
+            #             cassandraDB.insert(agent_id,self.variables,log_variables)
+            #             print "cassandra success"
+            #         except Exception as er:
+            #             print("ERROR: {} fails to update cassandra database".format(agent_id))
+            #             print er
+            #
+            #         self.updatePostgresDB()
 
-
-
-                with threadingLock:
-                    try:
-                        cassandraDB.insert(agent_id,self.variables,log_variables)
-                        print "cassandra success"
-                    except Exception as er:
-                        print("ERROR: {} fails to update cassandra database".format(agent_id))
-                        print er
-
-                    self.updatePostgresDB()
-
-            topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            topic = '/agent/ui/' + device_type + '/device_status_response/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
                 # headers_mod.DATE: now,
             }
-            if self.get_variable('power') is not None:
-                _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
-            else:
-                _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            # if self.get_variable('power') is not None:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
+            # else:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            _data = MultiSensor.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
+            print "message sent from multisensor agent with topic: {}".format(topic)
+            print "message sent from multisensor agent with data: {}".format(message)
 
         # 4. updateUIBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
+        @matching.match_exact('/ui/agent/' + device_type + '/device_status/' + _topic_Agent_UI_tail)
         def updateUIBehavior(self, topic, headers, message, match):
             print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"), topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            #reply message
+            # reply message
             self.updateStatus()
 
         # 5. deviceControlBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/update/'+_topic_Agent_UI_tail)
-        def deviceControlBehavior(self,topic,headers,message,match):
-            print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"),topic=topic)
+        @matching.match_exact('/ui/agent/' + device_type + '/update/' + _topic_Agent_UI_tail)
+        def deviceControlBehavior(self, topic, headers, message, match):
+            print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"), topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            #step1: change device status according to the receive message
+            # step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
                 setDeviceStatusResult = MultiSensor.setDeviceStatus(json.loads(message[0]))
-                #send reply message back to the UI
-                topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
+                # send reply message back to the UI
+                topic = '/agent/ui/' + device_type + '/update_response/' + _topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'
                 headers = {
                     'AgentID': agent_id,
@@ -565,15 +577,14 @@ def MultiSensorAgent(config_path, **kwargs):
                 print("The POST message is invalid, check status setting and try again\n")
                 message = 'failure'
             self.publish(topic, headers, message)
-            self.deviceMonitorBehavior() #Get device status, and get updated data
-
+            self.deviceMonitorBehavior()  # Get device status, and get updated data
 
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
                 _data = json.dumps(postmsg)
                 _data = json.loads(_data)
-                for k,v in _data.items():
+                for k, v in _data.items():
                     if k == 'status':
                         dataValidity = True
                         break
@@ -583,16 +594,16 @@ def MultiSensorAgent(config_path, **kwargs):
             return dataValidity
 
         # 6. deviceIdentifyBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/identify/'+_topic_Agent_UI_tail)
-        def deviceIdentifyBehavior(self,topic,headers,message,match):
-            print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"),topic=topic)
+        @matching.match_exact('/ui/agent/' + device_type + '/identify/' + _topic_Agent_UI_tail)
+        def deviceIdentifyBehavior(self, topic, headers, message, match):
+            print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"), topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            #step1: change device status according to the receive message
+            # step1: change device status according to the receive message
             identifyDeviceResult = MultiSensor.identifyDevice()
-            #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
-            #step2: send reply message back to the UI
-            topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
+            # TODO need to do additional checking whether the device setting is actually success!!!!!!!!
+            # step2: send reply message back to the UI
+            topic = '/agent/ui/identify_response/' + device_type + '/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -605,15 +616,16 @@ def MultiSensorAgent(config_path, **kwargs):
                 message = 'failure'
             self.publish(topic, headers, message)
 
-
     Agent.__name__ = 'MultiSensorAgent'
     return Agent(**kwargs)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     utils.default_main(MultiSensorAgent,
                        description='MultiSensor agent',
                        argv=argv)
+
 
 if __name__ == '__main__':
     # Entry point for script

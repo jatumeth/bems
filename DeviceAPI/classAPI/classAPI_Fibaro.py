@@ -62,7 +62,7 @@ class API:
         self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
         self.only_white_bulb = None
         # to initialize the only white bulb value
-        self.getDeviceStatus()
+        # self.getDeviceStatus()
     def renewConnection(self):
         pass
 
