@@ -14,7 +14,7 @@
     "device_monitor_time": 20, 
     "macaddress": "221445K1200138",
     "model": "FAN123",
-    "type": "Fanagent",
+    "type": "fan",
     "vendor": "Hitari",
     "zone_id": 999
 }

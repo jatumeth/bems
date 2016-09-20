@@ -146,6 +146,11 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/FanAgent/
 volttron-pkg configure /tmp/volttron_wheels/fanagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1FN221445K1200138.launch.json
 volttron-ctl install 1FN221445K1200138=/tmp/volttron_wheels/fanagent-0.1-py2-none-any.whl
 
+# Run Weather
+volttron-pkg package ~/workspace/bemoss_os/Agents/WeatherAgent/
+volttron-pkg configure /tmp/volttron_wheels/weatheragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/WeatherAgent/1WE221445K1200132.launch.json
+volttron-ctl install 1WE221445K1200132=/tmp/volttron_wheels/weatheragent-0.1-py2-none-any.whl
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
