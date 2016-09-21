@@ -92,12 +92,18 @@ def parse_resultset(variables, data_point, result_set):
 
 
 def integrate_power(AgentID, variable, start_time, end_time):
+    # time_now = datetime.datetime.now()
+    # end_time = time_now.replace(day=20, hour=17, minute=59, second=59)
+    # start_time = time_now.replace(day=20, hour=0, minute=00, second=0)
+    # # start_time = end_time.replace(hour=13)
+
     try:
         data_points, rs = retrieve(AgentID, vars=['time', str(variable)], startTime=start_time, endTime=end_time)
+        # print rs
         if (len(rs)):
             try:
                 time, data = parse_resultset(data_points, str(variable), rs)
-                wattsec = scipy.integrate.simps(data, time)
+                wattsec = scipy.integrate.simps(data, time, even='first')
                 energy_kWh = wattsec / (3600 * 1000 * 1000)
                 result = True
             except:
@@ -105,7 +111,7 @@ def integrate_power(AgentID, variable, start_time, end_time):
                 result = False
         else:
             energy_kWh = 0
-            result = False
+            result = True
     except:
         energy_kWh = 0
         result = False
@@ -120,39 +126,51 @@ def energy_calculate(AgentID, parameter, date):
         >> time_now = datetime.datetime.now()
         >> date = time_now.replace(hour=23, minute=59, second=59)'''
     data = {}
-    start_time = date.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_time = date.replace(hour=23, minute=59, second=59, microsecond=599999)
-    weekday = start_time.weekday()
-    if (weekday == 5) | (weekday == 6) | (weekday == 7):  # provide "weekday = 7" for holiday rate
-        data['daily_energy'], result = integrate_power(AgentID, parameter, start_time, end_time)
-        if result is True:
-            data['daily_bill'] = data['daily_energy'] * OFFPEAK_RATE
-        else:
-            data['daily_energy'] = 0
-            data['daily_bill'] = 0
-            return data, True
+    weekday = date.weekday()
+
+    # Off Peak Period 1  --- 0:00 - 09:00
+    end_time = date.replace(hour=9, minute=0, second=0)
+    start_time = date.replace(hour=0, minute=0, second=0)
+    data['daily_energy_offpeak1'], result = integrate_power(str(AgentID), str(parameter), start_time, end_time)
+    if result is True:
+        data['daily_bill_offpeak1'] = data['daily_energy_offpeak1'] * OFFPEAK_RATE
     else:
-        # Off Peak Period 1  --- 0:00 - 09:00
-        end_time = date.replace(hour=9, minute=0, second=0)
-        start_time = date.replace(hour=0, minute=0, second=0)
-        data['daily_energy_offpeak1'], result = integrate_power(str(AgentID), str(parameter), start_time, end_time)
+        data['daily_energy'] = 0
+        data['daily_bill'] = 0
+        return data, True
+
+    if (date > end_time):
+        # Peak Period --- 09:00 - 15:00
+        end_time = date.replace(hour=15, minute=0, second=0)
+        start_time = date.replace(hour=9, minute=0, second=1)
+        # print end_time
+        # print start_time
+        data['daily_energy_peak1'], result = integrate_power(AgentID, parameter, start_time, end_time)
         if result is True:
-            data['daily_bill_offpeak1'] = data['daily_energy_offpeak1'] * OFFPEAK_RATE
+            if (weekday == 5) | (weekday == 6) | (weekday == 7):
+                data['daily_bill_peak1'] = data['daily_energy_peak1'] * OFFPEAK_RATE
+            else:
+                data['daily_bill_peak1'] = data['daily_energy_peak1'] * PEAK_RATE
         else:
-            data['daily_energy'] = 0
-            data['daily_bill'] = 0
+            data['daily_energy'] = data['daily_energy_offpeak1']
+            data['daily_bill'] = data['daily_bill_offpeak1']
             return data, True
 
         if (date > end_time):
-            # Peak Period --- 09:00 - 22:00
+            # Peak Period --- 15:00 - 22:00
             end_time = date.replace(hour=22, minute=0, second=0)
-            start_time = date.replace(hour=9, minute=0, second=1)
-            data['daily_energy_peak'], result = integrate_power(AgentID, parameter, start_time, end_time)
+            start_time = date.replace(hour=15, minute=0, second=1)
+            # print end_time
+            # print start_time
+            data['daily_energy_peak2'], result = integrate_power(AgentID, parameter, start_time, end_time)
             if result is True:
-                data['daily_bill_peak'] = data['daily_energy_peak'] * PEAK_RATE
+                if (weekday == 5) | (weekday == 6) | (weekday == 7):
+                    data['daily_bill_peak1'] = data['daily_energy_peak1'] * OFFPEAK_RATE
+                else:
+                    data['daily_bill_peak2'] = data['daily_energy_peak2'] * PEAK_RATE
             else:
-                data['daily_energy'] = ['daily_energy_offpeak1']
-                data['daily_bill'] = data['daily_bill_offpeak1']
+                data['daily_energy'] = data['daily_energy_offpeak1'] + data['daily_energy_peak1']
+                data['daily_bill'] = data['daily_bill_offpeak1'] + data['daily_bill_peak1']
                 return data, True
 
             if (date >= end_time):
@@ -163,23 +181,21 @@ def energy_calculate(AgentID, parameter, date):
                 if result is True:
                     data['daily_bill_offpeak2'] = data['daily_energy_offpeak2'] * OFFPEAK_RATE
                 else:
-                    data['daily_energy'] = data['daily_energy_offpeak1'] + data['daily_energy_peak']
-                    data['daily_bill'] = data['daily_bill_offpeak1'] + data['daily_bill_peak']
+                    data['daily_energy'] = data['daily_energy_offpeak1'] + data['daily_energy_peak1'] + data['daily_energy_peak2']
+                    data['daily_bill'] = data['daily_bill_offpeak1'] + data['daily_bill_peak1'] + data['daily_bill_peak2']
                     return data, True
             else:
                 data['daily_energy_offpeak2'] = 0
                 data['daily_bill_offpeak2'] = 0
 
-        else:
-            data['daily_energy_peak'] = 0
-            data['daily_bill_peak'] = 0
-            data['daily_energy_offpeak2'] = 0
-            data['daily_bill_offpeak2'] = 0
-        # sum all period
-        data['daily_energy'] = data['daily_energy_peak'] + data['daily_energy_offpeak1'] + data[
-            'daily_energy_offpeak2']
-        data['daily_bill'] = data['daily_bill_peak'] + data['daily_bill_offpeak1'] + data[
-            'daily_bill_offpeak2']
+    else:
+        data['daily_energy_peak'] = 0
+        data['daily_bill_peak'] = 0
+        data['daily_energy_offpeak2'] = 0
+        data['daily_bill_offpeak2'] = 0
+    # sum all period
+    data['daily_energy'] = data['daily_energy_peak1'] + data['daily_energy_peak2'] + data['daily_energy_offpeak1'] + data['daily_energy_offpeak2']
+    data['daily_bill'] = data['daily_bill_peak1'] + data['daily_bill_peak2'] + data['daily_bill_offpeak1'] + data['daily_bill_offpeak2']
     return data, result
 
 
@@ -392,6 +408,16 @@ def last_day_usage(end_time):
 
 if __name__ == '__main__':
     print ("test")
+    end_time = datetime.datetime.now()
+    # start_time = end_time.replace(hour=13)
+    start_time = end_time.replace(day=20, hour=23, minute=59, second=59)
+
+    # data_points, rs = retrieve('3WIS221445K1200321', vars=['time', 'power', 'status'], startTime=start_time, endTime=end_time)
+    # print rs
+
+    EV_data = daily_energy_calculate("load", start_time)
+    print EV_data
+
     # annual_load_energy, annual_solar_energy = annual_energy_calculate()
     # print annual_load_energy
     # print annual_solar_energy
