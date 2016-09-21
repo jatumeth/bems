@@ -8,10 +8,14 @@ from volttron.platform.agent import utils, matching
 from volttron.platform.messaging import headers as headers_mod
 import settings
 import json
+import datetime
 import random
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
+
+OFFPEAK_RATE = 2.6369
+PEAK_RATE = 5.7982
 
 publish_periodic = 5
 
@@ -55,7 +59,7 @@ class GridAppAgent(PublishMixin, BaseAgent):
         HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
         '''
         topic = "/agent/ui/dashboard"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
+        now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
@@ -63,7 +67,19 @@ class GridAppAgent(PublishMixin, BaseAgent):
             'data_source': "gridApp"
         }
         # ***** algorithm here ******
-        current_electricity_price = round(random.uniform(3.0,4.0),2)
+        time_now = datetime.datetime.now()
+        weekday = time_now.weekday()
+        start_peak_period = time_now.replace(hour=9, minute=0, second=0, microsecond=1)
+        end_peak_period = time_now.replace(hour=22, minute=0, second=0, microsecond=0)
+
+        if (weekday == 5) | (weekday == 6) | (weekday == 7):
+            current_electricity_price = round(OFFPEAK_RATE, 2)
+        else:
+            if (time_now >= start_peak_period) & (time_now <= end_peak_period):
+                current_electricity_price = round(PEAK_RATE, 2)
+            else:
+                current_electricity_price = round(OFFPEAK_RATE, 2)
+
         message = json.dumps({'current_electricity_price': current_electricity_price})
         self.publish(topic, headers, message)
         print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
