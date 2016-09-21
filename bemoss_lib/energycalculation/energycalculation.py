@@ -36,6 +36,7 @@ log_variables = {'load_energy': 'double', 'solar_energy': 'double', 'load_bill':
 def parse_resultset(variables, data_point, result_set):
     x = [[lst[variables.index('time')], lst[variables.index(data_point)] + 0.0]
          for lst in result_set if lst[variables.index(data_point)] is not None]
+    print x
     newTime = []
     checkEle = x[0][0]
     newTime.append(checkEle)
@@ -92,8 +93,11 @@ def parse_resultset(variables, data_point, result_set):
 
 
 def integrate_power(AgentID, variable, start_time, end_time):
+    print start_time
+    print end_time
     try:
         data_points, rs = retrieve(AgentID, vars=['time', str(variable)], startTime=start_time, endTime=end_time)
+        # print rs
         if (len(rs)):
             try:
                 time, data = parse_resultset(data_points, str(variable), rs)
@@ -105,7 +109,7 @@ def integrate_power(AgentID, variable, start_time, end_time):
                 result = False
         else:
             energy_kWh = 0
-            result = False
+            result = True
     except:
         energy_kWh = 0
         result = False
@@ -147,11 +151,13 @@ def energy_calculate(AgentID, parameter, date):
             # Peak Period --- 09:00 - 22:00
             end_time = date.replace(hour=22, minute=0, second=0)
             start_time = date.replace(hour=9, minute=0, second=1)
+            # print end_time
+            # print start_time
             data['daily_energy_peak'], result = integrate_power(AgentID, parameter, start_time, end_time)
             if result is True:
                 data['daily_bill_peak'] = data['daily_energy_peak'] * PEAK_RATE
             else:
-                data['daily_energy'] = ['daily_energy_offpeak1']
+                data['daily_energy'] = data['daily_energy_offpeak1']
                 data['daily_bill'] = data['daily_bill_offpeak1']
                 return data, True
 
@@ -392,6 +398,16 @@ def last_day_usage(end_time):
 
 if __name__ == '__main__':
     print ("test")
+    end_time = datetime.datetime.now()
+    # start_time = end_time.replace(hour=13)
+    start_time = end_time.replace(day=20, hour=23, minute=59, second=59)
+
+    # data_points, rs = retrieve('3WIS221445K1200321', vars=['time', 'power', 'status'], startTime=start_time, endTime=end_time)
+    # print rs
+
+    EV_data = daily_energy_calculate("load", start_time)
+    print EV_data
+
     # annual_load_energy, annual_solar_energy = annual_energy_calculate()
     # print annual_load_energy
     # print annual_solar_energy
