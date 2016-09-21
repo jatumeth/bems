@@ -126,6 +126,8 @@ DATABASES = {
         'TABLE_Inverter': 'Inverter',
         'TABLE_Fan': 'Fan',
         'TABLE_Weather': 'Weather',
+        'TABLE_Sonos': 'Sonos',
+
     }
 }
 
