@@ -43,7 +43,6 @@ def parse_resultset(variables, data_point, result_set):
     newData = []
     checkData = x[0][1]
     newData.append(x[0][1])
-    count = 0
 
     for lst in x:
         if (lst[0] > checkEle):
@@ -76,7 +75,6 @@ def parse_resultset(variables, data_point, result_set):
         #     checkData = lst[1]
         checkEle = lst[0]
         checkData = lst[1]
-        count +=1
 
     del newTime[0]
     del newData[0]
@@ -187,10 +185,16 @@ def energy_calculate(AgentID, parameter, date):
             else:
                 data['daily_energy_offpeak2'] = 0
                 data['daily_bill_offpeak2'] = 0
-
+        else:
+            data['daily_energy_peak2'] = 0
+            data['daily_bill_peak2'] = 0
+            data['daily_energy_offpeak2'] = 0
+            data['daily_bill_offpeak2'] = 0
     else:
-        data['daily_energy_peak'] = 0
-        data['daily_bill_peak'] = 0
+        data['daily_energy_peak1'] = 0
+        data['daily_bill_peak1'] = 0
+        data['daily_energy_peak2'] = 0
+        data['daily_bill_peak2'] = 0
         data['daily_energy_offpeak2'] = 0
         data['daily_bill_offpeak2'] = 0
     # sum all period
@@ -408,15 +412,19 @@ def last_day_usage(end_time):
 
 if __name__ == '__main__':
     print ("test")
-    end_time = datetime.datetime.now()
-    # start_time = end_time.replace(hour=13)
-    start_time = end_time.replace(day=20, hour=23, minute=59, second=59)
-
+    # end_time = datetime.datetime.now()
+    # # start_time = end_time.replace(hour=13)
+    # start_time = end_time.replace(hour=14, minute=00, second=59)
+    # end_time = end_time.replace(hour=17, minute=30)
     # data_points, rs = retrieve('3WIS221445K1200321', vars=['time', 'power', 'status'], startTime=start_time, endTime=end_time)
-    # print rs
+    # x, y = parse_resultset(data_points, 'power', rs)
+    # print y
+    #
+    # a, b = parse_resultset(data_points, 'status', rs)
+    # print b
 
-    EV_data = daily_energy_calculate("load", start_time)
-    print EV_data
+    # EV_data = daily_energy_calculate("load", start_time)
+    # print EV_data
 
     # annual_load_energy, annual_solar_energy = annual_energy_calculate()
     # print annual_load_energy
