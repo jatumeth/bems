@@ -124,7 +124,10 @@ class API:
 
         conve_json = json.loads(data)
         self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]))
+        if str(conve_json["status"]) == "on":
+            self.set_variable('status', "ON")
+        else:
+            self.set_variable('status', "OFF")
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('type', str(conve_json["type"]))
 
