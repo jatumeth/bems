@@ -63,7 +63,10 @@ class API:
         # print _url_append
         _theJSON = json.loads(r.content)
         # print _theJSON
-        self.set_variable('status', _theJSON[0]["value"])
+        if  int(_theJSON[0]["value"]) == 0 :
+            self.set_variable('status', "OFF")
+        elif int(_theJSON[0]["value"]) == 1:
+            self.set_variable('status', "ON")
         self.set_variable('current_temperature', _theJSON[1]["value"])
         self.set_variable('set_temperature', _theJSON[2]["value"])
         self.set_variable('current_humidity', _theJSON[3]["value"])
@@ -174,12 +177,12 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
                    address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
-                   device_id="BedroomAir")
+                   device_id="LivingroomAir1")
 
     # print Airsaijo.variables
 
     Airsaijo.getDeviceStatus()
-    Airsaijo.setDeviceStatus({"status":"OFF"})
+    Airsaijo.setDeviceStatus({"status": "ON"})
     # Airsaijo.getDeviceStatus()
     # Airsaijo.setDeviceStatus({"status": "ON", "temp" : "23"})
     #time.sleep(10)
