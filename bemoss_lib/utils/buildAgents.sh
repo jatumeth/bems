@@ -153,7 +153,7 @@ volttron-ctl install 1WE221445K1200132=/tmp/volttron_wheels/weatheragent-0.1-py2
 
 # Run Sonos
 volttron-pkg package ~/workspace/bemoss_os/Agents/SonosAgent/
-volttron-pkg configure /tmp/volttron_wheels/sonosagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/sonosAgent/1SONOS445K1200137.launch.json
+volttron-pkg configure /tmp/volttron_wheels/sonosagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/SonosAgent/1SONOS445K1200137.launch.json
 volttron-ctl install 1SONOS445K1200137=/tmp/volttron_wheels/sonosagent-0.1-py2-none-any.whl
 
 
