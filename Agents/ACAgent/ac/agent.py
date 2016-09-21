@@ -321,7 +321,7 @@ def ACAgent(config_path, **kwargs):
             #     print 'nothing changed'
             #     return
             #
-            # self.updateStatus()
+            self.updateStatus()
             # #step6: debug agent knowledge
             # if debug_agent == True:
             #     print("printing agent's knowledge")
@@ -503,28 +503,28 @@ def ACAgent(config_path, **kwargs):
 
         def updateStatus(self, states=None):
 
-            if states is not None:
-                print "got state change:",states
-                self.changed_variables = dict()
-                if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
-                    self.set_variable('status','ON' if states['status']==1 else 'OFF')
-                    self.changed_variables['status'] = log_variables['status']
-                if 'power' in states:
-                    if(self.get_variable('power') != states['power']):
-                        self.changed_variables['power'] = log_variables['power']
-                        self.set_variable('power',states['power'])
-
-
-
-                with threadingLock:
-                    try:
-                        cassandraDB.insert(agent_id,self.variables,log_variables)
-                        print "cassandra success"
-                    except Exception as er:
-                        print("ERROR: {} fails to update cassandra database".format(agent_id))
-                        print er
-
-                    self.updatePostgresDB()
+            # if states is not None:
+            #     print "got state change:",states
+            #     self.changed_variables = dict()
+            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
+            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
+            #         self.changed_variables['status'] = log_variables['status']
+            #     if 'power' in states:
+            #         if(self.get_variable('power') != states['power']):
+            #             self.changed_variables['power'] = log_variables['power']
+            #             self.set_variable('power',states['power'])
+            #
+            #
+            #
+            #     with threadingLock:
+            #         try:
+            #             cassandraDB.insert(agent_id,self.variables,log_variables)
+            #             print "cassandra success"
+            #         except Exception as er:
+            #             print("ERROR: {} fails to update cassandra database".format(agent_id))
+            #             print er
+            #
+            #         self.updatePostgresDB()
 
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -533,13 +533,20 @@ def ACAgent(config_path, **kwargs):
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
                 # headers_mod.DATE: now,
             }
-            if self.get_variable('power') is not None:
-                _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
-            else:
-                _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            # if self.get_variable('power') is not None:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
+            # else:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            # message = json.dumps(_data)
+            # message = message.encode(encoding='utf_8')
+            # self.publish(topic, headers, message)
+
+            _data = AC.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
+            print "message sent from multisensor agent with topic: {}".format(topic)
+            print "message sent from multisensor agent with data: {}".format(message)
 
         # 4. updateUIBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
