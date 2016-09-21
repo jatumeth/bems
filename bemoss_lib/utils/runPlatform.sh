@@ -90,7 +90,6 @@ sleep 2
 #volttron-ctl start --tag 1WE221445K1200132
 #sleep 2
 
-
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish
