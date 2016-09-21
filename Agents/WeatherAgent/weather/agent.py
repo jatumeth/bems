@@ -227,7 +227,6 @@ def WeatherAgent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-            print "deviceMonitorBehavior"
             try:
                 Weather.getDeviceStatus()
             except Exception as er:
@@ -521,9 +520,26 @@ def WeatherAgent(config_path, **kwargs):
             _data = Weather.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
-            self.publish(topic, headers, message)
+            received_message = json.loads(message)
+
+            del received_message["db_password"]
+            del received_message["connection_renew_interval"]
+            del received_message["config_path"]
+            del received_message["offline_count"]
+            del received_message["macaddress"]
+            del received_message["db_database"]
+            del received_message["db_user"]
+            del received_message["db_host"]
+            del received_message["model"]
+            del received_message["agent_id"]
+            del received_message["db_port"]
+            del received_message["address"]
+            received_message = str(received_message)
+            self.publish(topic, headers, received_message)
+            print "massange-----------------------------"
             print "message sent from multisensor agent with topic: {}".format(topic)
-            print "message sent from multisensor agent with data: {}".format(message)
+            print "message sent from multisensor agent with data: {}".format(received_message)
+            print "massange---------------------end--------"
 
         # 4. updateUIBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
