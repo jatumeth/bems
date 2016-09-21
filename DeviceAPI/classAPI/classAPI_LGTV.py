@@ -170,6 +170,7 @@ class API:
         msgToDevice = {}
         if 'status' in postmsg.keys():
             msgToDevice['command'] = str(postmsg['status'].lower())
+            msgToDevice['command'] = "on"
         return msgToDevice
 
     # ----------------------------------------------------------------------
