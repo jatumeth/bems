@@ -12,6 +12,7 @@ import random
 from bemoss_lib.energycalculation.energycalculation import day_energy_bill_calculation
 from bemoss_lib.energycalculation.energycalculation import monthly_energy_bill_calculation
 from bemoss_lib.energycalculation.energycalculation import annual_energy_calculate
+from bemoss_lib.energycalculation.energycalculation import last_day_usage
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -89,7 +90,8 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         last_day = timedelta.replace(hour=23, minute=59, second=59)
 
         daily_data = day_energy_bill_calculation(self.check_daily_data, time_now)
-        last_day_data = day_energy_bill_calculation(self.check_daily_data, last_day)
+        last_day_data = last_day_usage(last_day)
+
 
         daily_energy_usage = round(daily_data['daily_energy'], 2)
         daily_electricity_bill = round(daily_data['daily_bill'], 2)
@@ -98,14 +100,13 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         daily_bill_plug = round(daily_data['daily_plug_bill'], 2)
         daily_bill_EV = round(daily_data['daily_EV_bill'], 2)
 
-        last_day_energy_usage = round(last_day_data['daily_energy'], 2)
-        last_day_bill = round(last_day_data['daily_bill'], 2)
+        last_day_energy_usage = round(last_day_data['last_day_energy'], 2)
+        last_day_bill = round(last_day_data['last_day_bill'], 2)
         last_day_bill_compare = round(daily_electricity_bill - last_day_bill, 2)
-        last_day_bill_light = round(last_day_data['daily_light_bill'], 2)
-        last_day_bill_AC = round(last_day_data['daily_AC_bill'], 2)
-        last_day_bill_plug = round(last_day_data['daily_plug_bill'], 2)
-        last_day_bill_EV = round(last_day_data['daily_EV_bill'], 2)
-
+        last_day_bill_light = round(last_day_data['last_day_light_bill'], 2)
+        last_day_bill_AC = round(last_day_data['last_day_AC_energy'], 2)
+        last_day_bill_plug = round(last_day_data['last_day_plug_bill'], 2)
+        last_day_bill_EV = round(last_day_data['last_day_EV_bill'], 2)
 
         monthly_data = monthly_energy_bill_calculation("Current")
         last_month_data = monthly_energy_bill_calculation("Last")
@@ -174,7 +175,6 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         else:
             netzero_condition = True
 
-
         message = json.dumps({"monthly_electricity_bill": monthly_electricity_bill,
                               "last_month_bill": last_month_bill,
                               "last_month_bill_compare": last_month_bill_compare,
@@ -211,6 +211,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         PowermeterAppAgent.check_daily_data = daily_data
         PowermeterAppAgent.check_last_day_data = last_day_data
         print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
