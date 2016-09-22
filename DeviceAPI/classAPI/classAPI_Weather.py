@@ -195,6 +195,7 @@ def main():
 
     url = 'http://api.wunderground.com/api/380538e19b591277/geolookup/conditions/q/Thailand/Bangkok.json'
     Weather = API(model='Weather',type='Weather',api='API3',address=url,username='Teerapong', agent_id='WeatherAgent')
+    Weather.getDeviceStatus()
 
 
 if __name__ == "__main__": main()

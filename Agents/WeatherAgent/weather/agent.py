@@ -500,7 +500,8 @@ def WeatherAgent(config_path, **kwargs):
                 #
                 #     self.updatePostgresDB()
 
-            topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            # topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            topic = '/agent/ui/Weathers/'
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -534,12 +535,12 @@ def WeatherAgent(config_path, **kwargs):
             del received_message["agent_id"]
             del received_message["db_port"]
             del received_message["address"]
-            received_message = str(received_message)
+            received_message = json.dumps(received_message)
             self.publish(topic, headers, received_message)
-            print "massange-----------------------------"
+            print "massage-----------------------------"
             print "message sent from multisensor agent with topic: {}".format(topic)
             print "message sent from multisensor agent with data: {}".format(received_message)
-            print "massange---------------------end--------"
+            print "massage---------------------end--------"
 
         # 4. updateUIBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
