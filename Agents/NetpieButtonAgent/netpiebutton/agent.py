@@ -129,6 +129,11 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def subscription(self, topic, message):
         logging.debug(topic + " " + message)
         self.message = message
+        print "self.message: {}".format(self.message)
+        if (self.message == '1'):
+            self.publish_heartbeat()
+        else :
+            print "pass"
 
     def disconnect(self):
         logging.debug("disconnect is work")
@@ -151,7 +156,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     # Demonstrate periodic decorator and settings access
     # @periodic(settings.HEARTBEAT_PERIOD)
-    @periodic(2)
+    # @periodic(10)
     def publish_heartbeat(self):
         '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
 
@@ -176,31 +181,47 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # TODO this is example how to write an app to control Refrigerator
         # print "control: {}".format(control)
         if (self.message == '1'):
-            topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+            # topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
             now = datetime.utcnow().isoformat(' ') + 'Z'
+            # headers = {
+            #     'AgentID': self._agent_id,
+            #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            #     headers_mod.DATE: now,
+            # }
+            # message = json.dumps({"status": "ON", "color": [255, 0, 0]})
+            # self.publish(topic, headers, message)
+            # print ("HUE turn ON")
+            # print ("topic{}".format(topic))
+            # print ("message{}".format(message))
+            # self.message = 0
+
+            # TODO publish to dashboard
+            topic = '/agent/ui/dashboard'
             headers = {
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
                 headers_mod.DATE: now,
+                'data_source': "netpiebutton",
             }
-            message = json.dumps({"status": "ON", "color": [255, 0, 0]})
+            message = json.dumps({"event": "dr", "status": "enable"})
             self.publish(topic, headers, message)
-            print ("HUE turn ON")
-            print ("topic{}".format(topic))
-            print ("message{}".format(message))
+            print ("sent message to UI for DR modal trigger")
+            print ("topic {}".format(topic))
+            print ("headers {}".format(headers))
+            print ("message {}".format(message))
             self.message = 0
         else :
             # TODO this is example how to write an app to control Lighting
-            topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
-            now = datetime.utcnow().isoformat(' ') + 'Z'
-            headers = {
-                'AgentID': self._agent_id,
-                headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-                headers_mod.DATE: now,
-            }
-            message = json.dumps({"status": "ON", "color": [0, 0, 255]})
-            self.publish(topic, headers, message)
-            print ("HUE turn OFF")
+            # topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+            # now = datetime.utcnow().isoformat(' ') + 'Z'
+            # headers = {
+            #     'AgentID': self._agent_id,
+            #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            #     headers_mod.DATE: now,
+            # }
+            # message = json.dumps({"status": "ON", "color": [0, 0, 255]})
+            # self.publish(topic, headers, message)
+            print ("NO MESSAGE FROM NETPIE")
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
