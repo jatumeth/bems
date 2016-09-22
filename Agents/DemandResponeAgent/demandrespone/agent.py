@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- {{{
 # vim: set fenc=utf-8 ft=python sw=4 ts=4 sts=4 et:
 #
-# Copyright (c) 2013, Battelle Memorial Institute
+# Copyright (c) 2013, Battelle Memorial Instituate
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -84,14 +84,18 @@ class ListenerAgent(PublishMixin, BaseAgent):
         super(ListenerAgent, self).__init__(**kwargs)
         self.config = utils.load_config(config_path)
 
+
+
     def setup(self):
         # Demonstrate accessing a value from the config file
         _log.info(self.config['message'])
         self._agent_id = self.config['agentid']
+
+        self.modenow = "COMFORT"
         # test control air
         # self.done_control = False
         # self.publish_test()
-        self.publish_BaseCase()        # air on temp 20,  light on brightness 100,    plug EV on
+        # self.publish_BaseCase()        # air on temp 20,  light on brightness 100,    plug EV on
         # self.publish_DRCase1()         # air on temp 27,  light on brightness 50,     plug EV on
         # self.publish_DRCase2()         # air off,         light on brightness 50,     plug EV on
         # self.publish_DRCase3()         # air off,         light on brightness 50,     plug EV off
@@ -133,122 +137,134 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #         print "fail"
 
     #
-    @matching.match_all
-    def on_match(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
-        _log.debug("Topic: {topic}, Headers: {headers}, "
-                         "Message: {message}".format(
-                         topic=topic, headers=headers, message=message))
-        print("topic{}".format(topic))
-        print("message{}".format(message))
-
-    # @matching.match_start("/ui/agent/")
+    # @matching.match_all
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
     #     _log.debug("Topic: {topic}, Headers: {headers}, "
     #                      "Message: {message}".format(
     #                      topic=topic, headers=headers, message=message))
-    #     print("")
+    #     print("topic{}".format(topic))
+    #     print("message{}".format(message))
 
+    @matching.match_exact('/ui/agent/select_mode/')
+    def on_match(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        # _log.debug("Topic: {topic}, Headers: {headers}, "
+        #            "Message: {message}".format(
+        #     topic=topic, headers=headers, message=message))
+        print "MODE---------"
+        print "Topic: {}".format(topic)
+        print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
+        event = json.loads(message[0])
+        print type(event)
+        print event
+        event_status = event["status"]
+        event_mode = event["mode"]
+        print "event_status: {} ".format(event_status)
+        print "event_mode: {} ".format(event_mode)
+
+        if (event_mode == "comfort"):
+            self.publish_Comfort()
+        elif (event_mode == "eco"):
+            self.publish_ECO()
+        elif (event_mode == "dr"):
+            self.publish_DR()
+        print"---------------------------------------------------"
+
+
+
+    # @matching.match_start("/ui/agent/mode/")
+    # def on_match(self, topic, headers, message, match):
+    #     '''Use match_all to receive all messages and print them out.'''
+    #     _log.debug("Topic: {topic}, Headers: {headers}, "
+    #                      "Message: {message}".format(
+    #                      topic=topic, headers=headers, message=message))
+    #     print("----------------------++++++++++++++++-------------------")
+    #     print type(message)
+    #     massage = message[0]
+    #     message = json.loads(message)
+    #     print message[0]
+    #     event = message[0]
+    #     event_status = event["status"]
+    #     event_mode = event["mode"]
+    #     print "event_status: {} ".format(event_status)
+    #     print "event_mode: {} ".format(event_mode)
+        # massage = str(message["mode"])
+        # print massage
+        #
+        # if self.modenow == message["home_mode"]:
+        #     print "same mode"
+        # else:
+        #     print "change mode"
+        #     if message["home_mode"] == "DR":  #", "ECO", "COMFORT"]
+        #         # dr = self.publish_BaseCase()
+        #         print "DR"
+        #     elif message["home_mode"] == "ECO":
+        #         # eco = self.publish_ECO()
+        #         print "ECO"
+        #     elif message["home_mode"] == "COMFORT":
+        #         # comfort = self.publish_Comfort()
+        #          print "COMFORT"
+        #     else:
+        #         print "not match"
+        #
+        # self.modenow = message["home_mode"]
     # Demonstrate periodic decorator and settings access
     # @periodic(settings.HEARTBEAT_PERIOD)
     # @periodic(2)
     # def publish_test(self):
     #     self.HUE_Color()
 
-    def publish_BaseCase(self):
-
-        self.HUE_ON()
-        time.sleep(15)
-        self.AC1_BASE()
-        time.sleep(15)
-        self.AC2_BASE()
-        time.sleep(15)
-        self.AC3_BASE()
-        time.sleep(15)
-        self.Plug_ON()
-
-    def publish_DRCase1(self):
-        self.AC1_ON()
-        time.sleep(15)
-        self.AC2_ON()
-        time.sleep(15)
-        self.AC3_ON()
-        time.sleep(15)
-        self.HUE_DIM(50)
-        print "brightness"
-        time.sleep(15)
-        self.Plug_ON()
-
-    def publish_DRCase2(self):
+    # total Load 1100 kW
+    def publish_DR(self):
         self.AC1_OFF()
-        time.sleep(15)
+        time.sleep(5)
         self.AC2_OFF()
-        time.sleep(15)
+        time.sleep(5)
         self.AC3_OFF()
-        time.sleep(15)
-        self.HUE_DIM(50)
-        print "brightness"
-        time.sleep(15)
-        self.Plug_ON()
-
-    def publish_DRCase3(self):
-        self.AC1_OFF()
-        time.sleep(15)
-        self.AC2_OFF()
-        time.sleep(15)
-        self.AC3_OFF()
-        time.sleep(15)
-        self.HUE_DIM(50)
-        print "brightness "
-        time.sleep(15)
+        time.sleep(2)
+        self.FAN_ON()
+        time.sleep(2)
         self.Plug_OFF()
-        print "EV off"
-
-    def publish_DRCase4(self):
-        self.AC1_OFF()
-        time.sleep(15)
-        self.AC2_OFF()
-        time.sleep(15)
-        self.AC3_OFF()
-        time.sleep(15)
+        time.sleep(2)
+        self.TV_OFF()
+        time.sleep(2)
         self.HUE_OFF()
-        print "Light OFF"
-        time.sleep(15)
-        self.Plug_OFF()
-        print "EV OFF"
-        time.sleep(15)
-        self.AC1_OFF()
-
-
     #
-    def publish_DRCase5(self):
-        self.AC1_ON()
-        time.sleep(15)
-        self.AC2_ON()
-        time.sleep(15)
-        self.AC3_ON()
-        time.sleep(15)
-        self.HUE_ON()
-        print "Light ON"
-        time.sleep(15)
-        self.Plug_OFF()
-        print "EV OFF"
+    # total Load 1200 kW
+    def publish_ECO(self):
+        self.AC1_temp27()
+        time.sleep(5)
+        self.AC2_temp27()
+        time.sleep(5)
+        self.AC3_temp27()
+        time.sleep(2)
+        self.FAN_ON()
+        time.sleep(2)
+        self.Plug_ON()
+        time.sleep(2)
+        self.TV_ON()
+        time.sleep(2)
+        self.HUE_DIM(10)
+    #
+    # total Load 4500 kW
+    def publish_Comfort(self):
+        self.AC1_temp20()
+        time.sleep(5)
+        self.AC2_temp20()
+        time.sleep(5)
+        self.AC3_temp20()
+        time.sleep(2)
+        self.FAN_OFF()
+        time.sleep(2)
+        self.Plug_ON()
+        time.sleep(2)
+        self.TV_ON()
+        time.sleep(2)
+        self.HUE_Max()
 
-    def publish_DRCase6(self):
-        self.AC1_OFF()
-        time.sleep(15)
-        self.AC2_OFF()
-        time.sleep(15)
-        self.AC3_OFF()
-        time.sleep(15)
-        self.HUE_ON()
-        print "Light ON"
-        time.sleep(15)
-        self.Plug_OFF()
-        print "EV OFF"
-
-    def AC1_BASE(self):
+    def AC1_temp20(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -261,7 +277,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 20")
 
-    def AC2_BASE(self):
+    def AC2_temp20(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -274,7 +290,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.publish(topic, headers, message)
         print ("AC2 turned on : temp 20")
 
-    def AC3_BASE(self):
+    def AC3_temp20(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000003'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -287,8 +303,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print ("message{}".format(message))
         self.publish(topic, headers, message)
 
-    #
-    def AC1_ON(self):
+
+    def AC1_temp27(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -300,7 +316,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "ON", "temp": "27"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 27")
-    #
+
     def AC1_OFF(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
@@ -314,7 +330,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.publish(topic, headers, message)
         print ("AC1 turned off")
     #
-    def AC2_ON(self):
+    def AC2_temp27(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -340,7 +356,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.publish(topic, headers, message)
         print ("AC2 turned off")
 
-    def AC3_ON(self):
+    def AC3_temp27(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000003'
         now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -365,6 +381,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "OFF"})
         self.publish(topic, headers, message)
         print ("AC3 turned off")
+
     #
     def HUE_ON(self):
         # TODO this is example how to write an app to control Lighting
@@ -404,6 +421,19 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.DATE: now,
         }
         message = json.dumps({"color": [255, 255, 255], "status": "ON", "brightness": brightness})
+        self.publish(topic, headers, message)
+        print ("HUE DIM brightness")
+
+    def HUE_Max(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"color": [255, 255, 255], "status": "ON", "brightness": 100})
         self.publish(topic, headers, message)
         print ("HUE DIM brightness")
 
@@ -448,6 +478,62 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "OFF"})
         self.publish(topic, headers, message)
         print ("plug EV turn OFF")
+
+
+    def FAN_ON(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/fan/update/bemoss/999/1FN221445K1200138"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("FAN turn ON")
+
+
+    def FAN_OFF(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/fan/update/bemoss/999/1FN221445K1200138"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("FAN turn OFF")
+
+
+    def TV_ON(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/lgtvagent/update/bemoss/999/1LG221445K1200137"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("TV turn ON")
+
+
+    def TV_OFF(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/lgtvagent/update/bemoss/999/1LG221445K1200137"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("TV turn OFF")
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
