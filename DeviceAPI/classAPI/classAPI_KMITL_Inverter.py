@@ -120,7 +120,7 @@ class API:
     #method1: GET Open the port and read the data
     def getDeviceStatus(self):
         getDeviceStatusResult = True
-        filename = os.getcwd() + "/DeviceAPI/classAPI/InvConfig.csv"
+        filename = os.getcwd() + "/InvConfig.csv"
 
         _pointer = 0
         _step = 20
@@ -339,7 +339,7 @@ class API:
 
 #This main method will not be executed when this class is used as a module
 def main():
-    Inverter = API(model='VC1000',type='VAV',api='API',address='192.168.1.60:4')
+    Inverter = API(model='VC1000',type='VAV',api='API',address='192.168.1.60:4',)
 
     Inverter.getDeviceStatus()
     #Inverter.setDeviceStatus({"mode":"Po"})
