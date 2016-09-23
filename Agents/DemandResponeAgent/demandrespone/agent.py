@@ -78,12 +78,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
     heartbeat period specified in the settings module.
     '''
 
-    matching_topic = '/agent/ui/lighting/update_response/bemoss/999/2HUE0017881cab4b'
+    # matching_topic = '/agent/ui/lighting/update_response/bemoss/999/2HUE0017881cab4b'
 
     def __init__(self, config_path, **kwargs):
         super(ListenerAgent, self).__init__(**kwargs)
         self.config = utils.load_config(config_path)
-
+        self.mode = ''
 
 
     def setup(self):
@@ -91,60 +91,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
         _log.info(self.config['message'])
         self._agent_id = self.config['agentid']
 
-        self.modenow = "COMFORT"
-        # test control air
-        # self.done_control = False
-        # self.publish_test()
-        # self.publish_BaseCase()        # air on temp 20,  light on brightness 100,    plug EV on
-        # self.publish_DRCase1()         # air on temp 27,  light on brightness 50,     plug EV on
-        # self.publish_DRCase2()         # air off,         light on brightness 50,     plug EV on
-        # self.publish_DRCase3()         # air off,         light on brightness 50,     plug EV off
-        # self.publish_DRCase4()           # air off,         light off,                  plug EV off
-        # self.publish_DRCase5()         # air on temp 27,  light on brightness 100,    plug EV off
-        # self.publish_DRCase6()         # air off,         light on brightness 100,    plug EV off
-
-        # Always call the base class setup()
         super(ListenerAgent, self).setup()
-    #
-    # @matching.match_start(matching_topic)
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("topic{}".format(topic))
-    #     print ("message{}".format(message))
-    #     if (message[0] == "success"):
-    #         print "success na ja"
-    #         self.done_control = True
-    #     else:
-    #         self.done_control = False
-    #         print "fail"
-    #
-    # @matching.match_start('/agent/ui/airconditioner/')
-    # def on_match_ac(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                "Message: {message}".format(
-    #         topic=topic, headers=headers, message=message))
-    #     print("topic{}".format(topic))
-    #     print ("message{}".format(message))
-    #     if (message[0] == "success"):
-    #         print "success na ja"
-    #         self.done_control = True
-    #     else:
-    #         self.done_control = False
-    #         print "fail"
 
-    #
-    # @matching.match_all
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("topic{}".format(topic))
-    #     print("message{}".format(message))
+    def main(self):
+
+
+        print "-56---54"
+
+
 
     @matching.match_exact('/ui/agent/select_mode/')
     def on_match(self, topic, headers, message, match):
@@ -155,12 +109,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "MODE---------"
         print "Topic: {}".format(topic)
         print "Headers: {}".format(headers)
-        # print "Message: {}".format(message)
+        print "Message: {}".format(message)
         event = json.loads(message[0])
         print type(event)
         print event
         event_status = event["status"]
         event_mode = event["mode"]
+        self.mode = event["mode"]
         print "event_status: {} ".format(event_status)
         print "event_mode: {} ".format(event_mode)
 
@@ -171,99 +126,111 @@ class ListenerAgent(PublishMixin, BaseAgent):
         elif (event_mode == "dr"):
             self.publish_DR()
         print"---------------------------------------------------"
+        print self.mode
 
-
-
-    # @matching.match_start("/ui/agent/mode/")
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("----------------------++++++++++++++++-------------------")
-    #     print type(message)
-    #     massage = message[0]
-    #     message = json.loads(message)
-    #     print message[0]
-    #     event = message[0]
-    #     event_status = event["status"]
-    #     event_mode = event["mode"]
-    #     print "event_status: {} ".format(event_status)
-    #     print "event_mode: {} ".format(event_mode)
-        # massage = str(message["mode"])
-        # print massage
-        #
-        # if self.modenow == message["home_mode"]:
-        #     print "same mode"
-        # else:
-        #     print "change mode"
-        #     if message["home_mode"] == "DR":  #", "ECO", "COMFORT"]
-        #         # dr = self.publish_BaseCase()
-        #         print "DR"
-        #     elif message["home_mode"] == "ECO":
-        #         # eco = self.publish_ECO()
-        #         print "ECO"
-        #     elif message["home_mode"] == "COMFORT":
-        #         # comfort = self.publish_Comfort()
-        #          print "COMFORT"
-        #     else:
-        #         print "not match"
-        #
-        # self.modenow = message["home_mode"]
-    # Demonstrate periodic decorator and settings access
-    # @periodic(settings.HEARTBEAT_PERIOD)
-    # @periodic(2)
-    # def publish_test(self):
-    #     self.HUE_Color()
+    @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
+    def on_match1(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        _log.debug("Topic: {topic}, Headers: {headers}, "
+                   "Message: {message}".format(
+            topic=topic, headers=headers, message=message))
+        print "MultiSensor----------"
+        print "Topic: {}".format(topic)
+        print "Headers: {}".format(headers)
+        print "Message: {}".format(message)
+        received_message = json.loads(message[0])
+        self.illu = received_message["illuminance"]
+        print self.illu
+        print"--------------------------"
+        self.brightness = 100
+        if self.illu > 500:
+            self.brightness = 1
+        elif self.illu > 400:
+            self.brightness = 10
+        elif self.illu > 350:
+            self.brightness = 10
+        elif self.illu > 300:
+            self.brightness = 20
+        elif self.illu > 250:
+            self.brightness = 30
+        elif self.illu > 200:
+            self.brightness = 40
+        elif self.illu > 180:
+            self.brightness = 50
+        elif self.illu > 150:
+            self.brightness = 70
+        elif self.illu > 120:
+            self.brightness = 80
+        elif self.illu > 100:
+            self.brightness = 100
+        else:
+            self.brightness = 100
+        print self.brightness
+        print"******************************"
+        print self.mode
+        if(self.mode == "comfort"):
+            self.brightness = 100
+        else:
+            print"mode DR or ECO"
+        self.HUE_DIM(self.brightness)
 
     # total Load 1100 kW
     def publish_DR(self):
         self.AC1_OFF()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC1_OFF()
+        time.sleep(2)
         self.AC2_OFF()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC2_OFF()
+        time.sleep(2)
+        self.AC3_OFF()
+        time.sleep(2)
         self.AC3_OFF()
         time.sleep(2)
         self.FAN_ON()
         time.sleep(2)
         self.Plug_OFF()
         time.sleep(2)
-        self.TV_OFF()
-        time.sleep(2)
-        self.HUE_OFF()
+        self.HUE_DIM(self.brightness)
     #
     # total Load 1200 kW
     def publish_ECO(self):
         self.AC1_temp27()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC1_temp27()
+        time.sleep(2)
         self.AC2_temp27()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC2_temp27()
+        time.sleep(2)
+        self.AC3_temp27()
+        time.sleep(2)
         self.AC3_temp27()
         time.sleep(2)
         self.FAN_ON()
-        time.sleep(2)
         self.Plug_ON()
-        time.sleep(2)
-        self.TV_ON()
-        time.sleep(2)
-        self.HUE_DIM(10)
+        self.HUE_DIM(self.brightness)
     #
     # total Load 4500 kW
     def publish_Comfort(self):
+
         self.AC1_temp20()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC1_temp20()
+        time.sleep(2)
         self.AC2_temp20()
-        time.sleep(5)
+        time.sleep(2)
+        self.AC2_temp20()
+        time.sleep(2)
+        self.AC3_temp20()
+        time.sleep(2)
         self.AC3_temp20()
         time.sleep(2)
         self.FAN_OFF()
-        time.sleep(2)
         self.Plug_ON()
-        time.sleep(2)
-        self.TV_ON()
-        time.sleep(2)
         self.HUE_Max()
-
+        # print self.mode
     def AC1_temp20(self):
         # TODO this is example how to write an app to control AC
         topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
@@ -273,7 +240,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20"})
+        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 20")
 
@@ -286,7 +253,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20"})
+        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
         self.publish(topic, headers, message)
         print ("AC2 turned on : temp 20")
 
@@ -299,10 +266,10 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20"})
-        print ("message{}".format(message))
+        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
+        # print ("message{}".format(message))
         self.publish(topic, headers, message)
-
+        print ("AC3 turned on : temp 20")
 
     def AC1_temp27(self):
         # TODO this is example how to write an app to control AC
@@ -313,7 +280,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27"})
+        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 27")
 
@@ -339,7 +306,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27"})
+        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC2 turned on : temp 27")
 
@@ -365,7 +332,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27"})
+        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC3 turned on : temp 27")
     #
@@ -534,6 +501,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "OFF"})
         self.publish(topic, headers, message)
         print ("TV turn OFF")
+
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
