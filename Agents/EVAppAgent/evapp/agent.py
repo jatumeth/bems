@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- {{{
+from __future__ import division
 from datetime import datetime
 import logging
 import sys
@@ -8,17 +9,30 @@ from volttron.platform.agent import utils, matching
 from volttron.platform.messaging import headers as headers_mod
 import settings
 import json
+import datetime
 import random
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
 publish_periodic = 5
+BATT_START_KILOMETER = 27
+OFFPEAK_RATE = 2.6369
+PEAK_RATE = 5.7982
+
 
 class EVAppAgent(PublishMixin, BaseAgent):
     '''Listens to everything and publishes a heartbeat according to the
     heartbeat period specified in the settings module.
     '''
+
+    # percent_charge = BATT_START_PERCENTAGE
+    time_delta = datetime.timedelta(minutes=2, seconds=28)
+    check_time = datetime.datetime.now() + time_delta
+    status_charge = "OFF"
+    message_from_EV = {"status": "OFF", "power": 0}
+    start_percent_charge = BATT_START_KILOMETER / 72 * 100
+    EV_bill = 0
 
     def __init__(self, config_path, **kwargs):
         super(EVAppAgent, self).__init__(**kwargs)
@@ -39,13 +53,15 @@ class EVAppAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    # @matching.match_start("/ui/agent/")
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("")
+    @matching.match_start("/agent/ui/plugload/device_status_response/bemoss/999/3WIS221445K1200321")
+    def on_match(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        _log.debug("Topic: {topic}, Headers: {headers}, "
+                   "Message: {message}".format(
+            topic=topic, headers=headers, message=message))
+        print message
+        self.message_from_EV = json.loads(message[0])
+        # print self.message_from_EV["power"]
 
     # Demonstrate periodic decorator and settings access
 
@@ -56,20 +72,80 @@ class EVAppAgent(PublishMixin, BaseAgent):
         HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
         '''
         topic = "/agent/ui/dashboard"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
+        topic2 = "/agent/ui/dashboard/EVApp"
+        now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
             'data_source': "EVApp",
         }
-        EV_mode = ["Charging", "No Charge", "V2G"]
-        percent_charge = random.randint(0, 100)
-        percent_batt_V2G = random.randint(10, 50)
-        message = json.dumps({"EV_mode": EV_mode[random.randint(0, 2)],
-                             "percentage_charge": percent_charge,
-                              "percentage_batt_V2G": percent_batt_V2G})
+        time_now = datetime.datetime.now()
+        weekday = time_now.weekday()
+        start_peak_period = time_now.replace(hour=9, minute=0, second=1)
+        end_peak_period = time_now.replace(hour=22,minute=0, second=0)
+
+        if (weekday == 5) | (weekday == 6) | (weekday == 7):
+            self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * OFFPEAK_RATE
+        else:
+            if (time_now > start_peak_period) * (time_now < end_peak_period):
+                self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * PEAK_RATE
+            else:
+                self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * OFFPEAK_RATE
+
+        print self.message_from_EV["status"]
+        print self.message_from_EV["power"]
+        if (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] > 3):
+            print "EV ON"
+            if self.status_charge == "OFF":
+                if (self.start_percent_charge < 100):
+                    EV_mode = "Charging"
+                else:
+                    EV_mode = "Charged"
+                percent_charge = self.start_percent_charge
+                print percent_charge
+                percent_batt_V2G = 0
+                self.status_charge = "ON"
+            else:
+                if (time_now > self.check_time):
+                    self.start_percent_charge += 1
+                    if (self.start_percent_charge > 100):
+                        self.start_percent_charge = 100
+                        EV_mode = "Charged"
+                        self.status_charge = "OFF"
+                    else:
+                        EV_mode = "Charging"
+                    percent_charge = self.start_percent_charge
+                    self.check_time = time_now + self.time_delta
+                    percent_batt_V2G = 0
+                else:
+                    percent_charge = self.start_percent_charge
+                    EV_mode = "Charging"
+                    percent_batt_V2G = 0
+        elif (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] < 3) & (self.status_charge == "ON"):
+            print "plug ON but no charge"
+            percent_charge = 100
+            EV_mode = "Charged"
+            percent_batt_V2G = 0
+        elif (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] < 3) & (self.status_charge == "OFF"):
+            self.start_percent_charge = BATT_START_KILOMETER / 72 * 100
+            EV_mode = "No Charge"
+            percent_charge = 0
+            percent_batt_V2G = 0
+        else:
+            print "EV OFF"
+            EV_mode = "No Charge"
+            percent_charge = 0
+            percent_batt_V2G = 0
+            self.status_charge = "OFF"
+
+        message = json.dumps({"EV_mode": EV_mode,
+                              "percentage_charge": round(percent_charge, 2),
+                              "percentage_batt_V2G": percent_batt_V2G,
+                              "EV_bill": self.EV_bill})
+
         self.publish(topic, headers, message)
+        self.publish(topic2, headers, message)
         print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
 
 def main(argv=sys.argv):

@@ -15,6 +15,7 @@ import datetime
 import numpy as np
 from dateutil.relativedelta import relativedelta
 from bemoss_lib.databases.cassandraAPI import cassandraDB
+import time
 
 #Global variables
 OFFPEAK_RATE = 2.6369
@@ -82,7 +83,7 @@ def parse_resultset(variables, data_point, result_set):
     len_newTime = len(newTime)
     len_newData = len(newData)
 
-    if not ((len_newData%2)&(len_newTime%2)):
+    if not ((len_newData % 2) & (len_newTime % 2)):
         del newTime[len(newTime)-1]
         del newData[len(newData)-1]
 
@@ -97,11 +98,12 @@ def integrate_power(AgentID, variable, start_time, end_time):
 
     try:
         data_points, rs = retrieve(AgentID, vars=['time', str(variable)], startTime=start_time, endTime=end_time)
-        # print rs
         if (len(rs)):
             try:
                 time, data = parse_resultset(data_points, str(variable), rs)
-                wattsec = scipy.integrate.simps(data, time, even='first')
+                # print data
+                # print time
+                wattsec = scipy.integrate.simps(data, time, even='avg')
                 energy_kWh = wattsec / (3600 * 1000 * 1000)
                 result = True
             except:
@@ -163,7 +165,7 @@ def energy_calculate(AgentID, parameter, date):
             data['daily_energy_peak2'], result = integrate_power(AgentID, parameter, start_time, end_time)
             if result is True:
                 if (weekday == 5) | (weekday == 6) | (weekday == 7):
-                    data['daily_bill_peak1'] = data['daily_energy_peak1'] * OFFPEAK_RATE
+                    data['daily_bill_peak2'] = data['daily_energy_peak2'] * OFFPEAK_RATE
                 else:
                     data['daily_bill_peak2'] = data['daily_energy_peak2'] * PEAK_RATE
             else:
@@ -339,8 +341,9 @@ def monthly_energy_bill_calculation(month):
         month_data['month_AC_bill'] = month_data['month_AC_bill'] + data['last_day_AC_bill']
         month_data['month_plug_bill'] = month_data['month_plug_bill'] + data['last_day_plug_bill']
         month_data['month_EV_bill'] = month_data['month_EV_bill'] + data['last_day_EV_bill']
-
+    print end_day_of_month
     data = day_energy_bill_calculation(check_data, end_day_of_month)
+    print data['daily_EV_bill']
     month_data['month_energy'] = month_data['month_energy'] + data['daily_energy']
     month_data['month_bill'] = month_data['month_bill'] + data['daily_bill']
     month_data['month_light_bill'] = month_data['month_light_bill'] + data['daily_light_bill']
@@ -412,18 +415,27 @@ def last_day_usage(end_time):
 
 if __name__ == '__main__':
     print ("test")
-    # end_time = datetime.datetime.now()
-    # # start_time = end_time.replace(hour=13)
-    # start_time = end_time.replace(hour=14, minute=00, second=59)
+    end_time = datetime.datetime.now() - datetime.timedelta(days=0)
+    print end_time
+    # start_time = end_time.replace(hour=13)
+    end_time = datetime.datetime.now() - datetime.timedelta(days=0)
+    start_time = end_time.replace(hour=5, minute=0, second=59)
     # end_time = end_time.replace(hour=17, minute=30)
-    # data_points, rs = retrieve('3WIS221445K1200321', vars=['time', 'power', 'status'], startTime=start_time, endTime=end_time)
-    # x, y = parse_resultset(data_points, 'power', rs)
-    # print y
+
+    # end_time = date.replace(hour=9, minute=0, second=0)
+    # start_time = date.replace(hour=0, minute=0, second=0)
+
+    data_points, rs = retrieve('SmappeePowerMeter', vars=['time', 'load_activepower'], startTime=start_time, endTime=end_time)
+    print rs
+    time, data = parse_resultset(data_points, 'load_activepower', rs)
+    print data
+    # wattsec = scipy.integrate.simps(data, time, even='first')
+    # energy_kWh = wattsec / (3600 * 1000 * 1000)
+    # print energy_kWh
     #
     # a, b = parse_resultset(data_points, 'status', rs)
     # print b
-
-    # EV_data = daily_energy_calculate("load", start_time)
+    # EV_data = daily_energy_calculate("grid", end_time)
     # print EV_data
 
     # annual_load_energy, annual_solar_energy = annual_energy_calculate()

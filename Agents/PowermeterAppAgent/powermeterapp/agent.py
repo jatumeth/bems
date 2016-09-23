@@ -41,6 +41,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
     flag_last_month = False
     flag_this_month = False
+    daily_bill_EV = 0
 
     def __init__(self, config_path, **kwargs):
         super(PowermeterAppAgent, self).__init__(**kwargs)
@@ -61,16 +62,28 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    # @matching.match_start("/ui/agent/")
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("")
+    @matching.match_start("/agent/ui/dashboard/EVApp")
+    def on_match(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        _log.debug("Topic: {topic}, Headers: {headers}, "
+                         "Message: {message}".format(
+                         topic=topic, headers=headers, message=message))
+        print "EVApp Topic: {}".format(topic)
+        print "EVApp Headers: {}".format(headers)
+        print "EVApp Message: {}".format(message)
+        print "***************************************************"
+        print "***************************************************"
+        print "***************************************************"
+        print "***************************************************"
+        print "***************************************************"
+        print "***************************************************"
+        print "***************************************************"
+        self.message_from_EV = json.loads(message[0])
+        # print self.message_from_EV
 
     # Demonstrate periodic decorator and settings access
     @periodic(publish_periodic)
+
     def publish_heartbeat(self):
         '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
 
@@ -92,14 +105,16 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         daily_data = day_energy_bill_calculation(self.check_daily_data, time_now)
         last_day_data = last_day_usage(last_day)
 
-
         daily_energy_usage = round(daily_data['daily_energy'], 2)
         daily_electricity_bill = round(daily_data['daily_bill'], 2)
         daily_bill_light = round(daily_data['daily_light_bill'], 2)
         daily_bill_AC = round(daily_data['daily_AC_bill'], 2)
         daily_bill_plug = round(daily_data['daily_plug_bill'], 2)
-        daily_bill_EV = round(daily_data['daily_EV_bill'], 2)
-
+        # daily_bill_EV = round(daily_data['daily_EV_bill'], 2)
+        try:
+            daily_bill_EV = round(self.message_from_EV["EV_bill"], 2)
+        except:
+            daily_bill_EV = 0
         last_day_energy_usage = round(last_day_data['last_day_energy'], 2)
         last_day_bill = round(last_day_data['last_day_bill'], 2)
         last_day_bill_compare = round(daily_electricity_bill - last_day_bill, 2)
@@ -192,7 +207,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
                               "monthly_bill_AC": monthly_bill_AC,
                               "monthly_bill_light": monthly_bill_light,
                               "monthly_bill_plug": monthly_bill_plug,
-                              "monthly_bill_EV": monthly_bill_EV,
+                              "monthly_bill_EV": daily_bill_EV, #need to fix it
                               "monthly_bill_AC_compare_percent": monthly_bill_AC_compare_percent,
                               "monthly_bill_light_compare_percent": monthly_bill_light_compare_percent,
                               "monthly_bill_plug_compare_percent": monthly_bill_plug_compare_percent,
