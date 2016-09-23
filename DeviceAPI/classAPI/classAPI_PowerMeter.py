@@ -92,10 +92,12 @@ class API:
     '''    
 
     # ----------------------------------------------------------------------
-    # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
 
         try:
+            url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
+            head_l = "admin"
+            requests.post(url_l, data=head_l)
             request = requests.get("http://Smappee1006003343.local/gateway/apipublic/reportInstantaneousValues")
             checkconnect = request.status_code
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
@@ -106,6 +108,9 @@ class API:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
+                url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
+                head_l = "admin"
+                requests.post(url_l, data=head_l)
             # Check the connectivity
         except Exception as er:
             print er
@@ -114,7 +119,6 @@ class API:
     def getDeviceStatusJson(self,data):
 
         x = json.loads(data, "utf-8")
-        print x
         volttage = float((x['report'].split('<BR>'))[1][8:13])
         self.set_variable('volttage', volttage)
         ts = time.time()
