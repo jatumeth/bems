@@ -248,7 +248,7 @@ def PlugloadAgent(config_path, **kwargs):
 
             try:
                 Plugload.getDeviceStatus()
-
+                self.variables['status'] = Plugload.variables['status']
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
@@ -532,6 +532,7 @@ def PlugloadAgent(config_path, **kwargs):
                 _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
             else:
                 _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            print "published!!!!! :{}".format(self.get_variable('status'))
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)

@@ -98,7 +98,7 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/1cf71480-1a2d-40ed-99e6-f203a0978440",
+            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/b3424348-ce97-4895-9b18-5fa8d39faeda",
                              headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
@@ -124,7 +124,10 @@ class API:
 
         conve_json = json.loads(data)
         self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]))
+        if (conve_json["status"] == "on" ) :
+            self.set_variable('status', "ON")
+        elif (conve_json["status"] == "off" ) :
+            self.set_variable('status', "OFF")
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('type', str(conve_json["type"]))
 
@@ -149,13 +152,13 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.put(
-                    "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/1cf71480-1a2d-40ed-99e6-f203a0978440",
+                    "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/b3424348-ce97-4895-9b18-5fa8d39faeda",
                     headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, data= _data, timeout=20);
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
             except:
-                print("ERROR: classAPI_LGTV connection failure! @ setDeviceStatus")
+                print("ERROR: classAPI_Sonos connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
@@ -170,7 +173,6 @@ class API:
         msgToDevice = {}
         if 'status' in postmsg.keys():
             msgToDevice['command'] = str(postmsg['status'].lower())
-            msgToDevice['command'] = "on"
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -180,26 +182,27 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    LGTV.getDeviceStatus()
+    PEASwitch1 = API(model='switch', type='plugload', api='API3', agent_id='plugloadagent')
+    PEASwitch1.getDeviceStatus()
+    print PEASwitch1.variables
 
-    import time
-    LGTV.setDeviceStatus({"status": "ON"})
+    # import time
+    # PEASwitch1.setDeviceStatus({"status": "ON"})
+
+    # time.sleep(10)
+    #
+    # PEASwitch1.setDeviceStatus({"status": "OFF"})
+
+    # time.sleep(10)
+    #
+    # Sonos.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "OFF"})
+    # Sonos.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "ON"})
-    #
-    # time.sleep(10)
-    #
-    # LGTV.setDeviceStatus({"status": "OFF"})
-    #
-    # time.sleep(10)
-    #
-    # LGTV.setDeviceStatus({"status": "ON"})
+    # Sonos.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()
