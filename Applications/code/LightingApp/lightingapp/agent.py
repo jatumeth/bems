@@ -44,6 +44,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     device_power = 0
     device_energy = 0
     device_bill = 0
+    device_id = ' '
 
     def __init__(self, config_path, **kwargs):
         super(ListenerAgent, self).__init__(**kwargs)
@@ -51,8 +52,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def setup(self):
         # Demonstrate accessing a value from the config file
-        _log.info(self.config['message'])
-        self._agent_id = self.config['agentid']
+        # _log.info(self.config['message'])
+        self._agent_id = self.config['agent_id']
         # test control air
         # self.publish_heartbeat()
         # Always call the base class setup()
@@ -88,6 +89,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print self.device_status
         self.device_brightness = received_message['brightness']
         print self.device_brightness
+        self.device_id = received_message['AgentID']
 
         self.calculate_power()
         self.calculate_on_now_for()
@@ -204,6 +206,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
+            'data_source': "realtime",
+            "agent_id": self.device_id
         }
 
         self.check_for_start_new_day()
