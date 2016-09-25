@@ -13,7 +13,7 @@ import random
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
-publish_periodic = 5
+publish_periodic = 10
 
 class ModeAppAgent(PublishMixin, BaseAgent):
     '''Listens to everything and publishes a heartbeat according to the
@@ -39,13 +39,20 @@ class ModeAppAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    # @matching.match_start("/ui/agent/")
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("")
+    @matching.match_exact("/ui/agent/select_mode/")
+    def on_match(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        _log.debug("Topic: {topic}, Headers: {headers}, "
+                         "Message: {message}".format(
+                         topic=topic, headers=headers, message=message))
+        print "Topic: {}".format(topic)
+        print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
+        received_message = json.loads(message[0])
+        print received_message
+        self.home_mode = received_message['mode']
+        self.publish_heartbeat()
+        print"---------------------------------------------------"
 
     # Demonstrate periodic decorator and settings access
 
@@ -63,10 +70,12 @@ class ModeAppAgent(PublishMixin, BaseAgent):
             headers_mod.DATE: now,
             'data_source': "modeApp",
         }
-        home_mode = ["DR", "ECO", "COMFORT"]
+
+        # home_mode = ["DR", "ECO", "COMFORT"]
+        #TODO fix rebate and eco saving
         DR_rebate_price = 8.00
         ECO_saving_cost = round(random.uniform(1.00,50.00), 2)
-        message = json.dumps({"home_mode": home_mode[random.randint(0, 2)],
+        message = json.dumps({"home_mode": self.home_mode.upper(),
              "DR_rebate_price": DR_rebate_price,
              "ECO_saving_cost": ECO_saving_cost})
         self.publish(topic, headers, message)
