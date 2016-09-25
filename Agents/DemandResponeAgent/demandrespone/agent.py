@@ -74,9 +74,9 @@ _log = logging.getLogger(__name__)
 
 
 class ListenerAgent(PublishMixin, BaseAgent):
-    '''Listens to everything and publishes a heartbeat according to the
-    heartbeat period specified in the settings module.
-    '''
+    # '''Listens to everything and publishes a heartbeat according to the
+    # heartbeat period specified in the settings module.
+    # '''
 
     # matching_topic = '/agent/ui/lighting/update_response/bemoss/999/2HUE0017881cab4b'
 
@@ -84,6 +84,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         super(ListenerAgent, self).__init__(**kwargs)
         self.config = utils.load_config(config_path)
         self.mode = ''
+        self.mode2 = ''
+        self.actor = ''
 
 
     def setup(self):
@@ -94,30 +96,29 @@ class ListenerAgent(PublishMixin, BaseAgent):
         super(ListenerAgent, self).setup()
 
     def main(self):
-
-
-        print "-56---54"
+        print ""
 
 
 
-    @matching.match_exact('/ui/agent/select_mode/')
-    def on_match(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
+    @matching.match_start('/ui/agent/select_mode/')
+    def on_matchmode(self, topic, headers, message, match):
+        # '''Use match_all to receive all messages and print them out.'''
         # _log.debug("Topic: {topic}, Headers: {headers}, "
         #            "Message: {message}".format(
         #     topic=topic, headers=headers, message=message))
-        print "MODE---------"
-        print "Topic: {}".format(topic)
-        print "Headers: {}".format(headers)
-        print "Message: {}".format(message)
+        # print "MODE---------"
+        # print "Topic: {}".format(topic)
+        # print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
         event = json.loads(message[0])
-        print type(event)
-        print event
+        # print type(event)
+        # print event
         event_status = event["status"]
         event_mode = event["mode"]
         self.mode = event["mode"]
-        print "event_status: {} ".format(event_status)
-        print "event_mode: {} ".format(event_mode)
+        # print "event_status: {} ".format(event_status)
+        # print "event_mode: {} ".format(event_mode)
+        print "UI select mode : .. {}".format(event_mode)
 
         if (event_mode == "comfort"):
             self.publish_Comfort()
@@ -125,57 +126,101 @@ class ListenerAgent(PublishMixin, BaseAgent):
             self.publish_ECO()
         elif (event_mode == "dr"):
             self.publish_DR()
+        else:
+            print "Finish Select mode"
+
+
+    @matching.match_exact('/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b')
+    def on_matchlight(self, topic, headers, message, match):
+        # '''Use match_all to receive all messages and print them out.'''
+        # _log.debug("Topic: {topic}, Headers: {headers}, "
+        #            "Message: {message}".format(
+        #     topic=topic, headers=headers, message=message))
+        # print "Topic: {}".format(topic)
+        # print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
+        received_message = json.loads(message[0])
+        try:
+            self.actor = received_message["actor"]
+            print "Now, Control action by : {}".format(self.actor)
+        except:
+            print "Brightness data sent by comfort, eco ,DR mode"
+            self.actor = "3Modecontrol"
         print"---------------------------------------------------"
-        print self.mode
 
     @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
-    def on_match1(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
-        _log.debug("Topic: {topic}, Headers: {headers}, "
-                   "Message: {message}".format(
-            topic=topic, headers=headers, message=message))
-        print "MultiSensor----------"
-        print "Topic: {}".format(topic)
-        print "Headers: {}".format(headers)
-        print "Message: {}".format(message)
+    def on_matchmulti(self, topic, headers, message, match):
+        # '''Use match_all to receive all messages and print them out.'''
+        # _log.debug("Topic: {topic}, Headers: {headers}, "
+        #            "Message: {message}".format(
+        #     topic=topic, headers=headers, message=message))
+        # print "MultiSensor----------"
+        # print "Topic: {}".format(topic)
+        # print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
         received_message = json.loads(message[0])
         self.illu = received_message["illuminance"]
-        print self.illu
-        print"--------------------------"
-        self.brightness = 100
-        if self.illu > 500:
-            self.brightness = 1
-        elif self.illu > 400:
-            self.brightness = 10
-        elif self.illu > 350:
-            self.brightness = 10
-        elif self.illu > 300:
-            self.brightness = 20
-        elif self.illu > 250:
-            self.brightness = 30
-        elif self.illu > 200:
-            self.brightness = 40
-        elif self.illu > 180:
-            self.brightness = 50
-        elif self.illu > 150:
-            self.brightness = 70
-        elif self.illu > 120:
-            self.brightness = 80
-        elif self.illu > 100:
-            self.brightness = 100
+        print "now brightness from multisensor is : {}".format(self.illu)
+
+        # if self.actor == "ui":
+        #     self.mode = "custom_mode"
+        #
+        #     print "now working at : {}".format(self.mode)
+        # else:
+        #     print ""
+        print "***************************"
+        print self.actor
+
+        if self.actor != "ui":
+            print "+++++++++++++++++++++++++++++++++++++++++"
+            if self.mode == ("eco" or "dr" or "comfort"):
+                print "now working at : {}".format(self.mode)
+                self.brightness = 100
+                if self.illu > 500:
+                    self.brightness = 1
+                elif self.illu > 400:
+                    self.brightness = 10
+                elif self.illu > 350:
+                    self.brightness = 10
+                elif self.illu > 300:
+                    self.brightness = 20
+                elif self.illu > 250:
+                    self.brightness = 30
+                elif self.illu > 200:
+                    self.brightness = 40
+                elif self.illu > 180:
+                    self.brightness = 50
+                elif self.illu > 150:
+                    self.brightness = 70
+                elif self.illu > 120:
+                    self.brightness = 80
+                elif self.illu > 100:
+                    self.brightness = 100
+                else:
+                    self.brightness = 100
+
+                if(self.mode == "comfort"):
+                    self.brightness = 100
+                else:
+                    print""
+                self.HUE_DIM(self.brightness)
+                print "calculate brightness to (%){}".format(self.brightness)
+                print "-------------------------------------------------------------------------"
+            else:
+                print "-------------------------------------------------------------------------"
+
         else:
-            self.brightness = 100
-        print self.brightness
-        print"******************************"
-        print self.mode
-        if(self.mode == "comfort"):
-            self.brightness = 100
-        else:
-            print"mode DR or ECO"
-        self.HUE_DIM(self.brightness)
+            print "now working at custom mode"
 
     # total Load 1100 kW
     def publish_DR(self):
+        try:
+            self.HUE_DIM(self.brightness)
+            print "use brightness from multi sensor"
+            print "self.brightness: {}".format(self.brightness)
+        except:
+            self.HUE_DIM(50)
+            print "manual change brightness of hue to 50%"
         self.AC1_OFF()
         time.sleep(2)
         self.AC1_OFF()
@@ -192,10 +237,16 @@ class ListenerAgent(PublishMixin, BaseAgent):
         time.sleep(2)
         self.Plug_OFF()
         time.sleep(2)
-        self.HUE_DIM(self.brightness)
     #
     # total Load 1200 kW
     def publish_ECO(self):
+        try:
+            self.HUE_DIM(self.brightness)
+            print "use brightness from multi sensor"
+            print "self.brightness: {}".format(self.brightness)
+        except:
+            self.HUE_DIM(50)
+            print "manual change brightness of hue to 50%"
         self.AC1_temp27()
         time.sleep(2)
         self.AC1_temp27()
@@ -210,26 +261,34 @@ class ListenerAgent(PublishMixin, BaseAgent):
         time.sleep(2)
         self.FAN_ON()
         self.Plug_ON()
-        self.HUE_DIM(self.brightness)
+
     #
     # total Load 4500 kW
     def publish_Comfort(self):
-
-        self.AC1_temp20()
-        time.sleep(2)
-        self.AC1_temp20()
-        time.sleep(2)
-        self.AC2_temp20()
-        time.sleep(2)
-        self.AC2_temp20()
-        time.sleep(2)
-        self.AC3_temp20()
-        time.sleep(2)
-        self.AC3_temp20()
-        time.sleep(2)
+        try:
+            self.brightness = 100
+            self.HUE_DIM(self.brightness)
+            print "use brightness from multi sensor"
+            print "self.brightness: {}".format(self.brightness)
+        except:
+            self.HUE_DIM(100)
+            print "manual change brightness of hue to 100%"
         self.FAN_OFF()
         self.Plug_ON()
-        self.HUE_Max()
+        self.AC1_temp20()
+        time.sleep(2)
+        self.AC1_temp20()
+        time.sleep(2)
+        self.AC2_temp20()
+        time.sleep(2)
+        self.AC2_temp20()
+        time.sleep(2)
+        self.AC3_temp20()
+        time.sleep(2)
+        self.AC3_temp20()
+        time.sleep(2)
+
+
         # print self.mode
     def AC1_temp20(self):
         # TODO this is example how to write an app to control AC
@@ -350,6 +409,20 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print ("AC3 turned off")
 
     #
+
+    def ChangeActor(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"actor": "demand_respond",})
+        # print ("message{}".format(message))
+
+
     def HUE_ON(self):
         # TODO this is example how to write an app to control Lighting
         topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
@@ -389,7 +462,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         }
         message = json.dumps({"color": [255, 255, 255], "status": "ON", "brightness": brightness})
         self.publish(topic, headers, message)
-        print ("HUE DIM brightness")
+        print ("HUE DIM brightness by DR, eco or Comfort mode ")
 
     def HUE_Max(self):
         # TODO this is example how to write an app to control Lighting
