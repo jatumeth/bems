@@ -78,3 +78,8 @@ target/
 
 #Except
 !bemoss/custom-eggs/*
+.temp/readme.txt
+Agents/NetpieButtonAgent/netpiebutton/microgear-5xeHHg4vpGAYTzj.cache
+log/readme.txt
+Agents/ListenerAgent/listener/microgear-5xeHHg4vpGAYTzj.cache
+nohup.out
