@@ -127,6 +127,8 @@ DATABASES = {
         'TABLE_Fan': 'Fan',
         'TABLE_Weather': 'Weather',
         'TABLE_Sonos': 'Sonos',
+        'TABLE_NETPIESensor': 'NETPIE',
+
 
     }
 }

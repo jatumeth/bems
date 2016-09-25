@@ -44,18 +44,30 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
 
-        _url_append = 'https://api.netpie.io/topic/RSDPEA/SMH/power?auth=5xeHHg4vpGAYTzj:N2hc2XaAriu2grlvRO0kEEglE'
+        _url_append = 'https://api.netpie.io/topic/RSDPEA/SMH/Sensor?auth=5xeHHg4vpGAYTzj:N2hc2XaAriu2grlvRO0kEEglE'
         try:
             r = requests.get(_url_append)
             _theJSON = json.loads(r.content)
+            # print _theJSON
             _temp = float(_theJSON[0]['payload'].split(',')[0])
             _humid = float(_theJSON[0]['payload'].split(',')[1])
+            _lux = float(_theJSON[0]['payload'].split(',')[2])
+
+
+            if _lux == 54612.0 :
+               _lux = " LUX ERROR Reading"
+            if 100>_temp <0:
+                _temp = "Tempparature ERROR Reading"
+            if 100>_humid <0:
+                _temp = "Humidity ERROR Reading"
+
             self.set_variable('Temp', _temp)
             self.set_variable('Humid', _humid)
-            print "Temperature = "
-            print self.get_variable('Temp')
-            print "Humidity = "
-            print self.get_variable('Humid')
+            self.set_variable('Lux', _lux)
+            print(" Temperature = {} C".format(self.get_variable('Temp')))
+            print(" Humidity = {} %".format(self.get_variable('Humid')))
+            print(" Lux = {} lx".format(self.get_variable('Lux')))
+
         except Exception as er:
             print er
             print('ERROR: classAPI_NETPIE_SHT15 failed to getDeviceStatus')
@@ -63,8 +75,8 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    SHT15sensor = API(model='SHT15',type='wifiLight',api='API3',address='https://api.netpie.io/topic/RSDPEA/SMH/power',username='acquired username',agent_id='LightingAgent')
-    SHT15sensor.getDeviceStatus()
+    NETPIESensor = API(model='Nodemcu',type='wifiLight',api='API3',address='https://api.netpie.io/topic/RSDPEA/SMH/power',username='acquired username',agent_id='LightingAgent')
+    NETPIESensor.getDeviceStatus()
 
 
 if __name__ == "__main__": main()

@@ -1,0 +1,20 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "NETPIESensoragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "1NP221445K1200112",
+    "api": "classAPI_NETPIE_SHT15",
+    "building_name": "bemoss",
+    "db_database": "bemossdb", 
+    "db_host": "localhost", 
+    "db_password": "admin", 
+    "db_port": "5432", 
+    "db_user": "admin", 
+    "device_monitor_time": 20, 
+    "macaddress": "221445K1200111",
+    "model": "nodemcu",
+    "type": "BH1750_SHT15",
+    "vendor": "NETPIE",
+    "zone_id": 999
+}
