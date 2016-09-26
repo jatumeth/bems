@@ -49,23 +49,23 @@ class API:
             r = requests.get(_url_append)
             _theJSON = json.loads(r.content)
             # print _theJSON
-            _temp = float(_theJSON[0]['payload'].split(',')[0])
-            _humid = float(_theJSON[0]['payload'].split(',')[1])
+            #_temp = float(_theJSON[0]['payload'].split(',')[0])
+            #_humid = float(_theJSON[0]['payload'].split(',')[1])
             _lux = float(_theJSON[0]['payload'].split(',')[2])
 
-
-            if _lux == 54612.0 :
-               _lux = " LUX ERROR Reading"
-            if 100>_temp <0:
-                _temp = "Tempparature ERROR Reading"
-            if 100>_humid <0:
-                _temp = "Humidity ERROR Reading"
-
-            self.set_variable('Temp', _temp)
-            self.set_variable('Humid', _humid)
+            # print _lux
+            # if _lux == 54612.0 :
+            #    _lux = " LUX ERROR Reading"
+            # if 100>_temp <0:
+            #     _temp = "Tempparature ERROR Reading"
+            # if 100>_humid <0:
+            #     _temp = "Humidity ERROR Reading"
+            #
+            # self.set_variable('Temp', _temp)
+            # self.set_variable('Humid', _humid)
             self.set_variable('Lux', _lux)
-            print(" Temperature = {} C".format(self.get_variable('Temp')))
-            print(" Humidity = {} %".format(self.get_variable('Humid')))
+            # print(" Temperature = {} C".format(self.get_variable('Temp')))
+            # print(" Humidity = {} %".format(self.get_variable('Humid')))
             print(" Lux = {} lx".format(self.get_variable('Lux')))
 
         except Exception as er:
