@@ -148,7 +148,9 @@ class ListenerAgent(PublishMixin, BaseAgent):
             self.actor = "3Modecontrol"
         print"---------------------------------------------------"
 
-    @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
+
+    @matching.match_exact('/agent/ui/BH1750_SHT15/device_status_response/bemoss/999/1NP221445K1200112')
+    # @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
     def on_matchmulti(self, topic, headers, message, match):
         # '''Use match_all to receive all messages and print them out.'''
         # _log.debug("Topic: {topic}, Headers: {headers}, "
@@ -157,9 +159,10 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # print "MultiSensor----------"
         # print "Topic: {}".format(topic)
         # print "Headers: {}".format(headers)
-        # print "Message: {}".format(message)
+        print "Message: {}".format(message)
         received_message = json.loads(message[0])
-        self.illu = received_message["illuminance"]
+        # self.illu = received_message["illuminance"]  # for fibaro
+        self.illu = received_message["Lux"]
         print "now brightness from multisensor is : {}".format(self.illu)
 
         # if self.actor == "ui":
@@ -186,14 +189,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
                     self.brightness = 20
                 elif self.illu > 250:
                     self.brightness = 30
-                elif self.illu > 200:
+                elif self.illu > 210:
                     self.brightness = 40
-                elif self.illu > 180:
-                    self.brightness = 50
+                # elif self.illu > 180:
+                #     self.brightness = 50
                 elif self.illu > 150:
                     self.brightness = 70
-                elif self.illu > 120:
-                    self.brightness = 80
+                # elif self.illu > 120:
+                #     self.brightness = 80
                 elif self.illu > 100:
                     self.brightness = 100
                 else:
