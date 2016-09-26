@@ -2,7 +2,7 @@ import time
 import urllib2
 import json
 import requests
-import  microgear.client as microgear
+# import  microgear.client as microgear
 
 class API:
     # 1. constructor : gets call every time when create a new class
