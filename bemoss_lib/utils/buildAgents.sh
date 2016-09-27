@@ -156,6 +156,36 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/SonosAgent/
 volttron-pkg configure /tmp/volttron_wheels/sonosagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/SonosAgent/1SONOS445K1200137.launch.json
 volttron-ctl install 1SONOS445K1200137=/tmp/volttron_wheels/sonosagent-0.1-py2-none-any.whl
 
+# Run DemandResponse Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/DemandResponeAgent
+volttron-pkg configure /tmp/volttron_wheels/demandresponseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DemandResponeAgent/DemandResponeAgent.launch.json
+volttron-ctl install DemandResponseAgent=/tmp/volttron_wheels/demandresponseagent-0.1-py2-none-any.whl
+
+# Run NETPIESensor Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/NETPIESensorgent
+volttron-pkg configure /tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NETPIESensorgent/NETPIESensoragent.launch.json
+volttron-ctl install NETPIESensorgent=/tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl
+
+# Run NETPIEButton Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/NetpieButtonAgent
+volttron-pkg configure /tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetpieButtonAgent/netpiebuttonagent.launch.json
+volttron-ctl install NETPIEButton=/tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl
+
+# Run ACApp
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/ACApp
+volttron-pkg configure /tmp/volttron_wheels/acappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/ACApp/acappagent.launch.json
+volttron-ctl install ACAPP=/tmp/volttron_wheels/acappagent-0.1-py2-none-any.whl
+
+# Run Alexa SmartThings Agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent
+volttron-pkg configure /tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent/alexasmartthingsagent.launch.json
+volttron-ctl install AlexaSmartThings=/tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl
+
+# Run LightingApp Agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/LightingApp
+volttron-pkg configure /tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/LightingApp/lightingappagent.launch.json
+volttron-ctl install LightingApp=/tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps

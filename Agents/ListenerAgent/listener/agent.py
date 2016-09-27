@@ -90,13 +90,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # Always call the base class setup()
         super(ListenerAgent, self).setup()
 
-    @matching.match_start('/ui/agent/airconditioner/')
-    def on_match(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
-        _log.debug("Topic: {topic}, Headers: {headers}, "
-                         "Message: {message}".format(
-                         topic=topic, headers=headers, message=message))
-        print("")
+    # @matching.match_start('/ui/agent/airconditioner/')
+    # def on_match(self, topic, headers, message, match):
+    #     '''Use match_all to receive all messages and print them out.'''
+    #     _log.debug("Topic: {topic}, Headers: {headers}, "
+    #                      "Message: {message}".format(
+    #                      topic=topic, headers=headers, message=message))
+    #     print("")
 
 
     #test multisensor
@@ -145,34 +145,37 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #     print"---------------------------------------------------"
 
     # #fridge
-    # @matching.match_exact('/agent/ui/refridgerator/device_status_response/bemoss/999/1FR221445K1200111')
+    @matching.match_start('/agent/ui/power_meter/')
+    def on_match(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        # _log.debug("Topic: {topic}, Headers: {headers}, "
+        #            "Message: {message}".format(
+        #     topic=topic, headers=headers, message=message))
+        print "fridge---------"
+        print "Topic: {}".format(topic)
+        print "Headers: {}".format(headers)
+        # print "Message: {}".format(message)
+        received_message = json.loads(message[0])
+        print received_message
+
+
+        print dict(headers)
+        print"---------------------------------------------------"
+
+    #LGTV
+    # @matching.match_exact('/agent/ui/lgtvagent/device_status_response/bemoss/999/1LG221445K1200137')
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
     #     # _log.debug("Topic: {topic}, Headers: {headers}, "
     #     #            "Message: {message}".format(
     #     #     topic=topic, headers=headers, message=message))
-    #     print "fridge---------"
+    #     print "LGTV---------"
     #     print "Topic: {}".format(topic)
     #     print "Headers: {}".format(headers)
     #     # print "Message: {}".format(message)
     #     received_message = json.loads(message[0])
     #     print received_message
     #     print"---------------------------------------------------"
-
-    #LGTV
-    @matching.match_exact('/agent/ui/lgtvagent/device_status_response/bemoss/999/1LG221445K1200137')
-    def on_match(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
-        # _log.debug("Topic: {topic}, Headers: {headers}, "
-        #            "Message: {message}".format(
-        #     topic=topic, headers=headers, message=message))
-        print "LGTV---------"
-        print "Topic: {}".format(topic)
-        print "Headers: {}".format(headers)
-        # print "Message: {}".format(message)
-        received_message = json.loads(message[0])
-        print received_message
-        print"---------------------------------------------------"
 
 
     # @matching.match_start("/ui/agent/")

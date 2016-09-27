@@ -63,8 +63,8 @@ volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag powermeteragent
 sleep 2
-#volttron-ctl start --tag powermeterappagent
-#sleep 2
+volttron-ctl start --tag powermeterappagent
+sleep 2
 volttron-ctl start --tag evappagent
 sleep 2
 volttron-ctl start --tag modeappagent
