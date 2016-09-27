@@ -76,6 +76,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "--------------------------------------------------"
         print "Topic: {}".format(topic)
         print "Headers: {}".format(headers)
+        received_headers = dict(headers)
         received_message = json.loads(message[0])
         print received_message
         print"---------------------------------------------------"
@@ -99,9 +100,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print self.device_status
         self.device_brightness = received_message['brightness']
         print self.device_brightness
-        self.device_id = received_message['AgentID']
+        self.device_id = received_headers['AgentID']
 
-        self.calculate_power()
         self.calculate_on_now_for()
         self.calculate_power()
 

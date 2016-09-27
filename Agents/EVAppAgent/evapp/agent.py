@@ -157,69 +157,12 @@ class EVAppAgent(PublishMixin, BaseAgent):
         self.calculate_today_energy_bill()
         self.EV_percentage_calculation()
         print ("from publish")
-        # time_now = datetime.datetime.now()
-        # weekday = time_now.weekday()
-        # start_peak_period = time_now.replace(hour=9, minute=0, second=1)
-        # end_peak_period = time_now.replace(hour=22, minute=0, second=0)
-        #
-        # if (weekday == 5) | (weekday == 6) | (weekday == 7):
-        #     self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * OFFPEAK_RATE
-        # else:
-        #     if (time_now > start_peak_period) * (time_now < end_peak_period):
-        #         self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * PEAK_RATE
-        #     else:
-        #         self.EV_bill += (self.message_from_EV["power"] * 20 / 3600 / 1000) * OFFPEAK_RATE
-        #
-        # print self.message_from_EV["status"]
-        # print self.message_from_EV["power"]
-        # if (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] > 1000):
-        #     print "EV ON"
-        #     if self.status_charge == "OFF":
-        #         if (self.start_percent_charge < 100):
-        #             EV_mode = "Charging"
-        #         else:
-        #             EV_mode = "Charged"
-        #         percent_charge = self.start_percent_charge
-        #         print percent_charge
-        #         percent_batt_V2G = 0
-        #         self.status_charge = "ON"
-        #     else:
-        #         if (time_now > self.check_time):
-        #             self.start_percent_charge += 1
-        #             if (self.start_percent_charge > 100):
-        #                 self.start_percent_charge = 100
-        #                 EV_mode = "Charged"
-        #                 self.status_charge = "OFF"
-        #             else:
-        #                 EV_mode = "Charging"
-        #             percent_charge = self.start_percent_charge
-        #             self.check_time = time_now + self.time_delta
-        #             percent_batt_V2G = 0
-        #         else:
-        #             percent_charge = self.start_percent_charge
-        #             EV_mode = "Charging"
-        #             percent_batt_V2G = 0
-        # elif (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] < 1000) & (self.status_charge == "ON"):
-        #     print "plug ON but no charge"
-        #     percent_charge = 100
-        #     EV_mode = "Charged"
-        #     percent_batt_V2G = 0
-        # elif (self.message_from_EV["status"] == "ON") & (self.message_from_EV["power"] < 1000) & (self.status_charge == "OFF"):
-        #     self.start_percent_charge = BATT_START_KILOMETER / BATT_MAX_KITLOMETER * 100
-        #     EV_mode = "No Charge"
-        #     percent_charge = 0
-        #     percent_batt_V2G = 0
-        # else:
-        #     print "EV OFF"
-        #     EV_mode = "No Charge"
-        #     percent_charge = 0
-        #     percent_batt_V2G = 0
-        #     self.status_charge = "OFF"
 
         message = json.dumps({"EV_mode": self.EV_mode,
                               "percentage_charge": round(self.percent_charge, 2),
                               "percentage_batt_V2G": self.percent_batt_V2G,
-                              "EV_bill": self.device_bill})
+                              "EV_bill": self.device_bill,
+                              "EV_energy": self.device_energy})
 
         self.publish(topic, headers, message)
         # self.publish(topic2, headers, message)
