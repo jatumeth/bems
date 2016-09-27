@@ -52,14 +52,11 @@
 # under Contract DE-AC05-76RL01830
 
 
-#Author : Payyoh
-#}}}
-
-
 from datetime import datetime
 import logging
 import sys
 import json
+import requests
 
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
 from volttron.platform.agent import utils, matching
@@ -120,6 +117,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
         # test control air
         self.publish_heartbeat()
+        self.status = "OFF"
         # Always call the base class setup()
         super(ListenerAgent, self).setup()
 
@@ -138,15 +136,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def disconnect(self):
         logging.debug("disconnect is work")
 
-    @matching.match_start('/ui/agent/airconditioner/')
-    def on_match(self, topic, headers, message, match):
-        '''Use match_all to receive all messages and print them out.'''
-        _log.debug("Topic: {topic}, Headers: {headers}, "
-                         "Message: {message}".format(
-                         topic=topic, headers=headers, message=message))
-        print("")
-
-    # @matching.match_start("/ui/agent/")
+    # @matching.match_start('/ui/agent/airconditioner/')
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
     #     _log.debug("Topic: {topic}, Headers: {headers}, "
@@ -154,49 +144,37 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    # Demonstrate periodic decorator and settings access
-    # @periodic(settings.HEARTBEAT_PERIOD)
+    @periodic(5)
+    def check_PEA_DR_trigger_button(self):
+
+        try:
+            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
+                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+            print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
+            if r.status_code == 200:
+                conve_json = json.loads(r.text)
+                if (conve_json["status"] == "on"):
+                    self.status = "ON"
+                    self.message = '1'
+                    self.publish_heartbeat()
+                elif (conve_json["status"] == "off"):
+                    self.status = "OFF"
+                print (" Received status from PEA DR Trigger button as: {}".format(self.status))
+            else:
+                print (" Received an error from server, cannot retrieve results")
+                getDeviceStatusResult = False
+        except Exception as er:
+            print er
+            print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
+
     # @periodic(10)
     def publish_heartbeat(self):
-        '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
-
-        HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
-        '''
-
-        # TODO this is example how to write an app to control AC
-        # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
-        # now = datetime.utcnow().isoformat(' ') + 'Z'
-        # headers = {
-        #     'AgentID': self._agent_id,
-        #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-        #     headers_mod.DATE: now,
-        # }
-        # import time
-        # # message = json.dumps({"status": "OFF"});
-        # # self.publish(topic, headers, message)
-        # # time.sleep(30)
-        # message = json.dumps({"status": "ON"});
-        # self.publish(topic, headers, message)
-
         # TODO this is example how to write an app to control Refrigerator
         # print "control: {}".format(control)
         if (self.message == '1'):
-            # topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
             now = datetime.utcnow().isoformat(' ') + 'Z'
-            # headers = {
-            #     'AgentID': self._agent_id,
-            #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-            #     headers_mod.DATE: now,
-            # }
-            # message = json.dumps({"status": "ON", "color": [255, 0, 0]})
-            # self.publish(topic, headers, message)
-            # print ("HUE turn ON")
-            # print ("topic{}".format(topic))
-            # print ("message{}".format(message))
-            # self.message = 0
-
             # TODO publish to dashboard
-            topic = '/agent/ui/dashboard'
+            topic = '/agent/ui/dashboard/netpiebutton'
             headers = {
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
