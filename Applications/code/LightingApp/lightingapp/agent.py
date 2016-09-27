@@ -44,7 +44,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     device_power = 0
     device_energy = 0
     device_bill = 0
-    # device_id = ' '
+    device_id = ' '
 
     def __init__(self, config_path, **kwargs):
         super(ListenerAgent, self).__init__(**kwargs)
@@ -60,14 +60,24 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # self.calculate_on_now_for()
         super(ListenerAgent, self).setup()
 
+    @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
+    def on_match_smappee(self, topic, headers, message, match):
+        '''Use match_all to receive all messages and print them out.'''
+        _log.debug("Topic: {topic}, Headers: {headers}, "
+                   "Message: {message}".format(
+            topic=topic, headers=headers, message=message))
+        message_from_Smappee = json.loads(message[0])
+        self.device_power_from_load = message_from_Smappee['load_activePower']
+        self.device_power_from_grid = message_from_Smappee['grid_activePower']
+
     @matching.match_exact('/agent/ui/lighting/device_status_response/bemoss/999/2HUE0017881cab4b')
     def on_match(self, topic, headers, message, match):
         '''Use match_all to receive all messages and print them out.'''
         print "--------------------------------------------------"
         print "Topic: {}".format(topic)
         print "Headers: {}".format(headers)
-        received_message = json.loads(message[0])
         received_headers = dict(headers)
+        received_message = json.loads(message[0])
         print received_message
         print"---------------------------------------------------"
         # {u'status': u'ON', u'color': u'#fff7d0', u'saturation': None, u'brightness': 100}
@@ -86,14 +96,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "+++++++++++++++++++++++++++++++++++++++++++++"
 
 # Start TODO #1
-        print received_headers['AgentID']
         self.device_status = received_message['status']
         print self.device_status
         self.device_brightness = received_message['brightness']
         print self.device_brightness
         self.device_id = received_headers['AgentID']
 
-        self.calculate_power()
         self.calculate_on_now_for()
         self.calculate_power()
 
@@ -186,12 +194,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
         end_peak_period = time_now.replace(hour=22, minute=0, second=0)
         self.device_energy += self.device_power * publish_period / 3600 / 1000
         if (weekday == 5) | (weekday == 6) | (weekday == 7):
-            self.device_bill += (self.device_power * publish_period / 3600 / 1000) * OFFPEAK_RATE
+            self.device_bill += (self.device_power * self.device_power_from_grid * publish_period / 3600 / 1000 / self.device_power_from_load) * OFFPEAK_RATE
         else:
             if (time_now > start_peak_period) * (time_now < end_peak_period):
-                self.device_bill += (self.device_power * publish_period / 3600 / 1000) * PEAK_RATE
+                self.device_bill += (self.device_power * self.device_power_from_grid * publish_period / 3600 / 1000 / self.device_power_from_load) * PEAK_RATE
             else:
-                self.device_bill += (self.device_power * publish_period / 3600 / 1000) * OFFPEAK_RATE
+                self.device_bill += (self.device_power * self.device_power_from_grid * publish_period / 3600 / 1000 / self.device_power_from_load) * OFFPEAK_RATE
 
 
     @periodic(publish_period)
@@ -202,7 +210,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         '''
 
         # TODO this is example how to write an app to control Refrigerator
-        topic = '/agent/ui/lighting'
+        topic = '/agent/ui/lighting/'
         now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
