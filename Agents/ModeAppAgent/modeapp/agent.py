@@ -72,14 +72,18 @@ class ModeAppAgent(PublishMixin, BaseAgent):
         }
 
         # home_mode = ["DR", "ECO", "COMFORT"]
-        #TODO fix rebate and eco saving
-        DR_rebate_price = 8.00
-        ECO_saving_cost = round(random.uniform(1.00,50.00), 2)
-        message = json.dumps({"home_mode": self.home_mode.upper(),
-             "DR_rebate_price": DR_rebate_price,
-             "ECO_saving_cost": ECO_saving_cost})
-        self.publish(topic, headers, message)
-        print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+        try:
+            # TODO fix rebate and eco saving
+            DR_rebate_price = 8.00
+            ECO_saving_cost = round(random.uniform(1.00, 50.00), 2)
+            print self.home_mode.upper()
+            message = json.dumps({"home_mode": self.home_mode.upper(),
+                                  "DR_rebate_price": DR_rebate_price,
+                                  "ECO_saving_cost": ECO_saving_cost})
+            self.publish(topic, headers, message)
+            print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+        except:
+            print "home_mode has not been set yet"
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''

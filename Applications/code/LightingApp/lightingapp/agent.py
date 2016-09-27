@@ -44,7 +44,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     device_power = 0
     device_energy = 0
     device_bill = 0
-    device_id = ' '
+    # device_id = ' '
 
     def __init__(self, config_path, **kwargs):
         super(ListenerAgent, self).__init__(**kwargs)
@@ -67,6 +67,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "Topic: {}".format(topic)
         print "Headers: {}".format(headers)
         received_message = json.loads(message[0])
+        received_headers = dict(headers)
         print received_message
         print"---------------------------------------------------"
         # {u'status': u'ON', u'color': u'#fff7d0', u'saturation': None, u'brightness': 100}
@@ -85,11 +86,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "+++++++++++++++++++++++++++++++++++++++++++++"
 
 # Start TODO #1
+        print received_headers['AgentID']
         self.device_status = received_message['status']
         print self.device_status
         self.device_brightness = received_message['brightness']
         print self.device_brightness
-        self.device_id = received_message['AgentID']
+        self.device_id = received_headers['AgentID']
 
         self.calculate_power()
         self.calculate_on_now_for()
@@ -200,7 +202,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         '''
 
         # TODO this is example how to write an app to control Refrigerator
-        topic = '/agent/ui/light/update_realtime/bemoss/999/2HUE0017881cab4b'
+        topic = '/agent/ui/lighting'
         now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
