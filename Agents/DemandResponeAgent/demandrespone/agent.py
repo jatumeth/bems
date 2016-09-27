@@ -109,11 +109,11 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # print "MODE---------"
         # print "Topic: {}".format(topic)
         # print "Headers: {}".format(headers)
-        # print "Message: {}".format(message)
+        print "Message: {}".format(message)
         event = json.loads(message[0])
         # print type(event)
         # print event
-        event_status = event["status"]
+        self.event_status = event["status"]
         event_mode = event["mode"]
         self.mode = event["mode"]
         # print "event_status: {} ".format(event_status)
@@ -124,7 +124,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             self.publish_Comfort()
         elif (event_mode == "eco"):
             self.publish_ECO()
-        elif (event_mode == "dr"):
+        elif (event_mode == "dr") and (self.event_status == "enable"):
             self.publish_DR()
         else:
             print "Finish Select mode"
@@ -176,41 +176,41 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
         if self.actor != "ui":
             print "+++++++++++++++++++++++++++++++++++++++++"
-            if self.mode == ("eco" or "dr" or "comfort"):
-                print "now working at : {}".format(self.mode)
+            # if self.mode == ("eco" or "dr" or "comfort"):
+            print "now working at : {}".format(self.mode)
+            self.brightness = 100
+            if self.illu > 500:
+                self.brightness = 1
+            elif self.illu > 400:
+                self.brightness = 10
+            elif self.illu > 350:
+                self.brightness = 10
+            elif self.illu > 300:
+                self.brightness = 20
+            elif self.illu > 250:
+                self.brightness = 30
+            elif self.illu > 210:
+                self.brightness = 40
+            # elif self.illu > 180:
+            #     self.brightness = 50
+            elif self.illu > 150:
+                self.brightness = 70
+            # elif self.illu > 120:
+            #     self.brightness = 80
+            elif self.illu > 100:
                 self.brightness = 100
-                if self.illu > 500:
-                    self.brightness = 1
-                elif self.illu > 400:
-                    self.brightness = 10
-                elif self.illu > 350:
-                    self.brightness = 10
-                elif self.illu > 300:
-                    self.brightness = 20
-                elif self.illu > 250:
-                    self.brightness = 30
-                elif self.illu > 210:
-                    self.brightness = 40
-                # elif self.illu > 180:
-                #     self.brightness = 50
-                elif self.illu > 150:
-                    self.brightness = 70
-                # elif self.illu > 120:
-                #     self.brightness = 80
-                elif self.illu > 100:
-                    self.brightness = 100
-                else:
-                    self.brightness = 100
-
-                if(self.mode == "comfort"):
-                    self.brightness = 100
-                else:
-                    print""
-                self.HUE_DIM(self.brightness)
-                print "calculate brightness to (%){}".format(self.brightness)
-                print "-------------------------------------------------------------------------"
             else:
-                print "-------------------------------------------------------------------------"
+                self.brightness = 100
+
+            if(self.mode == "comfort"):
+                self.brightness = 100
+            else:
+                print""
+            self.HUE_DIM(self.brightness)
+            print "calculate brightness to (%){}".format(self.brightness)
+            print "-------------------------------------------------------------------------"
+        # else:
+            print "-------------------------------------------------------------------------"
 
         else:
             print "now working at custom mode"
@@ -435,7 +435,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "color": [255, 255, 255]})
+        message = json.dumps({"status": "ON"})
         self.publish(topic, headers, message)
         print ("HUE turn ON")
         print ("topic{}".format(topic))
@@ -463,7 +463,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"color": [255, 255, 255], "status": "ON", "brightness": brightness})
+        message = json.dumps({"status": "ON", "brightness": brightness})
         self.publish(topic, headers, message)
         print ("HUE DIM brightness by DR, eco or Comfort mode ")
 
@@ -476,7 +476,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"color": [255, 255, 255], "status": "ON", "brightness": 100})
+        message = json.dumps({"status": "ON", "brightness": 100})
         self.publish(topic, headers, message)
         print ("HUE DIM brightness")
 
