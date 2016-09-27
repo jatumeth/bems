@@ -186,6 +186,11 @@ volttron-pkg package ~/workspace/bemoss_os/Applications/code/LightingApp
 volttron-pkg configure /tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/LightingApp/lightingappagent.launch.json
 volttron-ctl install LightingApp=/tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl
 
+# Run PEA Welcome Switch Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/PlugloadAgent
+volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WSP3424348ce9748959b185fa8d39faeda.launch.json
+volttron-ctl install 3WSP3424348ce97489=/tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
