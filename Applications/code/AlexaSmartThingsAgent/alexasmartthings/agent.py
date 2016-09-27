@@ -78,6 +78,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # Demonstrate accessing a value from the config file
         _log.info(self.config['message'])
         self._agent_id = self.config['agentid']
+        self.done_on = False
+        self.done_off = False
         # test control air
         # self.publish_heartbeat()
         # Always call the base class setup()
@@ -95,12 +97,16 @@ class ListenerAgent(PublishMixin, BaseAgent):
         _message = json.loads(message[0])
         status = _message['status']
         print("status: {}".format(status))
-        if (status == "ON"):
+        if (status == "ON" and self.done_on == False):
             self.HUE_ON()
             self.TV_ON()
-        if (status == "OFF"):
+            self.done_on = True
+            print "Alexa SmartThings Done ON Published"
+        if (status == "OFF" and self.done_off == False):
             self.HUE_OFF()
             self.TV_OFF()
+            self.done_off = True
+            print "Alexa SmartThings Done OFF Published"
 
     def HUE_ON(self):
         # TODO this is example how to write an app to control Lighting
