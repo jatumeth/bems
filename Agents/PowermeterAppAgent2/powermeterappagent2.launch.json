@@ -1,7 +1,7 @@
 {
     "agent": {
-        "exec": "powermeterappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "powermeterapp2agent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agentid": "PowermeterAppAgent",
-    "message": "hello my name is PowermeterAppAgent"
+    "agentid": "PowermeterApp2Agent",
+    "message": "hello my name is PowermeterAppAgent2"
 }
