@@ -225,17 +225,17 @@ class ListenerAgent(PublishMixin, BaseAgent):
             self.HUE_DIM(50)
             print "manual change brightness of hue to 50%"
         self.AC1_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.AC1_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.AC2_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.AC2_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.AC3_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.AC3_OFF()
-        time.sleep(2)
+        time.sleep(5)
         self.FAN_ON()
         time.sleep(2)
         self.Plug_OFF()
@@ -251,15 +251,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
             self.HUE_DIM(50)
             print "manual change brightness of hue to 50%"
         self.AC1_temp27()
-        time.sleep(2)
+        time.sleep(5)
         self.AC1_temp27()
-        time.sleep(2)
+        time.sleep(5)
         self.AC2_temp27()
-        time.sleep(2)
+        time.sleep(5)
         self.AC2_temp27()
-        time.sleep(2)
+        time.sleep(5)
         self.AC3_temp27()
-        time.sleep(2)
+        time.sleep(5)
         self.AC3_temp27()
         time.sleep(2)
         self.FAN_ON()
@@ -302,7 +302,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
+        message = json.dumps({"LivingroomAir1":"0","status": "ON", "temp": "20","fan_speed": "4"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 20")
 
@@ -315,7 +315,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
+        message = json.dumps({"LivingroomAir2":"0","status": "ON", "temp": "20","fan_speed": "4"})
         self.publish(topic, headers, message)
         print ("AC2 turned on : temp 20")
 
@@ -328,7 +328,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "20","fan_speed": "4"})
+        message = json.dumps({"BedroomAir":"0","status": "ON", "temp": "20","fan_speed": "4"})
         # print ("message{}".format(message))
         self.publish(topic, headers, message)
         print ("AC3 turned on : temp 20")
@@ -342,7 +342,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
+        message = json.dumps({"LivingroomAir1":"0","status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 27")
 
@@ -355,7 +355,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "OFF"})
+        message = json.dumps({"LivingroomAir1":"0","status": "OFF"})
         self.publish(topic, headers, message)
         print ("AC1 turned off")
     #
@@ -368,7 +368,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
+        message = json.dumps({"LivingroomAir2":"0","status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC2 turned on : temp 27")
 
@@ -381,7 +381,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "OFF"})
+        message = json.dumps({"LivingroomAir2":"0","status": "OFF"})
         self.publish(topic, headers, message)
         print ("AC2 turned off")
 
@@ -394,7 +394,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "ON", "temp": "27","fan_speed": "1"})
+        message = json.dumps({"BedroomAir":"0","status": "ON", "temp": "27","fan_speed": "1"})
         self.publish(topic, headers, message)
         print ("AC3 turned on : temp 27")
     #
@@ -407,7 +407,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"status": "OFF"})
+        message = json.dumps({"BedroomAir":"0","status": "OFF"})
         self.publish(topic, headers, message)
         print ("AC3 turned off")
 
