@@ -156,7 +156,7 @@ class API:
         solar_phasediff = float((z2[7].split('='))[1].split(' ')[0])
 
         self.set_variable('solar_current', solar_current)
-        self.set_variable('solar_activePower', solar_activePower)
+        # self.set_variable('solar_activePower', solar_activePower)
         self.set_variable('solar_reactivePower', solar_reactivePower)
         self.set_variable('solar_apparentPower', solar_apparentPower)
         self.set_variable('solar_powerfactor', solar_powerfactor)
@@ -166,7 +166,9 @@ class API:
 
         # Load
 
-        z3 = ((x['report'].split('<BR>'))[10]).split(',')
+        #z3 = ((x['report'].split('<BR>'))[10]).split(',')
+        #z3 change with new configuration
+        z3 = ((x['report'].split('<BR>'))[7]).split(',')
         load_current = float(((z3[0].split('='))[1]).split(' ')[0])
         load_activePower = float(((z3[1].split('='))[1]).split(' ')[0])
         load_reactivePower = float(((z3[2].split('='))[1]).split(' ')[0])
@@ -184,6 +186,8 @@ class API:
         self.set_variable('load_quadrant', load_quadrant)
         self.set_variable('load_phaseshift', load_phaseshift)
         self.set_variable('load_phasediff', load_phasediff)
+
+        self.set_variable('solar_activePower', load_activePower - grid_activePower)
 
 
     def printDeviceStatus(self):
