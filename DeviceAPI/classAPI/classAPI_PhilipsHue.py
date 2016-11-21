@@ -112,6 +112,8 @@ class API:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
+                getDeviceStatusResult = False
+
             # Check the connectivity
             if getDeviceStatusResult == True:
                 self.set_variable('offline_count', 0)
