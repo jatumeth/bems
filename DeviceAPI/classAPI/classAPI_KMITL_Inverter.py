@@ -120,100 +120,10 @@ class API:
     #method1: GET Open the port and read the data
     def getDeviceStatus(self):
         getDeviceStatusResult = True
-        filename = os.getcwd() + "/InvConfig.csv"
 
-        _pointer = 0
-        _step = 20
-        _param = {}
         try:
             self.connect()
-            _Total = self.load_reg(filename)
-            while (_Total - _pointer) >= _step:
-                bit_length = 0
-                i = 0
-                is_break = False
-                while (i <= _step):
-                    #print(i)
-                    next_step = _pointer + 1
-                    current_step = int(self.li_val[_pointer]) + 1
-                    #print(self.li_val[next_step])
-                    #print(current_step)
-                    _pointer = _pointer + 1
-
-                    if (int(self.li_val[next_step]) == int(current_step)):
-                        #print("Next Step")
-                        bit_length = bit_length + 1
-                    else:
-                        break
-                    i = i + 1
-
-                #print("total bit length  " + str((bit_length - 1)))
-                # if (i < step):
-                # pointer = pointer + 1
-                mod_inv = self.get_inv_status((_pointer - (bit_length - 1)), (bit_length - 1))
-                # print(mod_inv.registers)
-                if (mod_inv['result'] == self.result_success):
-                    li_reg = mod_inv['msg']
-                else:
-                    #print('Error!!  ' + mod_inv['msg'])
-                    exit()
-                param_key = 0
-
-                for i in li_reg:
-                    # print(i)
-                    #print("name : " + str(self.li_key[(_pointer - (bit_length - 1)) + param_key]) + ",  Address : " + str(
-                        #self.li_val[(_pointer - (bit_length - 1)) + param_key]))
-                    factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
-                    _param[self.li_key[(_pointer - (bit_length - 1)) + param_key]] = round(int(i)*factor,1)
-                    param_key = param_key + 1
-                # print("address:" + str(value) + ", name: " + key + " value:" + str(vv))
-                # pointer = pointer + step
-                #print(_pointer)
-                #print _param.values()
-                #print len(_param.values())
-            if (_Total - _pointer < _step):
-                #print("move to last group")
-                mod_inv = self.get_inv_status(_pointer, _Total - _pointer)
-                if (mod_inv['result'] == self.result_success):
-                    li_reg = mod_inv['msg']
-                else:
-                    #print('Error!!  ' + mod_inv['msg'])
-                    exit()
-                param_key = 0
-                for i in li_reg:
-                    factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
-                    _param[self.li_key[_pointer + param_key]] = round(int(i)*factor,1)
-                    param_key = param_key + 1
-
-                #print _param
-            self.client.close()
-            for k,v in _param.items():
-                self.set_variable(k, v)
-
-
-            _chargerpower = self.get_variable("Accumulated_charger_power_high") + self.get_variable("Accumulated_charger_power_low")
-            self.set_variable('Accumulated_charger_power', _chargerpower)
-            _dischargerpower = self.get_variable("Accumulated_discharger_power_high") + self.get_variable("Accumulated_discharger_power_low")
-            self.set_variable('Accumulated_discharger_power', _dischargerpower)
-            _buypower = self.get_variable("Accumulated_buy_power_high") + self.get_variable("Accumulated_buy_power_low")
-            self.set_variable('Accumulated_buy_power', _buypower)
-            _sellpower = self.get_variable("Accumulated_sell_power_high") + self.get_variable("Accumulated_sell_power_low")
-            self.set_variable('Accumulated_sell_power', _sellpower)
-            _loadpower = self.get_variable("Accumulated_load_power_high") + self.get_variable("Accumulated_load_power_low")
-            self.set_variable('Accumulated_load_power', _loadpower)
-            _usepower = self.get_variable("Accumulated_self_use_power_high") + self.get_variable("Accumulated_self_use_power_low")
-            self.set_variable('Accumulated_self_use_power', _usepower)
-
-            _sellpower = self.get_variable("Accumulated_PV_sell_power_high") + self.get_variable("Accumulated_PV_sell_power_low")
-            self.set_variable('Accumulated_PV_sell_power', _sellpower)
-
-            if self.get_variable("Accumulated_grid_charger_power_high") or self.get_variable("Accumulated_grid_charger_power_low")== None:
-                self.set_variable('Accumulated_grid_charger_power', 0)
-            else:
-                _gridpower = self.get_variable("Accumulated_grid_charger_power_high") + self.get_variable("Accumulated_grid_charger_power_low")
-                self.set_variable('Accumulated_grid_charger_power', _gridpower)
-
-            print self.variables
+            self.getData()
 
         except Exception as er:
             print "classAPI_KMITL_Inverter: ERROR: Reading Modbus registers at getDeviceStatus:"
@@ -224,6 +134,106 @@ class API:
             self.set_variable('offline_count',0)
         else:
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
+
+    def getData(self):
+        filename = os.getcwd() + "/InvConfig.csv"
+
+        _pointer = 0
+        _step = 20
+        _param = {}
+        _Total = self.load_reg(filename)
+        while (_Total - _pointer) >= _step:
+            bit_length = 0
+            i = 0
+            is_break = False
+            while (i <= _step):
+                # print(i)
+                next_step = _pointer + 1
+                current_step = int(self.li_val[_pointer]) + 1
+                # print(self.li_val[next_step])
+                # print(current_step)
+                _pointer = _pointer + 1
+
+                if (int(self.li_val[next_step]) == int(current_step)):
+                    # print("Next Step")
+                    bit_length = bit_length + 1
+                else:
+                    break
+                i = i + 1
+
+            # print("total bit length  " + str((bit_length - 1)))
+            # if (i < step):
+            # pointer = pointer + 1
+            mod_inv = self.get_inv_status((_pointer - (bit_length - 1)), (bit_length - 1))
+            # print(mod_inv.registers)
+            if (mod_inv['result'] == self.result_success):
+                li_reg = mod_inv['msg']
+            else:
+                # print('Error!!  ' + mod_inv['msg'])
+                exit()
+            param_key = 0
+
+            for i in li_reg:
+                # print(i)
+                # print("name : " + str(self.li_key[(_pointer - (bit_length - 1)) + param_key]) + ",  Address : " + str(
+                # self.li_val[(_pointer - (bit_length - 1)) + param_key]))
+                factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
+                _param[self.li_key[(_pointer - (bit_length - 1)) + param_key]] = round(int(i) * factor, 1)
+                param_key = param_key + 1
+                # print("address:" + str(value) + ", name: " + key + " value:" + str(vv))
+                # pointer = pointer + step
+                # print(_pointer)
+                # print _param.values()
+                # print len(_param.values())
+        if (_Total - _pointer < _step):
+            # print("move to last group")
+            mod_inv = self.get_inv_status(_pointer, _Total - _pointer)
+            if (mod_inv['result'] == self.result_success):
+                li_reg = mod_inv['msg']
+            else:
+                # print('Error!!  ' + mod_inv['msg'])
+                exit()
+            param_key = 0
+            for i in li_reg:
+                factor = float(self.li_factor[(_pointer - (bit_length - 1)) + param_key])
+                _param[self.li_key[_pointer + param_key]] = round(int(i) * factor, 1)
+                param_key = param_key + 1
+
+                # print _param
+        self.client.close()
+        for k, v in _param.items():
+            self.set_variable(k, v)
+
+        _chargerpower = self.get_variable("Accumulated_charger_power_high") + self.get_variable(
+            "Accumulated_charger_power_low")
+        self.set_variable('Accumulated_charger_power', _chargerpower)
+        _dischargerpower = self.get_variable("Accumulated_discharger_power_high") + self.get_variable(
+            "Accumulated_discharger_power_low")
+        self.set_variable('Accumulated_discharger_power', _dischargerpower)
+        _buypower = self.get_variable("Accumulated_buy_power_high") + self.get_variable("Accumulated_buy_power_low")
+        self.set_variable('Accumulated_buy_power', _buypower)
+        _sellpower = self.get_variable("Accumulated_sell_power_high") + self.get_variable("Accumulated_sell_power_low")
+        self.set_variable('Accumulated_sell_power', _sellpower)
+        _loadpower = self.get_variable("Accumulated_load_power_high") + self.get_variable("Accumulated_load_power_low")
+        self.set_variable('Accumulated_load_power', _loadpower)
+        _usepower = self.get_variable("Accumulated_self_use_power_high") + self.get_variable(
+            "Accumulated_self_use_power_low")
+        self.set_variable('Accumulated_self_use_power', _usepower)
+
+        _sellpower = self.get_variable("Accumulated_PV_sell_power_high") + self.get_variable(
+            "Accumulated_PV_sell_power_low")
+        self.set_variable('Accumulated_PV_sell_power', _sellpower)
+
+        if self.get_variable("Accumulated_grid_charger_power_high") or self.get_variable(
+                "Accumulated_grid_charger_power_low") == None:
+            self.set_variable('Accumulated_grid_charger_power', 0)
+        else:
+            _gridpower = self.get_variable("Accumulated_grid_charger_power_high") + self.get_variable(
+                "Accumulated_grid_charger_power_low")
+            self.set_variable('Accumulated_grid_charger_power', _gridpower)
+
+        print self.variables
+
 
     #method2: POST Open the port and Change status
     def setDeviceStatus(self, postmsg):
@@ -244,7 +254,7 @@ class API:
 
 
     def connect(self):
-        self.client = ModbusTcpClient('esp8266-mbb.local', port=502)
+        self.client = ModbusTcpClient('192.168.1.49', port=502)
         self.client.connect()
 
     def load_reg(self,filename):
@@ -339,7 +349,7 @@ class API:
 
 #This main method will not be executed when this class is used as a module
 def main():
-    Inverter = API(model='VC1000',type='VAV',api='API',address='192.168.1.60:4',)
+    Inverter = API(model='VC1000',type='VAV',api='API',address='192.168.1.49:4',)
 
     Inverter.getDeviceStatus()
     #Inverter.setDeviceStatus({"mode":"Po"})
