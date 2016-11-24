@@ -47,28 +47,30 @@ under Contract DE-EE0006352
 '''
 
 import time
-import urllib2
+import requests
 import json
 from bemoss_lib.utils import rgb_cie
+
+
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    def __init__(self,**kwargs):  # default color is white
+    def __init__(self, **kwargs):  # default color is white
         # Initialized common attributes
         self.variables = kwargs
         self.debug = True
-        self.set_variable('offline_count',0)
-        self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
+        self.set_variable('offline_count', 0)
+        self.set_variable('connection_renew_interval', 6000)  # nothing to renew, right now
         self.only_white_bulb = None
         # to initialize the only white bulb value
         self.getDeviceStatus()
     def renewConnection(self):
         pass
 
-    def set_variable(self,k,v):  # k=key, v=value
+    def set_variable(self, k, v):  # k=key, v=value
         self.variables[k] = v
 
-    def get_variable(self,k):
+    def get_variable(self, k):
         return self.variables.get(k, None)  # default of get_variable is none
 
     # 2. Attributes from Attributes table
@@ -81,7 +83,7 @@ class API:
     color             GET    POST      temporary target heat setpoint (floating point in deg F)
      ------------------------------------------------------------------------------------------
 
-    ''' 
+    '''
 
     # 3. Capabilites (methods) from Capabilities table
     '''
@@ -89,46 +91,49 @@ class API:
     1. getDeviceStatus() GET
     2. setDeviceStatus(postmsg) PUT
     3. identifyDevice()
-    '''    
+    '''
 
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         getDeviceStatusResult = True
         _hue_username = self.get_variable("username")
-        _url_append = '/api/'+_hue_username+'/groups/0/'
+        _url_append = '/api/' + _hue_username + '/groups/0/'
         _urlData = self.get_variable("address").replace(':80', _url_append)
         try:
-            _deviceUrl = urllib2.urlopen(_urlData, timeout=20)
-            print(" {0}Agent is querying its current status (status:{1}) please wait ...".
-                  format(self.variables.get('agent_id', None), _deviceUrl.getcode()))
-            if (_deviceUrl.getcode() == 200):
-                self.getDeviceStatusJson(_deviceUrl.read().decode("utf-8")) #convert string data to JSON object then interpret it
+            request = requests.get(_urlData)
+            checkconnect = request.status_code
+            print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(
+                self.variables.get('agent_id', None), str(checkconnect)))
+
+            if checkconnect == 200:
+                self.getDeviceStatusJson(request.content)
                 if self.debug is True:
                     self.printDeviceStatus()
             else:
-                print (" Received an error from server, cannot retrieve results " + str(_deviceUrl.getcode()))
+                print (" Received an error from server, cannot retrieve results")
                 getDeviceStatusResult = False
+
             # Check the connectivity
-            if getDeviceStatusResult==True:
+            if getDeviceStatusResult == True:
                 self.set_variable('offline_count', 0)
             else:
-                self.set_variable('offline_count', self.get_variable('offline_count')+1)
+                self.set_variable('offline_count', self.get_variable('offline_count') + 1)
         except Exception as er:
             print er
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-            self.set_variable('offline_count',self.get_variable('offline_count')+1)
+            self.set_variable('offline_count', self.get_variable('offline_count') + 1)
 
-    def getDeviceStatusJson(self,data):  
+    def getDeviceStatusJson(self, data):
         # Use the json module to load the string data into a dictionary
         _theJSON = json.loads(data)
         # 1. status
         if _theJSON["action"]["on"] == True:
-            self.set_variable('status',"ON")
+            self.set_variable('status', "ON")
         else:
-            self.set_variable('status',"OFF")
+            self.set_variable('status', "OFF")
         # 2. brightness convert to %
-        self.set_variable('brightness',int(round(float(_theJSON["action"]["bri"])*100/255,0)))
+        self.set_variable('brightness', int(round(float(_theJSON["action"]["bri"]) * 100 / 255, 0)))
         # update only white variable every round is necessary in case user add a/take away all color bulb(s).
         self.only_white_bulb = False if 'hue' in _theJSON["action"].keys() else True
         if self.only_white_bulb is False:
@@ -136,19 +141,19 @@ class API:
             self.set_variable('hue', _theJSON["action"]["hue"])
             self.set_variable('xy', _theJSON["action"]["xy"])
             self.set_variable('ct', _theJSON["action"]["ct"])
-            x=_theJSON["action"]["xy"][0]
-            y=_theJSON["action"]["xy"][1]
-            self.set_variable('color', rgb_cie.ColorHelper.getRGBFromXYAndBrightness(x,y,_theJSON["action"]["bri"]))
+            x = _theJSON["action"]["xy"][0]
+            y = _theJSON["action"]["xy"][1]
+            self.set_variable('color', rgb_cie.ColorHelper.getRGBFromXYAndBrightness(x, y, _theJSON["action"]["bri"]))
             self.set_variable('hexcolor', '#%02x%02x%02x' % self.get_variable('color'))
             # 4. saturation convert to %
-            self.set_variable('saturation',int(round(float(_theJSON["action"]["sat"])*100/255,0)))
-            self.set_variable('effect',_theJSON["action"]["effect"])
-            self.set_variable('colormode',_theJSON["action"]["colormode"])
+            self.set_variable('saturation', int(round(float(_theJSON["action"]["sat"]) * 100 / 255, 0)))
+            self.set_variable('effect', _theJSON["action"]["effect"])
+            self.set_variable('colormode', _theJSON["action"]["colormode"])
         for k in _theJSON["lights"]:
             self.set_variable("lights{}".format(k), k)
         self.set_variable('number_lights', len(_theJSON["lights"]))
-        self.set_variable('name',_theJSON["name"])
-        
+        self.set_variable('name', _theJSON["name"])
+
     def printDeviceStatus(self):
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
@@ -164,52 +169,52 @@ class API:
             print(" ct = {}".format(self.get_variable('ct')))
             print(" effect = {}".format(self.get_variable('effect')))
             print(" colormode = {}\n".format(self.get_variable('colormode')))
+
     # ----------------------------------------------------------------------
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
-        #Ex. postmsg = {"on":True,"bri":100,"hue":50260,"sat":200}
+        # Ex. postmsg = {"on":True,"bri":100,"hue":50260,"sat":200}
         _hue_username = self.get_variable("username")
-        _url_append = '/api/'+_hue_username+'/groups/0/'
+        _url_append = '/api/' + _hue_username + '/groups/0/'
         _urlData = self.get_variable("address").replace(':80', _url_append)
-        if self.isPostMsgValid(postmsg) == True: #check if the data is valid
+        if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
             _data = _data.encode(encoding='utf_8')
-            _request = urllib2.Request(_urlData+'action')
-            _request.add_header('Content-Type','application/json')
-            _request.get_method = lambda: 'PUT'
+            _request = _urlData + 'action'
             try:
-                _f = urllib2.urlopen(_request, _data, timeout=20) #when include data this become a POST command
-                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
-                .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
-                print(" after send a POST request: {}".format(_f.read().decode('utf-8')))
+                _f = requests.put(_request, headers={"Content-Type": "application/json"}, data=_data, timeout=20)
+                print _f
+                # _f = urllib2.urlopen(_request, _data, timeout=20) #when include data this become a POST command
+                print(" {0}Agent for {1} is changing its status with {2} please wait ...".format(
+                    self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
+                # print(" after send a POST request: {}".format(_f.read().decode('utf-8')))
             except:
                 print("ERROR: classAPI_PhilipsHue connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
         return setDeviceStatusResult
-            
-    def isPostMsgValid(self,postmsg): #check validity of postmsg
-        dataValidity = True
-        #TODO algo to check whether postmsg is valid 
-        return dataValidity
-    
 
-    def convertPostMsg(self,postmsg):
+    def isPostMsgValid(self, postmsg):  # check validity of postmsg
+        dataValidity = True
+        # TODO algo to check whether postmsg is valid
+        return dataValidity
+
+    def convertPostMsg(self, postmsg):
         msgToDevice = {}
-        datacontainsRGB=False
+        datacontainsRGB = False
         if 'color' in postmsg.keys():
-            datacontainsRGB=True
-            
-        for k,v in postmsg.items():
+            datacontainsRGB = True
+
+        for k, v in postmsg.items():
             if k == 'status':
                 if postmsg.get('status') == "ON":
                     msgToDevice['on'] = True
                 elif postmsg.get('status') == "OFF":
                     msgToDevice['on'] = False
             elif k == 'brightness':
-                msgToDevice['bri'] = int(round(float(postmsg.get('brightness'))*255.0/100.0,0))
+                msgToDevice['bri'] = int(round(float(postmsg.get('brightness')) * 255.0 / 100.0, 0))
             elif k == 'color':
                 if self.only_white_bulb is False:
                     print(type(postmsg['color']))
@@ -218,35 +223,36 @@ class API:
                     _blue = postmsg['color'][2]
                     _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
                     msgToDevice['xy'] = [_xyY.x, _xyY.y]
-                    #msgToDevice['bri']= int(round(_xyY.y*255,0))
+                    # msgToDevice['bri']= int(round(_xyY.y*255,0))
             elif k == 'hue':
-                if datacontainsRGB==False and self.only_white_bulb is False:
+                if datacontainsRGB == False and self.only_white_bulb is False:
                     msgToDevice['hue'] = postmsg.get('hue')
             elif k == 'saturation':
-                if datacontainsRGB==False and self.only_white_bulb is False:
-                    msgToDevice['sat'] = int(round(float(postmsg.get('saturation'))*255.0/100.0,0))
+                if datacontainsRGB == False and self.only_white_bulb is False:
+                    msgToDevice['sat'] = int(round(float(postmsg.get('saturation')) * 255.0 / 100.0, 0))
             else:
                 msgToDevice[k] = v
         return msgToDevice
+
     # ----------------------------------------------------------------------
     # method3: Identify this lights (Physically)
     def identifyDevice(self):
         identifyDeviceResult = False
         print(" {0}Agent for {1} is identifying itself by doing colorloop. Please observe your lights"
-              .format(self.variables.get('agent_id',None), self.variables.get('model',None)))
+              .format(self.variables.get('agent_id', None), self.variables.get('model', None)))
         try:
-            devicewasoff=0
-            if self.get_variable('status')=="OFF":
-                devicewasoff=1
-                self.setDeviceStatus({"status":"ON"})
+            devicewasoff = 0
+            if self.get_variable('status') == "OFF":
+                devicewasoff = 1
+                self.setDeviceStatus({"status": "ON"})
             elif self.only_white_bulb:
-                self.setDeviceStatus({"status":"OFF"})
+                self.setDeviceStatus({"status": "OFF"})
             if self.only_white_bulb is False:
                 self.setDeviceStatus({"effect": "colorloop"})
             if self.only_white_bulb:
                 time_iden = 3
             else:
-                time_iden = 10 #time to do identification
+                time_iden = 10  # time to do identification
             t0 = time.time()
             self.seconds = time_iden
             while time.time() - t0 <= time_iden:
@@ -254,26 +260,32 @@ class API:
                 print("wait: {} sec".format(self.seconds))
                 time.sleep(1)
             self.setDeviceStatus({"effect": "none"})
-            if devicewasoff==1:
-                self.setDeviceStatus({"status":"OFF"})
+            if devicewasoff == 1:
+                self.setDeviceStatus({"status": "OFF"})
             else:
-                self.setDeviceStatus({"status":"ON"})
+                self.setDeviceStatus({"status": "ON"})
             identifyDeviceResult = True
         except:
             print("ERROR: classAPI_PhilipsHue connection failure! @ identifyDevice")
         return identifyDeviceResult
-    # ----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
+
 
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue',type='wifiLight',api='API3',address='http://192.168.10.14:80',username='acquired username',agent_id='LightingAgent')
-    print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),PhilipsHue.get_variable('model'),PhilipsHue.get_variable('api'),PhilipsHue.get_variable('address')))
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.8:80',
+                     username='YrLSZ-vL0p01zCo7QMpNondjc8T3anYKLMek2JBE', agent_id='LightingAgent')
+    print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
+                                                                       PhilipsHue.get_variable('model'),
+                                                                       PhilipsHue.get_variable('api'),
+                                                                       PhilipsHue.get_variable('address')))
 
     PhilipsHue.getDeviceStatus()
-    PhilipsHue.setDeviceStatus({"status":"ON","color":(155,113,255)})
-    PhilipsHue.identifyDevice()
+    # PhilipsHue.setDeviceStatus({"status": "OFF"})
+    PhilipsHue.setDeviceStatus({"status": "ON", "color": (255, 255, 255)})
+    # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 
 
 if __name__ == "__main__": main()
