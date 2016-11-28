@@ -49,16 +49,18 @@ under Contract DE-EE0006352
 import time
 import json
 import requests
+import psycopg2
 
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
     def __init__(self,**kwargs):
-        # Initialized common attributes
+
+        #,model,device_type,api,address,macaddress,agent_id,db_host,db_port,db_user,db_password,db_database,config_path,device_id):
         self.variables = kwargs
         self.debug = True
-        # self.set_variable('offline_count',0)
-        # self.set_variable('connection_renew_interval', 6000)
+        self.set_variable('offline_count',0)
+        self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
         self.change = True
         self.powerStat = 0
@@ -78,9 +80,6 @@ class API:
         self.timeOnOff = [0, 0, 0, 0]
         self.runtimeCleaning = [0, 0]
         self.temp = []
-        self._id_AirBedroom = '1604F00640667'
-        self._id_AirLiving2 = '1608F00680619'
-        self._id_AirLiving1 = '1608F00680620'
 
         self.powerStatO = 0
         self.modeO = 0
@@ -88,14 +87,13 @@ class API:
         self.setRHO = 40
         self.inFanO = 0
         self.louPosO = 0
-
-
-    # def renewConnection(self):
-    #     pass
+        self.data33 = ""
+    def renewConnection(self):
+        pass
     #
     #
-    # def set_variable(self,k,v):  # k=key, v=value
-    #     self.variables[k] = v
+    def set_variable(self,k,v):  # k=key, v=value
+        self.variables[k] = v
 
     def get_variable(self,k):
         return self.variables.get(k, None)  # default of get_variable is none
@@ -123,44 +121,40 @@ class API:
 
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
-    def getDeviceStatus(self):
+    def gettoken(self):
 
-        getDeviceStatusResult = True
         url = "https://saijom2s.ddns.net/check_login.php"
-        email = "tisanaluk@hotmail.com"
         post_data = {'cus_email': 'tisanaluk@hotmail.com', 'cus_password': 'testair'}
         try:
 
             r = requests.post(url, data=post_data, verify=False)
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
-            status = r.status_code
-            decode = r.content.decode()
             if r.status_code == 200:
-                getDeviceStatusResult = False
                 content0 = eval(r.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
-                #print content0['data']['cus_token']
                 self.token = content0['data']['cus_token']
-
-                # serial_bed = ((content0['data']['air_info'])[0])['serial']
-                # serial_living2 = ((content0['data']['air_info'])[1])['serial']
-                # serial_living1 = ((content0['data']['air_info'])[2])['serial']
-                rx = 1
-                self.getDeviceStatusJson(rx)
-
-                if self.debug is True:
-                    self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
-            getDeviceStatusResult = False
         except Exception as er:
             print er
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
 
-    def getDeviceStatusJson(self, postmsg):
+        file = open('token.txt', 'w')
+        file.write(self.token)
+        file.close()
+        f1 = open("token.txt", "r")
+        self.TXTtoken =f1.readline()
+        f1.close()
+        print "New Token"
+        print self.TXTtoken
 
-        a = postmsg
+    def getDeviceStatus(self):
 
+        #self.gettoken()
+        self.getDeviceStatusJson()
+        self.printDeviceStatus()
+
+    def getDeviceStatusJson(self):
 
         temp =[]
         temp.append(ord('R'))
@@ -170,7 +164,7 @@ class API:
 
         temp.append(self.powerStat)
         temp.append(self.mode)
-        temp.append(int(self.setTemp * 2))
+        temp.append(int(self.setTemp * 2))#Airsaijo.setDeviceStatus({"temp" : "26","fan_speed": "3",'status':'ON'})
         temp.append(self.setRH)
         temp.append(self.inFan)
         temp.append(self.louPos)
@@ -180,31 +174,44 @@ class API:
         for i in range(39):
             temp.append(0)
 
-        data33 = ''
+        data22 = ''
 
         for i in temp:
-            data33 += format(i, '02x')
+            data22 += format(i, '02x')
 
         try:
+            # f1 = open("token.txt", "r")
+            # self.TXTtoken = f1.readline()
+            # f1.close()
+            self.TXTtoken = "41d1ddcee2f7d9f4af323d18ffd4ca87583bf1f20fa4c"
+
+            print "Token is .."
+            print self.TXTtoken
 
             post_url2 = 'https://saijom2s.ddns.net/cmd_data.php'
-            post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.token, 'air_command': data33,
-                          'air_serial': '1608F00680619'}
+            post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': data22,
+                          'air_serial': self.variables['air_serial']}
             r2 = requests.post(post_url2, data=post_data2, verify=False)
             content = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
-
-            if r2.status_code == 200:
-                print (" Received from server is OK")
+            print content['status']
+            if content['status'] == 200:
+                print ("content['status'] == 200")
+                print (" Get / Received from server is OK")
             else:
-                print (" Received an error from server, cannot retrieve results")
+                print "Token is change"
+                #self.gettoken()
+                post_url2 = 'https://saijom2s.ddns.net/cmd_data.php'
+                post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': data22,
+                              'air_serial': self.variables['air_serial']}
+                r2 = requests.post(post_url2, data=post_data2, verify=False)
+                content = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
+                print (" Get / Received an error from server, cannot retrieve results")
         except Exception as er:
                 print er
-                print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-
-        energy = content["data"]['energy']
-        outdoor = content["data"]['outdoor']
+                print('Get / ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+        #
         indoor = content["data"]['indoor']
-
+        print "Start Get /  --------------++++++++++++++++++---------"
         data = indoor
 
         powerStat = int(data[:2], 16)
@@ -276,28 +283,56 @@ class API:
         self.inFanO = int(inFan)
         self.louPosO = int(louPos)
 
-        print("power stat " + str(powerStat))
-        print("mode " + str(mode))
-        print("setTemp " + str(setTemp))
-        print("roomTemp " + str(roomTemp))
-        print("setRH " + str(setRH))
-        print("roomRH " + str(roomRH))
-        print("in Fan " + str(inFan))
-        print("Lou Pos " + str(louPos))
+        if int(powerStat) == 0:
+            self.set_variable('status', "OFF")
+        elif int(powerStat) == 1:
+            self.set_variable('status', "ON")
+        self.set_variable('current_temperature', int(roomTemp))
+        self.set_variable('set_temperature', int(setTemp))
+        self.set_variable('current_humidity', int(roomRH))
+        self.set_variable('set_humidity', int(setRH))
+        self._mode = int(mode)
+        if self._mode == 0 :
+            self.set_variable('mode', "Cool")
+        elif self._mode == 1 :
+            self.set_variable('mode', "Fan")
+        elif self._mode == 2 :
+            self.set_variable('mode', "Dry")
+        elif self._mode == 3 :
+            self.set_variable('mode', "Heat")
+        elif self._mode == 4 :
+            self.set_variable('mode', "Auto")
+        self.set_variable('fan_speed', int(inFan))
+        self.set_variable('fin_angle', int(louPos))
 
+        # print("power stat " + str(powerStat))
+        # print("mode " + str(mode))
+        # print("setTemp " + str(setTemp))
+        # print("roomTemp " + str(int(powerStat)))
+        # print("in Fan " + str(inFan))
+
+
+        print "End Get /  --------------++++++++++++++++++---------"
 
     def printDeviceStatus(self):
 
+        print(" status = {}".format(self.get_variable('status')))
+        print(" current_temperature = {}".format(self.get_variable('current_temperature')))
+        print(" set_temperature = {}".format(self.get_variable('set_temperature')))
+        print(" current_humidity = {}".format(self.get_variable('current_humidity')))
+        print(" mode = {}".format(self.get_variable('mode')))
+        print(" fan_speed = {}".format(self.get_variable('fan_speed')))
+        print(" fin_angle = {}".format(self.get_variable('fin_angle')))
+        print("-------------------------")
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
 
-
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
+        print "---start Set ---  ---start Set ---  ---start Set ---"
 
-        postmsg2 = self.convertPostMsg(postmsg)
-        print postmsg2
         self.getDeviceStatus()
+        postmsg2 = self.convertPostMsg(postmsg)
         self.powerStat = self.powerStatO
         self.mode = self.modeO
         self.setTemp = self.setTempO
@@ -310,153 +345,58 @@ class API:
                 self.setTemp = int((postmsg2['temp']))
             elif k == 'status':
                 self.powerStat = int((postmsg2['status']))
+
             elif k == 'mode':
                 self.mode = int((postmsg2['mode']))
+
             elif k == 'fan_speed':
                 self.inFan = int((postmsg2['fan_speed']))
             else:
                 m = 1
 
-        temp = []
-        temp.append(ord('C'))
-        temp.append(ord('M'))
-        temp.append(ord('D'))
-        temp.append(ord('+'))
+        temps = []
+        temps.append(ord('C'))
+        temps.append(ord('M'))
+        temps.append(ord('D'))
+        temps.append(ord('+'))
 
-        temp.append(self.powerStat)
-        temp.append(self.mode)
-        temp.append(int(self.setTemp * 2))
-        temp.append(self.setRH)
-        temp.append(self.inFan)
-        temp.append(self.louPos)
-        temp.append(0b10000)
+        temps.append(int(self.powerStat))
+        temps.append(int(self.mode))
+        temps.append(int(self.setTemp * 2))
+        temps.append(int(self.setRH))
+        temps.append(int(self.inFan))
+        temps.append(int(self.louPos))
+        temps.append(0b10000)
 
         for i in range(39):
-            temp.append(0)
+            temps.append(0)
 
-        data33 = ''
+        self.data33 = ''
 
-        for i in temp:
-            data33 += format(i, '02x')
-        print "----------55555555555555"
-        print postmsg2['_id']
+        for i in temps:
+            self.data33 += format(i, '02x')
+
         try:
+            print "*********************"
+            print "---Start Set Air SAIJO---   ---Start Set Air SAIJO---  ---Start Set Air SAIJO---"
 
-            post_url2 = 'https://saijom2s.ddns.net/cmd_data.php'
-            post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.token, 'air_command': data33,
-                          'air_serial': postmsg2['_id']}
-            r2 = requests.post(post_url2, data=post_data2, verify=False)
-            content = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
-            status2 = r2.status_code
-            decode2 = r2.content.decode()
-            if r2.status_code == 200:
+            post_url3 = 'https://saijom2s.ddns.net/cmd_data.php'
+            post_data3 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': self.data33,
+                          'air_serial': self.variables['air_serial']}
+            r3 = requests.post(post_url3, data=post_data3, verify=False)
+
+            print "End Set"
+            print r3.status_code
+
+            if r3.status_code == 200:
                 print (" Received from server is OK")
             else:
                 print (" Received an error from server, cannot retrieve results")
         except Exception as er:
             print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+            print('ERROR: classAPI_Air')
 
-        # energy = content["data"]['energy']
-        # outdoor = content["data"]['outdoor']
-        indoor = content["data"]['indoor']
-
-        data = indoor
-
-        powerStat = int(data[:2], 16)
-        data = data[2:]
-        mode = int(data[:2], 16)
-        data = data[2:]
-        setTemp = int(data[:2], 16) * 0.5
-        data = data[2:]
-        roomTemp = int(data[:2], 16) * 0.25
-        data = data[2:]
-        setRH = int(data[:2], 16)
-        data = data[2:]
-        roomRH = int(data[:2], 16)
-        data = data[2:]
-        inFan = int(data[:2], 16)
-        data = data[2:]
-        louPos = int(data[:2], 16)
-        data = data[2:]
-        Opt1 = int(data[:2], 16)
-        data = data[2:]
-
-        temp = []
-        for i in range(3):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        opt2_4 = temp
-
-        temp = []
-        for i in range(6):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        something3 = temp
-
-        temp = []
-        for i in range(2):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        inExv = temp
-
-        temp = []
-        for i in range(5):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        something4 = temp
-
-        FacReReq = int(data[:2], 16)
-        data = data[2:]
-
-        temp = []
-        for i in range(2):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        reservI = temp
-
-        temp = []
-        for i in range(2):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        runtimeCleaning = temp
-
-        temp = []
-        for i in range(4):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        timeOnOff = temp
-
-        temp = []
-        for i in range(50):
-            temp.append(int(data[:2], 16))
-            data = data[2:]
-        print "-----------------------------------------"
-        print "All parameter after set"
-        print("power stat " + str(powerStat))
-        print("mode " + str(mode))
-        print("setTemp " + str(setTemp))
-        print("roomTemp " + str(roomTemp))
-        print("setRH " + str(setRH))
-        print("roomRH " + str(roomRH))
-        print("in Fan " + str(inFan))
-        print("Lou Pos " + str(louPos))
-        print "-----------------------------------------"
-
-        #     try:
-        #         print "sending requests put"
-        #         r = requests.put(
-        #             "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/1cf71480-1a2d-40ed-99e6-f203a0978440",
-        #             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, data= _data, timeout=20);
-        #         print(" {0}Agent for {1} is changing its status with {2} please wait ..."
-        #               .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
-        #         print(" after send a POST request: {}".format(r.status_code))
-        #     except:
-        #         print("ERROR: classAPI_AirSAIJO connection failure! @ setDeviceStatus")
-        #         setDeviceStatusResult = False
-        # else:
-        #     print("The POST message is invalid, try again\n")
-        # return setDeviceStatusResult
+        print "---End Set Air SAIJO---   ---End Set Air SAIJO---   ---End Set Air SAIJO---"
 
     def isPostMsgValid(self, postmsg):  # check validity of postmsg
         dataValidity = True
@@ -464,24 +404,19 @@ class API:
         return dataValidity
 
     def convertPostMsg(self, postmsg):
+        print "StartconvertPostMsg"
         msgToDevice = {}
         for k,v in postmsg.items():
             if k == 'temp':
-                msgToDevice['temp'] = postmsg.get('temp')
+                temp1 = str(postmsg.get('temp'))
+                msgToDevice['temp'] = int(temp1)
             elif k == 'humidity':
                 msgToDevice['humidity'] = postmsg.get('humidity')
-            elif k == 'fan_speed':
-                msgToDevice['fan_speed'] = postmsg.get('fan_speed')
             elif k == 'fin_angle':
                 msgToDevice['fin_angle'] = postmsg.get('fin_angle')
             elif k == 'fan_speed':
-                msgToDevice['fan_speed'] = postmsg.get('fan_speed')
-            elif k == 'BedroomAir':
-                msgToDevice['_id'] = self._id_AirBedroom
-            elif k == 'LivingroomAir1':
-                msgToDevice['_id'] = self._id_AirLiving1
-            elif k == 'LivingroomAir2':
-                msgToDevice['_id'] = self._id_AirLiving2
+                fan_speed = str(postmsg.get('fan_speed'))
+                msgToDevice['fan_speed'] = int(fan_speed)
             elif k == 'mode':
                 if postmsg.get('mode') == "cool":
                     msgToDevice['mode'] = 0
@@ -500,6 +435,8 @@ class API:
                     msgToDevice['status'] = 0
             else:
                 msgToDevice[k] = v
+
+        print(" end convert massage = {}".format(msgToDevice))
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -509,12 +446,16 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    AirSAIJO = API(model='AirSAIJO', type='tv', api='API3', agent_id='AirSAIJOAgent')
-    # AirSAIJO.getDeviceStatus()
+    Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
+                   address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
+                   device_id="LivingroomAir1",air_serial="1608F00680620")
 
-    #AirSAIJO.setDeviceStatus({"LivingroomAir2":"0","status": "ON"})
+    #Airsaijo.getDeviceStatus()
+    #Airsaijo.setDeviceStatus({"temp" : "24","fan_speed": "1",'status':'ON'})
+    #Airsaijo.setDeviceStatus({"status": "ON"})
 
-    AirSAIJO.setDeviceStatus({"LivingroomAir2":"0", "temp" : "20","fan_speed": "4",'status':'ON'})
+    # 1   "air_serial": "1608F00680620",  2# "air_serial": "1608F00680619",  Bed     "air_serial": "1604F00640667",
+
 
 
     # 'BedroomAir' or 'LivingroomAir1' or 'LivingroomAir2'
