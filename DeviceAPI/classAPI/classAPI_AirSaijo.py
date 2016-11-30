@@ -46,10 +46,9 @@ under Contract DE-EE0006352
 #__lastUpdated__ = "2016-03-14 11:23:33"
 '''
 
-import time
-import json
 import requests
 import psycopg2
+import datetime
 
 class API:
     # 1. constructor : gets call every time when create a new class
@@ -80,14 +79,13 @@ class API:
         self.timeOnOff = [0, 0, 0, 0]
         self.runtimeCleaning = [0, 0]
         self.temp = []
-
         self.powerStatO = 0
         self.modeO = 0
         self.setTempO = 25
         self.setRHO = 40
         self.inFanO = 0
         self.louPosO = 0
-        self.data33 = ""
+        self.SetAC_Data = ""
     def renewConnection(self):
         pass
     #
@@ -103,54 +101,31 @@ class API:
     '''
     Attributes:
      ------------------------------------------------------------------------------------------
-    label            GET          label in string
-    illuminance      GET          illuminance
-    temperature      GET          temporary target heat setpoint (floating point in deg F)
-    battery          GET          percent battery of Fibaro censor
-    motion           GET          motion  status (active/inactive)
-    tamper           GET          tamper  status (active/inactive)
-    unitTime         GET          Hue light effect 'none' or 'colorloop'
+    label               GET              label in string
+    status              GET,SET          On/Off
+    temperature         GET              temporary now (floating point in deg C)
+    set_temperature     GET,SET          temporary target heat setpoint (floating point in deg C)
+    mode                GET,SET          AC operation mode such as ( "Cool" , "Fan" , "Dry" , "Heat" , "Auto" )
+    fan_speed           GET,SET          Fan speed Of AC in range 1-4
+    fin_angle           GET,SET          AC operate angle
+
      ------------------------------------------------------------------------------------------
+
+
 
     '''
     # 3. Capabilites (methods) from Capabilities table
     '''
-    API3 available methods:
+    API2 available methods:
     1. getDeviceStatus() GET
+    2. setDeviceStatus() GET
     '''    
 
     # ----------------------------------------------------------------------
-    # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
-    def gettoken(self):
-
-        url = "https://saijom2s.ddns.net/check_login.php"
-        post_data = {'cus_email': 'tisanaluk@hotmail.com', 'cus_password': 'testair'}
-        try:
-
-            r = requests.post(url, data=post_data, verify=False)
-            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
-            format(self.variables.get('agent_id', None), str(r.status_code))
-            if r.status_code == 200:
-                content0 = eval(r.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
-                self.token = content0['data']['cus_token']
-            else:
-                print (" Received an error from server, cannot retrieve results")
-        except Exception as er:
-            print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-
-        file = open('token.txt', 'w')
-        file.write(self.token)
-        file.close()
-        f1 = open("token.txt", "r")
-        self.TXTtoken =f1.readline()
-        f1.close()
-        print "New Token"
-        print self.TXTtoken
 
     def getDeviceStatus(self):
 
-        #self.gettoken()
+        self.opentoken()
         self.getDeviceStatusJson()
         self.printDeviceStatus()
 
@@ -164,7 +139,7 @@ class API:
 
         temp.append(self.powerStat)
         temp.append(self.mode)
-        temp.append(int(self.setTemp * 2))#Airsaijo.setDeviceStatus({"temp" : "26","fan_speed": "3",'status':'ON'})
+        temp.append(int(self.setTemp * 2))
         temp.append(self.setRH)
         temp.append(self.inFan)
         temp.append(self.louPos)
@@ -174,43 +149,35 @@ class API:
         for i in range(39):
             temp.append(0)
 
-        data22 = ''
+        getAC_Data = ''
 
         for i in temp:
-            data22 += format(i, '02x')
+            getAC_Data += format(i, '02x')
 
         try:
-            # f1 = open("token.txt", "r")
-            # self.TXTtoken = f1.readline()
-            # f1.close()
-            self.TXTtoken = "41d1ddcee2f7d9f4af323d18ffd4ca87583bf1f20fa4c"
-
-            print "Token is .."
-            print self.TXTtoken
-
-            post_url2 = 'https://saijom2s.ddns.net/cmd_data.php'
-            post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': data22,
+            post_url_get = 'https://saijom2s.ddns.net/cmd_data.php'
+            post_data_get = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self. token, 'air_command': getAC_Data,
                           'air_serial': self.variables['air_serial']}
-            r2 = requests.post(post_url2, data=post_data2, verify=False)
-            content = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
-            print content['status']
-            if content['status'] == 200:
-                print ("content['status'] == 200")
+            requests_get= requests.post(post_url_get, data=post_data_get, verify=False)
+            content_get = eval(requests_get.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
+            print content_get['status']
+            if int(content_get['status']) == 200:
                 print (" Get / Received from server is OK")
-            else:
+            elif int(content_get['status']) == 400:
                 print "Token is change"
-                #self.gettoken()
-                post_url2 = 'https://saijom2s.ddns.net/cmd_data.php'
-                post_data2 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': data22,
+                self.gettoken()
+                post_url_newtoken = 'https://saijom2s.ddns.net/cmd_data.php'
+                post_data_newtoken = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.token, 'air_command': getAC_Data,
                               'air_serial': self.variables['air_serial']}
-                r2 = requests.post(post_url2, data=post_data2, verify=False)
-                content = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
+                r2 = requests.post(post_url_newtoken, data=post_data_newtoken, verify=False)
+                content_get = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
+            else:
                 print (" Get / Received an error from server, cannot retrieve results")
         except Exception as er:
                 print er
-                print('Get / ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+                print('Get / ERROR: classAPI_AC failed to getDeviceStatus')
         #
-        indoor = content["data"]['indoor']
+        indoor = content_get["data"]['indoor']
         print "Start Get /  --------------++++++++++++++++++---------"
         data = indoor
 
@@ -284,9 +251,9 @@ class API:
         self.louPosO = int(louPos)
 
         if int(powerStat) == 0:
-            self.set_variable('status', "OFF")
+            self.set_variable('status', str("OFF"))
         elif int(powerStat) == 1:
-            self.set_variable('status', "ON")
+            self.set_variable('status', str("ON"))
         self.set_variable('current_temperature', int(roomTemp))
         self.set_variable('set_temperature', int(setTemp))
         self.set_variable('current_humidity', int(roomRH))
@@ -305,31 +272,8 @@ class API:
         self.set_variable('fan_speed', int(inFan))
         self.set_variable('fin_angle', int(louPos))
 
-        # print("power stat " + str(powerStat))
-        # print("mode " + str(mode))
-        # print("setTemp " + str(setTemp))
-        # print("roomTemp " + str(int(powerStat)))
-        # print("in Fan " + str(inFan))
-
-
-        print "End Get /  --------------++++++++++++++++++---------"
-
-    def printDeviceStatus(self):
-
-        print(" status = {}".format(self.get_variable('status')))
-        print(" current_temperature = {}".format(self.get_variable('current_temperature')))
-        print(" set_temperature = {}".format(self.get_variable('set_temperature')))
-        print(" current_humidity = {}".format(self.get_variable('current_humidity')))
-        print(" mode = {}".format(self.get_variable('mode')))
-        print(" fan_speed = {}".format(self.get_variable('fan_speed')))
-        print(" fin_angle = {}".format(self.get_variable('fin_angle')))
-        print("-------------------------")
-        # now we can access the contents of the JSON like any other Python object
-        print(" the current status is as follows:")
-
-    # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
-        print "---start Set ---  ---start Set ---  ---start Set ---"
+        print "---start Set--------------" 
 
         self.getDeviceStatus()
         postmsg2 = self.convertPostMsg(postmsg)
@@ -371,24 +315,24 @@ class API:
         for i in range(39):
             temps.append(0)
 
-        self.data33 = ''
+        self.SetAC_Data = ''
 
         for i in temps:
-            self.data33 += format(i, '02x')
+            self.SetAC_Data += format(i, '02x')
 
         try:
             print "*********************"
             print "---Start Set Air SAIJO---   ---Start Set Air SAIJO---  ---Start Set Air SAIJO---"
 
-            post_url3 = 'https://saijom2s.ddns.net/cmd_data.php'
-            post_data3 = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.TXTtoken, 'air_command': self.data33,
+            post_url_set = 'https://saijom2s.ddns.net/cmd_data.php'
+            post_data_set = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.token, 'air_command': self.SetAC_Data,
                           'air_serial': self.variables['air_serial']}
-            r3 = requests.post(post_url3, data=post_data3, verify=False)
+            requests_set = requests.post(post_url_set, data=post_data_set, verify=False)
 
             print "End Set"
-            print r3.status_code
+            print requests_set.status_code
 
-            if r3.status_code == 200:
+            if requests_set.status_code == 200:
                 print (" Received from server is OK")
             else:
                 print (" Received an error from server, cannot retrieve results")
@@ -398,10 +342,16 @@ class API:
 
         print "---End Set Air SAIJO---   ---End Set Air SAIJO---   ---End Set Air SAIJO---"
 
-    def isPostMsgValid(self, postmsg):  # check validity of postmsg
-        dataValidity = True
-        # TODO algo to check whether postmsg is valid
-        return dataValidity
+    def printDeviceStatus(self):
+
+        print(" status = {}".format(self.get_variable('status')))
+        print(" current_temperature = {}".format(self.get_variable('current_temperature')))
+        print(" set_temperature = {}".format(self.get_variable('set_temperature')))
+        print(" current_humidity = {}".format(self.get_variable('current_humidity')))
+        print(" mode = {}".format(self.get_variable('mode')))
+        print(" fan_speed = {}".format(self.get_variable('fan_speed')))
+        print(" fin_angle = {}".format(self.get_variable('fin_angle')))
+        print("-------------------------")
 
     def convertPostMsg(self, postmsg):
         print "StartconvertPostMsg"
@@ -439,7 +389,59 @@ class API:
         print(" end convert massage = {}".format(msgToDevice))
         return msgToDevice
 
-    # ----------------------------------------------------------------------
+    def gettoken(self):
+        url = "https://saijom2s.ddns.net/check_login.php"
+        post_data = {'cus_email': 'tisanaluk@hotmail.com', 'cus_password': 'testair'}
+        try:
+            requests_token = requests.post(url, data=post_data, verify=False)
+            print(
+            "{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'),
+                                                                                           requests_token.status_code))
+            format(self.variables.get('agent_id', None), str(requests_token.status_code))
+            if requests_token.status_code == 200:
+                content0 = eval(
+                    requests_token.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
+                self.token = content0['data']['cus_token']
+            else:
+                print (" Received an error from server, cannot retrieve results")
+        except Exception as er:
+            print er
+            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+
+        print "New Token"
+        conn = psycopg2.connect(host=self.variables['db_host'], port=self.variables['db_port'],
+                                user=self.variables['db_user'], password=self.variables['db_password'],
+                                dbname=self.variables['db_database'])
+
+        cur = conn.cursor()
+        cur.execute("SELECT * from information_schema.tables where table_name=%s", ("ac_saijo_token",))
+        if bool(cur.rowcount):
+            pass
+        else:
+            cur.execute('''CREATE TABLE ac_saijo_token(id SERIAL PRIMARY KEY NOT NULL,
+                    accesstoken VARCHAR(50) NOT NULL, time TIMESTAMP);''')
+            print "create new database ac_saijo_token"
+            conn.commit()
+            cur.execute('INSERT INTO ac_saijo_token (id, accesstoken, time) VALUES (%s, %s ,%s)',
+                        ('1', 'aaa', datetime.datetime.now()))
+            conn.commit()
+
+        cur = conn.cursor()
+        cur.execute('UPDATE ac_saijo_token SET accesstoken=%s WHERE id=%s', (self.token, "1"))
+        conn.commit()
+        cur = conn.cursor()
+        cur.execute('UPDATE ac_saijo_token SET time=%s WHERE id=%s', (datetime.datetime.now(), "1"))
+        conn.commit()
+
+    def opentoken(self):
+        conn = psycopg2.connect(host=self.variables['db_host'], port=self.variables['db_port'],
+                                user=self.variables['db_user'], password=self.variables['db_password'],
+                                dbname=self.variables['db_database'])
+        cur = conn.cursor()
+        cur.execute("""SELECT * from ac_saijo_token""")
+        rows = cur.fetchall()
+        for row in rows:
+            self.token = str(row[1])
 
 # This main method will not be executed when this class is used as a module
 def main():
@@ -448,16 +450,14 @@ def main():
 
     Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
                    address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
-                   device_id="LivingroomAir1",air_serial="1608F00680620")
+                   device_id="LivingroomAir1",air_serial="1608F00680620",db_host="localhost", db_port="5432", db_user="admin", db_password="admin",
+                    db_database="bemossdb")
 
-    #Airsaijo.getDeviceStatus()
+    Airsaijo.getDeviceStatus()
     #Airsaijo.setDeviceStatus({"temp" : "24","fan_speed": "1",'status':'ON'})
     #Airsaijo.setDeviceStatus({"status": "ON"})
 
     # 1   "air_serial": "1608F00680620",  2# "air_serial": "1608F00680619",  Bed     "air_serial": "1604F00640667",
-
-
-
     # 'BedroomAir' or 'LivingroomAir1' or 'LivingroomAir2'
 
 if __name__ == "__main__": main()

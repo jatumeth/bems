@@ -81,12 +81,12 @@ def ACAgent(config_path, **kwargs):
 
     debug_agent = False
     #Dictionary of Variables supposed to be saved in postgress database
-    agentAPImapping = dict(status=[], power=[], energy=[])
+    #agentAPImapping = dict(status=[], power=[], energy=[])
 
     #Dictionary of Variables supposed to be saved into timeseries database
-    log_variables = dict(fin_angle='double', current_humidity='double',
+    log_variables = dict(status='text', fin_angle='double', current_humidity='double',
                          current_temperature='double', fan_speed='double', set_humidity='double',
-                         set_temperature='double', mode='text') #status='text',
+                         set_temperature='double',mode='text' )
 
     tolerance = 0.5 #if the numerical variables change less than this percent, its not conisdered change and not logged
 
@@ -218,7 +218,7 @@ def ACAgent(config_path, **kwargs):
             try:
                 self.cur.execute("UPDATE "+db_table_AC+" SET status=%s "
                                  "WHERE AC_id=%s",
-                                 (self.get_variable('status'), agent_id))
+                                 (self.get_variable('mode'), agent_id))
                 self.con.commit()
                 if self.get_variable('power')!=None:
                     #self.set_variable('power', int(self.get_variable('power')))
