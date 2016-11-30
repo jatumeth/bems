@@ -34,6 +34,7 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
     '''Listens to everything and publishes a heartbeat according to the
     heartbeat period specified in the settings module.
     '''
+    check_day = datetime.datetime.now().weekday()
     total_today_energy = 0
     total_today_energy_from_solar = 0
     total_today_bill = 0
@@ -161,20 +162,15 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
         except:
             print "No header that interesting"
 
-    # def check_for_start_new_day(self):
-    #     time_now = datetime.datetime.now()
-    #     start_today_period = time_now.replace(hour=0, minute=0, second=0)
-    #     end_today_period = time_now.replace(hour=23, minute=59, second=0)
-    #     deltatime = datetime.timedelta(minutes=1)
-    #     if ((time_now - start_today_period) < deltatime) & (self.toggle == 0):
-    #         self.today_last_on_time = 0
-    #         self.today_current_on_time = 0
-    #         self.device_energy = 0
-    #         self.device_bill = 0
-    #         self.toggle = 1
-    #
-    #     if ((end_today_period - time_now) < deltatime):
-    #         self.toggle = 0
+    def check_for_start_new_day(self):
+        time_now = datetime.datetime.now().weekday()
+
+        if (((self.check_day == 6) and (self.check_day > time_now)) or ((self.check_day is not 6) and (self.check_day < time_now))):
+            self.today_last_on_time = 0
+            self.today_current_on_time = 0
+            self.device_energy = 0
+            self.device_bill = 0
+            self.check_day = time_now
 
     def calculate_total_today_energy_bill(self, power_from_grid, power_from_load, power_from_solar):
         time_now = datetime.datetime.now()
@@ -289,6 +285,8 @@ class PowermeterAppAgent(PublishMixin, BaseAgent):
 
         HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
         '''
+        self.check_for_start_new_day()
+
         topic = "/agent/ui/dashboard"
         now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
