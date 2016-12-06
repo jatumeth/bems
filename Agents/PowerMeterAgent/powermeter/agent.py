@@ -28,6 +28,7 @@ import datetime
 import time
 import math
 from bemoss_lib.databases.cassandraAPI import cassandraDB
+from ISStreamer.Streamer import Streamer
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -162,6 +163,13 @@ def powermeteragent(config_path, **kwargs):
                 print er
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
+            try:
+                self.streamer = Streamer(bucket_name="PEA Smart Home", bucket_key="YWJ69J6NWJK5",
+                                    access_key="N6tbiTrvyUWXWArGuYdpcjeUQJIlCDRe")
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
         #These set and get methods allow scalability 
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
@@ -207,6 +215,11 @@ def powermeteragent(config_path, **kwargs):
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
 
+            for v in log_variables:
+                if v in self.variables:
+                    print("logging {} with value {}".format(v, PowerMeter.variables[v]))
+                    self.streamer.log(str(agent_id)+v, PowerMeter.variables[v])
+
             # # Step: Check if any Device is OFFLINE
             # self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
             # if self.cur.rowcount != 0:
@@ -240,41 +253,41 @@ def powermeteragent(config_path, **kwargs):
             #     self.track_event_send_notification()
             #
             #step4: update PostgresQL (meta-data) database
-            try:
-                for k, v in log_variables.items():
-                    # check if column exists, then updateDB to corresponding column
-                    self.cur.execute("select column_name from information_schema.columns where table_name=%s and column_name=%s",
-                             (db_table_power_meter, k,))
-                    if bool(self.cur.rowcount):
-                        self.updateDB(db_table_power_meter, k, db_id_column_name, self.get_variable(k), agent_id)
-                    else:
-                        pass
-                # self.updateDB(db_table_power_meter, 'real_power', 'power_meter_id', self.get_variable('real_power'), agent_id)
-                #TODO check ip_address
-                if self.ip_address != None:
-                    psycopg2.extras.register_inet()
-                    _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_power_meter+" SET ip_address=%s WHERE power_meter_id=%s",
-                                     (_ip_address, agent_id))
-                    self.con.commit()
-                if self.get_variable('offline_count')>=3:
-                    self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
-                                     ('OFFLINE', agent_id))
-                    self.con.commit()
-                    _time_stamp_last_offline = str(datetime.datetime.now())
-                    self.cur.execute("UPDATE "+db_table_power_meter+" SET last_offline_time=%s "
-                                     "WHERE power_meter_id=%s",
-                                     (_time_stamp_last_offline, agent_id))
-                    self.con.commit()
-                else:
-                    self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
-                                     ('ONLINE', agent_id))
-                    self.con.commit()
-                print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id, db_database))
-
-            except Exception as er:
-                print("ERROR: {} failed to update database".format(agent_id))
-                print er
+            # try:
+            #     for k, v in log_variables.items():
+            #         # check if column exists, then updateDB to corresponding column
+            #         self.cur.execute("select column_name from information_schema.columns where table_name=%s and column_name=%s",
+            #                  (db_table_power_meter, k,))
+            #         if bool(self.cur.rowcount):
+            #             self.updateDB(db_table_power_meter, k, db_id_column_name, self.get_variable(k), agent_id)
+            #         else:
+            #             pass
+            #     # self.updateDB(db_table_power_meter, 'real_power', 'power_meter_id', self.get_variable('real_power'), agent_id)
+            #     #TODO check ip_address
+            #     if self.ip_address != None:
+            #         psycopg2.extras.register_inet()
+            #         _ip_address = psycopg2.extras.Inet(self.ip_address)
+            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET ip_address=%s WHERE power_meter_id=%s",
+            #                          (_ip_address, agent_id))
+            #         self.con.commit()
+            #     if self.get_variable('offline_count')>=3:
+            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
+            #                          ('OFFLINE', agent_id))
+            #         self.con.commit()
+            #         _time_stamp_last_offline = str(datetime.datetime.now())
+            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET last_offline_time=%s "
+            #                          "WHERE power_meter_id=%s",
+            #                          (_time_stamp_last_offline, agent_id))
+            #         self.con.commit()
+            #     else:
+            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
+            #                          ('ONLINE', agent_id))
+            #         self.con.commit()
+            #     print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id, db_database))
+            #
+            # except Exception as er:
+            #     print("ERROR: {} failed to update database".format(agent_id))
+            #     print er
 
 
             #step5: update sMAP (time-series) database
