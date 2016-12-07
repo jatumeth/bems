@@ -128,7 +128,7 @@ DATABASES = {
         'TABLE_Weather': 'Weather',
         'TABLE_Sonos': 'Sonos',
         'TABLE_NETPIESensor': 'NETPIE',
-
+        'TABLE_daily_consumption': 'daily_consumption',
 
     }
 }
