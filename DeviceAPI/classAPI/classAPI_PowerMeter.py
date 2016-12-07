@@ -36,14 +36,14 @@ expressed herein do not necessarily state or reflect those of the United States 
 VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
 under Contract DE-EE0006352
 
-#__author__ = "BEMOSS Team"
+#__author__ = "PEA HiVE Team"
 #__credits__ = ""
 #__version__ = "2.0"
 #__maintainer__ = "BEMOSS Team"
 #__email__ = "aribemoss@gmail.com"
 #__website__ = "www.bemoss.org"
 #__created__ = "2014-09-12 12:04:50"
-#__lastUpdated__ = "2016-03-14 11:23:33"
+#__lastUpdated__ = "2016-12-07 16:43:35"
 '''
 import time
 import json
@@ -54,16 +54,15 @@ import requests
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         # Initialized common attributes
         self.variables = kwargs
         self.debug = True
-        self.set_variable('offline_count',0)
-        self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
+
     def renewConnection(self):
         pass
 
-    def set_variable(self,k,v):  # k=key, v=value
+    def set_variable(self, k, v):  # k=key, v=value
         self.variables[k] = v
 
     def get_variable(self,k):
@@ -74,13 +73,32 @@ class API:
     '''
     Attributes:
      ------------------------------------------------------------------------------------------
-    label               GET          label in string
+    label              GET          label in string
     Time(Unix)         GET          time in unix
-    Current(A)          GET          current
-    ActivePower(W)      GET          Active Power
-    ReactivePower(Var)  GET          Reactive Power
-    ApparentPower(VA)   GET          Apparent Power
-    Powerfactor         GET          Power factor
+    grid_current
+    grid_activePower
+    grid_reactivePower
+    grid_apparentPower
+    grid_powerfactor
+    grid_quadrant
+    grid_phaseshift
+    grid_phasediff
+    load_current
+    load_activePower
+    load_reactivePower
+    load_apparentPower
+    load_powerfactor
+    load_quadrant
+    load_phaseshift
+    load_phasediff
+    solar_current
+    solar_activePower
+    solar_reactivePower
+    solar_apparentPower
+    solar_powerfactor
+    solar_quadrant
+    solar_phaseshift
+    solar_phasediff
 
      ------------------------------------------------------------------------------------------
 
@@ -111,7 +129,6 @@ class API:
                 url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
                 head_l = "admin"
                 requests.post(url_l, data=head_l)
-            # Check the connectivity
         except Exception as er:
             print er
             print('ERROR: classAPI_PowerMeter failed to getDeviceStatus')
@@ -144,28 +161,7 @@ class API:
         self.set_variable('grid_phaseshift', grid_phaseshift)
         self.set_variable('grid_phasediff', grid_phasediff)
 
-        # Solar
-        z2 = ((x['report'].split('<BR>'))[7]).split(',')
-        solar_current = float(((z2[0].split('='))[1]).split(' ')[0])
-        solar_activePower = float(((z2[1].split('='))[1]).split(' ')[0])
-        solar_reactivePower = float(((z2[2].split('='))[1]).split(' ')[0])
-        solar_apparentPower = float(((z2[3].split('='))[1]).split(' ')[0])
-        solar_powerfactor = float((z2[4].split('='))[1].split(' ')[0]) / 100
-        solar_quadrant = float((z2[5].split('='))[1].split(' ')[0])
-        solar_phaseshift = float((z2[6].split('='))[1].split(' ')[0])
-        solar_phasediff = float((z2[7].split('='))[1].split(' ')[0])
-
-        self.set_variable('solar_current', solar_current)
-        # self.set_variable('solar_activePower', solar_activePower)
-        self.set_variable('solar_reactivePower', solar_reactivePower)
-        self.set_variable('solar_apparentPower', solar_apparentPower)
-        self.set_variable('solar_powerfactor', solar_powerfactor)
-        self.set_variable('solar_quadrant', solar_quadrant)
-        self.set_variable('solar_phaseshift', solar_phaseshift)
-        self.set_variable('solar_phasediff', solar_phasediff)
-
         # Load
-
         #z3 = ((x['report'].split('<BR>'))[10]).split(',')
         #z3 change with new configuration
         z3 = ((x['report'].split('<BR>'))[7]).split(',')
@@ -187,8 +183,26 @@ class API:
         self.set_variable('load_phaseshift', load_phaseshift)
         self.set_variable('load_phasediff', load_phasediff)
 
+        # Solar
+        # z2 = ((x['report'].split('<BR>'))[7]).split(',')
+        # solar_current = float(((z2[0].split('='))[1]).split(' ')[0])
+        # solar_activePower = float(((z2[1].split('='))[1]).split(' ')[0])
+        # solar_reactivePower = float(((z2[2].split('='))[1]).split(' ')[0])
+        # solar_apparentPower = float(((z2[3].split('='))[1]).split(' ')[0])
+        # solar_powerfactor = float((z2[4].split('='))[1].split(' ')[0]) / 100
+        # solar_quadrant = float((z2[5].split('='))[1].split(' ')[0])
+        # solar_phaseshift = float((z2[6].split('='))[1].split(' ')[0])
+        # solar_phasediff = float((z2[7].split('='))[1].split(' ')[0])
+        # TODO due to our current configuration where clamps are at "Grid" and "Load" thus we have to calculate solar variables
+        self.set_variable('solar_current', load_current - grid_current)
         self.set_variable('solar_activePower', load_activePower - grid_activePower)
-
+        self.set_variable('solar_reactivePower', 0)
+        self.set_variable('solar_apparentPower', 0)
+        self.set_variable('solar_powerfactor', 0)
+        # TODO has to correct these variables
+        self.set_variable('solar_quadrant', 0)
+        self.set_variable('solar_phaseshift', 0)
+        self.set_variable('solar_phasediff', 0)
 
     def printDeviceStatus(self):
 
@@ -232,7 +246,8 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PowerMeter = API(model='Smappee', type='PowerMeter', api='API3', agent_id='Smappee')
+    PowerMeter = API(model='Smappee', type='powermeter', api='classAPI_PowerMeter', agent_id='Smappee')
     PowerMeter.getDeviceStatus()
+    print PowerMeter.variables
 
 if __name__ == "__main__": main()

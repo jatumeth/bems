@@ -56,7 +56,6 @@ def powermeteragent(config_path, **kwargs):
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
     cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
-
     debug_agent = False
 
     log_variables = dict(grid_current='double', grid_activePower='double', grid_reactivePower='double',
@@ -68,6 +67,7 @@ def powermeteragent(config_path, **kwargs):
                          load_current='double', load_activePower='double', load_reactivePower='double',
                          load_apparentPower='double', load_powerfactor='double', load_quadrant='double',
                          load_phaseshift='double', load_phasediff='double')
+
     # 2. @params device_info
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
@@ -152,6 +152,7 @@ def powermeteragent(config_path, **kwargs):
             self.tmpDate = datetime.datetime.now()
             self.changed_variables = None
             self.lastUpdateTime = None
+            self.stream_data_initialState = False
 
             # 2. setup connection with db -> Connect to bemossdb database
             try:
@@ -214,11 +215,13 @@ def powermeteragent(config_path, **kwargs):
                     if v not in self.variables: #it won't be in self.variables either (in the first time)
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
-
-            for v in log_variables:
-                if v in self.variables:
-                    print("logging {} with value {}".format(v, PowerMeter.variables[v]))
-                    self.streamer.log(str(agent_id)+v, PowerMeter.variables[v])
+            if (self.stream_data_initialState):
+                for v in log_variables:
+                    if v in self.variables:
+                        print("logging {} with value {}".format(v, PowerMeter.variables[v]))
+                        self.streamer.log(str(agent_id)+v, PowerMeter.variables[v])
+            else:
+                print("{} not streaming data to initialstate".format(agent_id))
 
             # # Step: Check if any Device is OFFLINE
             # self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
