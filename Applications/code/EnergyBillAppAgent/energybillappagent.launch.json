@@ -1,0 +1,12 @@
+{
+    "agent": {
+        "exec": "powermeterapp2agent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agentid": "EnergyBillAppAgent",
+    "message": "hello my name is EnergyBillAppAgent",
+    "db_database": "bemossdb",
+    "db_host": "localhost",
+    "db_password": "admin",
+    "db_port": "5432",
+    "db_user": "admin"
+}
