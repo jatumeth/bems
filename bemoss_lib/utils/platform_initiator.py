@@ -86,6 +86,7 @@ db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_coun
 db_table_seen_notifications_counter = settings.DATABASES['default']['TABLE_seen_notifications_counter']
 db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
 db_table_node_info = settings.DATABASES['default']['TABLE_node_info']
+db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
 
 PROJECT_DIR = settings.PROJECT_DIR
 Agents_Launch_DIR = settings.Agents_Launch_DIR
@@ -231,6 +232,29 @@ if cur.rowcount == 0:  # this APP used to be launched before
     conn.commit()
 
 #8. create tables
+cur.execute("select * from information_schema.tables where table_name=%s", ('daily_consumption',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE daily_consumption")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE daily_consumption
+       (ID SERIAL   PRIMARY KEY   NOT NULL,
+       DATE   DATE   NOT NULL,
+       GRIDIMPORTENERGY     FLOAT,
+       GRIDEXPORTENERGY     FLOAT,
+       SOLARENERGY     FLOAT,
+       LOADENERGY     FLOAT,
+       GRIDIMPORTBILL     FLOAT,
+       GRIDEXPORTBILL     FLOAT,
+       SOLARBILL     FLOAT,
+       LOADBILL     FLOAT);''')
+print "Table daily_consumption created successfully"
+conn.commit()
+
+
 cur.execute("select * from information_schema.tables where table_name=%s", ('application_running',))
 print bool(cur.rowcount)
 if bool(cur.rowcount):
