@@ -167,14 +167,16 @@ def EnergyBillAppAgent(config_path, **kwargs):
             today = datetime.datetime.now().weekday()
             if (((self.check_day == 6) and (self.check_day > today)) or ((self.check_day is not 6) and (self.check_day < today))):
                 self.start_new_day()
-                self.insertDB()
+                # self.insertDB()
             else:
                 pass
 
         def insertDB(self):
+            print self.variables
+            print self.get_variable('solarBill')
             self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                             " VALUES(DEFULT, %s, %s, %s, %s, %s, %s, %s, %s)",
-                             ((str(datetime.datetime.now().date()-datetime.timedelta(days=1))),
+                             " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                             ((str(datetime.datetime.now().date())),
                               self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
                               self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
                               self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
@@ -182,22 +184,30 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
             self.con.commit()
 
-        @periodic(60)
+        @periodic(10)
         def updateDB(self):
             today = str(datetime.datetime.now().date())
-            try:
-                self.cur.execute("UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
-                                                                          "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                          "gridexportbill=%s, solarbill=%s, loadbill=%s"
-                                                                          " WHERE date = '" + today + "'",
-                                 (self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
-                                  self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
-                                  self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                                  self.get_variable('solarBill'), self.get_variable('loadBill')))
-                self.con.commit()
-                print"Success"
-            except:
-                print"Cannot update database"
+
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
+            print bool(self.cur.rowcount)
+            if bool(self.cur.rowcount):
+                try:
+                    self.cur.execute(
+                        "UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+                                                                 "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                 " WHERE date = '" + today + "'",
+                        (self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
+                         self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
+                         self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
+                         self.get_variable('solarBill'), self.get_variable('loadBill')))
+                    self.con.commit()
+                    print"Success"
+                except:
+                    print"Cannot update database"
+            else:
+                self.insertDB()
+
 
         def get_yesterday_data(self):
             time_now = datetime.datetime.now()
