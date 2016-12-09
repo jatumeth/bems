@@ -1,6 +1,6 @@
 {
     "agent": {
-        "exec": "powermeterapp2agent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "energybillappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agentid": "EnergyBillAppAgent",
     "message": "hello my name is EnergyBillAppAgent",

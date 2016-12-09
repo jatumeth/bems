@@ -16,7 +16,7 @@
     "device_monitor_time": 20,
     "macaddress": "20000000000002",
     "model": "Saijo Denki GPS",
-    "type": "Airconditioner",
+    "type": "airconditioner",
     "vendor": "Saijo Denki",
     "zone_id": 999
 }

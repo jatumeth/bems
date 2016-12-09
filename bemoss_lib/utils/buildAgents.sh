@@ -196,6 +196,11 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/PowermeterAppAgent2
 volttron-pkg configure /tmp/volttron_wheels/powermeterapp2agent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowermeterAppAgent2/powermeterappagent2.launch.json
 volttron-ctl install PowermeterApp2Agent=/tmp/volttron_wheels/powermeterapp2agent-0.1-py2-none-any.whl
 
+# Run EnergyBillApp Agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/EnergyBillAppAgent
+volttron-pkg configure /tmp/volttron_wheels/energybillappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EnergyBillAppAgent/energybillappagent.launch.json
+volttron-ctl install EnergyBillAppAgent=/tmp/volttron_wheels/energybillappagent-0.1-py2-none-any.whl
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent
