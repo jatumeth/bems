@@ -96,11 +96,9 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
-
-        getDeviceStatusResult = True
-
         try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/illuminances/01f7f6d2-6e87-4d3e-89e6-3c12174eebcc",headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/551402ec-2513-4d61-a893-433195239b5d",
+                             headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, timeout=20);
             print(" {0}Agent is querying its current status (status:{1}) please wait ...")
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
@@ -118,10 +116,9 @@ class API:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
         except Exception as er:
             print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-            self.set_variable('offline_count',self.get_variable('offline_count')+1)
+            print('ERROR: classAPI_Fibaro failed to getDeviceStatus')
 
-    def getDeviceStatusJson(self,data):
+    def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
         self.set_variable('label', str(conve_json["label"]))
@@ -146,9 +143,7 @@ class API:
         print(" tamper = {}".format(self.get_variable('tamper')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('type')))
-
         print("---------------------------------------------")
-
 
     # ----------------------------------------------------------------------
 
@@ -158,10 +153,10 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    url = "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/illuminances/01f7f6d2-6e87-4d3e-89e6-3c12174eebcc"
-    head = {"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3',address=url,username=head, agent_id='FibaroAgent')
-    #Fibaro.getDeviceStatus()
+    url = "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/551402ec-2513-4d61-a893-433195239b5d"
+    head = {"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}
+    Fibaro = API(model='Fibaro',type='illuminance',api='API3', address=url, username=head, agent_id='FibaroAgent')
+    Fibaro.getDeviceStatus()
     #Fibaro.printDeviceStatus()
 
 if __name__ == "__main__": main()
