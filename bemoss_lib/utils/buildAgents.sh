@@ -201,6 +201,12 @@ volttron-pkg package ~/workspace/bemoss_os/Applications/code/EnergyBillAppAgent
 volttron-pkg configure /tmp/volttron_wheels/energybillappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EnergyBillAppAgent/energybillappagent.launch.json
 volttron-ctl install EnergyBillAppAgent=/tmp/volttron_wheels/energybillappagent-0.1-py2-none-any.whl
 
+# Run PVinverter Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/PVInverterAgent
+volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PV221445K1200138.launch.json
+volttron-ctl install PVInverterAgent=/tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl
+>>>>>>> 5f8e07c259b5931ad40ca27cb9ac2eb1786e12a1
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent
