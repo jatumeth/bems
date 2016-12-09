@@ -14,6 +14,7 @@ import psycopg2.extras
 import datetime
 import logging
 import sys
+import calendar
 
 publish_periodic = 10
 OFFPEAK_RATE = 2.6369
@@ -41,12 +42,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
     db_user = get_config('db_user')
     db_password = get_config('db_password')
     db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
-    db_id_column_name = 'date'
-
-    #Dictionary of variables supposed to be save into database
-    log_variables = dict(date='date', gridimportenergy='double', gridexportenergy='double', solarenergy='double',
-                         loadenergy='double', gridimportbill='double', gridexportbill='double', solarbill='double',
-                         loadbill='double')
+    db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
 
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
@@ -80,6 +76,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self._agent_id = config['agentid']
             self.get_yesterday_data()
             self.get_today_data()
+            self.get_last_month_data()
+            self.get_this_month_data()
 
         def start_new_day(self):
             self.load_energy_today = 0
@@ -91,6 +89,17 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_import_bill_today = 0
             self.grid_export_bill_today = 0
             self.get_yesterday_data()
+
+        def start_new_month(self):
+            self.load_energy_this_month = 0
+            self.solar_energy_this_month = 0
+            self.grid_import_energy_this_month = 0
+            self.grid_export_energy_this_month = 0
+            self.load_bill_this_month = 0
+            self.solar_bill_this_month = 0
+            self.grid_import_bill_this_month = 0
+            self.grid_export_bill_this_month = 0
+            self.get_last_month_data()
 
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):
@@ -119,6 +128,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.start_new_day_checking()
             self.calculate_energy_today()
             self.calculate_bill_today()
+            self.calculate_this_month_energy_and_bill()
 
         def calculate_energy_today(self):
             # Calculate Energy from Grid_import
@@ -171,25 +181,35 @@ def EnergyBillAppAgent(config_path, **kwargs):
             else:
                 pass
 
-        def insertDB(self):
-            print self.variables
-            print self.get_variable('solarBill')
-            self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                             " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                             ((str(datetime.datetime.now().date())),
-                              self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
-                              self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
-                              self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                              self.get_variable('solarBill'), self.get_variable('loadBill')))
+        def insertDB(self, table):
+            if (table == 'daily'):
+                self.cur.execute("INSERT INTO " + db_table_daily_consumption +
+                                 " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                 ((str(datetime.datetime.now().date())),
+                                  self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
+                                  self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
+                                  self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
+                                  self.get_variable('solarBill'), self.get_variable('loadBill')))
 
-            self.con.commit()
+                self.con.commit()
+            elif (table == 'monthly'):
+                self.cur.execute("INSERT INTO " + db_table_monthly_consumption +
+                                 " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                 ((str(datetime.datetime.now() + relativedelta(day=31))),
+                                  self.grid_import_energy_this_month, self.grid_export_energy_this_month,
+                                  self.solar_energy_this_month, self.load_energy_this_month,
+                                  self.grid_import_bill_this_month, self.grid_export_bill_this_month,
+                                  self.solar_bill_this_month, self.load_bill_this_month))
+
+                self.con.commit()
 
         @periodic(10)
         def updateDB(self):
             today = str(datetime.datetime.now().date())
+            last_day_of_this_month = str(datetime.datetime.now() + relativedelta(day=31))
 
+            #Update table "daily_consumption"
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
-            print bool(self.cur.rowcount)
             if bool(self.cur.rowcount):
                 try:
                     self.cur.execute(
@@ -206,8 +226,28 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 except:
                     print"Cannot update database"
             else:
-                self.insertDB()
+                self.insertDB('daily')
 
+            #Update table "monthly consumption"
+            self.cur.execute("SELECT * FROM " + db_table_monthly_consumption + " WHERE date = '" + last_day_of_this_month + "'")
+            if bool(self.cur.rowcount):
+                try:
+                    self.cur.execute(
+                        "UPDATE " + db_table_monthly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+                                                                 "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                 " WHERE date = '" + last_day_of_this_month + "'",
+                        (self.grid_import_energy_this_month, self.grid_export_energy_this_month,
+                         self.solar_energy_this_month, self.load_energy_this_month,
+                         self.grid_import_bill_this_month, self.grid_export_bill_this_month,
+                         self.solar_bill_this_month, self.load_bill_this_month))
+
+                    self.con.commit()
+                    print"Success"
+                except:
+                    print"Cannot update database"
+            else:
+                self.insertDB('monthly')
 
         def get_yesterday_data(self):
             time_now = datetime.datetime.now()
@@ -235,6 +275,36 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 self.solar_bill_last_day = 0
                 self.load_bill_last_day = 0
 
+        def get_last_month_data(self):
+            self.grid_import_energy_last_month = 0
+            self.grid_export_energy_last_month = 0
+            self.solar_energy_last_month = 0
+            self.load_energy_last_month = 0
+            self.grid_import_bill_last_month = 0
+            self.grid_export_bill_last_month = 0
+            self.solar_bill_last_month = 0
+            self.load_bill_last_month = 0
+
+            first_date = (datetime.datetime.now() - relativedelta(months=1)).replace(day=1).date()
+            end_date = first_date + relativedelta(day=31)
+            first_date_str = str(first_date)
+            end_date_str = str(end_date)
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date BETWEEN '" +
+                             first_date_str + "' AND '" + end_date_str + "'")
+            if (self.cur.rowcount):
+                data = self.cur.fetchall()
+                print len(data)
+                for i in range(len(data)):
+                    self.grid_import_energy_last_month += data[i][2]
+                    self.grid_export_energy_last_month += data[i][3]
+                    self.solar_energy_last_month += data[i][4]
+                    self.load_energy_last_month += data[i][5]
+                    self.grid_import_bill_last_month += data[i][6]
+                    self.grid_export_bill_last_month += data[i][7]
+                    self.solar_bill_last_month += data[i][8]
+                    self.load_bill_last_month += data[i][9]
+            else:
+                pass
 
         def get_today_data(self):
             today = str(datetime.datetime.now().date())
@@ -253,6 +323,47 @@ def EnergyBillAppAgent(config_path, **kwargs):
             except:
                 self.start_new_day()
 
+        def get_this_month_data(self):
+            self.grid_import_energy_this_month_until_last_day = 0
+            self.grid_export_energy_this_month_until_last_day = 0
+            self.solar_energy_this_month_until_last_day = 0
+            self.load_energy_this_month_until_last_day = 0
+            self.grid_import_bill_this_month_until_last_day = 0
+            self.grid_export_bill_this_month_until_last_day = 0
+            self.solar_bill_this_month_until_last_day = 0
+            self.load_bill_this_month_until_last_day = 0
+
+            first_date = datetime.datetime.now().replace(day=1).date()
+            end_date = datetime.datetime.now() - datetime.timedelta(days=1)
+            first_date_str = str(first_date)
+            end_date_str = str(end_date)
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date BETWEEN '" +
+                             first_date_str + "' AND '" + end_date_str + "'")
+            if (self.cur.rowcount):
+                data = self.cur.fetchall()
+                print len(data)
+                for i in range(len(data)):
+                    self.grid_import_energy_this_month_until_last_day += data[i][2]
+                    self.grid_export_energy_this_month_until_last_day += data[i][3]
+                    self.solar_energy_this_month_until_last_day += data[i][4]
+                    self.load_energy_this_month_until_last_day += data[i][5]
+                    self.grid_import_bill_this_month_until_last_day += data[i][6]
+                    self.grid_export_bill_this_month_until_last_day += data[i][7]
+                    self.solar_bill_this_month_until_last_day += data[i][8]
+                    self.load_bill_this_month_until_last_day += data[i][9]
+            else:
+                self.start_new_month()
+
+        def calculate_this_month_energy_and_bill(self):
+            self.grid_import_energy_this_month = self.grid_import_energy_this_month_until_last_day + self.grid_import_energy_today
+            self.grid_export_energy_this_month = self.grid_export_energy_this_month_until_last_day + self.grid_export_energy_today
+            self.solar_energy_this_month =  self.solar_energy_this_month_until_last_day + self.solar_energy_today
+            self.load_energy_this_month = self.load_energy_this_month_until_last_day + self.load_energy_today
+            self.grid_import_bill_this_month = self.grid_import_bill_this_month_until_last_day + self.grid_import_bill_today
+            self.grid_export_bill_this_month = self.grid_export_bill_this_month_until_last_day + self.grid_export_bill_today
+            self.solar_bill_this_month = self.solar_bill_this_month_until_last_day + self.solar_bill_today
+            self.load_bill_this_month = self.load_bill_this_month_until_last_day + self.load_bill_today
+
         @periodic(publish_periodic)
         def publish_message(self):
             topic = "/agent/ui/dashboard"
@@ -263,13 +374,20 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 headers_mod.DATE: now,
                 'data_source': "powermeterApp"
             }
-            message = json.dumps(({"daily_energy_usage": round(self.get_variable('loadEnergy'), 2),
-                                   "last_day_energy_usage": round(self.load_energy_last_day, 2),
-                                   "daily_electricity_bill": round(self.get_variable('gridImportBill'), 2),
-                                   "last_day_bill_compare": round(self.get_variable('gridImportBill')-self.grid_import_bill_last_day, 2)}))
+            try:
+                message = json.dumps(({"daily_energy_usage": round(self.get_variable('loadEnergy'), 2),
+                                       "last_day_energy_usage": round(self.load_energy_last_day, 2),
+                                       "daily_electricity_bill": round(self.get_variable('gridImportBill'), 2),
+                                       "last_day_bill_compare": round(self.get_variable('gridImportBill')-self.grid_import_bill_last_day, 2),
+                                       "monthly_energy_usage": round(self.load_energy_this_month, 2),
+                                       "last_month_energy_usage": round(self.load_energy_last_month, 2),
+                                       "monthly_electricity_bill": round(self.grid_import_bill_this_month, 2),
+                                      "last_month_bill_compare": round((self.grid_import_bill_this_month - self.grid_import_bill_last_month), 2)}))
 
-            self.publish(topic, headers, message)
-            print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+                self.publish(topic, headers, message)
+                print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+            except:
+                pass
 
 
     Agent.__name__ = 'EnergyBillAppAgent'

@@ -130,6 +130,8 @@ DATABASES = {
         'TABLE_NETPIESensor': 'NETPIE',
         'TABLE_daily_consumption': 'daily_consumption',
         'TABLE_PVInverter': 'PVInverter',
+        'TABLE_monthly_consumption': 'monthly_consumption',
+
 
     }
 }

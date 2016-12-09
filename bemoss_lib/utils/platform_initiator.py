@@ -87,6 +87,7 @@ db_table_seen_notifications_counter = settings.DATABASES['default']['TABLE_seen_
 db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
 db_table_node_info = settings.DATABASES['default']['TABLE_node_info']
 db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
+db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
 
 PROJECT_DIR = settings.PROJECT_DIR
 Agents_Launch_DIR = settings.Agents_Launch_DIR
@@ -252,6 +253,28 @@ cur.execute('''CREATE TABLE daily_consumption
        SOLARBILL     FLOAT,
        LOADBILL     FLOAT);''')
 print "Table daily_consumption created successfully"
+conn.commit()
+
+cur.execute("select * from information_schema.tables where table_name=%s", ('monthly_consumption',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE monthly_consumption")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE monthly_consumption
+       (ID SERIAL   PRIMARY KEY   NOT NULL,
+       DATE   DATE   NOT NULL,
+       GRIDIMPORTENERGY     FLOAT,
+       GRIDEXPORTENERGY     FLOAT,
+       SOLARENERGY     FLOAT,
+       LOADENERGY     FLOAT,
+       GRIDIMPORTBILL     FLOAT,
+       GRIDEXPORTBILL     FLOAT,
+       SOLARBILL     FLOAT,
+       LOADBILL     FLOAT);''')
+print "Table monthly_consumption created successfully"
 conn.commit()
 
 
