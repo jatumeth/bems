@@ -86,6 +86,8 @@ class API:
         self.inFanO = 0
         self.louPosO = 0
         self.SetAC_Data = ""
+        self.gettoken()
+
     def renewConnection(self):
         pass
     #
