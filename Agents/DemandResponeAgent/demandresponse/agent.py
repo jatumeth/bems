@@ -149,8 +149,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print"---------------------------------------------------"
 
 
-    @matching.match_exact('/agent/ui/BH1750_SHT15/device_status_response/bemoss/999/1NP221445K1200112')
-    # @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
+    # @matching.match_exact('/agent/ui/BH1750_SHT15/device_status_response/bemoss/999/1NP221445K1200112')
+    @matching.match_exact('/agent/ui/MultiSensor/device_status_response/bemoss/999/1MS221445K1200132')
     def on_matchmulti(self, topic, headers, message, match):
         # '''Use match_all to receive all messages and print them out.'''
         # _log.debug("Topic: {topic}, Headers: {headers}, "
@@ -162,7 +162,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "Message: {}".format(message)
         received_message = json.loads(message[0])
         # self.illu = received_message["illuminance"]  # for fibaro
-        self.illu = received_message["Lux"]
+        self.illu = received_message["illuminance"]
         print "now brightness from multisensor is : {}".format(self.illu)
 
         # if self.actor == "ui":
