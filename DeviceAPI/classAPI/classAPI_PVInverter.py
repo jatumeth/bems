@@ -66,7 +66,7 @@ class API:
         self.variables = kwargs
         address_parts = self.get_variable('address').split(':')
         self.set_variable('address',address_parts[0])
-        self.set_variable('slave_id',int(address_parts[1]))
+        # self.set_variable('slave_id',int(address_parts[1]))
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval',6000) #nothing to renew
         self.client = '1'
@@ -111,106 +111,166 @@ class API:
     def getDeviceStatus(self):
 
         try:
-            self.connect(25201, 23)
-            self.get_variable = {'Name': '3kwInverter'}
-            self.get_variable['workState'] = self.request.getRegister(0) * 1
-            self.get_variable['acVoltageGrade'] = self.request.getRegister(1) * 1
-            self.get_variable['ratedPower'] = self.request.getRegister(2) * 1
-            self.get_variable['reserved'] = self.request.getRegister(3) * 0.1
-            self.get_variable['batteryVoltage'] = self.request.getRegister(4) * 0.1
-            self.get_variable['solarVoltage'] = self.request.getRegister(5) * 0.1
-            self.get_variable['gridVoltage'] = self.request.getRegister(6) * 0.1
-            self.get_variable['busVoltage'] = self.request.getRegister(7) * 0.1
-            self.get_variable['controlCurrent'] = self.request.getRegister(8) * 0.1
-            self.get_variable['InverterCurrent'] = self.request.getRegister(9) * 0.1
-            self.get_variable['gridCurrent'] = self.request.getRegister(10) * 0.1
-            self.get_variable['loadCurrent'] = self.request.getRegister(11) * 0.1
-            self.get_variable['solarBattActivePower'] = self.request.getRegister(12) * 1
-            self.get_variable['gridActivePowerold'] = self.request.getRegister(13) * 1
-            self.get_variable['loadActivePower'] = self.request.getRegister(14) * 1
-            self.get_variable['reserved1'] = self.request.getRegister(15) * 1
-            self.get_variable['solarBattApparentPower'] = self.request.getRegister(16) * 1
-            self.get_variable['gridApparentPower'] = self.request.getRegister(17) * 1
-            self.get_variable['loadApparentPower'] = self.request.getRegister(18) * 1
-            self.get_variable['reserved2'] = self.request.getRegister(19) * 1
-            self.get_variable['solarBattReativePower'] = self.request.getRegister(20) * 1
-            self.get_variable['gridReativePower'] = self.request.getRegister(21) * 1
-            self.get_variable['loadReativePower'] = self.request.getRegister(22) * 1
-
+            self.connect(20109, 1)
+            register109 = float(self.request.getRegister(0))
+            self.set_variable('energy_use_mode', register109)
 
         except Exception as er:
-            print "Error connect to inverter"
-
+            print "Error connect to inverter20109"
 
         try:
-            self.connect(25273, 2)
-            self.get_variable['battPowerold'] = self.request.getRegister(0) * 1
-            self.get_variable['battCurrent'] = self.request.getRegister(1) * 1
+            self.connect(20131, 1)
+            register131 = float(self.request.getRegister(0))
+            self.set_variable('battery_low_return_voltage', register131)
+
         except Exception as er:
-            print "Error connect to inverter"
+            print "Error connect to inverter20131"
 
         try:
-            if self.get_variable['gridActivePowerold'] < 10000:
-                self.get_variable['gridActivePowerstatus'] = "solarToGrid"
-                self.get_variable['gridActivePower'] = int(self.get_variable['gridActivePowerold'])
-            else:
-                self.get_variable['gridActivePowerstatus'] = "gridToHome"
-                self.get_variable['gridActivePower'] = 65536-int(self.get_variable['gridActivePowerold'])
+            self.connect(25206, 20)
+            register1 = (self.request.getRegister(1) * 0.1)
+            self.set_variable('grid_voltage', register1)
 
+            register2 = (self.request.getRegister(2) * 0.1)
+            self.set_variable('load_voltage', register2)
 
-            if self.get_variable['battPowerold'] < 10000:
-                self.get_variable['Batterystatus'] = "Discharge"
-                self.get_variable['battPower'] = int(self.get_variable['battPowerold'])
-                print "654654"
+            register5 = (self.request.getRegister(5) * 0.1)
+            self.set_variable('grid_current', register5)
 
-                self.get_variable['solarActivePower'] = (int(self.get_variable['solarBattActivePower'])-int(self.get_variable['battPower']))
-            else:
-                self.get_variable['Batterystatus'] = "Charge"
-                self.get_variable['battPower'] = 65536-int(self.get_variable['battPowerold'])
-                self.get_variable['solarActivePower'] = (int(self.get_variable['solarBattActivePower'])+int(self.get_variable['battPower']))
+            register6 = int((self.request.getRegister(6)) * 0.1)
+            self.set_variable('load_current', register6)
 
-            self.printDeviceStatus()
+            register7 = float(self.request.getRegister(7))
+            self.set_variable('Inverter_activepower', register7)
+
+            register8 = float(self.request.getRegister(8))
+            self.set_variable('grid_activepower', register8)
+
+            register9 = float(self.request.getRegister(9))
+            self.set_variable('load_activepower', register9)
+
+            register11 = float(self.request.getRegister(11))
+            self.set_variable('Inverter_apparentpower', register11)
+
+            register12 = float(self.request.getRegister(12))
+            self.set_variable('grid_apparentpower', register12)
+
+            register13 = float(self.request.getRegister(13))
+            self.set_variable('load_apparentpower', register13)
+
+            register10 = float(self.request.getRegister(15))
+            self.set_variable('Inverter_reactivepower', register10)
+
+            register16 = float(self.request.getRegister(16))
+            self.set_variable('grid_reactivepower', register16)
+
+            register17 = self.request.getRegister(17)
+            self.set_variable('load_reactivepower', register17)
+
         except Exception as er:
-            print "Error connect to PRINT"
+            print "Error connect to register grid_voltage to load_reactivepower"
+
+        try:
+            self.connect(25273, 1)
+            register73 = float(self.request.getRegister(0))
+            self.set_variable('battery_power', register73)
+        except Exception as er:
+            print "Error connect to register battery_power"
+
+        try:
+            self.connect(25245, 16)
+            register46 = (self.request.getRegister(1))
+            self.set_variable('accumulated_charger_power', register46)
+
+            register48 = (self.request.getRegister(3))
+            self.set_variable('accumulated_discharge_power', register48)
+
+            register50 = (self.request.getRegister(5))
+            self.set_variable('accumulated_buy_power', register50)
+
+            register52 = int((self.request.getRegister(7)))
+            self.set_variable('accumulated_sell_power', register52)
+
+            register54 = float(self.request.getRegister(9))
+            self.set_variable('accumulated_load_power', register54)
+
+            register56 = float(self.request.getRegister(11))
+            self.set_variable('accumulated_self_use_power', register56)
+
+            register58 = float(self.request.getRegister(13))
+            self.set_variable('accumulated_pv_sell_power', register58)
+
+            register60 = float(self.request.getRegister(15))
+            self.set_variable('accumulated_grid_charger_power', register60)
+
+        except Exception as er:
+            print "Error connect to register accumulated"
+
+
+            # register13 = gridActivePower before converse
+        try:
+            if register8 < 10000:
+                register8 = (register8 * (-1))
+                self.set_variable('grid_activepower', register8)
+            else:
+                self.set_variable('grid_activepower', (65536 - register8))
+
+            # register73 = battPower before converse
+            if register73 < 10000:
+                # self.set_variable('Batterystatus', "Discharge")
+                self.set_variable('battery_power', register73)
+                # register73= solar+BattReativePower   , register00 = battPower before converse
+                solarActivePower = float(register7 - register73)
+                self.set_variable('solar_activepower', solarActivePower)
+            else:
+                # self.set_variable('Batterystatus', "Charge")
+                batterypower = float(((-1) * (65536 - register73)))
+                self.set_variable('battery_power', batterypower)
+                solarActivePower = register7 + batterypower
+                self.set_variable('solar_activepower', solarActivePower)
+
+        except Exception as er:
+            print "Error connect to calculate solarToGrid or gridToHome"
+
+        self.printDeviceStatus()
 
 
     def printDeviceStatus(self):
 
         print(" the current status is as follows:")
 
-        print(" gridActivePower_status = {}".format(self.get_variable['gridActivePowerstatus']))
-        print(" gridActivePower = {}".format(self.get_variable['gridActivePower']))
-        print(" loadActivePower = {}".format(self.get_variable['loadActivePower']))
-        print(" solarActivePower = {}".format(self.get_variable['solarActivePower']))
-        print(" Battery_status = {}".format(self.get_variable['Batterystatus']))
-        print(" battPower = {}".format(self.get_variable['battPower']))
-        print(" solar+Battery = {}".format(self.get_variable['solarBattActivePower']))
+        print(" energy_use_mode = {}".format(self.get_variable('energy_use_mode')))
+        print(" battery_low_return_voltage = {}".format(self.get_variable('battery_low_return_voltage')))
         print("-----------------------------------------------------------")
 
-        print(" workState = {}".format(self.get_variable['workState']))
-        print(" acVoltageGrade = {}".format(self.get_variable['acVoltageGrade']))
-        print(" ratedPower = {}".format(self.get_variable['ratedPower']))
-        print(" reserved = {}".format(self.get_variable['reserved']))
-        print(" batteryVoltage = {}".format(self.get_variable['batteryVoltage']))
-        print(" solarVoltage = {}".format(self.get_variable['solarVoltage']))
-        print(" gridVoltage = {}".format(self.get_variable['gridVoltage']))
-        print(" busVoltage = {}".format(self.get_variable['busVoltage']))
-        print(" controlCurrent = {}".format(self.get_variable['controlCurrent']))
-        print(" InverterCurrent = {}".format(self.get_variable['InverterCurrent']))
-        print(" gridCurrent = {}".format(self.get_variable['gridCurrent']))
-        print(" loadCurrent= {}".format(self.get_variable['loadCurrent']))
-        print(" solarBattActivePower = {}".format(self.get_variable['solarBattActivePower']))
-        print(" loadActivePower = {}".format(self.get_variable['loadActivePower']))
-        print(" solarBattApparentPower= {}".format(self.get_variable['solarBattApparentPower']))
-        print(" busVoltage = {}".format(self.get_variable['busVoltage']))
-        print(" gridApparentPower = {}".format(self.get_variable['gridApparentPower']))
-        print(" loadApparentPower = {}".format(self.get_variable['loadApparentPower']))
-        print(" solarBattsolarReativePower = {}".format(self.get_variable['solarBattReativePower']))
-        print(" gridReativePower = {}".format(self.get_variable['gridReativePower']))
-        print(" loadReativePower = {}".format(self.get_variable['loadReativePower']))
-        print(" battPower = {}".format(self.get_variable['battPower']))
-        print(" battCurrent = {}".format(self.get_variable['battCurrent']))
+        print(" grid_voltage = {}".format(self.get_variable('grid_voltage')))
+        print(" load_voltage = {}".format(self.get_variable('load_voltage')))
+        print(" grid_current = {}".format(self.get_variable('grid_current')))
+        print(" load_current = {}".format(self.get_variable('load_current')))
+        print(" Inverter_activepower = {}".format(self.get_variable('Inverter_activepower')))
+        print(" grid_activepower = {}".format(self.get_variable('grid_activepower')))
+        print(" load_activepower = {}".format(self.get_variable('load_activepower')))
+        print(" Inverter_apparentpower = {}".format(self.get_variable('Inverter_apparentpower')))
+        print(" grid_apparentpower = {}".format(self.get_variable('grid_apparentpower')))
+        print(" load_apparentpower = {}".format(self.get_variable('load_apparentpower')))
+        print(" Inverter_reactivepower = {}".format(self.get_variable('Inverter_reactivepower')))
+        print(" grid_reactivepower = {}".format(self.get_variable('grid_reactivepower')))
+        print(" load_reactivepower = {}".format(self.get_variable('load_reactivepower')))
+        print("-----------------------------------------------------------")
+
+        print(" battery_power = {}".format(self.get_variable('battery_power')))
+
+        print(" accumulated_charger_power = {}".format(self.get_variable('accumulated_charger_power')))
+        print(" accumulated_discharge_power = {}".format(self.get_variable('accumulated_discharge_power')))
+
+        print(" accumulated_buy_power = {}".format(self.get_variable('accumulated_buy_power')))
+        print(" accumulated_sell_power = {}".format(self.get_variable('accumulated_sell_power')))
+        print(" accumulated_load_power = {}".format(self.get_variable('accumulated_load_power')))
+        print(" accumulated_self_use_power= {}".format(self.get_variable('accumulated_self_use_power')))
+        print(" accumulated_pv_sell_power = {}".format(self.get_variable('accumulated_pv_sell_power')))
+        print(" accumulated_grid_charger_power = {}".format(self.get_variable('accumulated_grid_charger_power')))
         print("-------------------------        from pymodbus.client.sync import ModbusTcpClient--------------------")
+        print(" solar_activepower = {}".format(self.get_variable('solar_activepower')))
 
 
     def setDeviceStatus(self, postmsg):
@@ -225,7 +285,6 @@ class API:
             _mode = 3
         elif postmsg['mode'] == "PO":
             _mode = 4
-        self.set_use_mode(_mode)
 
     def connect(self,start,num):
         client = ModbusTcpClient('192.168.1.49', port=502)

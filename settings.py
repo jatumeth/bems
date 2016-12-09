@@ -129,6 +129,7 @@ DATABASES = {
         'TABLE_Sonos': 'Sonos',
         'TABLE_NETPIESensor': 'NETPIE',
         'TABLE_daily_consumption': 'daily_consumption',
+        'TABLE_PVInverter': 'PVInverter',
 
     }
 }
