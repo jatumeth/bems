@@ -61,6 +61,7 @@ import settings
 import socket
 import threading
 from bemoss_lib.databases.cassandraAPI import cassandraDB
+from ISStreamer.Streamer import Streamer
 
 def ACAgent(config_path, **kwargs):
     
@@ -180,6 +181,7 @@ def ACAgent(config_path, **kwargs):
             self.lastUpdateTime = None
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
+            self.stream_data_initialState = True
             #2. setup connection with db -> Connect to bemossdb database
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
@@ -191,6 +193,14 @@ def ACAgent(config_path, **kwargs):
             #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
+            # 3. setup connection with initialstate
+            try:
+                self.streamer = Streamer(bucket_name="PEA Smart Home", bucket_key="YWJ69J6NWJK5",
+                                    access_key="N6tbiTrvyUWXWArGuYdpcjeUQJIlCDRe")
+                print "connected to streamer"
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
         # These set and get methods allow scalability
         def set_variable(self,k,v): #k=key, v=value
@@ -251,6 +261,14 @@ def ACAgent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
+
+            if (self.stream_data_initialState):
+                for v in log_variables:
+                    if v in AC.variables:
+                        print("logging {} with value {}".format(v, AC.variables[v]))
+                        self.streamer.log(str(agent_id)+v, AC.variables[v])
+            else:
+                print("{} not streaming data to initialstate".format(agent_id))
 
             #TODO make tolerance more accessible
             # tolerance = 1
