@@ -277,6 +277,28 @@ cur.execute('''CREATE TABLE monthly_consumption
 print "Table monthly_consumption created successfully"
 conn.commit()
 
+cur.execute("select * from information_schema.tables where table_name=%s", ('annual_consumption',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE annual_consumption")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE annual_consumption
+       (ID SERIAL   PRIMARY KEY   NOT NULL,
+       DATE   DATE   NOT NULL,
+       GRIDIMPORTENERGY     FLOAT,
+       GRIDEXPORTENERGY     FLOAT,
+       SOLARENERGY     FLOAT,
+       LOADENERGY     FLOAT,
+       GRIDIMPORTBILL     FLOAT,
+       GRIDEXPORTBILL     FLOAT,
+       SOLARBILL     FLOAT,
+       LOADBILL     FLOAT);''')
+print "Table annual_consumption created successfully"
+conn.commit()
+
 
 cur.execute("select * from information_schema.tables where table_name=%s", ('application_running',))
 print bool(cur.rowcount)

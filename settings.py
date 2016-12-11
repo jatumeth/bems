@@ -131,6 +131,7 @@ DATABASES = {
         'TABLE_daily_consumption': 'daily_consumption',
         'TABLE_PVInverter': 'PVInverter',
         'TABLE_monthly_consumption': 'monthly_consumption',
+        'TABLE_annual_consumption': 'annual_consumption',
 
 
     }
