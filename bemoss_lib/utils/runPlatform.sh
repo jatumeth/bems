@@ -53,9 +53,11 @@ sleep 2
 volttron-ctl start --tag applauncheragent
 sleep 2
 volttron-ctl start --tag approvalhelperagent
+
 #sleep 2
 #volttron-ctl start --tag multibuildingagent
-#Run network agent
+#Run network agentcd
+
 sleep 2
 volttron-ctl start --tag networkagent
 sleep 2
@@ -88,6 +90,8 @@ sleep 2
 #volttron-ctl start --tag 1FN221445K1200138
 #sleep 2
 #volttron-ctl start --tag 1WE221445K1200132
+#sleep 2
+#volttron-ctl start --tag RelaySRD05VDCSLCIP0035
 #sleep 2
 
 volttron-ctl status

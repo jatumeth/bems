@@ -60,6 +60,7 @@ from datetime import datetime
 import logging
 import sys
 import json
+import time
 
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
 from volttron.platform.agent import utils, matching
@@ -130,7 +131,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #     print"---------------------------------------------------"
 
         # test Fan
-    # @matching.match_exact('/agent/ui/fan/device_status_response/bemoss/999/1FN221445K1200138')
+    # @matching.match_exact('/agent/ui/dcrelay/device_status_response/bemoss/999/1FN221445K1200138')
     # def on_match(self, topic, headers, message, match):
     #     '''Use match_all to receive all messages and print them out.'''
     #     # _log.debug("Topic: {topic}, Headers: {headers}, "
@@ -158,9 +159,41 @@ class ListenerAgent(PublishMixin, BaseAgent):
         received_message = json.loads(message[0])
         print received_message
 
-
         print dict(headers)
         print"---------------------------------------------------"
+        self.Relay_on()
+        self.Relay_off()
+    # @matching.match_start("/agent /ui/")
+
+    def Relay_on(self):
+        # # TODO this is example how to write an app to control AC
+        topic = '/ui/agent/Relay/update/bemoss/999/RelaySRD05VDCSLCIP0035'
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"Relay0": "on","Relay1": "on","Relay2": "on","Relay3": "on","Relay4": "on","Relay5": "on","Relay6": "on","Relay7": "on"})
+        self.publish(topic, headers, message)
+        print ("ALL Relay Turn ON")
+        time.sleep(5)
+
+    def Relay_off(self):
+        # # TODO this is example how to write an app to control AC
+        topic = '/ui/agent/Relay/update/bemoss/999/RelaySRD05VDCSLCIP0035'
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps(
+            {"Relay0": "off", "Relay1": "off", "Relay2": "off", "Relay3": "off", "Relay4": "off", "Relay5": "off",
+             "Relay6": "off", "Relay7": "off"})
+        self.publish(topic, headers, message)
+        print ("ALL Relay Turn OFF")
+        time.sleep(5)
 
     #LGTV
     # @matching.match_exact('/agent/ui/lgtvagent/device_status_response/bemoss/999/1LG221445K1200137')

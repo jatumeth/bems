@@ -205,7 +205,16 @@ volttron-ctl install EnergyBillAppAgent=/tmp/volttron_wheels/energybillappagent-
 volttron-pkg package ~/workspace/bemoss_os/Agents/PVInverterAgent
 volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PV221445K1200138.launch.json
 volttron-ctl install PVInverterAgent=/tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl
->>>>>>> 5f8e07c259b5931ad40ca27cb9ac2eb1786e12a1
+
+# Run PVinverter Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/DCRelayAgent
+volttron-pkg configure /tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DCRelayAgent/RelaySRD05VDCSLCIP0035.launch.json
+volttron-ctl install DCRelayAgent=/tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl
+
+# Run Listener Agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/ListenerAgent
+volttron-pkg configure /tmp/volttron_wheels/listeneragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ListenerAgent/listeneragent.launch.json
+volttron-ctl install ListenerAgent=/tmp/volttron_wheels/listeneragent-0.1-py2-none-any.whl
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
