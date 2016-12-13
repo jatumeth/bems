@@ -1,7 +1,7 @@
 {
     "address": "http://192.168.1.35",
     "agent": {
-        "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "dcrelayagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "RelaySRD05VDCSLCIP0035",
     "api": "classAPI_DCRelay",
