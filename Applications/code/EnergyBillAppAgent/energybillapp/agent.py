@@ -243,20 +243,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
 
                 self.con.commit()
-        def insertDB(self):
-            print self.variables
-            print self.get_variable('solarBill')
-            self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                             " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                             ((str(datetime.datetime.now().date())),
-                              self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
-                              self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
-                              self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                              self.get_variable('solarBill'), self.get_variable('loadBill')))
-
-            self.con.commit()
-
-            self.con.commit()
 
         @periodic(10)
         def updateDB(self):
@@ -329,7 +315,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                     print"Cannot update database"
             else:
                 self.insertDB('annaul')
-                self.insertDB()
 
 
         def get_yesterday_data(self):
