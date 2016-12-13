@@ -54,6 +54,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
             self.start_first_time = True
             self.check_day = datetime.datetime.now().weekday()
+            self.check_month = datetime.datetime.now().month
+            self.check_year = datetime.datetime.now().year
 
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
@@ -188,13 +190,29 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
         def start_new_day_checking(self):
             today = datetime.datetime.now().weekday()
-            if (((self.check_day == 6) and (self.check_day > today)) or ((self.check_day is not 6) and (self.check_day < today))):
+            if ((self.check_day == 6) and (self.check_day > today)) or ((self.check_day is not 6) and (self.check_day < today)):
                 self.start_new_day()
+                self.check_day = today
                 # self.insertDB()
             else:
                 pass
 
-<<<<<<< HEAD
+
+        def start_new_month_checking(self):
+            this_month = datetime.datetime.now().month
+            if ((self.check_month == 12) and (self.check_month > this_month)) or ((self.check_month is not 12) and (self.check_month < this_month)):
+                self.start_new_month()
+                self.check_month = this_month
+            else:
+                pass
+
+        def start_new_year_checking(self):
+            this_year = datetime.datetime.now().year
+            if self.check_year < this_year:
+                self.start_new_year()
+                self.check_year = this_year
+            else:
+                pass
         def insertDB(self, table):
             if (table == 'daily'):
                 self.cur.execute("INSERT INTO " + db_table_daily_consumption +
@@ -205,7 +223,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
                                   self.get_variable('solarBill'), self.get_variable('loadBill')))
 
-                self.con.commit()
             elif (table == 'monthly'):
                 self.cur.execute("INSERT INTO " + db_table_monthly_consumption +
                                  " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -215,19 +232,17 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.grid_import_bill_this_month, self.grid_export_bill_this_month,
                                   self.solar_bill_this_month, self.load_bill_this_month))
 
-                self.con.commit()
-
             elif (table == 'annaul'):
                 self.cur.execute("INSERT INTO " + db_table_annual_consumption +
                                  " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().replace(month=12).date() + relativedelta(day=31))),
-                                  self.grid_import_energy_this_month, self.grid_export_energy_this_month,
-                                  self.solar_energy_this_month, self.load_energy_this_month,
-                                  self.grid_import_bill_this_month, self.grid_export_bill_this_month,
-                                  self.solar_bill_this_month, self.load_bill_this_month))
+                                  self.grid_import_energy_annual, self.grid_export_energy_annual,
+                                  self.solar_energy_annual, self.load_energy_annual,
+                                  self.grid_import_bill_annual, self.grid_export_bill_annual,
+                                  self.solar_bill_annual, self.load_bill_annual))
+
 
                 self.con.commit()
-=======
         def insertDB(self):
             print self.variables
             print self.get_variable('solarBill')
@@ -240,22 +255,20 @@ def EnergyBillAppAgent(config_path, **kwargs):
                               self.get_variable('solarBill'), self.get_variable('loadBill')))
 
             self.con.commit()
->>>>>>> add DC relay agent and API
+
+            self.con.commit()
 
         @periodic(10)
         def updateDB(self):
             today = str(datetime.datetime.now().date())
-<<<<<<< HEAD
             last_day_of_this_month = str(datetime.datetime.now().date() + relativedelta(day=31))
             last_day_of_end_month = str(datetime.datetime.now().replace(month=12).date() + relativedelta(day=31))
 
             #Update table "daily_consumption"
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
-=======
 
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
             print bool(self.cur.rowcount)
->>>>>>> add DC relay agent and API
             if bool(self.cur.rowcount):
                 try:
                     self.cur.execute(
@@ -272,7 +285,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 except:
                     print"Cannot update database"
             else:
-<<<<<<< HEAD
                 self.insertDB('daily')
 
             #Update table "monthly consumption"
@@ -317,9 +329,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                     print"Cannot update database"
             else:
                 self.insertDB('annaul')
-=======
                 self.insertDB()
->>>>>>> add DC relay agent and API
 
 
         def get_yesterday_data(self):
