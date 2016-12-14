@@ -115,6 +115,17 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_import_bill_annual = 0
             self.grid_export_bill_annual = 0
 
+
+        @matching.match_exact('/agent/ui/airconditioner')
+        def on_match_AC(self, topic, headers, message, match):
+            message_from_AC = json.loads(message[0])
+            self.bill_today_AC = message_from_AC['daily_bill_AC']
+            self.bill_today_percent_compare_AC = message_from_AC['daily_bill_AC_percent_compare']
+            self.bill_this_month_AC = message_from_AC['monthly_bill_AC']
+            self.bill_this_month_percent_compare_AC = message_from_AC['monthly_bill_AC_percent_compare']
+            self.power_AC = message_from_AC['power_AC']
+            self.power_from_grid_AC = message_from_AC['power_from_grid_AC']
+
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):
             print "Hello from SMappee"
@@ -489,7 +500,11 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                        "monthly_electricity_bill": round(self.grid_import_bill_this_month, 2),
                                       "last_month_bill_compare": round((self.grid_import_bill_this_month - self.grid_import_bill_last_month), 2),
                                        "netzero_onsite_generation": round(self.solar_energy_annual, 2),
-                                       "netzero_energy_consumption": round(self.load_energy_annual, 2)}))
+                                       "netzero_energy_consumption": round(self.load_energy_annual, 2),
+                                       "daily_bill_AC": self.bill_today_AC,
+                                       "daily_bill_AC_compare_percent": self.bill_today_percent_compare_AC,
+                                       "monthly_bill_AC": self.bill_this_month_AC,
+                                       "monthly_bill_AC_compare_percent": self.bill_this_month_percent_compare_AC}))
 
                 self.publish(topic, headers, message)
                 print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)

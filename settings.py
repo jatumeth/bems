@@ -133,6 +133,8 @@ DATABASES = {
         'TABLE_monthly_consumption': 'monthly_consumption',
         'TABLE_annual_consumption': 'annual_consumption',
         'TABLE_DCRelay': 'DCRelay',
+        'TABLE_ac_daily_consumption': 'ac_daily_consumption',
+        'TABLE_ac_monthly_consumption': 'ac_monthly_consumption',
     }
 }
 

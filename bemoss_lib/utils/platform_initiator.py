@@ -299,6 +299,43 @@ cur.execute('''CREATE TABLE annual_consumption
 print "Table annual_consumption created successfully"
 conn.commit()
 
+cur.execute("select * from information_schema.tables where table_name=%s", ('ac_daily_consumption',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE ac_daily_consumption")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE ac_daily_consumption
+       (ID SERIAL   PRIMARY KEY   NOT NULL,
+       DATE   DATE   NOT NULL,
+       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ENERGY     FLOAT,
+       DEVICE_ENERGY_FROM_GRID     FLOAT,
+       DEVICE_BILL     FLOAT,
+       DEVICE_TOTAL_BILL     FLOAT);''')
+print "Table ac_daily_consumption created successfully"
+conn.commit()
+
+cur.execute("select * from information_schema.tables where table_name=%s", ('ac_monthly_consumption',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE ac_monthly_consumption")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE ac_monthly_consumption
+       (ID SERIAL   PRIMARY KEY   NOT NULL,
+       DATE   DATE   NOT NULL,
+       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ENERGY     FLOAT,
+       DEVICE_ENERGY_FROM_GRID     FLOAT,
+       DEVICE_BILL     FLOAT,
+       DEVICE_TOTAL_BILL     FLOAT);''')
+print "Table ac_monthly_consumption created successfully"
+conn.commit()
 
 cur.execute("select * from information_schema.tables where table_name=%s", ('application_running',))
 print bool(cur.rowcount)
