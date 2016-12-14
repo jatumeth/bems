@@ -394,10 +394,16 @@ def ACAppAgent(config_path, **kwargs):
         #         self.start_new_year()
 
         def calculate_this_month_device_energy_and_bill(self, device_id):
-            self.device_energy_this_month[device_id] = self.device_energy_this_month_until_last_day[device_id] + self.device_energy[device_id]
-            self.device_energy_from_grid_this_month[device_id] = self.device_energy_from_grid_this_month_until_last_day[device_id] + self.device_energy_from_grid[device_id]
-            self.device_bill_this_month[device_id] = self.device_bill_this_month_until_last_day[device_id] + self.device_bill[device_id]
-            self.device_total_bill_this_month[device_id] = self.device_total_bill_this_month_until_last_day[device_id] + self.device_total_bill[device_id]
+            try:
+                self.device_energy_this_month[device_id] = self.device_energy_this_month_until_last_day[device_id] + self.device_energy[device_id]
+                self.device_energy_from_grid_this_month[device_id] = self.device_energy_from_grid_this_month_until_last_day[device_id] + self.device_energy_from_grid[device_id]
+                self.device_bill_this_month[device_id] = self.device_bill_this_month_until_last_day[device_id] + self.device_bill[device_id]
+                self.device_total_bill_this_month[device_id] = self.device_total_bill_this_month_until_last_day[device_id] + self.device_total_bill[device_id]
+            except:
+                self.device_energy_this_month[device_id] = self.device_energy[device_id]
+                self.device_energy_from_grid_this_month[device_id] = self.device_energy_from_grid[device_id]
+                self.device_bill_this_month[device_id] = self.device_bill[device_id]
+                self.device_total_bill_this_month[device_id] = self.device_total_bill[device_id]
 
         # def calculate_annual_energy_and_bill(self):
         #     self.device_energy_annual = self.device_energy_annual_until_last_month + self.device_energy_this_month
@@ -476,19 +482,27 @@ def ACAppAgent(config_path, **kwargs):
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
                 headers_mod.DATE: now,
-                'data_source': "realtime",
+                'data_source': "acApp",
                 "agent_id": self.device_status.keys()
             }
 
             self.calculate_daily_bill_compare()
             self.calculate_monthly_bill_compare()
 
-            message = json.dumps({"daily_bill_AC": round(sum(self.device_bill.values()), 2),
-                                  "daily_bill_AC_percent_compare": round(self.device_bill_compare, 2),
-                                  "monthly_bill_AC": round(sum(self.device_bill_this_month.values()), 2),
-                                  "monthly_bill_AC_percent_compare": round(self.device_bill_this_month_compare, 2),
-                                  "power_AC": round(sum(self.device_power.values()), 2),
-                                  "power_from_grid_AC": round(sum(self.device_power_from_grid.values()), 2)})
+            try:
+                message = json.dumps({"daily_bill_AC": round(sum(self.device_bill.values()), 2),
+                                      "daily_bill_AC_percent_compare": round(self.device_bill_compare, 2),
+                                      "monthly_bill_AC": round(sum(self.device_bill_this_month.values()), 2),
+                                      "monthly_bill_AC_percent_compare": round(self.device_bill_this_month_compare, 2),
+                                      "power_AC": round(sum(self.device_power.values()), 2),
+                                      "power_from_grid_AC": round(sum(self.device_power_from_grid.values()), 2)})
+            except:
+                message = json.dumps({"daily_bill_AC": 0,
+                                      "daily_bill_AC_percent_compare": 0,
+                                      "monthly_bill_AC": 0,
+                                      "monthly_bill_AC_percent_compare": 0,
+                                      "power_AC": 0,
+                                      "power_from_grid_AC": 0})
             self.publish(topic, headers, message)
             print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
 
