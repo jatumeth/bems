@@ -133,6 +133,10 @@ DATABASES = {
         'TABLE_monthly_consumption': 'monthly_consumption',
         'TABLE_annual_consumption': 'annual_consumption',
         'TABLE_DCRelay': 'DCRelay',
+        'TABLE_ac_daily_consumption': 'ac_daily_consumption',
+        'TABLE_ac_monthly_consumption': 'ac_monthly_consumption',
+        'TABLE_lighting_daily_consumption': 'lighting_daily_consumption',
+        'TABLE_lighting_monthly_consumption': 'lighting_monthly_consumption',
     }
 }
 
