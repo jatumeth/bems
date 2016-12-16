@@ -80,11 +80,6 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/NetworkAgent/
 volttron-pkg configure /tmp/volttron_wheels/networkagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetworkAgent/networkagent.launch.json
 volttron-ctl install networkagent=/tmp/volttron_wheels/networkagent-0.1-py2-none-any.whl
 
-# Run GridApp agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/GridAppAgent/
-volttron-pkg configure /tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/GridAppAgent/gridappagent.launch.json
-volttron-ctl install gridappagent=/tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl
-
 # Run Powermeter agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PowerMeterAgent/
 volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/powermeteragent.launch.json
@@ -215,6 +210,12 @@ volttron-ctl install DCRelayAgent=/tmp/volttron_wheels/dcrelayagent-0.1-py2-none
 volttron-pkg package ~/workspace/bemoss_os/Agents/ListenerAgent
 volttron-pkg configure /tmp/volttron_wheels/listeneragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ListenerAgent/listeneragent.launch.json
 volttron-ctl install ListenerAgent=/tmp/volttron_wheels/listeneragent-0.1-py2-none-any.whl
+
+# Run GridApp agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/GridAppAgent/
+volttron-pkg configure /tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/GridAppAgent/gridappagent.launch.json
+volttron-ctl install GridAppAgent=/tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
