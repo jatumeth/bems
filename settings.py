@@ -137,6 +137,8 @@ DATABASES = {
         'TABLE_ac_monthly_consumption': 'ac_monthly_consumption',
         'TABLE_lighting_daily_consumption': 'lighting_daily_consumption',
         'TABLE_lighting_monthly_consumption': 'lighting_monthly_consumption',
+        'TABLE_ev_daily_consumption': 'ev_daily_consumption',
+        'TABLE_ev_monthly_consumption': 'ev_monthly_consumption',
     }
 }
 

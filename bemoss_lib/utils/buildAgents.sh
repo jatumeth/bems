@@ -90,11 +90,6 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/PowermeterAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/powermeterappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowermeterAppAgent/powermeterappagent.launch.json
 volttron-ctl install powermeterappagent=/tmp/volttron_wheels/powermeterappagent-0.1-py2-none-any.whl
 
-# Run EVApp agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/EVAppAgent/
-volttron-pkg configure /tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/EVAppAgent/evappagent.launch.json
-volttron-ctl install evappagent=/tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl
-
 # Run Mode agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/ModeAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/modeappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ModeAppAgent/modeappagent.launch.json
@@ -215,6 +210,11 @@ volttron-ctl install ListenerAgent=/tmp/volttron_wheels/listeneragent-0.1-py2-no
 volttron-pkg package ~/workspace/bemoss_os/Applications/code/GridAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/GridAppAgent/gridappagent.launch.json
 volttron-ctl install GridAppAgent=/tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl
+
+# Run EVApp agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/EVAppAgent/
+volttron-pkg configure /tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EVAppAgent/evappagent.launch.json
+volttron-ctl install evappagent=/tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl
 
 
 sudo chmod 777 -R /tmp/volttron_wheels/
