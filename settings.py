@@ -139,6 +139,8 @@ DATABASES = {
         'TABLE_lighting_monthly_consumption': 'lighting_monthly_consumption',
         'TABLE_ev_daily_consumption': 'ev_daily_consumption',
         'TABLE_ev_monthly_consumption': 'ev_monthly_consumption',
+        'TABLE_plugload_daily_consumption': 'plugload_daily_consumption',
+        'TABLE_plugload_monthly_consumption': 'plugload_monthly_consumption',
     }
 }
 
