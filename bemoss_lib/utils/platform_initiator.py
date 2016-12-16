@@ -310,7 +310,7 @@ else:
 cur.execute('''CREATE TABLE ac_daily_consumption
        (ID SERIAL   PRIMARY KEY   NOT NULL,
        DATE   DATE   NOT NULL,
-       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ID     TEXT ,
        DEVICE_ENERGY     FLOAT,
        DEVICE_ENERGY_FROM_GRID     FLOAT,
        DEVICE_BILL     FLOAT,
@@ -329,7 +329,7 @@ else:
 cur.execute('''CREATE TABLE ac_monthly_consumption
        (ID SERIAL   PRIMARY KEY   NOT NULL,
        DATE   DATE   NOT NULL,
-       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ID     TEXT ,
        DEVICE_ENERGY     FLOAT,
        DEVICE_ENERGY_FROM_GRID     FLOAT,
        DEVICE_BILL     FLOAT,
@@ -345,10 +345,10 @@ if bool(cur.rowcount):
 else:
     pass
 
-cur.execute('''CREATE TABLE ac_daily_consumption
+cur.execute('''CREATE TABLE lighting_daily_consumption
        (ID SERIAL   PRIMARY KEY   NOT NULL,
        DATE   DATE   NOT NULL,
-       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ID     TEXT ,
        DEVICE_ENERGY     FLOAT,
        DEVICE_ENERGY_FROM_GRID     FLOAT,
        DEVICE_BILL     FLOAT,
@@ -364,10 +364,10 @@ if bool(cur.rowcount):
 else:
     pass
 
-cur.execute('''CREATE TABLE ac_monthly_consumption
+cur.execute('''CREATE TABLE lighting_monthly_consumption
        (ID SERIAL   PRIMARY KEY   NOT NULL,
        DATE   DATE   NOT NULL,
-       DEVICE_ID     MESSAGE_TEXT ,
+       DEVICE_ID     TEXT ,
        DEVICE_ENERGY     FLOAT,
        DEVICE_ENERGY_FROM_GRID     FLOAT,
        DEVICE_BILL     FLOAT,
