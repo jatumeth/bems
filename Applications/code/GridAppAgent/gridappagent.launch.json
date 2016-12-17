@@ -2,6 +2,6 @@
     "agent": {
         "exec": "gridappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agentid": "GridAppAgent",
+    "agent_id": "GridAppAgent",
     "message": "hello my name is GridAppAgent"
 }

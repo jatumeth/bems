@@ -65,8 +65,14 @@ def EVAppAgent(config_path, **kwargs):
             self.device_energy_from_grid = {}
             self.device_bill = {}
             self.device_total_bill = {}
+            self.check_first_time = {}
+            self.check_power = {}
+            self.check_time = {}
+            self.percent_charge = {}
+            self.EV_mode = {}
             self.power_from_load = 0
             self.power_from_grid_import = 0
+            self.time_delta = datetime.timedelta(minutes=2, seconds=28)
 
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
@@ -144,6 +150,20 @@ def EVAppAgent(config_path, **kwargs):
             message_from_EV = json.loads(message[0])
             self.device_status[device_id] = message_from_EV['status']
             self.device_power[device_id] = message_from_EV['power']
+            try:
+                if (self.check_first_time[device_id]):
+                    pass
+            except:
+                self.check_first_time[device_id] = True
+
+            self.calculate_power(device_id)
+            self.calculate_EV_percentage()
+
+        def calculate_power(self, device_id):
+            if (self.power_from_load > self.power_from_grid_import):
+                self.device_power_from_grid[device_id] = self.device_power[device_id] * self.power_from_grid_import / self.power_from_load
+            else:
+                self.device_power_from_grid[device_id] = self.device_power[device_id]
 
         @periodic(publish_periodic)
         def calculate_device_energy_today(self):
@@ -377,44 +397,46 @@ def EVAppAgent(config_path, **kwargs):
                  else:
                      self.insertDB('monthly', device_id[i])
 
-        # def calculate_EV_percentage(self):
-        #     device_id = self.device_energy.keys()
-        #     for i in range(len(device_id)):
-        #         time_now = datetime.datetime.now()
-        #         if (self.device_status[device_id] == "ON") and (self.device_power[device_id] > 1000):
-        #             print ("++++++++++++++++++++++++++++++++++++++++++++++++")
-        #             if (self.check_status == "OFF"):
-        #                 self.percent_charge = start_percent_charge
-        #             self.check_status = "ON"
-        #             self.percent_batt_V2G = 0
-        #
-        #             if (self.percent_charge >= 100):
-        #                 self.percent_charge = 100
-        #                 self.EV_mode = "Charged"
-        #             else:
-        #                 self.EV_mode = "Charging"
-        #                 if (time_now > self.check_time):
-        #                     self.percent_charge += 1
-        #                     self.check_time = time_now + self.time_delta
-        #
-        #         elif (self.device_status == "ON") and (self.device_power < 1000):
-        #             if not self.device_power:
-        #                 self.percent_charge = 0
-        #                 self.EV_mode = "No Charge"
-        #             else:
-        #                 self.check_status = "ON"
-        #                 self.percent_charge = 100
-        #                 self.EV_mode = "Charged"
-        #                 self.percent_batt_V2G = 0
-        #
-        #         elif (self.device_status == "OFF") and (self.check_status == "ON"):
-        #             self.check_status = "OFF"
-        #             self.EV_mode = "No Charge"
-        #             self.percent_batt_V2G = 0
-        #         else:
-        #             self.EV_mode = "No Charge"
-        #             self.percent_batt_V2G = 0
-        #             self.percent_charge = 0
+        def calculate_EV_percentage(self):
+            device_id = self.device_status.keys()
+            for i in range(len(device_id)):
+                time_now = datetime.datetime.now()
+                if (self.device_status[device_id[i]] == "ON"):
+                    if (self.check_first_time[device_id[i]]):
+                        self.check_power[device_id[i]] = self.device_power[device_id[i]]
+                        self.percent_charge[device_id[i]] = start_percent_charge
+                        self.check_time[device_id[i]] = datetime.datetime.now() + self.time_delta
+                        self.check_first_time[device_id[i]] = False
+                        self.EV_mode[device_id[i]] = "Charging"
+                    if (self.device_power[device_id[i]] >= 1000):
+                        if (time_now > self.check_time[device_id[i]]):
+                            self.check_time[device_id[i]] = datetime.datetime.now() + self.time_delta
+                            if (self.percent_charge[device_id[i]] == 100):
+                                self.percent_charge[device_id[i]] = 100
+                                self.EV_mode[device_id[i]] = "Charged"
+                            else:
+                                self.percent_charge[device_id[i]] += 1
+                                self.EV_mode[device_id[i]] = "Charging"
+                    elif (self.device_power[device_id[i]] > 1) and (self.device_power[device_id[i]] < 1000):
+                        if (self.device_power[device_id[i]] > self.check_first_power[device_id[i]]):
+                            if (time_now > self.check_time[device_id[i]]):
+                                self.check_time[device_id[i]] = datetime.datetime.now() + self.time_delta
+                                if (self.percent_charge[device_id[i]] == 100):
+                                    self.percent_charge[device_id[i]] = 100
+                                    self.EV_mode[device_id[i]] = "Charged"
+                                else:
+                                    self.percent_charge[device_id[i]] += 1
+                                    self.EV_mode[device_id[i]] = "Charging"
+                        else:
+                            self.percent_charge[device_id[i]] = 100
+                            self.EV_mode[device_id[i]] = "Charged"
+
+                elif (self.device_status[device_id[i]] == "OFF"):
+                    if (self.check_first_time[device_id[i]]):
+                        self.check_power[device_id[i]] = self.device_power[device_id[i]]
+                        self.percent_charge[device_id[i]] = 0
+                        self.check_time[device_id[i]] = datetime.datetime.now() + self.time_delta
+                    self.EV_mode[device_id[i]] = "No Charge"
 
         @periodic(publish_periodic)
         def publish_message(self):
@@ -438,16 +460,21 @@ def EVAppAgent(config_path, **kwargs):
                                        "monthly_bill_ev": round(sum(self.device_bill_this_month.values()), 2),
                                        "monthly_bill_ev_percent_compare": round(self.device_bill_this_month_compare, 2),
                                        "power_ev": round(sum(self.device_power.values()), 2),
-                                       "power_from_grid_ev": round(sum(self.device_power_from_grid.values()), 2)})
+                                       "power_from_grid_ev": round(sum(self.device_power_from_grid.values()), 2),
+                                       "EV_mode": "No Charge",
+                                       "percentage_charge": 0})
              except:
                  message = json.dumps({"daily_bill_ev": 0.00,
                                        "daily_bill_ev_percent_compare": 0.00,
                                        "monthly_bill_ev": 0.00,
                                        "monthly_bill_ev_percent_compare": 0.00,
                                        "power_ev": 0.00,
-                                       "power_from_grid_ev": 0.00})
+                                       "power_from_grid_ev": 0.00,
+                                       "EV_mode": "No Charge",
+                                       "percentage_charge": 0})
              self.publish(topic, headers, message)
              print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
+
 
     Agent.__name__ = 'EVAppAgent'
     return Agent(**kwargs)

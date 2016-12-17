@@ -9,20 +9,15 @@ from volttron.platform.messaging import headers as headers_mod
 import settings
 import json
 import datetime
-import random
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
 OFFPEAK_RATE = 2.6369
 PEAK_RATE = 5.7982
-
 publish_periodic = 5
 
 class GridAppAgent(PublishMixin, BaseAgent):
-    '''Listens to everything and publishes a heartbeat according to the
-    heartbeat period specified in the settings module.
-    '''
 
     def __init__(self, config_path, **kwargs):
         super(GridAppAgent, self).__init__(**kwargs)
@@ -31,7 +26,7 @@ class GridAppAgent(PublishMixin, BaseAgent):
     def setup(self):
         # Demonstrate accessing a value from the config file
         _log.info(self.config['message'])
-        self._agent_id = self.config['agentid']
+        self._agent_id = self.config['agent_id']
         # Always call the base class setup()
         super(GridAppAgent, self).setup()
 
@@ -58,13 +53,14 @@ class GridAppAgent(PublishMixin, BaseAgent):
 
         HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
         '''
-        topic = "/agent/ui/dashboard"
+        topic = "/app/ui/grid/update_ui/bemoss/999"
         now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
+            'sender_agent_id': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
-            'data_source': "gridApp"
+            'receiver_agent_id': "ui"
         }
 
         self.get_current_electricity_price()

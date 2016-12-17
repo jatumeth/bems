@@ -76,7 +76,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             super(Agent, self).setup()
             # Demonstrate accessing value from the config file
             _log.info(config['message'])
-            self._agent_id = config['agentid']
+            self._agent_id = agent_id
             self.get_yesterday_data()
             self.get_today_data()
             self.get_last_month_data()
@@ -115,33 +115,13 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_import_bill_annual = 0
             self.grid_export_bill_annual = 0
 
-        @matching.match_exact('/agent/ui/lighting')
-        def on_match_lighting(self, topic, headers, message, match):
-            message_from_lighting = json.loads(message[0])
-            self.bill_today_lighting = message_from_lighting['daily_bill_lighting']
-            self.bill_today_percent_compare_lighting = message_from_lighting['daily_bill_lighting_percent_compare']
-            self.bill_this_month_lighting = message_from_lighting['monthly_bill_lighting']
-            self.bill_this_month_percent_compare_lighting = message_from_lighting['monthly_bill_lighting_percent_compare']
-            self.power_AC = message_from_lighting['power_lighting']
-            self.power_from_grid_lighting = message_from_lighting['power_from_grid_lighting']
-
-        @matching.match_exact('/agent/ui/airconditioner')
-        def on_match_AC(self, topic, headers, message, match):
-            message_from_AC = json.loads(message[0])
-            self.bill_today_AC = message_from_AC['daily_bill_AC']
-            self.bill_today_percent_compare_AC = message_from_AC['daily_bill_AC_percent_compare']
-            self.bill_this_month_AC = message_from_AC['monthly_bill_AC']
-            self.bill_this_month_percent_compare_AC = message_from_AC['monthly_bill_AC_percent_compare']
-            self.power_AC = message_from_AC['power_AC']
-            self.power_from_grid_AC = message_from_AC['power_from_grid_AC']
-
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):
             print "Hello from SMappee"
             message_from_Smappee = json.loads(message[0])
             self.power_from_load = message_from_Smappee['load_activePower']
             self.power_from_solar = message_from_Smappee['solar_activePower']
-            if (message_from_Smappee['grid_activePower']):
+            if (message_from_Smappee['grid_activePower'] > 0):
                 self.power_from_grid_import = message_from_Smappee['grid_activePower']
                 self.power_from_grid_export = 0
             else:
@@ -178,7 +158,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
             #Calculate Energy from Load
             self.load_energy_today += self.power_from_load * self.conversion_kWh
             self.set_variable('loadEnergy', self.load_energy_today)
-
 
         def calculate_bill_today(self):
             time_now = datetime.datetime.now()
@@ -217,7 +196,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
             else:
                 pass
 
-
         def start_new_month_checking(self):
             this_month = datetime.datetime.now().month
             if ((self.check_month == 12) and (self.check_month > this_month)) or ((self.check_month is not 12) and (self.check_month < this_month)):
@@ -233,6 +211,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 self.check_year = this_year
             else:
                 pass
+
         def insertDB(self, table):
             if (table == 'daily'):
                 self.cur.execute("INSERT INTO " + db_table_daily_consumption +
@@ -335,7 +314,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                     print"Cannot update database"
             else:
                 self.insertDB('annaul')
-
 
         def get_yesterday_data(self):
             time_now = datetime.datetime.now()
@@ -491,33 +469,15 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
         @periodic(publish_periodic)
         def publish_message(self):
-            topic = "/agent/ui/dashboard"
+            topic = "/app/ui/energybillapp/update_ui/bemoss/999"
             now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
                 headers_mod.DATE: now,
-                'data_source': "powermeterApp"
+                'receiver_agent_id': "ui"
             }
-            # try:
-            #     message = json.dumps(({"daily_energy_usage": round(self.get_variable('loadEnergy'), 2),
-            #                            "last_day_energy_usage": round(self.load_energy_last_day, 2),
-            #                            "daily_electricity_bill": round(self.get_variable('gridImportBill'), 2),
-            #                            "last_day_bill_compare": round(self.get_variable('gridImportBill')-self.grid_import_bill_last_day, 2),
-            #                            "monthly_energy_usage": round(self.load_energy_this_month, 2),
-            #                            "last_month_energy_usage": round(self.load_energy_last_month, 2),
-            #                            "monthly_electricity_bill": round(self.grid_import_bill_this_month, 2),
-            #                           "last_month_bill_compare": round((self.grid_import_bill_this_month - self.grid_import_bill_last_month), 2),
-            #                            "netzero_onsite_generation": round(self.solar_energy_annual, 2),
-            #                            "netzero_energy_consumption": round(self.load_energy_annual, 2),
-            #                            "daily_bill_AC": self.bill_today_AC,
-            #                            "daily_bill_AC_compare_percent": self.bill_today_percent_compare_AC,
-            #                            "monthly_bill_AC": self.bill_this_month_AC,
-            #                            "monthly_bill_AC_compare_percent": self.bill_this_month_percent_compare_AC,
-            #                            "daily_bill_light": self.bill_today_lighting,
-            #                            "daily_bill_light_compare_percent": self.bill_today_percent_compare_lighting,
-            #                            "monthly_bill_light": self.bill_this_month_lighting,
-            #                            "monthly_bill_light_compare_percent": self.bill_this_month_percent_compare_lighting}))
+
             try:
                 message = json.dumps(({"daily_energy_usage": round(self.get_variable('loadEnergy'), 2),
                                        "last_day_energy_usage": round(self.load_energy_last_day, 2),
@@ -534,7 +494,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
             except:
                 pass
-
 
     Agent.__name__ = 'EnergyBillAppAgent'
     return Agent(**kwargs)
