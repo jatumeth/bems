@@ -140,8 +140,8 @@ def PlugloadAppAgent(config_path, **kwargs):
         @matching.match_start('/app/ui/acapp/update_ui/bemoss/999')
         def on_match_ACApp(self, topic, headers, message, match):
             received_message = json.loads(message[0])
-            self.power_ac = received_message['power_ac']
-            self.power_from_grid_ac = received_message['power_from_grid_ac']
+            self.power_ac = received_message['power_AC']
+            self.power_from_grid_ac = received_message['power_from_grid_AC']
 
         @matching.match_start('/app/ui/evapp/update_ui/bemoss/999')
         def on_match_EVApp(self, topic, headers, message, match):
@@ -150,8 +150,17 @@ def PlugloadAppAgent(config_path, **kwargs):
             self.power_from_grid_ev = received_message['power_from_grid_ev']
 
         def calculate_power(self):
-            self.device_power = self.power_from_load - (self.power_lighting + self.power_ac + self.power_ev)
-            self.device_power_from_grid = self.power_from_grid_import - (self.power_from_grid_lighting + self.power_from_grid_ac + self.power_from_grid_ev)
+            sum_power_from_others = self.power_lighting + self.power_ac + self.power_ev
+            if (sum_power_from_others > self.power_from_load):
+                self.device_power = 0
+            else:
+                self.device_power = self.power_from_load - sum_power_from_others
+
+            sum_power_from_grid_from_others = self.power_from_grid_lighting + self.power_from_grid_ac + self.power_from_grid_ev
+            if (sum_power_from_grid_from_others > self.power_from_grid_import):
+                self.device_power_from_grid = 0
+            else:
+                self.device_power_from_grid = self.power_from_grid_import - sum_power_from_grid_from_others
 
         @periodic(publish_period)
         def calculate_device_energy_today(self):
