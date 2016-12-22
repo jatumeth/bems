@@ -65,6 +65,7 @@ def PlugloadAppAgent(config_path, **kwargs):
             self.power_from_grid_ac = 0
             self.power_ev = 0
             self.power_from_grid_ev = 0
+            self.current_electricity_price = 0
 
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
@@ -104,16 +105,10 @@ def PlugloadAppAgent(config_path, **kwargs):
             self.device_bill_this_month = 0
             self.device_total_bill_this_month = 0
 
-        @matching.match_start('/agent/ui/dashboard')
+        @matching.match_start('/app/ui/grid/update_ui/bemoss/999')
         def on_match_gridappagent(self, topic, headers, message, match):
-            recived_header = headers['data_source']
-
-            if (recived_header == 'gridApp'):
-                message_from_gridApp = json.loads(message[0])
-                self.current_electricity_price = message_from_gridApp['current_electricity_price']
-                print "Current electricity price : {}".format(self.current_electricity_price)
-            else:
-                pass
+            message_from_gridApp = json.loads(message[0])
+            self.current_electricity_price = message_from_gridApp['current_electricity_price']
 
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):

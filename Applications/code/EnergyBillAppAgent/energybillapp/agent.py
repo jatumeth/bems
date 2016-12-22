@@ -56,6 +56,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.check_day = datetime.datetime.now().weekday()
             self.check_month = datetime.datetime.now().month
             self.check_year = datetime.datetime.now().year
+            self.current_electricity_price = 0
 
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
@@ -115,6 +116,12 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_import_bill_annual = 0
             self.grid_export_bill_annual = 0
 
+        @matching.match_start('/app/ui/grid/update_ui/bemoss/999')
+        def on_match_gridappagent(self, topic, headers, message, match):
+            message_from_gridApp = json.loads(message[0])
+            self.current_electricity_price = message_from_gridApp['current_electricity_price']
+            print "Current electricity price : {}".format(self.current_electricity_price)
+
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):
             print "Hello from SMappee"
@@ -136,7 +143,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
             else:
                 time_now = datetime.datetime.now()
                 timedelta_period = time_now - self.last_time
-                self.conversion_kWh = timedelta_period.seconds / (3600 * 1000)
+                self.conversion_kWh = timedelta_period.seconds / (3600.0 * 1000.0)
+                print "conversion = {}".format(self.conversion_kWh)
                 self.last_time = time_now
 
             self.start_new_day_checking()
@@ -160,27 +168,15 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.set_variable('loadEnergy', self.load_energy_today)
 
         def calculate_bill_today(self):
-            time_now = datetime.datetime.now()
-            weekday = time_now.weekday()
-            start_peak_period = time_now.replace(hour=9, minute=0, second=1)
-            end_peak_period = time_now.replace(hour=22, minute=0, second=0)
+            grid_import_bill_current_time = self.power_from_grid_import * self.conversion_kWh * self.current_electricity_price
+            grid_export_bill_current_time = self.power_from_grid_export * self.conversion_kWh * self.current_electricity_price
+            solar_bill_current_time = self.power_from_solar * self.conversion_kWh * self.current_electricity_price
+            load_bill_current_time = self.power_from_load * self.conversion_kWh * self.current_electricity_price
 
-            if ((weekday == 5) or (weekday == 6) or (weekday == 7)): #Holiday have electricity price only OFFPEAK_RATE
-                self.grid_import_bill_today += self.power_from_grid_import * self.conversion_kWh * OFFPEAK_RATE
-                self.grid_export_bill_today += self.power_from_grid_export * self.conversion_kWh * OFFPEAK_RATE
-                self.solar_bill_today += self.power_from_solar * self.conversion_kWh * OFFPEAK_RATE
-                self.load_bill_today += self.power_from_load * self.conversion_kWh * OFFPEAK_RATE
-            else:
-                if (time_now > start_peak_period) and (time_now < end_peak_period):
-                    self.grid_import_bill_today += self.power_from_grid_import * self.conversion_kWh * PEAK_RATE
-                    self.grid_export_bill_today += self.power_from_grid_export * self.conversion_kWh * PEAK_RATE
-                    self.solar_bill_today += self.power_from_solar * self.conversion_kWh * PEAK_RATE
-                    self.load_bill_today += self.power_from_load * self.conversion_kWh * PEAK_RATE
-                else:
-                    self.grid_import_bill_today += self.power_from_grid_import * self.conversion_kWh * OFFPEAK_RATE
-                    self.grid_export_bill_today += self.power_from_grid_export * self.conversion_kWh * OFFPEAK_RATE
-                    self.solar_bill_today += self.power_from_solar * self.conversion_kWh * OFFPEAK_RATE
-                    self.load_bill_today += self.power_from_load * self.conversion_kWh * OFFPEAK_RATE
+            self.grid_import_bill_today += grid_import_bill_current_time
+            self.grid_export_bill_today += grid_export_bill_current_time
+            self.solar_bill_today += solar_bill_current_time
+            self.load_bill_today += load_bill_current_time
 
             self.set_variable('gridImportBill', self.grid_import_bill_today)
             self.set_variable('gridExportBill', self.grid_export_bill_today)
