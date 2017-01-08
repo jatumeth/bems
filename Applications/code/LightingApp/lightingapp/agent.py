@@ -65,6 +65,7 @@ def LightingAppAgent(config_path, **kwargs):
             self.device_total_bill = {}
             self.power_from_load = 0
             self.power_from_grid_import = 0
+            self.current_electricity_price = 0
 
             try:
                 self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
@@ -103,6 +104,12 @@ def LightingAppAgent(config_path, **kwargs):
             self.device_energy_from_grid_this_month = {}
             self.device_bill_this_month = {}
             self.device_total_bill_this_month = {}
+
+        @matching.match_start('/app/ui/grid/update_ui/bemoss/999')
+        def on_match_gridappagent(self, topic, headers, message, match):
+            message_from_gridApp = json.loads(message[0])
+            self.current_electricity_price = message_from_gridApp['current_electricity_price']
+            print "Current electricity price : {}".format(self.current_electricity_price)
 
         @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
         def on_match_smappee(self, topic, headers, message, match):
@@ -188,33 +195,14 @@ def LightingAppAgent(config_path, **kwargs):
                 self.calculate_this_month_device_energy_and_bill(device_id[i])
 
         def calculate_bill_today(self, device_id):
-            time_now = datetime.datetime.now()
-            weekday = time_now.weekday()
-            start_peak_period = time_now.replace(hour=9, minute=0, second=1)
-            end_peak_period = time_now.replace(hour=22, minute=0, second=0)
-
-            if ((weekday == 5) or (weekday == 6) or (weekday == 7)):  # Holiday have electricity price only OFFPEAK_RATE
-                try:
-                    self.device_total_bill[device_id] += self.device_power[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                    self.device_bill[device_id] += self.device_power_from_grid[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                except:
-                    self.device_total_bill[device_id] = self.device_power[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                    self.device_bill[device_id] = self.device_power_from_grid[device_id] * self.conversion_kWh * OFFPEAK_RATE
-            else:
-                if (time_now > start_peak_period) and (time_now < end_peak_period):
-                    try:
-                        self.device_total_bill[device_id] += self.device_power[device_id] * self.conversion_kWh * PEAK_RATE
-                        self.device_bill[device_id] += self.device_power_from_grid[device_id] * self.conversion_kWh * PEAK_RATE
-                    except:
-                        self.device_total_bill[device_id] = self.device_power[device_id] * self.conversion_kWh * PEAK_RATE
-                        self.device_bill[device_id] = self.device_power_from_grid[device_id] * self.conversion_kWh * PEAK_RATE
-                else:
-                    try:
-                        self.device_total_bill[device_id] += self.device_power[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                        self.device_bill[device_id] += self.device_power_from_grid[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                    except:
-                        self.device_total_bill[device_id] = self.device_power[device_id] * self.conversion_kWh * OFFPEAK_RATE
-                        self.device_bill[device_id] = self.device_power_from_grid[device_id] * self.conversion_kWh * OFFPEAK_RATE
+            total_bill_current_time = self.device_power[device_id] * self.conversion_kWh * self.current_electricity_price
+            bill_current_time = self.device_power_from_grid[device_id] * self.conversion_kWh * self.current_electricity_price
+            try:
+                self.device_total_bill[device_id] += total_bill_current_time
+                self.device_bill[device_id] += bill_current_time
+            except:
+                self.device_total_bill[device_id] = total_bill_current_time
+                self.device_bill[device_id] = bill_current_time
 
         def start_new_day_checking(self):
             today = datetime.datetime.now().weekday()
