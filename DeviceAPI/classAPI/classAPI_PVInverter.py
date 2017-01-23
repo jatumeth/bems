@@ -209,11 +209,18 @@ class API:
 
             # register13 = gridActivePower before converse
         try:
+
+            if register7 > 10000:
+                register7 = (register7 - 65536)
+                self.set_variable('Inverter_activepower', register7)
+            else:
+                print ("")
+
             if register8 < 10000:
                 register8 = (register8 * (-1))
                 self.set_variable('grid_activepower', register8)
             else:
-                self.set_variable('grid_activepower', (65536 - register8))
+                self.set_variable('grid_activepower', (register8 - 65536))
 
             # register73 = battPower before converse
             if register73 < 10000:
@@ -224,7 +231,7 @@ class API:
                 self.set_variable('solar_activepower', solarActivePower)
             else:
                 # self.set_variable('Batterystatus', "Charge")
-                batterypower = float(((-1) * (65536 - register73)))
+                batterypower = float(((-1) * (register73 - 65536)))
                 self.set_variable('battery_power', batterypower)
                 solarActivePower = register7 + batterypower
                 self.set_variable('solar_activepower', solarActivePower)
