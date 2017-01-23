@@ -85,11 +85,6 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/PowerMeterAgent/
 volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/powermeteragent.launch.json
 volttron-ctl install powermeteragent=/tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl
 
-# Run PowermeterApp agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/PowermeterAppAgent/
-volttron-pkg configure /tmp/volttron_wheels/powermeterappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowermeterAppAgent/powermeterappagent.launch.json
-volttron-ctl install powermeterappagent=/tmp/volttron_wheels/powermeterappagent-0.1-py2-none-any.whl
-
 # Run Mode agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/ModeAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/modeappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ModeAppAgent/modeappagent.launch.json
@@ -176,15 +171,15 @@ volttron-pkg package ~/workspace/bemoss_os/Applications/code/LightingApp
 volttron-pkg configure /tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/LightingApp/lightingappagent.launch.json
 volttron-ctl install LightingApp=/tmp/volttron_wheels/lightingappagent-0.1-py2-none-any.whl
 
+# Run PlugloadApp Agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/PlugloadAppAgent
+volttron-pkg configure /tmp/volttron_wheels/plugloadappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/PlugloadAppAgent/plugloadappagent.launch.json
+volttron-ctl install PlugloadApp=/tmp/volttron_wheels/plugloadappagent-0.1-py2-none-any.whl
+
 # Run PEA Welcome Switch Agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PlugloadAgent
 volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WSP3424348ce9748959b185fa8d39faeda.launch.json
 volttron-ctl install 3WSP3424348ce97489=/tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl
-
-# Run Powermeter App 2 Agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/PowermeterAppAgent2
-volttron-pkg configure /tmp/volttron_wheels/powermeterapp2agent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowermeterAppAgent2/powermeterappagent2.launch.json
-volttron-ctl install PowermeterApp2Agent=/tmp/volttron_wheels/powermeterapp2agent-0.1-py2-none-any.whl
 
 # Run EnergyBillApp Agent
 volttron-pkg package ~/workspace/bemoss_os/Applications/code/EnergyBillAppAgent
