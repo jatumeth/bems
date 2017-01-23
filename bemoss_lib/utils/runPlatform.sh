@@ -53,26 +53,36 @@ sleep 2
 volttron-ctl start --tag applauncheragent
 sleep 2
 volttron-ctl start --tag approvalhelperagent
+sleep 2
 
-#sleep 2
 #volttron-ctl start --tag multibuildingagent
-#Run network agentcd
+#sleep 2
+#volttron-ctl start --tag networkagent
+#sleep 2
 
-sleep 2
-volttron-ctl start --tag networkagent
-sleep 2
 volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag powermeteragent
-sleep 2
-#volttron-ctl start --tag powermeterappagent
-#sleep 2
-volttron-ctl start --tag evappagent
 sleep 2
 volttron-ctl start --tag modeappagent
 sleep 2
 volttron-ctl start --tag devicestatusappagent
 sleep 2
+volttron-ctl start --tag ACAPP
+sleep 2
+volttron-ctl start --tag LightingApp
+sleep 2
+volttron-ctl start --tag PlugloadApp
+sleep 2
+volttron-ctl start --tag evappagent
+sleep 2
+volttron-ctl start --tag EnergyBillAppAgent
+sleep 2
+volttron-ctl start --tag GridAppAgent
+sleep 2
+volttron-ctl start --tag 1WE221445K1200132  #weatheragent
+sleep 2
+
 #volttron-ctl start --tag LivingroomAir1
 #sleep 2
 #volttron-ctl start --tag LivingroomAir2
@@ -88,8 +98,6 @@ sleep 2
 #volttron-ctl start --tag 1IN221445K1300011
 #sleep 2
 #volttron-ctl start --tag 1FN221445K1200138
-#sleep 2
-#volttron-ctl start --tag 1WE221445K1200132
 #sleep 2
 #volttron-ctl start --tag RelaySRD05VDCSLCIP0035
 #sleep 2
