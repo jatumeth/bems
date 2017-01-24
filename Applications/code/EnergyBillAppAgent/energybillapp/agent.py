@@ -14,6 +14,7 @@ import psycopg2.extras
 import datetime
 import logging
 import sys
+import numpy as np
 import calendar
 
 publish_periodic = 10
@@ -211,7 +212,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
         def insertDB(self, table):
             if (table == 'daily'):
                 self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                                 " VALUES(DEFAULT, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                 " VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().date())),
                                   self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
                                   self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
@@ -318,14 +319,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + last_day + "'")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()[0]
-                self.grid_import_energy_last_day = data[2]
-                self.grid_export_energy_last_day = data[3]
-                self.solar_energy_last_day = data[4]
-                self.load_energy_last_day = data[5]
-                self.grid_import_bill_last_day = data[6]
-                self.grid_export_bill_last_day = data[7]
-                self.solar_bill_last_day = data[8]
-                self.load_bill_last_day = data[9]
+                self.grid_import_energy_last_day = float(data[1])
+                self.grid_export_energy_last_day = float(data[2])
+                self.solar_energy_last_day = float(data[3])
+                self.load_energy_last_day = float(data[4])
+                self.grid_import_bill_last_day = float(data[5])
+                self.grid_export_bill_last_day = float(data[6])
+                self.solar_bill_last_day = float(data[7])
+                self.load_bill_last_day = float(data[8])
             else:
                 self.grid_import_energy_last_day = 0
                 self.grid_export_energy_last_day = 0
@@ -355,14 +356,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_last_month += data[i][2]
-                    self.grid_export_energy_last_month += data[i][3]
-                    self.solar_energy_last_month += data[i][4]
-                    self.load_energy_last_month += data[i][5]
-                    self.grid_import_bill_last_month += data[i][6]
-                    self.grid_export_bill_last_month += data[i][7]
-                    self.solar_bill_last_month += data[i][8]
-                    self.load_bill_last_month += data[i][9]
+                    self.grid_import_energy_last_month += float(data[i][1])
+                    self.grid_export_energy_last_month += float(data[i][2])
+                    self.solar_energy_last_month += float(data[i][3])
+                    self.load_energy_last_month += float(data[i][4])
+                    self.grid_import_bill_last_month += float(data[i][5])
+                    self.grid_export_bill_last_month += float(data[i][6])
+                    self.solar_bill_last_month += float(data[i][7])
+                    self.load_bill_last_month += float(data[i][8])
             else:
                 pass
 
@@ -371,14 +372,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()[0]
-                self.grid_import_energy_today = data[2]
-                self.grid_export_energy_today = data[3]
-                self.solar_energy_today = data[4]
-                self.load_energy_today = data[5]
-                self.grid_import_bill_today = data[6]
-                self.grid_export_bill_today = data[7]
-                self.solar_bill_today = data[8]
-                self.load_bill_today = data[9]
+                self.grid_import_energy_today = float(data[1])
+                self.grid_export_energy_today = float(data[2])
+                self.solar_energy_today = float(data[3])
+                self.load_energy_today = float(data[4])
+                self.grid_import_bill_today = float(data[5])
+                self.grid_export_bill_today = float(data[6])
+                self.solar_bill_today = float(data[7])
+                self.load_bill_today = float(data[8])
 
             else:
                 self.start_new_day()
@@ -402,14 +403,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_this_month_until_last_day += data[i][2]
-                    self.grid_export_energy_this_month_until_last_day += data[i][3]
-                    self.solar_energy_this_month_until_last_day += data[i][4]
-                    self.load_energy_this_month_until_last_day += data[i][5]
-                    self.grid_import_bill_this_month_until_last_day += data[i][6]
-                    self.grid_export_bill_this_month_until_last_day += data[i][7]
-                    self.solar_bill_this_month_until_last_day += data[i][8]
-                    self.load_bill_this_month_until_last_day += data[i][9]
+                    self.grid_import_energy_this_month_until_last_day += float(data[i][1])
+                    self.grid_export_energy_this_month_until_last_day += float(data[i][2])
+                    self.solar_energy_this_month_until_last_day += float(data[i][3])
+                    self.load_energy_this_month_until_last_day += float(data[i][4])
+                    self.grid_import_bill_this_month_until_last_day += float(data[i][5])
+                    self.grid_export_bill_this_month_until_last_day += float(data[i][6])
+                    self.solar_bill_this_month_until_last_day += float(data[i][7])
+                    self.load_bill_this_month_until_last_day += float(data[i][8])
             else:
                 self.start_new_month()
 
@@ -432,14 +433,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_annual_until_last_month += data[i][2]
-                    self.grid_export_energy_annual_until_last_month += data[i][3]
-                    self.solar_energy_annual_until_last_month += data[i][4]
-                    self.load_energy_annual_until_last_month += data[i][5]
-                    self.grid_import_bill_annual_until_last_month += data[i][6]
-                    self.grid_export_bill_annual_until_last_month += data[i][7]
-                    self.solar_bill_annual_until_last_month += data[i][8]
-                    self.load_bill_annual_until_last_month += data[i][9]
+                    self.grid_import_energy_annual_until_last_month += float(data[i][1])
+                    self.grid_export_energy_annual_until_last_month += float(data[i][2])
+                    self.solar_energy_annual_until_last_month += float(data[i][3])
+                    self.load_energy_annual_until_last_month += float(data[i][4])
+                    self.grid_import_bill_annual_until_last_month += float(data[i][5])
+                    self.grid_export_bill_annual_until_last_month += float(data[i][6])
+                    self.solar_bill_annual_until_last_month += float(data[i][7])
+                    self.load_bill_annual_until_last_month += float(data[i][8])
             else:
                 self.start_new_year()
 
