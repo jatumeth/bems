@@ -233,28 +233,6 @@ if cur.rowcount == 0:  # this APP used to be launched before
     conn.commit()
 
 #8. create tables
-cur.execute("select * from information_schema.tables where table_name=%s", ('daily_consumption',))
-print bool(cur.rowcount)
-if bool(cur.rowcount):
-    cur.execute("DROP TABLE daily_consumption")
-    conn.commit()
-else:
-    pass
-
-cur.execute('''CREATE TABLE daily_consumption
-       (ID SERIAL   PRIMARY KEY   NOT NULL,
-       DATE   DATE   NOT NULL,
-       GRIDIMPORTENERGY     FLOAT,
-       GRIDEXPORTENERGY     FLOAT,
-       SOLARENERGY     FLOAT,
-       LOADENERGY     FLOAT,
-       GRIDIMPORTBILL     FLOAT,
-       GRIDEXPORTBILL     FLOAT,
-       SOLARBILL     FLOAT,
-       LOADBILL     FLOAT);''')
-print "Table daily_consumption created successfully"
-conn.commit()
-
 cur.execute("select * from information_schema.tables where table_name=%s", ('monthly_consumption',))
 print bool(cur.rowcount)
 if bool(cur.rowcount):
