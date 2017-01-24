@@ -146,8 +146,27 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #     print"---------------------------------------------------"
 
     # #fridge
-    @matching.match_start('/agent/ui/power_meter/')
-    def on_match(self, topic, headers, message, match):
+    # @matching.match_start('/agent/ui/power_meter/')
+    # def on_match(self, topic, headers, message, match):
+    #     '''Use match_all to receive all messages and print them out.'''
+    #     # _log.debug("Topic: {topic}, Headers: {headers}, "
+    #     #            "Message: {message}".format(
+    #     #     topic=topic, headers=headers, message=message))
+    #     print "fridge---------"
+    #     print "Topic: {}".format(topic)
+    #     print "Headers: {}".format(headers)
+    #     # print "Message: {}".format(message)
+    #     received_message = json.loads(message[0])
+    #     print received_message
+    #
+    #     print dict(headers)
+    #     print"---------------------------------------------------"
+    #     self.Relay_on()
+    #     self.Relay_off()
+    # @matching.match_start("/agent /ui/")
+
+    @matching.match_start('/agent/ui/PVInverter/')
+    def on_match3(self, topic, headers, message, match):
         '''Use match_all to receive all messages and print them out.'''
         # _log.debug("Topic: {topic}, Headers: {headers}, "
         #            "Message: {message}".format(
@@ -158,11 +177,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # print "Message: {}".format(message)
         received_message = json.loads(message[0])
         print received_message
-
         print dict(headers)
         print"---------------------------------------------------"
-        self.Relay_on()
-        self.Relay_off()
     # @matching.match_start("/agent /ui/")
 
     def Relay_on(self):

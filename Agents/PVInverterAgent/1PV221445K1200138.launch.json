@@ -14,7 +14,7 @@
     "device_monitor_time": 20, 
     "macaddress": "221445K1200138",
     "model": "PV123",
-    "type": "PV",
+    "type": "PVInverter",
     "vendor": "Must",
     "zone_id": 999
 }
