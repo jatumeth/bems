@@ -98,8 +98,8 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/f0aab61a-ae35-4690-858c-b437bb5b7e1b",
-                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/switches/5500e07f-1f41-4716-b89c-723c98cc2c0e",
+                             headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
@@ -152,8 +152,8 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.put(
-                    "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/f0aab61a-ae35-4690-858c-b437bb5b7e1b",
-                    headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, data= _data, timeout=20);
+                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/switches/5500e07f-1f41-4716-b89c-723c98cc2c0e",
+                    headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b "}, data= _data, timeout=20);
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
@@ -185,8 +185,8 @@ def main():
     Fan = API(model='Fan', type='tv', api='API3', agent_id='FanAgent')
     Fan.getDeviceStatus()
 
-    # import time
-    # Fan.setDeviceStatus({"status": "ON"})
+    import time
+    Fan.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
