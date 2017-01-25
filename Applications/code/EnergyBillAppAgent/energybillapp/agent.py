@@ -45,6 +45,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
     db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
     db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
+    db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
 
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
@@ -237,11 +238,16 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.grid_import_bill_annual, self.grid_export_bill_annual,
                                   self.solar_bill_annual, self.load_bill_annual))
 
+            elif (table == 'cumulative'):
+                self.cur.execute("INSERT INTO " + db_table_cumulative_energy +
+                                 " VALUES(%s, %s, %s)",
+                                 (datetime.datetime.now(), self.get_variable('loadEnergy'), self.get_variable('solarEnergy')))
 
                 self.con.commit()
 
         @periodic(10)
         def updateDB(self):
+            self.insertDB('cumulative')
             today = str(datetime.datetime.now().date())
             last_day_of_this_month = str(datetime.datetime.now().date() + relativedelta(day=31))
             last_day_of_end_month = str(datetime.datetime.now().replace(month=12).date() + relativedelta(day=31))
