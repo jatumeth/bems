@@ -97,7 +97,7 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/551402ec-2513-4d61-a893-433195239b5d",
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/3d5602d2-ace5-4b47-9d76-b05b17c662df",
                              headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, timeout=20);
             print(" {0}Agent is querying its current status (status:{1}) please wait ...")
             format(self.variables.get('agent_id', None), str(r.status_code))

@@ -98,12 +98,14 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/1cf71480-1a2d-40ed-99e6-f203a0978440",
-                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/switches/aa301961-fb27-483e-8372-5345f499e83c",
+                             headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
+            print r.text
             if r.status_code == 200:
                 getDeviceStatusResult = False
+
                 self.getDeviceStatusJson(r.text)
                 if self.debug is True:
                     self.printDeviceStatus()
@@ -149,8 +151,10 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.put(
-                    "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/1cf71480-1a2d-40ed-99e6-f203a0978440",
-                    headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, data= _data, timeout=20);
+                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/switches/aa301961-fb27-483e-8372-5345f499e83c",
+                    headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, data= _data, timeout=20);
+                # print "15456"
+                # print r.text
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
@@ -170,7 +174,6 @@ class API:
         msgToDevice = {}
         if 'status' in postmsg.keys():
             msgToDevice['command'] = str(postmsg['status'].lower())
-            msgToDevice['command'] = "on"
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -181,9 +184,8 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    LGTV.getDeviceStatus()
+    # LGTV.getDeviceStatus()
 
-    import time
     LGTV.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
