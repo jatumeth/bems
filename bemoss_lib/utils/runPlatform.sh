@@ -59,7 +59,12 @@ sleep 2
 #sleep 2
 #volttron-ctl start --tag networkagent
 #sleep 2
-
+volttron-ctl start --tag gridappagent
+sleep 2
+volttron-ctl start --tag NETPIEButton
+sleep 2
+volttron-ctl start --tag DemandResponseAgent
+sleep 2
 volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag powermeteragent
@@ -83,16 +88,16 @@ sleep 2
 volttron-ctl start --tag 1WE221445K1200132  #weatheragent
 sleep 2
 
-#volttron-ctl start --tag LivingroomAir1
-#sleep 2
-#volttron-ctl start --tag LivingroomAir2
-#sleep 2
-#volttron-ctl start --tag BedroomAir
-#sleep 2
+volttron-ctl start --tag LivingroomAir1
+sleep 2
+volttron-ctl start --tag LivingroomAir2
+sleep 2
+volttron-ctl start --tag BedroomAir
+sleep 2
 #volttron-ctl start --tag 1FR221445K1200111
 #sleep 2
-#volttron-ctl start --tag 1MS221445K1200132
-#sleep 2
+volttron-ctl start --tag 1MS221445K1200132
+sleep 2
 #volttron-ctl start --tag 1LG221445K1200137
 #sleep 2
 #volttron-ctl start --tag 1IN221445K1300011
