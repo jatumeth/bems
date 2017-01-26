@@ -162,58 +162,55 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print "Message: {}".format(message)
         received_message = json.loads(message[0])
         # self.illu = received_message["illuminance"]  # for fibaro
-        self.illu = received_message["illuminance"]
-        print "now brightness from multisensor is : {}".format(self.illu)
+        try:
+            self.illu = received_message["illuminance"]
+            print "now illuminance from multisensor is : {}".format(self.illu)
 
-        # if self.actor == "ui":
-        #     self.mode = "custom_mode"
-        #
-        #     print "now working at : {}".format(self.mode)
-        # else:
-        #     print ""
-        print "***************************"
-        print self.actor
+            print "***************************"
+            print self.actor
 
-        if self.actor != "ui":
-            print "+++++++++++++++++++++++++++++++++++++++++"
-            # if self.mode == ("eco" or "dr" or "comfort"):
-            print "now working at : {}".format(self.mode)
-            self.brightness = 100
-            if self.illu > 500:
-                self.brightness = 1
-            elif self.illu > 400:
-                self.brightness = 10
-            elif self.illu > 350:
-                self.brightness = 10
-            elif self.illu > 300:
-                self.brightness = 20
-            elif self.illu > 250:
-                self.brightness = 30
-            elif self.illu > 210:
-                self.brightness = 40
-            # elif self.illu > 180:
-            #     self.brightness = 50
-            elif self.illu > 150:
-                self.brightness = 70
-            # elif self.illu > 120:
-            #     self.brightness = 80
-            elif self.illu > 100:
+            if self.actor != "ui":
+                print "+++++++++++++++++++++++++++++++++++++++++"
+                # if self.mode == ("eco" or "dr" or "comfort"):
+                print "now working at : {}".format(self.mode)
                 self.brightness = 100
+                if self.illu > 500:
+                    self.brightness = 1
+                elif self.illu > 400:
+                    self.brightness = 10
+                elif self.illu > 350:
+                    self.brightness = 10
+                elif self.illu > 300:
+                    self.brightness = 20
+                elif self.illu > 250:
+                    self.brightness = 30
+                elif self.illu > 210:
+                    self.brightness = 40
+                # elif self.illu > 180:
+                #     self.brightness = 50
+                elif self.illu > 150:
+                    self.brightness = 70
+                # elif self.illu > 120:
+                #     self.brightness = 80
+                elif self.illu > 100:
+                    self.brightness = 100
+                else:
+                    self.brightness = 100
+
+                if (self.mode == "comfort"):
+                    self.brightness = 100
+                else:
+                    print""
+                self.HUE_DIM(self.brightness)
+                print "calculate brightness to (%){}".format(self.brightness)
+                print "-------------------------------------------------------------------------"
+                # else:
+                print "-------------------------------------------------------------------------"
+
             else:
-                self.brightness = 100
-
-            if(self.mode == "comfort"):
-                self.brightness = 100
-            else:
-                print""
-            self.HUE_DIM(self.brightness)
-            print "calculate brightness to (%){}".format(self.brightness)
-            print "-------------------------------------------------------------------------"
-        # else:
-            print "-------------------------------------------------------------------------"
-
-        else:
-            print "now working at custom mode"
+                print "now working at custom mode"
+        except:
+            print "cannot get illuminance from multisensor: {}".format(received_message["agent_id"])
 
     # total Load 1100 kW
     def publish_DR(self):
