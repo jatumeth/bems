@@ -163,10 +163,12 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_export_energy_today += self.power_from_grid_export * self.conversion_kWh
             self.set_variable('gridExportEnergy', self.grid_export_energy_today)
             # Calculate Energy from Solar
-            self.solar_energy_today += self.power_from_solar * self.conversion_kWh
+            self.solar_energy_period = self.power_from_solar * self.conversion_kWh
+            self.solar_energy_today += self.solar_energy_period
             self.set_variable('solarEnergy', self.solar_energy_today)
             #Calculate Energy from Load
-            self.load_energy_today += self.power_from_load * self.conversion_kWh
+            self.load_energy_period = self.power_from_load * self.conversion_kWh
+            self.load_energy_today += self.load_energy_period
             self.set_variable('loadEnergy', self.load_energy_today)
 
         def calculate_bill_today(self):
@@ -241,7 +243,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             elif (table == 'cumulative'):
                 self.cur.execute("INSERT INTO " + db_table_cumulative_energy +
                                  " VALUES(%s, %s, %s)",
-                                 (datetime.datetime.now(), self.get_variable('loadEnergy'), self.get_variable('solarEnergy')))
+                                 (datetime.datetime.now(), self.load_energy_period, self.solar_energy_period))
 
                 self.con.commit()
 
