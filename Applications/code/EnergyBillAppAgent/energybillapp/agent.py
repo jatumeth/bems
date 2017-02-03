@@ -441,14 +441,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_annual_until_last_month += float(data[i][1])
-                    self.grid_export_energy_annual_until_last_month += float(data[i][2])
-                    self.solar_energy_annual_until_last_month += float(data[i][3])
-                    self.load_energy_annual_until_last_month += float(data[i][4])
-                    self.grid_import_bill_annual_until_last_month += float(data[i][5])
-                    self.grid_export_bill_annual_until_last_month += float(data[i][6])
-                    self.solar_bill_annual_until_last_month += float(data[i][7])
-                    self.load_bill_annual_until_last_month += float(data[i][8])
+                    self.grid_import_energy_annual_until_last_month += float(data[i][2])
+                    self.grid_export_energy_annual_until_last_month += float(data[i][3])
+                    self.solar_energy_annual_until_last_month += float(data[i][4])
+                    self.load_energy_annual_until_last_month += float(data[i][5])
+                    self.grid_import_bill_annual_until_last_month += float(data[i][6])
+                    self.grid_export_bill_annual_until_last_month += float(data[i][7])
+                    self.solar_bill_annual_until_last_month += float(data[i][8])
+                    self.load_bill_annual_until_last_month += float(data[i][9])
             else:
                 self.start_new_year()
 
