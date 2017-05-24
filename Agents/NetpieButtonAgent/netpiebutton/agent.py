@@ -87,9 +87,9 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self._agent_id = self.config['agentid']
         self.message = ''
         # NETPIE --------------------
-        appid = "RSDPEA"
-        gearkey = "5xeHHg4vpGAYTzj"
-        gearsecret = "N2hc2XaAriu2grlvRO0kEEglE"
+        appid = "NETPIENoAndJane"
+        gearkey = "NaMH5UBXNWsyS4n"
+        gearsecret = "Xfqb4WM2gu2NegeLe5x3Ot808"
 
         microgear.create(gearkey, gearsecret, appid, {'debugmode': True})
 
@@ -104,12 +104,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # def disconnect():
         #     logging.debug("disconnect is work")
 
-        microgear.setalias("doraemons")
+        microgear.setalias("switch1")
         microgear.on_connect = self.connection
         microgear.on_message = self.subscription
         microgear.on_disconnect = self.disconnect
-        microgear.subscribe("/SMH/pushbutton")
-        x = microgear.subscribe("/SMH/pushbutton")
+        microgear.subscribe("/outdoor/temp")
+        x = microgear.subscribe("/outdoor/temp")
         print "x:{}".format(x)
         microgear.connect(False)
 
@@ -124,10 +124,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def connection(self):
         logging.debug("Now I am connected with netpie")
 
+
+
     def subscription(self, topic, message):
         logging.debug(topic + " " + message)
         self.message = message
-        print "self.message: {}".format(self.message)
+        print "self.message111: {}".format(self.message)
         if (self.message == '1'):
             self.publish_heartbeat()
         else :
@@ -144,28 +146,28 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    @periodic(5)
-    def check_PEA_DR_trigger_button(self):
-
-        try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
-                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
-            print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
-            if r.status_code == 200:
-                conve_json = json.loads(r.text)
-                if (conve_json["status"] == "on"):
-                    self.status = "ON"
-                    self.message = '1'
-                    self.publish_heartbeat()
-                elif (conve_json["status"] == "off"):
-                    self.status = "OFF"
-                print (" Received status from PEA DR Trigger button as: {}".format(self.status))
-            else:
-                print (" Received an error from server, cannot retrieve results")
-                getDeviceStatusResult = False
-        except Exception as er:
-            print er
-            print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
+    # @periodic(5)
+    # def check_PEA_DR_trigger_button(self):
+    #
+    #     try:
+    #         r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
+    #                          headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+    #         print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
+    #         if r.status_code == 200:
+    #             conve_json = json.loads(r.text)
+    #             if (conve_json["status"] == "on"):
+    #                 self.status = "ON"
+    #                 self.message = '1'
+    #                 self.publish_heartbeat()
+    #             elif (conve_json["status"] == "off"):
+    #                 self.status = "OFF"
+    #             print (" Received status from PEA DR Trigger button as: {}".format(self.status))
+    #         else:
+    #             print (" Received an error from server, cannot retrieve results")
+    #             getDeviceStatusResult = False
+    #     except Exception as er:
+    #         print er
+    #         print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
 
     # @periodic(10)
     def publish_heartbeat(self):
@@ -200,6 +202,47 @@ class ListenerAgent(PublishMixin, BaseAgent):
             # message = json.dumps({"status": "ON", "color": [0, 0, 255]})
             # self.publish(topic, headers, message)
             print ("NO MESSAGE FROM NETPIE")
+
+    @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
+    def on_match_smappee(self, topic, headers, message, match):
+        print "Hello from SMappee"
+        print message[0]
+        microgear.publish("/outdoor/temp", message[0])
+        # message_from_Smappee = json.loads(message[0])
+        # print message_from_Smappee
+        # microgear.publish("/outdoor/temp", message_from_Smappee)
+
+        # self.power_from_load = message_from_Smappee['load_activePower']
+        # self.power_from_solar = message_from_Smappee['solar_activePower']
+        # if (message_from_Smappee['grid_activePower'] > 0):
+        #     self.power_from_grid_import = message_from_Smappee['grid_activePower']
+        #     self.power_from_grid_export = 0
+        # else:
+        #     self.power_from_grid_export = abs(message_from_Smappee['grid_activePower'])
+        #     self.power_from_grid_import = 0
+        #
+        # # This for calculate the period of power which got from SMAPPEE
+        # if (self.start_first_time):
+        #     self.conversion_kWh = 0
+        #     self.last_time = datetime.datetime.now()
+        #     self.start_first_time = False
+        # else:
+        #     time_now = datetime.datetime.now()
+        #     timedelta_period = time_now - self.last_time
+        #     self.conversion_kWh = timedelta_period.seconds / (3600.0 * 1000.0)
+        #     print "conversion = {}".format(self.conversion_kWh)
+        #     self.last_time = time_now
+        #
+        # self.start_new_day_checking()
+        # self.calculate_energy_today()
+        # self.calculate_bill_today()
+        # self.calculate_this_month_energy_and_bill()
+        # self.calculate_annual_energy_and_bill()
+
+    @periodic(2)
+    def test(self):
+        print "888"
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''

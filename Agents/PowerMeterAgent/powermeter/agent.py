@@ -28,7 +28,6 @@ import datetime
 import time
 import math
 from bemoss_lib.databases.cassandraAPI import cassandraDB
-from ISStreamer.Streamer import Streamer
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -164,13 +163,6 @@ def powermeteragent(config_path, **kwargs):
                 print er
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
-            try:
-                self.streamer = Streamer(bucket_name="PEA Smart Home", bucket_key="YWJ69J6NWJK5",
-                                    access_key="N6tbiTrvyUWXWArGuYdpcjeUQJIlCDRe")
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-
         #These set and get methods allow scalability 
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
@@ -215,13 +207,6 @@ def powermeteragent(config_path, **kwargs):
                     if v not in self.variables: #it won't be in self.variables either (in the first time)
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
-            if (self.stream_data_initialState):
-                for v in log_variables:
-                    if v in self.variables:
-                        print("logging {} with value {}".format(v, PowerMeter.variables[v]))
-                        self.streamer.log(str(agent_id)+v, PowerMeter.variables[v])
-            else:
-                print("{} not streaming data to initialstate".format(agent_id))
 
             # # Step: Check if any Device is OFFLINE
             # self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
