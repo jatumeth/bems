@@ -87,9 +87,9 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self._agent_id = self.config['agentid']
         self.message = ''
         # NETPIE --------------------
-        appid = "NETPIENoAndJane"
-        gearkey = "NaMH5UBXNWsyS4n"
-        gearsecret = "Xfqb4WM2gu2NegeLe5x3Ot808"
+        appid = "RSDPEA"
+        gearkey = "5xeHHg4vpGAYTzj"
+        gearsecret = "N2hc2XaAriu2grlvRO0kEEglE"
 
         microgear.create(gearkey, gearsecret, appid, {'debugmode': True})
 
@@ -104,32 +104,30 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # def disconnect():
         #     logging.debug("disconnect is work")
 
-        microgear.setalias("switch1")
+        microgear.setalias("doraemons")
         microgear.on_connect = self.connection
         microgear.on_message = self.subscription
         microgear.on_disconnect = self.disconnect
-        microgear.subscribe("/outdoor/temp")
-        x = microgear.subscribe("/outdoor/temp")
+        microgear.subscribe("/SMH/pushbutton")
+        x = microgear.subscribe("/SMH/pushbutton")
         print "x:{}".format(x)
         microgear.connect(False)
 
         # ------------------------
 
         # test control air
-        self.publish_heartbeat()
-        self.status = "OFF"
+        # self.publish_heartbeat()
+        # self.status = "OFF"
         # Always call the base class setup()
         super(ListenerAgent, self).setup()
 
     def connection(self):
         logging.debug("Now I am connected with netpie")
 
-
-
     def subscription(self, topic, message):
         logging.debug(topic + " " + message)
         self.message = message
-        print "self.message111: {}".format(self.message)
+        print "self.message: {}".format(self.message)
         if (self.message == '1'):
             self.publish_heartbeat()
         else :
@@ -145,6 +143,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #                      "Message: {message}".format(
     #                      topic=topic, headers=headers, message=message))
     #     print("")
+
+    # @periodic(10)
+    # def testModal(self):
+    #     self.publish_heartbeat()
+    #     self.message = '1'
+    #     print("publish_heartbeat message sent")
 
     # @periodic(5)
     # def check_PEA_DR_trigger_button(self):
@@ -169,14 +173,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #         print er
     #         print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
 
-    # @periodic(10)
-    def publish_heartbeat(self):
+    @matching.match_exact('/agent/ui/dashboard/netpiebutton')
+    def on_match(self, topic, headers, message, match):
         # TODO this is example how to write an app to control Refrigerator
         # print "control: {}".format(control)
+        self.message='1'
         if (self.message == '1'):
             now = datetime.utcnow().isoformat(' ') + 'Z'
             # TODO publish to dashboard
-            topic = '/agent/ui/dashboard/netpiebutton'
+            topic = '/agent/ui/dashboard'
             headers = {
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
@@ -189,7 +194,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             print ("topic {}".format(topic))
             print ("headers {}".format(headers))
             print ("message {}".format(message))
-            self.message = 0
+            # self.message = 0
         else :
             # TODO this is example how to write an app to control Lighting
             # topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
@@ -202,47 +207,6 @@ class ListenerAgent(PublishMixin, BaseAgent):
             # message = json.dumps({"status": "ON", "color": [0, 0, 255]})
             # self.publish(topic, headers, message)
             print ("NO MESSAGE FROM NETPIE")
-
-    @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
-    def on_match_smappee(self, topic, headers, message, match):
-        print "Hello from SMappee"
-        print message[0]
-        microgear.publish("/outdoor/temp", message[0])
-        # message_from_Smappee = json.loads(message[0])
-        # print message_from_Smappee
-        # microgear.publish("/outdoor/temp", message_from_Smappee)
-
-        # self.power_from_load = message_from_Smappee['load_activePower']
-        # self.power_from_solar = message_from_Smappee['solar_activePower']
-        # if (message_from_Smappee['grid_activePower'] > 0):
-        #     self.power_from_grid_import = message_from_Smappee['grid_activePower']
-        #     self.power_from_grid_export = 0
-        # else:
-        #     self.power_from_grid_export = abs(message_from_Smappee['grid_activePower'])
-        #     self.power_from_grid_import = 0
-        #
-        # # This for calculate the period of power which got from SMAPPEE
-        # if (self.start_first_time):
-        #     self.conversion_kWh = 0
-        #     self.last_time = datetime.datetime.now()
-        #     self.start_first_time = False
-        # else:
-        #     time_now = datetime.datetime.now()
-        #     timedelta_period = time_now - self.last_time
-        #     self.conversion_kWh = timedelta_period.seconds / (3600.0 * 1000.0)
-        #     print "conversion = {}".format(self.conversion_kWh)
-        #     self.last_time = time_now
-        #
-        # self.start_new_day_checking()
-        # self.calculate_energy_today()
-        # self.calculate_bill_today()
-        # self.calculate_this_month_energy_and_bill()
-        # self.calculate_annual_energy_and_bill()
-
-    @periodic(2)
-    def test(self):
-        print "888"
-
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
