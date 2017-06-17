@@ -208,6 +208,40 @@ class ListenerAgent(PublishMixin, BaseAgent):
             # self.publish(topic, headers, message)
             print ("NO MESSAGE FROM NETPIE")
 
+    @matching.match_exact('/agent/ui/dashboard/help')
+    def on_match_help(self, topic, headers, message, match):
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        topic = '/agent/ui/dashboard'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+            'data_source': "help",
+        }
+        message = json.dumps({"event": "dr", "status": "enable"})
+        self.publish(topic, headers, message)
+        print ("sent message to trig js help")
+        print ("topic {}".format(topic))
+        print ("headers {}".format(headers))
+        print ("message {}".format(message))
+
+    @matching.match_exact('/agent/ui/dashboard/help')
+    def on_match_help(self, topic, headers, message, match):
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        topic = '/agent/ui/dashboard'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+            'data_source': "help",
+        }
+        message = json.dumps({"event": "dr", "status": "enable"})
+        self.publish(topic, headers, message)
+        print ("sent message to trig js help")
+        print ("topic {}".format(topic))
+        print ("headers {}".format(headers))
+        print ("message {}".format(message))
+
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
