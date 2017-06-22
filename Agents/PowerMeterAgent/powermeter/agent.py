@@ -96,6 +96,7 @@ def powermeteragent(config_path, **kwargs):
     db_database = get_config('db_database')
     db_user = get_config('db_user')
     db_password = get_config('db_password')
+    db_table_power_from_meter = settings.DATABASES['default']['TABLE_power_from_meter']
     db_table_power_meter = settings.DATABASES['default']['TABLE_powermeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -255,6 +256,19 @@ def powermeteragent(config_path, **kwargs):
             # if self.send_notification:
             #     self.track_event_send_notification()
             #
+
+            #Update power from meter to PostgreSQL
+
+            self.cur.execute("INSERT INTO " + db_table_power_from_meter +
+                             " VALUES(%s, %s, %s, %s)",
+                             ((str(datetime.datetime.now())),
+                              self.get_variable('grid_activePower'), self.get_variable('solar_activePower'),
+                              self.get_variable('load_activePower')))
+            self.con.commit()
+            # except:
+            #     print "Cannot update DB"
+
+
             #step4: update PostgresQL (meta-data) database
             # try:
             #     for k, v in log_variables.items():
