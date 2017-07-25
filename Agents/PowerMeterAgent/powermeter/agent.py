@@ -32,6 +32,7 @@ from bemoss_lib.databases.cassandraAPI import cassandraDB
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
+
 # Step1: Agent Initialization
 def powermeteragent(config_path, **kwargs):
     config = utils.load_config(config_path)
@@ -44,7 +45,7 @@ def powermeteragent(config_path, **kwargs):
 
     def valid_ip(ip):
         parts = ip.split('.')
-        return(
+        return (
             len(parts) == 4
             and all(part.isdigit() for part in parts)
             and all(0 <= int(part) <= 255 for part in parts)
@@ -83,8 +84,10 @@ def powermeteragent(config_path, **kwargs):
     _address = str(_address).split('/')[0]
     try:  # validate whether or not address is an ip address
         socket.inet_aton(_address)
-        if valid_ip(_address): ip_address = _address
-        else: ip_address = None
+        if valid_ip(_address):
+            ip_address = _address
+        else:
+            ip_address = None
         print "yes ip_address is {}".format(ip_address)
     except socket.error:
         print "yes ip_address is None"
@@ -95,7 +98,6 @@ def powermeteragent(config_path, **kwargs):
     db_database = get_config('db_database')
     db_user = get_config('db_user')
     db_password = get_config('db_password')
-    db_table_power_from_meter = settings.DATABASES['default']['TABLE_power_from_meter']
     db_table_power_meter = settings.DATABASES['default']['TABLE_powermeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -107,25 +109,24 @@ def powermeteragent(config_path, **kwargs):
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
-
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-
 
     # 4. @params device_api
     api = get_config('api')
-    apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
+    apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
 
-    #4.1 initialize thermostat device object
+    print "++++++++____________________++++++++++++++"
+
+    # 4.1 initialize thermostat device object
     PowerMeter = apiLib.API(model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
-                     addressl=url_l, usernamel=head_l, agent_id=agent_id, db_host=db_host, db_port=db_port,
+                            addressl=url_l, usernamel=head_l, agent_id=agent_id, db_host=db_host, db_port=db_port,
                             db_user=db_user, db_password=db_password, db_database=db_database)
-
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id, PowerMeter.get_variable('model'),
                                                                         PowerMeter.get_variable('api'),
                                                                         PowerMeter.get_variable('address')))
 
-    #5. @params notification_info
+    # 5. @params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
     email_recipients = settings.NOTIFICATION['email']['recipients']
@@ -164,33 +165,33 @@ def powermeteragent(config_path, **kwargs):
                 print er
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
-        #These set and get methods allow scalability 
+
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
-    
+
         def get_variable(self, k):
             return self.variables.get(k, None)  # default of get_variable is none
-        
-        #2. agent setup method
+
+        # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
-            #1. Do a one time push when we start up so we don't have to wait for the periodic
+            # 1. Do a one time push when we start up so we don't have to wait for the periodic
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": PowerMeter.identifyDevice()
 
-        @periodic(cassandra_update_time) #save all data every max_monitor_time
+        @periodic(cassandra_update_time)  # save all data every max_monitor_time
         def backupSaveData(self):
             try:
                 PowerMeter.getDeviceStatus()
-                cassandraDB.insert(agent_id,PowerMeter.variables,log_variables)
+                cassandraDB.insert(agent_id, PowerMeter.variables, log_variables)
                 print('Data Pushed to cassandra')
             except Exception as er:
                 print("ERROR: {} fails to update cassandra database".format(agent_id))
                 print er
 
-        @periodic(device_monitor_time) 
+        @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-            #step1: get current status, then map keywords and variables to agent knowledge
+            # step1: get current status, then map keywords and variables to agent knowledge
             try:
                 PowerMeter.getDeviceStatus()
                 self.updateUI()
@@ -205,125 +206,64 @@ def powermeteragent(config_path, **kwargs):
                         self.variables[v] = PowerMeter.variables[v]
                         self.changed_variables[v] = log_variables[v]
                 else:
-                    if v not in self.variables: #it won't be in self.variables either (in the first time)
+                    if v not in self.variables:  # it won't be in self.variables either (in the first time)
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
 
-            # # Step: Check if any Device is OFFLINE
-            # self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            # if self.cur.rowcount != 0:
-            #     self.device_offline_detection()
-            #
-            # try:
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_power_meter+" SET last_scanned_time=%s "
-            #                      "WHERE power_meter_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-
-
-            #check data validity after mapping
             if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
-                self.set_variable('realpower', -1*float(self.get_variable('realpower')))
+                self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
             if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:
-                self.set_variable('reactivepower', -1*float(self.get_variable('reactivepower')))
+                self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
-                self.set_variable('apparentpower', -1*float(self.get_variable('apparentpower')))
+                self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # #step3: send notification to a user if required
-            # if self.send_notification:
-            #     self.track_event_send_notification()
-            #
-
-            #Update power from meter to PostgreSQL
-
-            self.cur.execute("INSERT INTO " + db_table_power_from_meter +
-                             " VALUES(%s, %s, %s, %s)",
-                             ((str(datetime.datetime.now())),
-                              self.get_variable('grid_activePower'), self.get_variable('solar_activePower'),
-                              self.get_variable('load_activePower')))
-            self.con.commit()
-            # except:
-            #     print "Cannot update DB"
+            # PubAndSub3 = importlib.import_module("DeviceAPI.classAPI.device.samples." + "classAPI_mqtt")
+            # PubAndSub3 = importlib.import_module("device.samples." + "classAPI_mqtt")
+            try:
+                # PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples" + "classAPI_mqtt")
+                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                PowermeterMQTT.iothub_client_sample_run(self.get_variable('grid_activePower'),
+                                                        self.get_variable('solar_activePower'),
+                                                        self.get_variable('load_activePower'))
 
 
-            #step4: update PostgresQL (meta-data) database
-            # try:
-            #     for k, v in log_variables.items():
-            #         # check if column exists, then updateDB to corresponding column
-            #         self.cur.execute("select column_name from information_schema.columns where table_name=%s and column_name=%s",
-            #                  (db_table_power_meter, k,))
-            #         if bool(self.cur.rowcount):
-            #             self.updateDB(db_table_power_meter, k, db_id_column_name, self.get_variable(k), agent_id)
-            #         else:
-            #             pass
-            #     # self.updateDB(db_table_power_meter, 'real_power', 'power_meter_id', self.get_variable('real_power'), agent_id)
-            #     #TODO check ip_address
-            #     if self.ip_address != None:
-            #         psycopg2.extras.register_inet()
-            #         _ip_address = psycopg2.extras.Inet(self.ip_address)
-            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET ip_address=%s WHERE power_meter_id=%s",
-            #                          (_ip_address, agent_id))
-            #         self.con.commit()
-            #     if self.get_variable('offline_count')>=3:
-            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
-            #                          ('OFFLINE', agent_id))
-            #         self.con.commit()
-            #         _time_stamp_last_offline = str(datetime.datetime.now())
-            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET last_offline_time=%s "
-            #                          "WHERE power_meter_id=%s",
-            #                          (_time_stamp_last_offline, agent_id))
-            #         self.con.commit()
-            #     else:
-            #         self.cur.execute("UPDATE "+db_table_power_meter+" SET network_status=%s WHERE power_meter_id=%s",
-            #                          ('ONLINE', agent_id))
-            #         self.con.commit()
-            #     print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id, db_database))
-            #
-            # except Exception as er:
-            #     print("ERROR: {} failed to update database".format(agent_id))
-            #     print er
+                # PowermeterMQTT.iothub_client_sample_run(0,0,0)
+            except Exception as er:
+                print("ERROR: {} fails to update mqtt database".format(agent_id))
+                print er
 
-
-            #step5: update sMAP (time-series) database
+            # step5: update sMAP (time-series) database
             try:
                 cassandraDB.insert(agent_id, self.variables, log_variables)
                 print "{} success update cassandra database".format(agent_id)
             except Exception as er:
                 print("ERROR: {} fails to update casasasasandra database".format(agent_id))
                 print er
-            #
-            # #step6: debug agent knowledge
-            # if debug_agent:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
+                #
+                # #step6: debug agent knowledge
+                # if debug_agent:
+                #     print("printing agent's knowledge")
+                #     for k, v in self.variables.items():
+                #         print (k, v)
+                #     print('')
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
-                device_nickname=self.cur.fetchone()[0]
+                device_nickname = self.cur.fetchone()[0]
                 print device_nickname
             else:
                 device_nickname = ''
-            _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
+            _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
+            _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
+            _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname, agent_id)
             self.cur.execute("SELECT network_status FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
-            if self.network_status=="OFFLINE":
+            if self.network_status == "OFFLINE":
                 print "Found Device OFFLINE"
                 self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
                 self._active_alert_id = self.cur.fetchone()[0]
@@ -340,7 +280,9 @@ def powermeteragent(config_path, **kwargs):
                     self.con.commit()
                     self.send_device_notification_db(_db_notification_subject, self._active_alert_id)
                     # Send email if exist
-                    self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'1'))
+                    self.cur.execute(
+                        "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                        (self._active_alert_id, '1'))
                     if self.cur.rowcount != 0:
                         self._alert_email = self.cur.fetchall()
                         for single_email_1 in self._alert_email:
@@ -348,7 +290,9 @@ def powermeteragent(config_path, **kwargs):
                             self.send_device_notification_email(single_email_1[0], _email_subject, _email_text)
 
                     # Send SMS if provided by user
-                    self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'2'))
+                    self.cur.execute(
+                        "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                        (self._active_alert_id, '2'))
                     if self.cur.rowcount != 0:
                         self._alert_sms_phone_no = self.cur.fetchall()
                         for single_number in self._alert_sms_phone_no:
@@ -395,9 +339,9 @@ def powermeteragent(config_path, **kwargs):
             self.con.commit()
 
         def send_device_notification_email(self, _active_alert_email, _email_subject, _email_text):
-            #_email_subject = '#Attention: BEMOSS Device {} has detected a high level of CO2!!!'.format(agent_id)
+            # _email_subject = '#Attention: BEMOSS Device {} has detected a high level of CO2!!!'.format(agent_id)
             # _email_text = 'Here is the detail of device status\n' + str(_tampering_device_msg) \
-            #_email_text = 'The CO2 level has exceeded the defined range'
+            # _email_text = 'The CO2 level has exceeded the defined range'
             emailService = EmailService()
 
             # Send Email
@@ -408,7 +352,8 @@ def powermeteragent(config_path, **kwargs):
             print "INSIDE send_device_notification_sms"
             print _active_alert_phone_number_misoperation
             smsService = SMSService()
-            smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
+            smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password,
+                               _sms_subject, email_mailServer)
 
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
@@ -448,7 +393,9 @@ def powermeteragent(config_path, **kwargs):
 
                 print "INSIDE the priority counter exceeded the defined range"
                 # Send email if exist
-                self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'1'))
+                self.cur.execute(
+                    "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                    (self._active_alert_id, '1'))
                 if self.cur.rowcount != 0:
                     self._alert_email = self.cur.fetchall()
                     for single_email_1 in self._alert_email:
@@ -456,7 +403,9 @@ def powermeteragent(config_path, **kwargs):
                         self.send_device_notification_email(single_email_1[0], _email_subject, _email_text)
 
                 # Send SMS if provided by user
-                self.cur.execute("SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",(self._active_alert_id,'2'))
+                self.cur.execute(
+                    "SELECT notify_address FROM " + db_table_alerts_notificationchanneladdress + " WHERE active_alert_id=%s AND notification_channel_id=%s",
+                    (self._active_alert_id, '2'))
                 if self.cur.rowcount != 0:
                     self._alert_sms_phone_no = self.cur.fetchall()
                     for single_number in self._alert_sms_phone_no:
@@ -469,7 +418,7 @@ def powermeteragent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def updateUI(self):
-            topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            topic = '/agent/ui/' + device_type + '/device_status_response/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -483,26 +432,26 @@ def powermeteragent(config_path, **kwargs):
             # message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
 
-        #4. updateUIBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
+        # 4. updateUIBehavior (generic behavior)
+        @matching.match_exact('/ui/agent/' + device_type + '/device_status/' + _topic_Agent_UI_tail)
         def updateUIBehavior(self, topic, headers, message, match):
             print agent_id + " got\nTopic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             self.updateUI()
 
-        #5. deviceControlBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/update/'+_topic_Agent_UI_tail)
+        # 5. deviceControlBehavior (generic behavior)
+        @matching.match_exact('/ui/agent/' + device_type + '/update/' + _topic_Agent_UI_tail)
         def deviceControlBehavior(self, topic, headers, message, match):
             print agent_id + " got\nTopic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            #step1: change device status according to the receive message
+            # step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
                 setDeviceStatusResult = PowerMeter.setDeviceStatus(json.loads(message[0]))
-                #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
-                #step2: update agent's knowledge on this device
-                topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
+                # TODO need to do additional checking whether the device setting is actually success!!!!!!!!
+                # step2: update agent's knowledge on this device
+                topic = '/agent/ui/' + device_type + '/update_response/' + _topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'
                 headers = {
                     'AgentID': agent_id,
@@ -523,17 +472,17 @@ def powermeteragent(config_path, **kwargs):
             dataValidity = True
             return dataValidity
 
-        #6. deviceIdentifyBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/'+device_type+'/identify/'+_topic_Agent_UI_tail)
+        # 6. deviceIdentifyBehavior (generic behavior)
+        @matching.match_exact('/ui/agent/' + device_type + '/identify/' + _topic_Agent_UI_tail)
         def deviceIdentifyBehavior(self, topic, headers, message, match):
-            print agent_id+" got\nTopic: {topic}".format(topic=topic)
+            print agent_id + " got\nTopic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            #step1: change device status according to the receive message
+            # step1: change device status according to the receive message
             identifyDeviceResult = PowerMeter.identifyDevice()
-            #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
-            #step2: send reply message back to the UI
-            topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
+            # TODO need to do additional checking whether the device setting is actually success!!!!!!!!
+            # step2: send reply message back to the UI
+            topic = '/agent/ui/identify_response/' + device_type + '/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -546,20 +495,20 @@ def powermeteragent(config_path, **kwargs):
                 message = 'failure'
             self.publish(topic, headers, message)
 
-        #9. update Postgres database
+        # 9. update Postgres database
         def updateDB(self, table, column, column_ref, column_data, column_ref_data):
-            self.cur.execute("UPDATE "+table+" SET "+column+"=%s "
-                                 "WHERE "+column_ref+"=%s",
-                                 (column_data, column_ref_data))
+            self.cur.execute("UPDATE " + table + " SET " + column + "=%s "
+                                                                    "WHERE " + column_ref + "=%s",
+                             (column_data, column_ref_data))
             self.con.commit()
 
-        @matching.match_exact('/ui/agent/'+device_type+'/add_notification_event/'+_topic_Agent_UI_tail)
+        @matching.match_exact('/ui/agent/' + device_type + '/add_notification_event/' + _topic_Agent_UI_tail)
         def add_notification_event(self, topic, headers, message, match):
             print agent_id + " got\nTopic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}".format(message=message)
-            #reply message
-            topic = '/agent/ui/'+device_type+'/add_notification_event_response/'+_topic_Agent_UI_tail
+            # reply message
+            topic = '/agent/ui/' + device_type + '/add_notification_event_response/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -568,7 +517,7 @@ def powermeteragent(config_path, **kwargs):
                 headers_mod.FROM: agent_id,
                 headers_mod.TO: 'ui'
             }
-            #add event_id to self.event_ids
+            # add event_id to self.event_ids
             _data = json.loads(message[0])
             event_id = _data['event_id']
             print "{} added notification event_id: {}".format(agent_id, event_id)
@@ -579,13 +528,13 @@ def powermeteragent(config_path, **kwargs):
             # message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
 
-        @matching.match_exact('/ui/agent/'+device_type+'/remove_notification_event/'+_topic_Agent_UI_tail)
+        @matching.match_exact('/ui/agent/' + device_type + '/remove_notification_event/' + _topic_Agent_UI_tail)
         def remove_notification_event(self, topic, headers, message, match):
             print agent_id + " got\nTopic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}".format(message=message)
-            #reply message
-            topic = '/agent/ui/'+device_type+'/remove_notification_event_response/'+_topic_Agent_UI_tail
+            # reply message
+            topic = '/agent/ui/' + device_type + '/remove_notification_event_response/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
@@ -594,7 +543,7 @@ def powermeteragent(config_path, **kwargs):
                 headers_mod.FROM: agent_id,
                 headers_mod.TO: 'ui'
             }
-            #add event_id to self.event_ids
+            # add event_id to self.event_ids
             _data = json.loads(message[0])
             event_id = _data['event_id']
             print "{} removed notification event_id: {}".format(agent_id, event_id)
@@ -623,9 +572,10 @@ def powermeteragent(config_path, **kwargs):
                     notify_address = row[6]
                     notify_heartbeat = row[7] if row[7] is not None else self.notify_heartbeat
                     _event_has_triggered = False
-                    print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}"\
-                        .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter), comparator, threshold)
-                    #check whether message is already sent
+                    print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}" \
+                        .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter), comparator,
+                                threshold)
+                    # check whether message is already sent
                     try:
                         if (datetime.datetime.now() - self.time_sent_notifications[
                             event_id]).seconds > notify_heartbeat:
@@ -636,9 +586,10 @@ def powermeteragent(config_path, **kwargs):
                                 elif comparator == ">":
                                     threshold = float(threshold)
                                     if self.get_variable(triggered_parameter) > threshold: _event_has_triggered = True
-                                    print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}"\
-                                        .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter), comparator, threshold)
-                                    print "{} _event_has_triggerered {}".format(agent_id,_event_has_triggered)
+                                    print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}" \
+                                        .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter),
+                                                comparator, threshold)
+                                    print "{} _event_has_triggerered {}".format(agent_id, _event_has_triggered)
                                 elif comparator == "<=":
                                     threshold = float(threshold)
                                     if self.get_variable(triggered_parameter) <= threshold: _event_has_triggered = True
@@ -665,7 +616,7 @@ def powermeteragent(config_path, **kwargs):
                                 else:
                                     pass
                                 if _event_has_triggered:  # notify the user if triggered
-                                    #step2 notify user to notify_channel at notify_address with period notify_heartbeat
+                                    # step2 notify user to notify_channel at notify_address with period notify_heartbeat
                                     if notify_channel == 'email':
                                         _email_text = '{} notification event triggered_parameter: {}, comparator: {}, ' \
                                                       'threshold: {}\n now the current status of triggered_parameter: {} is {}' \
@@ -676,14 +627,14 @@ def powermeteragent(config_path, **kwargs):
                                                                email_password,
                                                                self.subject, _email_text, email_mailServer)
                                         # self.send_notification_status = True
-                                        #TODO store time_send_notification for each event
+                                        # TODO store time_send_notification for each event
                                         self.time_sent_notifications[event_id] = datetime.datetime.now()
                                         print "time_sent_notifications is {}".format(
                                             self.time_sent_notifications[event_id])
                                         print('{} >> sent notification message for {}'.format(agent_id, event_name))
                                         print(
-                                        '{} notification event triggered_parameter: {}, comparator: {}, threshold: {}'
-                                        .format(agent_id, triggered_parameter, comparator, threshold))
+                                            '{} notification event triggered_parameter: {}, comparator: {}, threshold: {}'
+                                                .format(agent_id, triggered_parameter, comparator, threshold))
                                     else:
                                         print "{} >> notification channel: {} is not supported yet".format(agent_id,
                                                                                                            notify_channel)
@@ -694,9 +645,9 @@ def powermeteragent(config_path, **kwargs):
                         else:
                             "{} >> Email is already sent, waiting for another heartbeat period".format(agent_id)
                     except:
-                        #step1 compare triggered_parameter with comparator to threshold
-                        #step1.1 classify comparator <,>,<=,>=,is,isnot
-                        #case1 comparator <
+                        # step1 compare triggered_parameter with comparator to threshold
+                        # step1.1 classify comparator <,>,<=,>=,is,isnot
+                        # case1 comparator <
                         print "{} >> first time trigger notification".format(agent_id)
                         if notify_device_id == agent_id:
                             if comparator == "<":
@@ -705,9 +656,10 @@ def powermeteragent(config_path, **kwargs):
                             elif comparator == ">":
                                 threshold = float(threshold)
                                 if self.get_variable(triggered_parameter) > threshold: _event_has_triggered = True
-                                print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}"\
-                                        .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter), comparator, threshold)
-                                print "{} _event_has_triggerered {}".format(agent_id,_event_has_triggered)
+                                print "{} triggered_parameter:{} self.get_variable(triggered_parameter):{} comparator:{} threshold:{}" \
+                                    .format(agent_id, triggered_parameter, self.get_variable(triggered_parameter),
+                                            comparator, threshold)
+                                print "{} _event_has_triggerered {}".format(agent_id, _event_has_triggered)
                             elif comparator == "<=":
                                 threshold = float(threshold)
                                 if self.get_variable(triggered_parameter) <= threshold: _event_has_triggered = True
@@ -734,7 +686,7 @@ def powermeteragent(config_path, **kwargs):
                                 pass
                             print "{} >> _event_has_triggered {}".format(agent_id, _event_has_triggered)
                             if _event_has_triggered:  # notify the user if triggered
-                                #step2 notify user to notify_channel at notify_address with period notify_heartbeat
+                                # step2 notify user to notify_channel at notify_address with period notify_heartbeat
                                 if notify_channel == 'email':
                                     _email_text = '{} notification event triggered_parameter: {}, comparator: {}, ' \
                                                   'threshold: {}\n now the current status of triggered_parameter: {} is {}' \
@@ -745,9 +697,11 @@ def powermeteragent(config_path, **kwargs):
                                                            email_password,
                                                            self.subject, _email_text, email_mailServer)
                                     # self.send_notification_status = True
-                                    #store time_send_notification for each event
+                                    # store time_send_notification for each event
                                     self.time_sent_notifications[event_id] = datetime.datetime.now()
-                                    print "{} >> time_sent_notifications is {}".format(agent_id, self.time_sent_notifications[event_id])
+                                    print "{} >> time_sent_notifications is {}".format(agent_id,
+                                                                                       self.time_sent_notifications[
+                                                                                           event_id])
                                     print('{} >> sent notification message for {}'.format(agent_id, event_name))
                                     print('{} notification event triggered_parameter: {}, comparator: {}, threshold: {}'
                                           .format(agent_id, triggered_parameter, comparator, threshold))
@@ -764,11 +718,13 @@ def powermeteragent(config_path, **kwargs):
     Agent.__name__ = 'PowerMeterAgent'
     return Agent(**kwargs)
 
+
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     utils.default_main(powermeteragent,
                        description='Power Meter agent',
                        argv=argv)
+
 
 if __name__ == '__main__':
     # Entry point for script
