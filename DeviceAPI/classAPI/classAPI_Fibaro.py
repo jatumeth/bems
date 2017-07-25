@@ -97,8 +97,8 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/3d5602d2-ace5-4b47-9d76-b05b17c662df",
-                             headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}, timeout=20);
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/illuminances/bc50da4c-d899-4a45-86a1-cd52d96b8fee",
+                             headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
             print(" {0}Agent is querying its current status (status:{1}) please wait ...")
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
@@ -153,8 +153,8 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    url = "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/8b8f2783-fa24-4921-ad64-7a416c352c70/illuminances/551402ec-2513-4d61-a893-433195239b5d"
-    head = {"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b"}
+    url = "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/illuminances/bc50da4c-d899-4a45-86a1-cd52d96b8fee"
+    head = {"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}
     Fibaro = API(model='Fibaro',type='illuminance',api='API3', address=url, username=head, agent_id='FibaroAgent')
     Fibaro.getDeviceStatus()
     #Fibaro.printDeviceStatus()
