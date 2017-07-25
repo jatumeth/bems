@@ -165,7 +165,7 @@ def powermeteragent(config_path, **kwargs):
                 print er
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
-        # These set and get methods allow scalability
+
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
 
@@ -210,7 +210,6 @@ def powermeteragent(config_path, **kwargs):
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
 
-            # check data validity after mapping
             if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
                 self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
             if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:

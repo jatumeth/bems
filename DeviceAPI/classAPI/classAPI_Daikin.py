@@ -46,11 +46,8 @@ under Contract DE-EE0006352
 #__lastUpdated__ = "2016-03-14 11:23:33"
 '''
 
-import time
-import json
 import requests
 
-#from bemoss_lib.utils import rgb_cie
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
@@ -58,13 +55,7 @@ class API:
         # Initialized common attributes
         self.variables = kwargs
         self.debug = True
-        self.set_variable('offline_count',0)
-        self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
-        self.only_white_bulb = None
-        # to initialize the only white bulb value
-        # self.getDeviceStatus()
-    def renewConnection(self):
-        pass
+
 
     def set_variable(self,k,v):  # k=key, v=value
         self.variables[k] = v
@@ -77,13 +68,11 @@ class API:
     '''
     Attributes:
      ------------------------------------------------------------------------------------------
-    label            GET          label in string
-    illuminance      GET          illuminance
-    temperature      GET          temporary target heat setpoint (floating point in deg F)
-    battery          GET          percent battery of Fibaro censor
-    motion           GET          motion  status (active/inactive)
-    tamper           GET          tamper  status (active/inactive)
-    unitTime         GET          Hue light effect 'none' or 'colorloop'
+    status               GET,SET      open/close airconditioner
+    set_temperature      GET,SET      change set temperature
+    current_temperature  GET          show current temperature
+    mode                 GET,SET      represents the operating mode
+    set_humidity         GET          represents the target humidity
      ------------------------------------------------------------------------------------------
 
     '''
@@ -91,61 +80,104 @@ class API:
     '''
     API3 available methods:
     1. getDeviceStatus() GET
-    '''    
+    2. setDeviceStatus() SET
+    '''
 
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
+
+        # getDeviceStatusResult = True
+
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/illuminances/bc50da4c-d899-4a45-86a1-cd52d96b8fee",
-                             headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
-            print(" {0}Agent is querying its current status (status:{1}) please wait ...")
+            r = requests.get("http://192.168.1.30/aircon/get_control_info",
+                              timeout=20);
+            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
+
+            q = requests.get("http://192.168.1.30/aircon/get_sensor_info",
+                              timeout=20);
+
             if r.status_code == 200:
-                getDeviceStatusResult = False
-                self.getDeviceStatusJson(r.text)
+
+                self.getDeviceStatusJson(r, q)
                 if self.debug is True:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
                 getDeviceStatusResult = False
-            # Check the connectivity
-            if getDeviceStatusResult==True:
-                self.set_variable('offline_count', 0)
-            else:
-                self.set_variable('offline_count', self.get_variable('offline_count')+1)
+
         except Exception as er:
             print er
-            print('ERROR: classAPI_Fibaro failed to getDeviceStatus')
+            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
 
-    def getDeviceStatusJson(self, data):
 
-        conve_json = json.loads(data)
-        self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('illuminance', float(conve_json["illuminance"]))
-        self.set_variable('temperature', float(conve_json["temperature"]))
-        self.set_variable('battery', float(conve_json["battery"]))
-        self.set_variable('motion', str(conve_json["motion"]))
-        self.set_variable('tamper', str(conve_json["tamper"]))
-        self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+    def getDeviceStatusJson(self, r, q):
 
+        self.set_variable('status', (r.text.split(','))[1].split('=')[1])
+        self.set_variable('current_temperature', (q.text.split(','))[1].split('=')[1])
+        self.set_variable('set_temperature', (r.text.split(','))[4].split('=')[1])
+        self.set_variable('set_humidity', (r.text.split(','))[5].split('=')[1])
+        self.set_variable('mode', (r.text.split(','))[2].split('=')[1])
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')))
-        print(" illuminance = {}".format(self.get_variable('illuminance')))
-        print(" temperature = {}".format(self.get_variable('temperature')))
-        print(" battery = {}".format(self.get_variable('battery')))
-        print(" motion = {}".format(self.get_variable('motion')))
-        print(" tamper = {}".format(self.get_variable('tamper')))
-        print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" status = {}".format(self.get_variable('status')))
+        print(" current_temperature = {}".format(self.get_variable('current_temperature')))
+        print(" set_temperature = {}".format(self.get_variable('set_temperature')))
+        print(" set_humidity = {}".format(self.get_variable('set_humidity')))
+        print(" mode = {}".format(self.get_variable('mode')))
         print("---------------------------------------------")
 
-    # ----------------------------------------------------------------------
+    # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
+    def setDeviceStatus(self, postmsg):
+        setDeviceStatusResult = True
+
+        print(" postmsg = {}".format(postmsg))
+
+        if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
+
+            status = format(self.get_variable('status'))
+            stemp = format(self.get_variable('set_temperature'))
+            mode = format(self.get_variable('mode'))
+
+
+            for k, v in postmsg.items():
+                if k == 'status':
+                    if (postmsg['status']) == "ON":
+                        status = "1"
+                    elif (postmsg['status']) == "OFF":
+                        status = "0"
+                elif k == 'stemp':
+                    stemp = (postmsg['stemp'])
+                elif k == 'mode':
+                    mode = (postmsg['mode'])
+                else:
+                    m = 1
+
+            data="pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3"
+
+            try:
+                print "sending requests put"
+                r = requests.post(
+                    "http://192.168.1.30/aircon/set_control_info",
+                    headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b "}, data= data, timeout=20);
+                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
+                      .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
+                print(" after send a POST request: {}".format(r.status_code))
+            except:
+                print("ERROR: classAPI_Fan connection failure! @ setDeviceStatus")
+                setDeviceStatusResult = False
+        else:
+            print("The POST message is invalid, try again\n")
+        return setDeviceStatusResult
+
+    def isPostMsgValid(self, postmsg):  # check validity of postmsg
+        dataValidity = True
+        # TODO algo to check whether postmsg is valid
+        return dataValidity
 
 
 # This main method will not be executed when this class is used as a module
@@ -153,10 +185,10 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    url = "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/illuminances/bc50da4c-d899-4a45-86a1-cd52d96b8fee"
-    head = {"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3', address=url, username=head, agent_id='FibaroAgent')
-    Fibaro.getDeviceStatus()
-    #Fibaro.printDeviceStatus()
+    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
+    AC.getDeviceStatus()
+
+    AC.setDeviceStatus({"status" : "ON","stemp": "22",'mode':'3'})
+    # AC.setDeviceStatus({'stemp':'24'})
 
 if __name__ == "__main__": main()

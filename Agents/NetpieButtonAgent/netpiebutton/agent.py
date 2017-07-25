@@ -116,8 +116,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # ------------------------
 
         # test control air
-        self.publish_heartbeat()
-        self.status = "OFF"
+        # self.publish_heartbeat()
+        # self.status = "OFF"
         # Always call the base class setup()
         super(ListenerAgent, self).setup()
 
@@ -144,37 +144,44 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #                      topic=topic, headers=headers, message=message))
     #     print("")
 
-    @periodic(5)
-    def check_PEA_DR_trigger_button(self):
-
-        try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
-                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
-            print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
-            if r.status_code == 200:
-                conve_json = json.loads(r.text)
-                if (conve_json["status"] == "on"):
-                    self.status = "ON"
-                    self.message = '1'
-                    self.publish_heartbeat()
-                elif (conve_json["status"] == "off"):
-                    self.status = "OFF"
-                print (" Received status from PEA DR Trigger button as: {}".format(self.status))
-            else:
-                print (" Received an error from server, cannot retrieve results")
-                getDeviceStatusResult = False
-        except Exception as er:
-            print er
-            print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
-
     # @periodic(10)
-    def publish_heartbeat(self):
+    # def testModal(self):
+    #     self.publish_heartbeat()
+    #     self.message = '1'
+    #     print("publish_heartbeat message sent")
+
+    # @periodic(5)
+    # def check_PEA_DR_trigger_button(self):
+    #
+    #     try:
+    #         r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
+    #                          headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+    #         print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
+    #         if r.status_code == 200:
+    #             conve_json = json.loads(r.text)
+    #             if (conve_json["status"] == "on"):
+    #                 self.status = "ON"
+    #                 self.message = '1'
+    #                 self.publish_heartbeat()
+    #             elif (conve_json["status"] == "off"):
+    #                 self.status = "OFF"
+    #             print (" Received status from PEA DR Trigger button as: {}".format(self.status))
+    #         else:
+    #             print (" Received an error from server, cannot retrieve results")
+    #             getDeviceStatusResult = False
+    #     except Exception as er:
+    #         print er
+    #         print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
+
+    @matching.match_exact('/agent/ui/dashboard/netpiebutton')
+    def on_match(self, topic, headers, message, match):
         # TODO this is example how to write an app to control Refrigerator
         # print "control: {}".format(control)
+        self.message='1'
         if (self.message == '1'):
             now = datetime.utcnow().isoformat(' ') + 'Z'
             # TODO publish to dashboard
-            topic = '/agent/ui/dashboard/netpiebutton'
+            topic = '/agent/ui/dashboard'
             headers = {
                 'AgentID': self._agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
@@ -187,7 +194,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
             print ("topic {}".format(topic))
             print ("headers {}".format(headers))
             print ("message {}".format(message))
-            self.message = 0
+            # self.message = 0
         else :
             # TODO this is example how to write an app to control Lighting
             # topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
@@ -200,6 +207,40 @@ class ListenerAgent(PublishMixin, BaseAgent):
             # message = json.dumps({"status": "ON", "color": [0, 0, 255]})
             # self.publish(topic, headers, message)
             print ("NO MESSAGE FROM NETPIE")
+
+    @matching.match_exact('/agent/ui/dashboard/help')
+    def on_match_help(self, topic, headers, message, match):
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        topic = '/agent/ui/dashboard'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+            'data_source': "help",
+        }
+        message = json.dumps({"event": "dr", "status": "enable"})
+        self.publish(topic, headers, message)
+        print ("sent message to trig js help")
+        print ("topic {}".format(topic))
+        print ("headers {}".format(headers))
+        print ("message {}".format(message))
+
+    @matching.match_exact('/agent/ui/dashboard/help')
+    def on_match_help(self, topic, headers, message, match):
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        topic = '/agent/ui/dashboard'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+            'data_source': "help",
+        }
+        message = json.dumps({"event": "dr", "status": "enable"})
+        self.publish(topic, headers, message)
+        print ("sent message to trig js help")
+        print ("topic {}".format(topic))
+        print ("headers {}".format(headers))
+        print ("message {}".format(message))
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
