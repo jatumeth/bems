@@ -143,6 +143,7 @@ DATABASES = {
         'TABLE_plugload_monthly_consumption': 'plugload_monthly_consumption',
         'TABLE_cumulative_energy': 'cumulative_energy',
         'TABLE_pvrealtime_hourly': 'pvrealtime_hourly',
+        'TABLE_power_from_meter': 'power_from_meter',
     }
 }
 
