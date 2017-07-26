@@ -254,6 +254,10 @@ def InverterAgent(config_path, **kwargs):
 
             try:
                 Inverter.getDeviceStatus()
+                _data = Inverter.variables
+                message = json.dumps(_data)
+                InverterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                InverterMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)

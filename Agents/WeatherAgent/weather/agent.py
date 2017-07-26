@@ -229,6 +229,10 @@ def WeatherAgent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
             try:
                 Weather.getDeviceStatus()
+                _data = Weather.variables
+                message = json.dumps(_data)
+                WeatherMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                WeatherMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)

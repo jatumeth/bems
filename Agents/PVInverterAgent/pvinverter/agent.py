@@ -61,7 +61,6 @@ import settings
 import socket
 import threading
 from bemoss_lib.databases.cassandraAPI import cassandraDB
-from ISStreamer.Streamer import Streamer
 
 def PVInverterAgent(config_path, **kwargs):
     
@@ -193,13 +192,6 @@ def PVInverterAgent(config_path, **kwargs):
             except:
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
-            try:
-                self.streamer = Streamer(bucket_name="PEA Smart Home", bucket_key="YWJ69J6NWJK5",
-                                         access_key="N6tbiTrvyUWXWArGuYdpcjeUQJIlCDRe")
-                print("{} connects to the initialstate".format(agent_id))
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to initialstate streamer".format(agent_id))
 
             #3. send notification to notify building admin
             self.send_notification = send_notification
@@ -261,20 +253,13 @@ def PVInverterAgent(config_path, **kwargs):
 
             try:
                 PVInverter.getDeviceStatus()
+                _data = PVInverter.variables
+                message = json.dumps(_data)
+                PVInverterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                PVInverterMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-
-            for v in log_variables:
-                print("logging {} with value {}".format(v, PVInverter.variables[v]))
-                self.streamer.log(str(agent_id) + "_" + v, PVInverter.variables[v])
-
-
-            # for v in PVInverter.variables:
-            #     print("logging {} with value {}".format(v, PVInverter.variables[v]))
-            #     self.streamer.log(str(agent_id) + "_" + v, PVInverter.variables[v])
-            # print "Done push data to streamer"
-
 
             # TODO make tolerance more accessible
             # tolerance = 1
