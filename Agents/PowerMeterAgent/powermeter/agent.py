@@ -217,22 +217,14 @@ def powermeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # PubAndSub3 = importlib.import_module("DeviceAPI.classAPI.device.samples." + "classAPI_mqtt")
-            # PubAndSub3 = importlib.import_module("device.samples." + "classAPI_mqtt")
-            try:
-                # PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples" + "classAPI_mqtt")
-                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                PowermeterMQTT.iothub_client_sample_run(self.get_variable('grid_activePower'),
-                                                        self.get_variable('solar_activePower'),
-                                                        self.get_variable('load_activePower'))
+
+            #pub mqtt tu azure
+            PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            PowermeterMQTT.iothub_client_sample_run(self.get_variable('grid_activePower'),self.get_variable('solar_activePower'),
+                                                    self.get_variable('load_activePower'))
 
 
-                # PowermeterMQTT.iothub_client_sample_run(0,0,0)
-            except Exception as er:
-                print("ERROR: {} fails to update mqtt database".format(agent_id))
-                print er
 
-            # step5: update sMAP (time-series) database
             try:
                 cassandraDB.insert(agent_id, self.variables, log_variables)
                 print "{} success update cassandra database".format(agent_id)
