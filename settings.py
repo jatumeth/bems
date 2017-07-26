@@ -144,7 +144,6 @@ DATABASES = {
         'TABLE_cumulative_energy': 'cumulative_energy',
         'TABLE_pvrealtime_hourly': 'pvrealtime_hourly',
         'TABLE_CreativePowerMeter': 'CreativePowerMeter',
-        'TABLE_ACDaikin': 'ACDaikin',
     }
 }
 

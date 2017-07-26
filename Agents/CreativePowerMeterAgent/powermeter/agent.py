@@ -210,7 +210,7 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # pub mqtt tu azure
+            # pub creative power meter mqtt tu azure
             _data = CreativePowerMeter.variables
             message = json.dumps(_data)
             CreativePowerMeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")

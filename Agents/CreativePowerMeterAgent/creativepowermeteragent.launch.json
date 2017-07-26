@@ -1,6 +1,6 @@
 {
     "agent": {
-        "exec": "creativepowermeteragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "Creativepowermeteragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "creativePowerMeter",
     "device_monitor_time":5,
