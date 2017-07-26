@@ -58,7 +58,7 @@ else
   sudo python ~/workspace/bemoss_os/bemoss_lib/utils/platform_initiator.py
   sleep 2
 fi
-sudo PYTHONPATH='.' python ~/workspace/bemoss_os/bemoss_lib/databases/cassandraAPI/startCassandra.py
+#sudo PYTHONPATH='.' python ~/workspace/bemoss_os/bemoss_lib/databases/cassandraAPI/startCassandra.py
 sleep 2
 #Step3: Build agents
 source ~/workspace/bemoss_os/bemoss_lib/utils/buildAgents.sh
