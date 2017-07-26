@@ -217,11 +217,11 @@ def powermeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-
-            #pub mqtt tu azure
+            # pub mqtt tu azure
+            _data = PowerMeter.variables
+            message = json.dumps(_data)
             PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            PowermeterMQTT.iothub_client_sample_run(self.get_variable('grid_activePower'),self.get_variable('solar_activePower'),
-                                                    self.get_variable('load_activePower'))
+            PowermeterMQTT.iothub_client_sample_run(message)
 
 
 
@@ -231,13 +231,7 @@ def powermeteragent(config_path, **kwargs):
             except Exception as er:
                 print("ERROR: {} fails to update casasasasandra database".format(agent_id))
                 print er
-                #
-                # #step6: debug agent knowledge
-                # if debug_agent:
-                #     print("printing agent's knowledge")
-                #     for k, v in self.variables.items():
-                #         print (k, v)
-                #     print('')
+
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
