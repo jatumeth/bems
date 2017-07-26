@@ -246,6 +246,10 @@ def MultiSensorAgent(config_path, **kwargs):
 
             try:
                 MultiSensor.getDeviceStatus()
+                _data = MultiSensor.variables
+                message = json.dumps(_data)
+                MultiSensorMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                MultiSensorMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
