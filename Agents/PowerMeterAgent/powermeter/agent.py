@@ -221,6 +221,7 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1*float(self.get_variable('apparentpower')))
 
 
+            #pub mqtt tu azure
             PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
             PowermeterMQTT.iothub_client_sample_run(self.get_variable('grid_activePower'),self.get_variable('solar_activePower'),
                                                     self.get_variable('load_activePower'))
