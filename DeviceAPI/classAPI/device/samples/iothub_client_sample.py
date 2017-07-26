@@ -29,7 +29,7 @@ RECEIVE_CONTEXT = 0
 AVG_WIND_SPEED = 10.0
 MIN_TEMPERATURE = 20.0
 MIN_HUMIDITY = 60.0
-MESSAGE_COUNT = 5
+MESSAGE_COUNT = 1
 RECEIVED_COUNT = 0
 TWIN_CONTEXT = 0
 SEND_REPORTED_STATE_CONTEXT = 0
@@ -51,10 +51,6 @@ PROTOCOL = IoTHubTransportProvider.MQTT
 # "HostName=HiVE-IoT.azure-devices.net;DeviceId=mqttSample;SharedAccessKey=djS4cXyaxlqFncLLkzzmbXEtFLWVFhaEEsYpc1zhZ0o="
 # CONNECTION_STRING = "HostName=hiveiotsuiteeaff5.azure-devices.net;DeviceId=CoolingSampleDevice_6430;SharedAccessKey=trph7ztL03F7OfH6SeUI4g6sOV+C1FSV4rLtAr5/3E0="
 CONNECTION_STRING = "HostName=hiveiotsuiteeaff5.azure-devices.net;DeviceId=CoolingSampleDevice_0925;SharedAccessKey=n2cuoHfrqJcmKlOAujkFakeqs2U46GCHybTc3XJCqsM="
-
-MSG_TXT = "{\"deviceId\": \"myPythonDevice\",\"temperature\": %.2f,\"windSpeed\": %.2f,\"humidity\": %.2f}"
-
-# some embedded platforms need certificate informationvice\",\"\": %.2f,\"temperature\": %.2f,\"humidity\": %.2f}"
 
 def set_certificates(client):
     from iothub_client_cert import CERTIFICATES
@@ -165,7 +161,7 @@ def print_last_message_time(client):
             print (iothub_client_error)
 
 
-def iothub_client_sample_run(temperature,humidity,windSpeed):
+def iothub_client_sample_run(msg):
 
     try:
 
@@ -179,20 +175,12 @@ def iothub_client_sample_run(temperature,humidity,windSpeed):
             # send a few messages every minute
             print ("IoTHubClient sending %d messages" % MESSAGE_COUNT)
             for message_counter in range(0, MESSAGE_COUNT):
-                # temperature = MIN_TEMPERATURE + (random.random() * 10)
-                # humidity = MIN_HUMIDITY + (random.random() * 20)
-                # temperature = 44
-                # humidity = 99
-                # windSpeed = 45
-                AVG_WIND_SPEED2 =70
-                # msg_txt_formatted = MSG_TXT % (
-                #     AVG_WIND_SPEED + (random.random() * 4 + 2),
-                #     temperature,
-                #     humidity)
-                msg_txt_formatted = MSG_TXT % (
-                    temperature,
-                    windSpeed,
-                    humidity)
+
+                msg_txt_formatted = msg
+                print "7777777777777777777777777777777777777777777777777777777"
+                print msg_txt_formatted
+                print "8888888888888888888888888888888888888888888888888888888"
+
                 # messages can be encoded as string or bytearray
                 if (message_counter & 1) == 1:
                     message = IoTHubMessage(bytearray(msg_txt_formatted, 'utf8'))
@@ -203,7 +191,7 @@ def iothub_client_sample_run(temperature,humidity,windSpeed):
                 message.correlation_id = "correlation_%d" % message_counter
                 # optional: assign properties
                 prop_map = message.properties()
-                prop_map.add("temperatureAlert", 'true' if temperature > 28 else 'false')
+                # prop_map.add("temperatureAlert", 'true' if temperature > 28 else 'false')
 
                 client.send_event_async(message, send_confirmation_callback, 1)
                 print ( "IoTHubClient.send_event_async accepted message [%d] for transmission to IoT Hub." % message_counter )
@@ -212,7 +200,7 @@ def iothub_client_sample_run(temperature,humidity,windSpeed):
             status = client.get_send_status()
             x = False
             status_counter = 0
-            while status_counter <= 1:
+            while status_counter <= 0:
                 status = client.get_send_status()
                 print ("Send status: %s" % status)
                 time.sleep(1)
@@ -247,4 +235,4 @@ if __name__ == '__main__':
     # print ("    Protocol %s" % PROTOCOL)
     # print ("    Connection string=%s" % CONNECTION_STRING)
 
-    iothub_client_sample_run(99,1,11)
+    iothub_client_sample_run("test")

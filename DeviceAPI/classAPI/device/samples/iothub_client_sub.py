@@ -14,9 +14,9 @@ when selecting the Service Bus namespace in Server Explorer
 
 
 bus_service = ServiceBusService(
-    service_namespace='HIve02',
+    service_namespace='hive03',
     shared_access_key_name='RootManageSharedAccessKey',
-    shared_access_key_value='ZrHat2DEO2VFcQ/8tjGByXLEHTsFxbdpjAyGuoTlpFc=')
+    shared_access_key_value='Ijidj1JCQ5unGXTpuCPahIZQl5KVhswqlZdND+AS8Eg=')
 
 '''
 create_queue also supports additional options,
@@ -25,9 +25,9 @@ to live (TTL) or maximum queue size. The following example sets t
 he maximum queue size to 5 GB, and the TTL value to 1 minute
 '''
 
-bus_service.create_subscription('home1', 'AllMessages')
+bus_service.create_subscription('home03', 'AllMessages')
 while True:
-    msg = bus_service.receive_subscription_message('home1', 'AllMessages', peek_lock=False)
+    msg = bus_service.receive_subscription_message('home03', 'AllMessages', peek_lock=False)
     print("message received!!!")
     print(msg.body)
     time.sleep(2)
