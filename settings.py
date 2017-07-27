@@ -118,7 +118,7 @@ DATABASES = {
         'TABLE_temp_failure_time': 'temp_failure_time',
         'TABLE_priority': 'priority',
         'TABLE_seen_notifications_counter': 'seen_notifications_counter',
-        'TABLE_powermeter': 'powermeter',
+        'TABLE_powermeter': 'netatmo',
         'TABLE_AC': 'ac',
         'TABLE_Refrigerator': 'Refrigerator',
         'TABLE_MultiSensor': 'MultiSensor',
@@ -145,6 +145,7 @@ DATABASES = {
         'TABLE_pvrealtime_hourly': 'pvrealtime_hourly',
         'TABLE_CreativePowerMeter': 'CreativePowerMeter',
         'TABLE_ACDaikin': 'ACDaikin',
+        'TABLE_Netatmo': 'Netatmo',
     }
 }
 
