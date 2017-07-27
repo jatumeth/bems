@@ -25,10 +25,8 @@ to live (TTL) or maximum queue size. The following example sets t
 he maximum queue size to 5 GB, and the TTL value to 1 minute
 '''
 
-# bus_service.create_subscription('home03', 'AllMessages')
 bus_service.create_subscription('home03', 'AllMessages')
 while True:
-    # msg = bus_service.receive_subscription_message('home03', 'AllMessages', peek_lock=False)
     msg = bus_service.receive_subscription_message('home03', 'AllMessages', peek_lock=False)
     print("message received!!!")
     print(msg.body)
