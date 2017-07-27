@@ -268,17 +268,15 @@ def ACAgent(config_path, **kwargs):
             #             return True if value2 != 0 else False
             #         return True if 100*abs(value1-value2)/float(value1) deviceMonitorBehavior(self):
 
+            #pub mqtt to azure
             try:
-                print""
-                #AC.getDeviceStatus()
-                # pub mqtt tu azure
                 _data = AC.variables
                 message = json.dumps(_data)
                 ACMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
                 ACMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
-                print "device connection for {} is not successful".format(agent_id)
+                print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
             #TODO make tolerance more accessible > tolerance else False
             #

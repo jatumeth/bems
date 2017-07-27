@@ -203,18 +203,17 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                         self.changed_variables[v] = log_variables[v]
                         self.variables[v] = None
 
-            if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
-                self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
-            if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:
-                self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
-            if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
-                self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # pub creative power meter mqtt tu azure
-            _data = CreativePowerMeter.variables
-            message = json.dumps(_data)
-            CreativePowerMeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            CreativePowerMeterMQTT.iothub_client_sample_run(message)
+            # pub creative power meter mqtt to azure
+            try:
+                _data = CreativePowerMeter.variables
+                message = json.dumps(_data)
+                CreativePowerMeterMQTT = importlib.import_module(
+                    "DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                CreativePowerMeterMQTT.iothub_client_sample_run(message)
+            except Exception as er:
+                print er
+                print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
 
 
