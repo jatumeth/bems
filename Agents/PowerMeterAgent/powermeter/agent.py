@@ -218,11 +218,14 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
             # pub mqtt tu azure
-            _data = PowerMeter.variables
-            message = json.dumps(_data)
-            PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            PowermeterMQTT.iothub_client_sample_run(message)
-
+            try:
+                _data = PowerMeter.variables
+                message = json.dumps(_data)
+                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                PowermeterMQTT.iothub_client_sample_run(message)
+            except Exception as er:
+                print er
+                print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
 
             try:
