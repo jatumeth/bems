@@ -1,10 +1,10 @@
 {
     "address": "http://192.168.1.30:49153", 
     "agent": {
-        "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "daikinagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "AC1200138",
-    "api": "classAPI_Fan",
+    "agent_id": "ACD1200138",
+    "api": "classAPI_Daikin",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 

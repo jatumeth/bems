@@ -137,7 +137,7 @@ def ACDaikinAgent(config_path, **kwargs):
 
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize ACDaikin device object
+    #4.1 initialize ACDaikinAgent device object
     ACDaikin = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
                     db_database=db_database, config_path=config_path)
@@ -147,7 +147,7 @@ def ACDaikinAgent(config_path, **kwargs):
                                                                         ACDaikin.get_variable('api'),
                                                                         ACDaikin.get_variable('address')))
 
-    # connection_renew_interval = ACDaikin.variables['connection_renew_interval']
+    # connection_renew_interval = ACDaikinAgent.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -238,7 +238,7 @@ def ACDaikinAgent(config_path, **kwargs):
         #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
         # @periodic(connection_renew_interval)
         # def renewConnection(self):
-        #     ACDaikin.renewConnection()
+        #     ACDaikinAgent.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -561,7 +561,7 @@ def ACDaikinAgent(config_path, **kwargs):
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     utils.default_main(ACDaikinAgent,
-                       description='ACDaikin agent',
+                       description='ACDaikinAgent agent',
                        argv=argv)
 
 if __name__ == '__main__':
