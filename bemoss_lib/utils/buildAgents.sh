@@ -211,6 +211,22 @@ volttron-pkg package ~/workspace/bemoss_os/Applications/code/EVAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EVAppAgent/evappagent.launch.json
 volttron-ctl install evappagent=/tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl
 
+# Run Netatmo agent
+volttron-pkg package ~/workspace/bemoss_os/Agents/NetatmoAgent/
+volttron-pkg configure /tmp/volttron_wheels/netatmoagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetatmoAgent/netatmoagent.launch.json
+volttron-ctl install Netatmoagent=/tmp/volttron_wheels/netatmoagent-0.1-py2-none-any.whl
+
+# Run CreativePowerMeter
+volttron-pkg package ~/workspace/bemoss_os/Agents/CreativePowerMeterAgent/
+volttron-pkg configure /tmp/volttron_wheels/creativepoweragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/CreativePowerMeterAgent/creativepoweragent.launch.json
+volttron-ctl install  CreativePowerAgent=/tmp/volttron_wheels/creativepoweragent-0.1-py2-none-any.whl
+
+
+# Run Daikin
+volttron-pkg package ~/workspace/bemoss_os/Agents/ACDaikinAgent/
+volttron-pkg configure /tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACDaikinAgent/daikinagent.launch.json
+volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
