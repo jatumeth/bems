@@ -50,7 +50,8 @@ PROTOCOL = IoTHubTransportProvider.MQTT
 # "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
 # "HostName=HiVE-IoT.azure-devices.net;DeviceId=mqttSample;SharedAccessKey=djS4cXyaxlqFncLLkzzmbXEtFLWVFhaEEsYpc1zhZ0o="
 # CONNECTION_STRING = "HostName=hiveiotsuiteeaff5.azure-devices.net;DeviceId=CoolingSampleDevice_6430;SharedAccessKey=trph7ztL03F7OfH6SeUI4g6sOV+C1FSV4rLtAr5/3E0="
-CONNECTION_STRING = "HostName=hiveiotsuiteeaff5.azure-devices.net;DeviceId=CoolingSampleDevice_0925;SharedAccessKey=n2cuoHfrqJcmKlOAujkFakeqs2U46GCHybTc3XJCqsM="
+CONNECTION_STRING = "HostName=HiVEIoTHub.azure-devices.net;DeviceId=home01_25device;SharedAccessKey=yfU4a0DDqCVUs9DRaMeJSgcZrtZG7wS1Hi/4qTov59Q="
+
 
 def set_certificates(client):
     from iothub_client_cert import CERTIFICATES
@@ -211,8 +212,6 @@ def iothub_client_sample_run(msg):
         return
     except KeyboardInterrupt:
         print ("IoTHubClient sample stopped")
-
-
 
 
 def usage():
