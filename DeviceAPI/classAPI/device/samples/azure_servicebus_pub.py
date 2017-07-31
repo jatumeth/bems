@@ -14,9 +14,9 @@ when selecting the Service Bus namespace in Server Explorer
 
 
 sbs = ServiceBusService(
-    service_namespace='hive03',
+    service_namespace='hivebus01',
     shared_access_key_name='RootManageSharedAccessKey',
-    shared_access_key_value='Ijidj1JCQ5unGXTpuCPahIZQl5KVhswqlZdND+AS8Eg=')
+    shared_access_key_value='xjmPplyeEmlNI+QejKjAyJkgtwbrbf+Jypw3QkzeCYk=')
 
 '''
 create_queue also supports additional options,
@@ -30,7 +30,7 @@ sbs.create_topic('taskdiscussion')
 while True:
 
     print("message sented!!!")
-    msg = Message('Hello World!777')
+    msg = Message('Hello World!000')
     sbs.send_topic_message('taskdiscussion', msg)
     print(msg.body)
     time.sleep(1)
