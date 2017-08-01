@@ -113,10 +113,10 @@ class API:
     def getDeviceStatus(self):
 
         try:
-            url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
+            url_l = 'http://192.168.1.23/gateway/apipublic/logon'
             head_l = "admin"
             requests.post(url_l, data=head_l)
-            request = requests.get("http://Smappee1006003343.local/gateway/apipublic/reportInstantaneousValues")
+            request = requests.get("http://192.168.1.23/gateway/apipublic/reportInstantaneousValues")
             checkconnect = request.status_code
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
@@ -126,7 +126,7 @@ class API:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
-                url_l = 'http://Smappee1006003343.local/gateway/apipublic/logon'
+                url_l = 'http://192.168.1.23/gateway/apipublic/logon'
                 head_l = "admin"
                 requests.post(url_l, data=head_l)
         except Exception as er:
