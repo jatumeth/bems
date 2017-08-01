@@ -25,12 +25,17 @@ to live (TTL) or maximum queue size. The following example sets t
 he maximum queue size to 5 GB, and the TTL value to 1 minute
 '''
 
-sbs.create_topic('taskdiscussion')
+def pubazure(topic,rawmsg):
+    print ("start public")
+    sbs.create_topic(topic)
 
-while True:
+    for x in range(5):
+        print("message sented!!!")
+        msg = Message(rawmsg)
+        sbs.send_topic_message(topic, msg)
+        print(msg.body)
+        time.sleep(1)
 
-    print("message sented!!!")
-    msg = Message('Hello World!000')
-    sbs.send_topic_message('taskdiscussion', msg)
-    print(msg.body)
-    time.sleep(1)
+if __name__ == '__main__':
+    # print ("\nPython %s" % sys.version)
+    pubazure('taskdiscussion','Hello World!000')

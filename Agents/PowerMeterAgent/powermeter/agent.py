@@ -217,7 +217,7 @@ def powermeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # pub mqtt tu azure
+            # pub mqtt to azure
             try:
                 _data = PowerMeter.variables
                 message = json.dumps(_data)
@@ -226,6 +226,17 @@ def powermeteragent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "Data to Azure IoT hub {} is not successful".format(agent_id)
+
+            # pub mqtt to azure servicebus
+            try:
+                _data = PowerMeter.variables
+                message = json.dumps(_data)
+                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "azure_servicebus_pub")
+                PowermeterMQTT.pubazure("smappee",message)
+            except Exception as er:
+                print er
+                print "Data to Azure IoT hub {} is not successful".format(agent_id)
+
 
 
             try:
