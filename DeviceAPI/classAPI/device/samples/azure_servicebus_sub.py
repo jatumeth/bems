@@ -15,9 +15,9 @@ when selecting the Service Bus namespace in Server Explorer
 
 
 sbs = ServiceBusService(
-    service_namespace='hivebus01',
+    service_namespace='hiveservicebus',
     shared_access_key_name='RootManageSharedAccessKey',
-    shared_access_key_value='xjmPplyeEmlNI+QejKjAyJkgtwbrbf+Jypw3QkzeCYk=')
+    shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
 
 '''
 create_queue also supports additional options,
@@ -26,21 +26,21 @@ to live (TTL) or maximum queue size. The following example sets t
 he maximum queue size to 5 GB, and the TTL value to 1 minute
 '''
 
-sbs.create_subscription('smappee', 'client1')
+sbs.create_subscription('tp01', 'client1')
 
 
 while True:
     print ""
     print("message received!!!")
-    msg = sbs.receive_subscription_message('smappee', 'client1')
-    # print(msg.body)
+    msg = sbs.receive_subscription_message('tp01', 'client1', peek_lock=False)
+    print(msg.body)
     # print type(msg.body)
     loadmessage = json.loads(msg.body)
     # print loadmessage
-    print(" grid_activePower = {}".format(loadmessage['grid_activePower']))
-    print(" solar_activePower = {}".format(loadmessage['solar_activePower']))
-    print(" load_activePower = {}".format(loadmessage['load_activePower']))
-    print "-------------------------------------------------------------------"
-    print ""
-    print ""
-    time.sleep(2)
+    # print(" grid_activePower = {}".format(loadmessage['grid_activePower']))
+    # print(" solar_activePower = {}".format(loadmessage['solar_activePower']))
+    # print(" load_activePower = {}".format(loadmessage['load_activePower']))
+    # print "-------------------------------------------------------------------"
+    # print ""
+    # print ""
+    # time.sleep(2)

@@ -14,9 +14,9 @@ when selecting the Service Bus namespace in Server Explorer
 
 
 sbs = ServiceBusService(
-    service_namespace='hivebus01',
+    service_namespace='hiveservicebus',
     shared_access_key_name='RootManageSharedAccessKey',
-    shared_access_key_value='xjmPplyeEmlNI+QejKjAyJkgtwbrbf+Jypw3QkzeCYk=')
+    shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
 
 '''
 create_queue also supports additional options,
@@ -29,7 +29,7 @@ def pubazure(topic,rawmsg):
     print ("start public")
     sbs.create_topic(topic)
 
-    for x in range(5):
+    for x in range(2):
         print("message sented!!!")
         msg = Message(rawmsg)
         sbs.send_topic_message(topic, msg)
@@ -38,4 +38,35 @@ def pubazure(topic,rawmsg):
 
 if __name__ == '__main__':
     # print ("\nPython %s" % sys.version)
-    pubazure('taskdiscussion','Hello World!000')
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01','{"status": "OFF", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
+    pubazure('tp01', '{"status": "ON", "brightness": "99", "color": [1, 50, 100]}')
+    time.sleep(3)
