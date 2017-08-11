@@ -27,6 +27,21 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.mode = ''
         self.mode2 = ''
         self.actor = ''
+        try:
+            self.sbs = ServiceBusService(
+                service_namespace='hiveservicebus',
+                shared_access_key_name='RootManageSharedAccessKey',
+                shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
+            self.sbs.create_subscription('tp01', 'client1')
+            self.sbs.create_subscription('wemo01', 'client1')
+            self.sbs.create_subscription('hue01', 'client1')
+            self.sbs.create_subscription('fan01', 'client1')
+            self.sbs.create_subscription('daikin01', 'client1')
+            self.sbs.create_subscription('saijo01', 'client1')
+            self.sbs.create_subscription('saijo02', 'client1')
+            self.sbs.create_subscription('saijo03', 'client1')
+        except:
+            print ""
 
 
     def setup(self):
@@ -41,51 +56,101 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     @periodic(1)
     def on_matchmode(self):
-        sbs = ServiceBusService(
-            service_namespace='hiveservicebus',
-            shared_access_key_name='RootManageSharedAccessKey',
-            shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
 
-        '''
-        create_queue also supports additional options,
-        which enable you to override default queue settings such as message time
-        to live (TTL) or maximum queue size. The following example sets t
-        he maximum queue size to 5 GB, and the TTL value to 1 minute
-        '''
-        print "777"
-        sbs.create_subscription('tp01', 'client1')
-
-
+        # Listener Hue
         try:
+            # print ""
+            print("message MQTT received")
+            msg = self.sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
 
-            print ""
-            print("message received!!!")
-            msghue = sbs.receive_subscription_message('tp01', 'client1', peek_lock=False)
-            print(msghue.body)
-            # print type(msg.body)
-            self.loadmessagehue = json.loads(msghue.body)
-            self.HUE1()
+            self.commsg = json.loads(msg.body)
+            device = str(self.commsg['device'])
+
+            if str(device) == "hue1":  # check if the data is valid
+                print "hue"
+                self.hue()
+                # print self.loadmessage.values()[0]
+            elif str(device) == "wemo1":
+                print "wemo1"
+                self.wemo()
+                # print self.loadmessage.values()[0]
+
+            elif str(device) == "daikin1":
+                print "daikin1"
+                self.daikin()
+                # print self.loadmessage.values()[0]
+
+            elif str(device) == "fan1":
+                print "fan1"
+                self.fan()
+                # print self.loadmessage.values()[0]
+            else:
+                print "Receiving message not in HiVE IoT Device "
         except:
-            print "error11"
+            print "No MQTT to"
+        print "End"
 
-    def HUE1(self):
+    def hue(self):
         # TODO this is example how to write an app to control Lighting
         topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
-
-        print self.loadmessagehue
-
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps(self.loadmessagehue)
+        message = json.dumps(self.commsg)
+        print type(message)
+
         self.publish(topic, headers, message)
-        # print ("HUE turn ON")
         print ("topic{}".format(topic))
         print ("message{}".format(message))
 
+
+    def wemo(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = '/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321'
+        # {"status": "OFF"}
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps(self.commsg)
+        self.publish(topic, headers, message)
+        print ("topic{}".format(topic))
+        print ("message{}".format(message))
+
+    def daikin(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = '/ui/agent/AC/update/bemoss/999/ACD1200138'
+        # {"status": "OFF"}
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps(self.commsg)
+        self.publish(topic, headers, message)
+        print ("topic{}".format(topic))
+        print ("message{}".format(message))
+
+    def fan(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = '/ui/agent/fan/update/bemoss/999/1FN221445K1200138'
+        # {"status": "OFF"}
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps(self.commsg)
+        self.publish(topic, headers, message)
+        print ("topic{}".format(topic))
+        print ("message{}".format(message))
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
