@@ -178,7 +178,7 @@ volttron-ctl install PlugloadApp=/tmp/volttron_wheels/plugloadappagent-0.1-py2-n
 
 # Run PEA Welcome Switch Agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PlugloadAgent
-volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WSP3424348ce9748959b185fa8d39faeda.launch.json
+volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WIS221445K1200321.launch.json
 volttron-ctl install 3WSP3424348ce97489=/tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl
 
 # Run EnergyBillApp Agent
@@ -226,6 +226,10 @@ volttron-ctl install  CreativePowerAgent=/tmp/volttron_wheels/creativepoweragent
 volttron-pkg package ~/workspace/bemoss_os/Agents/ACDaikinAgent/
 volttron-pkg configure /tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACDaikinAgent/daikinagent.launch.json
 volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl
+
+volttron-pkg package ~/workspace/bemoss_os/Agents/mqttsubscribe/
+volttron-pkg configure /tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/mqttsubscribe/mqttsubagent.launch.json
+volttron-ctl install MQTTSub=/tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl
 
 
 sudo chmod 777 -R /tmp/volttron_wheels/

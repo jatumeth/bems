@@ -2,25 +2,17 @@
 from datetime import datetime
 import logging
 import sys
-import json
-import time
-import random
+
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
 from volttron.platform.agent import utils, matching
 from volttron.platform.messaging import headers as headers_mod
 from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
-import time
 import json
-import settings
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
-class ListenerAgent(PublishMixin, BaseAgent):
-    # '''Listens to everything and publishes a heartbeat according to the
-    # heartbeat period specified in the settings module.
-    # '''
-    # matching_topic = '/agent/ui/lighting/update_response/bemoss/999/2HUE0017881cab4b'
 
+class ListenerAgent(PublishMixin, BaseAgent):
     def __init__(self, config_path, **kwargs):
         super(ListenerAgent, self).__init__(**kwargs)
         self.config = utils.load_config(config_path)
@@ -43,9 +35,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         except:
             print ""
 
-
     def setup(self):
-        # Demonstrate accessing a value from the config file
         _log.info(self.config['message'])
         self._agent_id = self.config['agentid']
         super(ListenerAgent, self).setup()
@@ -57,9 +47,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     @periodic(1)
     def on_matchmode(self):
 
-        # Listener Hue
         try:
-            # print ""
             print("message MQTT received")
             msg = self.sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
 
@@ -67,23 +55,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
             device = str(self.commsg['device'])
 
             if str(device) == "hue1":  # check if the data is valid
-                print "hue"
                 self.hue()
-                # print self.loadmessage.values()[0]
             elif str(device) == "wemo1":
-                print "wemo1"
                 self.wemo()
-                # print self.loadmessage.values()[0]
 
             elif str(device) == "daikin1":
-                print "daikin1"
                 self.daikin()
-                # print self.loadmessage.values()[0]
 
             elif str(device) == "fan1":
-                print "fan1"
                 self.fan()
-                # print self.loadmessage.values()[0]
             else:
                 print "Receiving message not in HiVE IoT Device "
         except:
@@ -110,7 +90,6 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def wemo(self):
         # TODO this is example how to write an app to control Lighting
         topic = '/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321'
-        # {"status": "OFF"}
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

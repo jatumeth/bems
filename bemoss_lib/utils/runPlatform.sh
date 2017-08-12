@@ -63,8 +63,8 @@ volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag NETPIEButton
 sleep 2
-volttron-ctl start --tag DemandResponseAgent
-sleep 2
+#volttron-ctl start --tag DemandResponseAgent
+#sleep 2
 volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag powermeteragent
@@ -106,6 +106,9 @@ sleep 2
 #sleep 2
 #volttron-ctl start --tag RelaySRD05VDCSLCIP0035
 #sleep 2
+
+volttron-ctl start --tag MQTTSub
+sleep 2
 
 volttron-ctl status
 deactivate
