@@ -243,87 +243,43 @@ def FanAgent(config_path, **kwargs):
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            try:
-                Fan.getDeviceStatus()
-                _data = Fan.variables
-                message = json.dumps(_data)
-                FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                FANMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "device connection for {} is not successful".format(agent_id)
-
-            # TODO make tolerance more accessible
-            # tolerance = 1
-            #
-            # def isChanged(variable_name,value1,value2):
-            #     #Checks if two value of variable is to be considered different.
-            #     # Returns false if numerical value are different by less than the tolerance %
-            #     if variable_name=='status':
-            #         return value1 == value2 #strict comparision for status
-            #     elif variable_name in ['power','energy','offline_count']:
-            #         if value1 == 0:
-            #             return True if value2 != 0 else False
-            #         return True if 100*abs(value1-value2)/float(value1) > tolerance else False
-            #
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in Fan.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],Fan.variables[v]):
-            #             self.variables[v] = Fan.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            #
             # try:
-            #     with threadingLock:
-            #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_Fan+" SET network_status=%s WHERE Fan_id=%s",
-            #                              ('OFFLINE', agent_id))
-            #             self.con.commit()
-            #             if self.already_offline is False:
-            #                 self.already_offline = True
-            #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_Fan+" SET last_offline_time=%s "
-            #                                  "WHERE Fan_id=%s",
-            #                                  (_time_stamp_last_offline, agent_id))
-            #                 self.con.commit()
-            #         else:
-            #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_Fan+" SET network_status=%s WHERE Fan_id=%s",
-            #                              ('ONLINE', agent_id))
-            #             self.con.commit()
-            #
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Update scan time
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_Fan+" SET last_scanned_time=%s "
-            #                      "WHERE Fan_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
+            #     Fan.getDeviceStatus()
+            #     _data = Fan.variables
+            #     message = json.dumps(_data)
+            #     FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            #     FANMQTT.iothub_client_sample_run(message)
             # except Exception as er:
             #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-            #
-            self.updateStatus()
-            # #step6: debug agent knowledge
-            # if debug_agent == True:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
+            #     print "device connection for {} is not successful".format(agent_id)
 
+            self.updateStatus()
             self.backupSaveData()
+
+            self.postgresAPI()
+
+        def postgresAPI(self):
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
+
+            try:
+                cur = conn.cursor()
+                cur.execute('UPDATE fan SET status=%s WHERE fan_id=%s',
+                            (Fan.variables['status'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE Fan SET last_scanned_time=%s WHERE fan_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+            except:
+                print "I am unable to connect to the database."
+
+
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_Fan + " WHERE Fan_id=%s",

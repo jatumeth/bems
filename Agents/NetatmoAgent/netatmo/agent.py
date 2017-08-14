@@ -213,22 +213,63 @@ def Netatmoagent(config_path, **kwargs):
             # pub mqtt tu azure
 
             # pub creative power meter mqtt to azure
-            try:
-                _data = Netatmo.variables
-                message = json.dumps(_data)
-                NetatmoMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                NetatmoMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
+            # try:
+            #     _data = Netatmo.variables
+            #     message = json.dumps(_data)
+            #     NetatmoMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            #     NetatmoMQTT.iothub_client_sample_run(message)
+            # except Exception as er:
+            #     print er
+            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
+            self.postgresAPI()
+
+        def postgresAPI(self):
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
 
             try:
-                cassandraDB.insert(agent_id, self.variables, log_variables)
-                print "{} success update cassandra database".format(agent_id)
-            except Exception as er:
-                print("ERROR: {} fails to update casasasasandra database".format(agent_id))
-                print er
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET noise=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['noise'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET temperature=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['temperature'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET humidity=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['humidity'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET pressure=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['pressure'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET co2=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['co2'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET outdoor_temperature=%s WHERE weather_sensor_id=%s',
+                            (Netatmo.variables['outdoor_temperature'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE weathersensor SET last_scanned_time=%s WHERE weather_sensor_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+            except:
+                print "I am unable to connect to the database."
+
 
 
         def device_offline_detection(self):
