@@ -191,15 +191,15 @@ def LightingAgent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": Light.identifyDevice()
 
-        @periodic(max_monitor_time) #save all data every max_monitor_time
-        def backupSaveData(self):
-            try:
-                Light.getDeviceStatus()
-                cassandraDB.insert(agent_id,Light.variables,log_variables)
-                print('Every Data Pushed to cassandra')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+        # @periodic(max_monitor_time) #save all data every max_monitor_time
+        # def backupSaveData(self):
+        #     try:
+        #         Light.getDeviceStatus()
+        #         cassandraDB.insert(agent_id,Light.variables,log_variables)
+        #         print('Every Data Pushed to cassandra')
+        #     except Exception as er:
+        #         print("ERROR: {} fails to update cassandra database".format(agent_id))
+        #         print er
 
         #3. deviceMonitorBehavior (TickerBehavior)
         @periodic(device_monitor_time)
@@ -236,9 +236,9 @@ def LightingAgent(config_path, **kwargs):
                 print er
                 print("ERROR: {} failed to update last scanned time".format(agent_id))
 
-            if len(self.changed_variables) == 0:
-                print 'nothing changed'
-                return
+            # if len(self.changed_variables) == 0:
+            #     print 'nothing changed'
+            #     return
 
             self.updateUI()
             #step4: update PostgresQL (meta-data) database
@@ -298,13 +298,13 @@ def LightingAgent(config_path, **kwargs):
                 print("ERROR: {} fails to update the database name {}".format(agent_id,db_database))
 
             #step5: update Cassandra (time-series) database
-            try:
-                cassandraDB.insert(agent_id,self.variables,log_variables)
-                print('Data Pushed to cassandra')
-                print "{} success update".format(agent_id)
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            # try:
+            #     cassandraDB.insert(agent_id,self.variables,log_variables)
+            #     print('Data Pushed to cassandra')
+            #     print "{} success update".format(agent_id)
+            # except Exception as er:
+            #     print("ERROR: {} fails to update cassandra database".format(agent_id))
+            #     print er
             #step6: debug agent knowledge
             if debug_agent:
                 print("printing agent's knowledge")

@@ -114,7 +114,16 @@ class API:
 
     def getDeviceStatusJson(self, r, q):
 
-        self.set_variable('status', (r.text.split(','))[1].split('=')[1])
+        statusraw = (r.text.split(','))[1].split('=')[1]
+        if statusraw == "1":
+            status = "ON"
+        elif statusraw == "0":
+            status = "OFF"
+        else:
+            status = "ON"
+        print status
+
+        self.set_variable('status', status)
         self.set_variable('current_temperature', (q.text.split(','))[1].split('=')[1])
         self.set_variable('set_temperature', (r.text.split(','))[4].split('=')[1])
         self.set_variable('set_humidity', (r.text.split(','))[5].split('=')[1])
