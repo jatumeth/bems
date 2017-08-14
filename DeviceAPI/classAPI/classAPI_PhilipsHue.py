@@ -275,15 +275,15 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.8:80',
-                     username='YrLSZ-vL0p01zCo7QMpNondjc8T3anYKLMek2JBE', agent_id='LightingAgent')
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.6:80',
+                     username='qtQUUEcD3hnu4f1w-g22lT-lDbsaGyige10eN76d', agent_id='LightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
                                                                        PhilipsHue.get_variable('model'),
                                                                        PhilipsHue.get_variable('api'),
                                                                        PhilipsHue.get_variable('address')))
 
     PhilipsHue.getDeviceStatus()
-    # PhilipsHue.setDeviceStatus({"status": "OFF"})
+    PhilipsHue.setDeviceStatus({"status": "OFF", "device": "hue1"})
     PhilipsHue.setDeviceStatus({"status": "ON", "color": (255, 255, 255)})
     # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 

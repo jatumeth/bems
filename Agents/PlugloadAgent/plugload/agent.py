@@ -253,6 +253,36 @@ def PlugloadAgent(config_path, **kwargs):
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
+
+
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
+
+            try:
+                cur = conn.cursor()
+                cur.execute('UPDATE plugload SET status=%s WHERE plugload_id=%s',
+                            (Plugload.variables['status'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE plugload SET power=%s WHERE plugload_id=%s',
+                            (Plugload.variables['power'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE plugload SET last_scanned_time=%s WHERE plugload_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+            except:
+                print "I am unable to connect to the database."
+
+
+
+
             #TODO make tolerance more accessible
             tolerance = 1
 
@@ -519,7 +549,7 @@ def PlugloadAgent(config_path, **kwargs):
                         print("ERROR: {} fails to update cassandra database".format(agent_id))
                         print er
 
-                    self.updatePostgresDB()
+                    # self.updatePostgresDB()
 
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'

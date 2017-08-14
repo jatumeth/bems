@@ -251,17 +251,65 @@ def ACDaikinAgent(config_path, **kwargs):
 
             # TODO make tolerance more accessible
             #pub mqtt to azure
-            try:
-                _data = ACDaikin.variables
-                message = json.dumps(_data)
-                ACDaikinMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                ACDaikinMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
+            # try:
+            #     _data = ACDaikin.variables
+            #     message = json.dumps(_data)
+            #     ACDaikinMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            #     ACDaikinMQTT.iothub_client_sample_run(message)
+            # except Exception as er:
+            #     print er
+            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
             self.updateStatus()
             self.backupSaveData()
+            self.postgresAPI()
+
+        def postgresAPI(self):
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
+
+            try:
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET status=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['status'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET current_temperature=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['current_temperature'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET set_temperature=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['set_temperature'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET current_humidity=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['set_humidity'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET set_humidity=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['set_humidity'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET mode=%s WHERE airconditioner_id=%s',
+                            (ACDaikin.variables['mode'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+            except:
+                print "I am unable to connect to the database."
+
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_ACDaikin + " WHERE ACDaikin_id=%s",
