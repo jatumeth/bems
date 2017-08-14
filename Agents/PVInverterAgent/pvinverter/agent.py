@@ -277,33 +277,23 @@ def PVInverterAgent(config_path, **kwargs):
 
             try:
                 cur = conn.cursor()
-                cur.execute('UPDATE inverter SET status=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['status'], agent_id))
+                cur.execute('UPDATE inverter SET grid_activepower=%s WHERE inverter_id=%s',
+                            (PVInverter.variables['grid_activepower'], agent_id))
                 conn.commit()
 
                 cur = conn.cursor()
-                cur.execute('UPDATE inverter SET current_temperature=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['current_temperature'], agent_id))
+                cur.execute('UPDATE inverter SET load_activepower=%s WHERE inverter_id=%s',
+                            (PVInverter.variables['load_activepower'], agent_id))
                 conn.commit()
 
                 cur = conn.cursor()
-                cur.execute('UPDATE inverter SET set_temperature=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['set_temperature'], agent_id))
+                cur.execute('UPDATE inverter SET load_activepower=%s WHERE inverter_id=%s',
+                            (PVInverter.variables['solar_activepower'], agent_id))
                 conn.commit()
 
                 cur = conn.cursor()
-                cur.execute('UPDATE inverter SET current_humidity=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['set_humidity'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE inverter SET set_humidity=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['set_humidity'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE inverter SET mode=%s WHERE inverter_id=%s',
-                            (PVInverter.variables['mode'], agent_id))
+                cur.execute('UPDATE inverter SET grid_voltage=%s WHERE inverter_id=%s',
+                            (PVInverter.variables['grid_voltage'], agent_id))
                 conn.commit()
 
                 cur = conn.cursor()
