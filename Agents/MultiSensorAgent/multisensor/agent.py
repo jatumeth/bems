@@ -188,6 +188,18 @@ def MultiSensorAgent(config_path, **kwargs):
             self.postgresAPI()
 
         def postgresAPI(self):
+
+            try:
+                self.cur.execute("SELECT * from multisensor WHERE multisensor_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO multisensor (multisensor_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+            except:
+                print "Error to check data base."
+                
             try:
                 self.cur.execute("""
                     UPDATE multisensor
