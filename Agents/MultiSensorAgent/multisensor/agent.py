@@ -243,88 +243,56 @@ def MultiSensorAgent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
             try:
                 MultiSensor.getDeviceStatus()
-                _data = MultiSensor.variables
-                message = json.dumps(_data)
-                MultiSensorMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                MultiSensorMQTT.iothub_client_sample_run(message)
+                self.updateUI()
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-
-            # TODO make tolerance more accessible
-            # tolerance = 1
-            #
-            # def isChanged(variable_name,value1,value2):
-            #     #Checks if two value of variable is to be considered different.
-            #     # Returns false if numerical value are different by less than the tolerance %
-            #     if variable_name=='status':
-            #         return value1 == value2 #strict comparision for status
-            #     elif variable_name in ['power','energy','offline_count']:
-            #         if value1 == 0:
-            #             return True if value2 != 0 else False
-            #         return True if 100*abs(value1-value2)/float(value1) > tolerance else False
-            #
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in MultiSensor.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],MultiSensor.variables[v]):
-            #             self.variables[v] = MultiSensor.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            #
-            # try:
-            #     with threadingLock:
-            #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_MultiSensor+" SET network_status=%s WHERE MultiSensor_id=%s",
-            #                              ('OFFLINE', agent_id))
-            #             self.con.commit()
-            #             if self.already_offline is False:
-            #                 self.already_offline = True
-            #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_MultiSensor+" SET last_offline_time=%s "
-            #                                  "WHERE MultiSensor_id=%s",
-            #                                  (_time_stamp_last_offline, agent_id))
-            #                 self.con.commit()
-            #         else:
-            #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_MultiSensor+" SET network_status=%s WHERE MultiSensor_id=%s",
-            #                              ('ONLINE', agent_id))
-            #             self.con.commit()
-            #
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Update scan time
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_MultiSensor+" SET last_scanned_time=%s "
-            #                      "WHERE MultiSensor_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-            #
             self.updateStatus()
-            # #step6: debug agent knowledge
-            # if debug_agent == True:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
-
             self.backupSaveData()
+            self.postgresAPI()
+
+        def postgresAPI(self):
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
+
+            try:
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET illuminance=%s WHERE multisensor_id=%s',
+                            (MultiSensor.variables['illuminance'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET temperature=%s WHERE multisensor_id=%s',
+                            (MultiSensor.variables['temperature'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET battery=%s WHERE multisensor_id=%s',
+                            (MultiSensor.variables['battery'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET motion=%s WHERE multisensor_id=%s',
+                            (MultiSensor.variables['motion'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET tamper=%s WHERE multisensor_id=%s',
+                            (MultiSensor.variables['tamper'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE multisensor SET last_scanned_time=%s WHERE multisensor_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+            except:
+                print "I am unable to connect to the database."
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_MultiSensor + " WHERE MultiSensor_id=%s",
@@ -497,12 +465,7 @@ def MultiSensorAgent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def backupSaveData(self):
-            try:
-                cassandraDB.insert(agent_id, MultiSensor.variables, log_variables)
-                print('Data Pushed to cassandra as a backup')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            print ""
 
         def updateStatus(self, states=None):
 

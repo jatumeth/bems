@@ -26,12 +26,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
                 shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
             self.sbs.create_subscription('tp01', 'client1')
             self.sbs.create_subscription('wemo01', 'client1')
-            self.sbs.create_subscription('hue01', 'client1')
-            self.sbs.create_subscription('fan01', 'client1')
-            self.sbs.create_subscription('daikin01', 'client1')
-            self.sbs.create_subscription('saijo01', 'client1')
-            self.sbs.create_subscription('saijo02', 'client1')
-            self.sbs.create_subscription('saijo03', 'client1')
+            self.sbs.create_subscription('hue1', 'client1')
+            self.sbs.create_subscription('fan1', 'client1')
+            self.sbs.create_subscription('daikin1', 'client1')
+            self.sbs.create_subscription('saijo1', 'client1')
+            self.sbs.create_subscription('saijo2', 'client1')
+            self.sbs.create_subscription('saijo3', 'client1')
         except:
             print ""
 

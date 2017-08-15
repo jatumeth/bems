@@ -307,6 +307,12 @@ def ACDaikinAgent(config_path, **kwargs):
                 cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
                             (datetime.datetime.now(), agent_id))
                 conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                            (ACDaikin.variables['status'], agent_id))
+                conn.commit()
+
             except:
                 print "I am unable to connect to the database."
 
