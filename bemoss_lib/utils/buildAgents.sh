@@ -121,11 +121,6 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
 volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/1LG221445K1200137.launch.json
 volttron-ctl install 1LG221445K1200137=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
 
-# Run InverterAgent
-volttron-pkg package ~/workspace/bemoss_os/Agents/InverterAgent/
-volttron-pkg configure /tmp/volttron_wheels/inverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/InverterAgent/1IN221445K1300011.launch.json
-volttron-ctl install 1IN221445K1300011=/tmp/volttron_wheels/inverteragent-0.1-py2-none-any.whl
-
 # Run Fan
 volttron-pkg package ~/workspace/bemoss_os/Agents/FanAgent/
 volttron-pkg configure /tmp/volttron_wheels/fanagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1FN221445K1200138.launch.json
@@ -191,7 +186,7 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/PVInverterAgent
 volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PV221445K1200138.launch.json
 volttron-ctl install PVInverterAgent=/tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl
 
-# Run PVinverter Agent
+# Run DC Agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/DCRelayAgent
 volttron-pkg configure /tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DCRelayAgent/RelaySRD05VDCSLCIP0035.launch.json
 volttron-ctl install DCRelayAgent=/tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl
