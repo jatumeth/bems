@@ -253,10 +253,10 @@ def PVInverterAgent(config_path, **kwargs):
 
             try:
                 PVInverter.getDeviceStatus()
-                _data = PVInverter.variables
-                message = json.dumps(_data)
-                PVInverterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                PVInverterMQTT.iothub_client_sample_run(message)
+                # _data = PVInverter.variables
+                # message = json.dumps(_data)
+                # PVInverterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                # PVInverterMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)

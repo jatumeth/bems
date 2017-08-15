@@ -243,15 +243,17 @@ def FanAgent(config_path, **kwargs):
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            # try:
-            #     Fan.getDeviceStatus()
-            #     _data = Fan.variables
-            #     message = json.dumps(_data)
-            #     FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            #     FANMQTT.iothub_client_sample_run(message)
-            # except Exception as er:
-            #     print er
-            #     print "device connection for {} is not successful".format(agent_id)
+
+
+            try:
+                Fan.getDeviceStatus()
+                # _data = Fan.variables
+                # message = json.dumps(_data)
+                # FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                # FANMQTT.iothub_client_sample_run(message)
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
             self.backupSaveData()
@@ -276,6 +278,12 @@ def FanAgent(config_path, **kwargs):
                 cur.execute('UPDATE Fan SET last_scanned_time=%s WHERE fan_id=%s',
                             (datetime.datetime.now(), agent_id))
                 conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                            (Fan.variables['status'], agent_id))
+                conn.commit()
+
             except:
                 print "I am unable to connect to the database."
 
@@ -444,52 +452,15 @@ def FanAgent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def backupSaveData(self):
-            try:
-                cassandraDB.insert(agent_id, Fan.variables, log_variables)
-                print('Data Pushed to cassandra as a backup')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            print ""
 
         def updateStatus(self,states=None):
 
-            # if states is not None:
-            #     print "got state change:",states
-            #     self.changed_variables = dict()
-            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
-            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
-            #         self.changed_variables['status'] = log_variables['status']
-            #     if 'power' in states:
-            #         if(self.get_variable('power') != states['power']):
-            #             self.changed_variables['power'] = log_variables['power']
-            #             self.set_variable('power',states['power'])
-
-
-
-                # with threadingLock:
-                #     try:
-                #         cassandraDB.insert(agent_id,self.variables,log_variables)
-                #         print "cassandra success"
-                #     except Exception as er:
-                #         print("ERROR: {} fails to update cassandra database".format(agent_id))
-                #         print er
-                #
-                #     self.updatePostgresDB()
-
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
-            # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
-                # headers_mod.DATE: now,
             }
-            # if self.get_variable('power') is not None:
-            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
-            # else:
-            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
-            # message = json.dumps(_data)
-            # message = message.encode(encoding='utf_8')
-            # self.publish(topic, headers, message)
 
             _data = Fan.variables
             message = json.dumps(_data)

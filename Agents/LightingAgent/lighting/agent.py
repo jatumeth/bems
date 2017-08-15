@@ -321,6 +321,47 @@ def LightingAgent(config_path, **kwargs):
                 for k, v in agentAPImapping.items():
                     print (k, v)
 
+
+            self.postgresAPI()
+
+        def postgresAPI(self):
+            try:
+                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivedev", password="28Sep1960",
+                                        dbname="postgres")
+            except:
+                print "I am unable to connect to the database."
+
+            try:
+                cur = conn.cursor()
+                cur.execute('UPDATE lighting SET status=%s WHERE lighting_id=%s',
+                            (Light.variables['status'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE lighting SET brightness=%s WHERE lighting_id=%s',
+                            (Light.variables['brightness'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE lighting SET color=%s WHERE lighting_id=%s',
+                            (Light.variables['color'], agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE lighting SET last_scanned_time=%s WHERE lighting_id=%s',
+                            (datetime.datetime.now(), agent_id))
+                conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                            (Light.variables['status'], agent_id))
+                conn.commit()
+
+
+            except:
+                print "I am unable to connect to the database."
+
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_lighting + " WHERE lighting_id=%s",
                              (agent_id,))

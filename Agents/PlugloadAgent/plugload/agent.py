@@ -277,6 +277,11 @@ def PlugloadAgent(config_path, **kwargs):
                 cur.execute('UPDATE plugload SET last_scanned_time=%s WHERE plugload_id=%s',
                             (datetime.datetime.now(), agent_id))
                 conn.commit()
+
+                cur = conn.cursor()
+                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                            (Plugload.variables['status'], agent_id))
+                conn.commit()
             except:
                 print "I am unable to connect to the database."
 
