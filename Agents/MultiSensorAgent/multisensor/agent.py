@@ -208,6 +208,7 @@ def MultiSensorAgent(config_path, **kwargs):
                  """, (MultiSensor.variables['illuminance'], MultiSensor.variables['temperature'],
                        MultiSensor.variables['battery'], MultiSensor.variables['motion'],
                        MultiSensor.variables['tamper'], agent_id))
+                self.con.commit()
 
                 self.cur.execute('UPDATE multisensor SET last_scanned_time=%s WHERE multisensor_id=%s',
                                  (datetime.datetime.now(), agent_id))
