@@ -1,49 +1,16 @@
 # -*- coding: utf-8 -*-
 '''
-Copyright (c) 2016, Virginia Tech
+Copyright (c) 2017, HiVE Team (PEA - Provincial Electricity Authority)
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- following conditions are met:
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-The views and conclusions contained in the software and documentation are those of the authors and should not be
-interpreted as representing official policies, either expressed or implied, of the FreeBSD Project.
-
-This material was prepared as an account of work sponsored by an agency of the United States Government. Neither the
-United States Government nor the United States Department of Energy, nor Virginia Tech, nor any of their employees,
-nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty,
-express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or
-any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe
-privately owned rights.
-
-Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or
-otherwise does not necessarily constitute or imply its endorsement, recommendation, favoring by the United States
-Government or any agency thereof, or Virginia Tech - Advanced Research Institute. The views and opinions of authors
-expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
-
-VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
-under Contract DE-EE0006352
-
-#__author__ = "BEMOSS Team"
+#__author__ = "HiVE Team"
 #__credits__ = ""
-#__version__ = "2.0"
-#__maintainer__ = "BEMOSS Team"
-#__email__ = "aribemoss@gmail.com"
-#__website__ = "www.bemoss.org"
-#__created__ = "2014-09-12 12:04:50"
-#__lastUpdated__ = "2016-03-14 11:23:33"
+#__version__ = "1.0"
+#__maintainer__ = "HiVE Team"
+#__email__ = "teerapong.pon@gmail.com"
+#__website__ = "www.pea.co.th"
+#__created__ = "2015-09-12 12:04:50"
+#__lastUpdated__ = "2017-08-15 23:09:13"
 '''
 
 import sys
@@ -115,11 +82,12 @@ def FanAgent(config_path, **kwargs):
     # mac_address = get_config('mac_address')
 
     #TODO get database parameters from settings.py, add db_table for specific table
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+
     db_table_Fan = settings.DATABASES['default']['TABLE_Fan']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
@@ -210,40 +178,9 @@ def FanAgent(config_path, **kwargs):
                     self.subscriptionTime=datetime.datetime.now()
                 except Exception as er:
                     print "Can't subscribe.", er
-                
-        def updatePostgresDB(self):
-            try:
-                self.cur.execute("UPDATE "+db_table_Fan+" SET status=%s "
-                                 "WHERE Fan_id=%s",
-                                 (self.get_variable('status'), agent_id))
-                self.con.commit()
-                if self.get_variable('power')!=None:
-                    #self.set_variable('power', int(self.get_variable('power')))
-                    self.cur.execute("UPDATE "+db_table_Fan+" SET power=%s "
-                                     "WHERE Fan_id=%s",
-                                     (int(self.get_variable('power')), agent_id))
-                    self.con.commit()
-                if self.ip_address != None:
-                    psycopg2.extras.register_inet()
-                    _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_Fan+" SET ip_address=%s WHERE Fan_id=%s",
-                                     (_ip_address, agent_id))
-                    self.con.commit()
-
-                print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id,
-                                                                                                     db_database))
-            except:
-                print("ERROR: {} fails to update the database name {}".format(agent_id, db_database))
-
-        #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
-        # @periodic(connection_renew_interval)
-        # def renewConnection(self):
-        #     Fan.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
-
 
             try:
                 Fan.getDeviceStatus()
@@ -256,38 +193,34 @@ def FanAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
-            self.backupSaveData()
-
             self.postgresAPI()
 
         def postgresAPI(self):
-            try:
-                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
-                                        user="peahive@peahivedev", password="28Sep1960",
-                                        dbname="postgres")
-            except:
-                print "I am unable to connect to the database."
 
             try:
-                cur = conn.cursor()
-                cur.execute('UPDATE fan SET status=%s WHERE fan_id=%s',
-                            (Fan.variables['status'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE Fan SET last_scanned_time=%s WHERE fan_id=%s',
-                            (datetime.datetime.now(), agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                            (Fan.variables['status'], agent_id))
-                conn.commit()
-
+                self.cur.execute("SELECT * from fan WHERE fan_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO fan (fan_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
             except:
-                print "I am unable to connect to the database."
+                print "Error to check data base."
 
+            try:
+                self.cur.execute("""
+                    UPDATE fan
+                    SET status=%s, last_scanned_time=%s
+                    WHERE fan_id=%s
+                 """, (Fan.variables['status'], datetime.datetime.now(), agent_id))
+                self.con.commit()
 
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (Fan.variables['status'], agent_id))
+                self.con.commit()
+            except:
+                print "Error to the database."
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_Fan + " WHERE Fan_id=%s",
