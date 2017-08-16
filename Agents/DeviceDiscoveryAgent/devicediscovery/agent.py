@@ -415,14 +415,25 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                     deviceNickname = modelinfo['nickname']
                                 else:
                                     deviceNickname = deviceType+str(self.device_num)
-                                self.cur.execute("INSERT INTO "+db_table_device_info+" VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                                 (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
-                                                  None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'PND'))
-                                self.con.commit()
+                                # self.cur.execute("INSERT INTO "+db_table_device_info+" VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                #                  (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
+                                #                   None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'PND'))
+                                try:
+                                    self.cur.execute("INSERT INTO "+db_table_device_info+" (device_id, device_type, vendor_name, device_model, "
+                                                                                         "device_model_id, mac_address, min_range, max_range, "
+                                                                                         "identifiable, communication, date_added, factory_id, "
+                                                                                         "approval_status, image, device_name, is_enable, status) \
+                                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                                     (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
+                                                      None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'APR',
+                                                      'device_images/wemoinsight.png','wemo insight',True,'ON'))
+                                    self.con.commit()
 
-                                self.cur.execute("INSERT INTO "+deviceType+" ("+deviceType+"_id, ip_address,nickname,zone_id,network_status) VALUES(%s,%s,%s,%s,%s)",
-                                                 (deviceID, deviceIP,deviceNickname,999,'ONLINE'))
-                                self.con.commit()
+                                    self.cur.execute("INSERT INTO "+deviceType+" ("+deviceType+"_id, ip_address,nickname,zone_id,network_status) VALUES(%s,%s,%s,%s,%s)",
+                                                     (deviceID, deviceIP,deviceNickname,999,'ONLINE'))
+                                    self.con.commit()
+                                except:
+                                    print("Device with mac_addr is already exist".format(macaddress))
                                 agent_name = deviceType.replace('_','')
                                 num_new_Devices+=1
                                 #After found new device-> Assign a suitable agent to each device to communicate, control, and collect data
