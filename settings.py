@@ -128,7 +128,7 @@ DATABASES = {
         'TABLE_Weather': 'Weather',
         'TABLE_Sonos': 'Sonos',
         'TABLE_NETPIESensor': 'NETPIE',
-        'TABLE_daily_consumption': 'daily_consumption',
+        'TABLE_daily_consumption': 'dailyenergyconsumption',
         'TABLE_PVInverter': 'PVInverter',
         'TABLE_monthly_consumption': 'monthly_consumption',
         'TABLE_annual_consumption': 'annual_consumption',

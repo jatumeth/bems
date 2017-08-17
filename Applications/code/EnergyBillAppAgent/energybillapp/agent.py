@@ -215,12 +215,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
         def insertDB(self, table):
             if (table == 'daily'):
                 self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                                 " VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                 " (date, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
+                                 "gridimportbill, gridexportbill, solarbill, loadbill, updated_at) "
+                                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().date())),
                                   self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
                                   self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
                                   self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                                  self.get_variable('solarBill'), self.get_variable('loadBill')))
+                                  self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
 
             elif (table == 'monthly'):
                 self.cur.execute("INSERT INTO " + db_table_monthly_consumption +
@@ -264,12 +266,12 @@ def EnergyBillAppAgent(config_path, **kwargs):
                     self.cur.execute(
                         "UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
                                                                  "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s, updated_at=%s"
                                                                  " WHERE date = '" + today + "'",
                         (self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
                          self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
                          self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                         self.get_variable('solarBill'), self.get_variable('loadBill')))
+                         self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
                     self.con.commit()
                     print"Success"
                 except:
