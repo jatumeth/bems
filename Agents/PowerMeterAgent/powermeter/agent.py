@@ -27,7 +27,6 @@ import settings
 import datetime
 import time
 import math
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -55,7 +54,6 @@ def powermeteragent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
-    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
     debug_agent = False
 
     log_variables = dict(grid_current='double', grid_activePower='double', grid_reactivePower='double',
@@ -93,11 +91,11 @@ def powermeteragent(config_path, **kwargs):
         print "yes ip_address is None"
         ip_address = None
     identifiable = get_config('identifiable')
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
     db_table_power_meter = settings.DATABASES['default']['TABLE_powermeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -179,16 +177,6 @@ def powermeteragent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": PowerMeter.identifyDevice()
 
-        @periodic(cassandra_update_time)  # save all data every max_monitor_time
-        def backupSaveData(self):
-            try:
-                PowerMeter.getDeviceStatus()
-                cassandraDB.insert(agent_id, PowerMeter.variables, log_variables)
-                print('Data Pushed to cassandra')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
-
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             # step1: get current status, then map keywords and variables to agent knowledge
@@ -218,34 +206,31 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
             # pub mqtt to azure
-            try:
-                _data = PowerMeter.variables
-                message = json.dumps(_data)
-                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                PowermeterMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
+            # try:
+            #     _data = PowerMeter.variables
+            #     message = json.dumps(_data)
+            #     PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            #     PowermeterMQTT.iothub_client_sample_run(message)
+            # except Exception as er:
+            #     print er
+            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
+            #
+            # # pub mqtt to azure servicebus
+            # try:
+            #     _data = PowerMeter.variables
+            #     message = json.dumps(_data)
+            #     PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "azure_servicebus_pub")
+            #     PowermeterMQTT.pubazure("smappee",message)
+            # except Exception as er:
+            #     print er
+            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
-            # pub mqtt to azure servicebus
-            try:
-                _data = PowerMeter.variables
-                message = json.dumps(_data)
-                PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "azure_servicebus_pub")
-                PowermeterMQTT.pubazure("smappee",message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
-
-
-
-            try:
-                cassandraDB.insert(agent_id, self.variables, log_variables)
-                print "{} success update cassandra database".format(agent_id)
-            except Exception as er:
-                print("ERROR: {} fails to update casasasasandra database".format(agent_id))
-                print er
-
+            # try:
+            #     cassandraDB.insert(agent_id, self.variables, log_variables)
+            #     print "{} success update cassandra database".format(agent_id)
+            # except Exception as er:
+            #     print("ERROR: {} fails to update casasasasandra database".format(agent_id))
+            #     print er
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
@@ -430,6 +415,7 @@ def powermeteragent(config_path, **kwargs):
             _data = PowerMeter.variables
             message = json.dumps(_data)
             # message = message.encode(encoding='utf_8')
+            print("{} published topic: {} and message {}".format(agent_id, topic, message))
             self.publish(topic, headers, message)
 
         # 4. updateUIBehavior (generic behavior)
@@ -718,13 +704,11 @@ def powermeteragent(config_path, **kwargs):
     Agent.__name__ = 'PowerMeterAgent'
     return Agent(**kwargs)
 
-
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     utils.default_main(powermeteragent,
                        description='Power Meter agent',
                        argv=argv)
-
 
 if __name__ == '__main__':
     # Entry point for script
