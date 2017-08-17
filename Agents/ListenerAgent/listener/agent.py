@@ -165,13 +165,12 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #     self.Relay_off()
     # @matching.match_start("/agent /ui/")
 
-    @matching.match_start('/agent/ui/PVInverter/')
+    @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/Smappee001')
     def on_match3(self, topic, headers, message, match):
         '''Use match_all to receive all messages and print them out.'''
         # _log.debug("Topic: {topic}, Headers: {headers}, "
         #            "Message: {message}".format(
         #     topic=topic, headers=headers, message=message))
-        print "fridge---------"
         print "Topic: {}".format(topic)
         print "Headers: {}".format(headers)
         # print "Message: {}".format(message)

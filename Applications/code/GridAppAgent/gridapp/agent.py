@@ -15,7 +15,7 @@ _log = logging.getLogger(__name__)
 
 OFFPEAK_RATE = 2.6369
 PEAK_RATE = 5.7982
-publish_periodic = 5
+publish_periodic = 60
 
 class GridAppAgent(PublishMixin, BaseAgent):
 
@@ -29,6 +29,7 @@ class GridAppAgent(PublishMixin, BaseAgent):
         self._agent_id = self.config['agent_id']
         # Always call the base class setup()
         super(GridAppAgent, self).setup()
+        self.publish_heartbeat()
 
     def get_current_electricity_price(self):
         # ***** algorithm here ******

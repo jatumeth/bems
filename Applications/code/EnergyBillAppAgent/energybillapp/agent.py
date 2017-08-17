@@ -1,5 +1,3 @@
-#Author : NopparatA.
-
 from __future__ import division
 from datetime import datetime
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
@@ -37,11 +35,11 @@ def EnergyBillAppAgent(config_path, **kwargs):
     agent_id = get_config('agent_id')
 
     # 2. @param DB interfaces
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
     db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
     db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
@@ -124,7 +122,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.current_electricity_price = message_from_gridApp['current_electricity_price']
             print "Current electricity price : {}".format(self.current_electricity_price)
 
-        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/SmappeePowerMeter')
+        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/Smappee001')
         def on_match_smappee(self, topic, headers, message, match):
             print "Hello from SMappee"
             message_from_Smappee = json.loads(message[0])
@@ -154,6 +152,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.calculate_bill_today()
             self.calculate_this_month_energy_and_bill()
             self.calculate_annual_energy_and_bill()
+            self.updateDB()
+            self.publish_message()
 
         def calculate_energy_today(self):
             # Calculate Energy from Grid_import
@@ -247,7 +247,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
                 self.con.commit()
 
-        @periodic(10)
+        # @periodic(10)
         def updateDB(self):
             self.insertDB('cumulative')
             today = str(datetime.datetime.now().date())
@@ -472,7 +472,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.solar_bill_annual = self.solar_bill_annual_until_last_month + self.solar_bill_this_month
             self.load_bill_annual = self.load_bill_annual_until_last_month + self.load_bill_this_month
 
-        @periodic(publish_periodic)
+        # @periodic(publish_periodic)
         def publish_message(self):
             topic = "/app/ui/energybillapp/update_ui/bemoss/999"
             now = datetime.datetime.utcnow().isoformat(' ') + 'Z'
