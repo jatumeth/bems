@@ -1,5 +1,5 @@
 {
-    "address": "http://192.168.1.14:49153", 
+    "address": "http://192.168.1.31:49153",
     "agent": {
         "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 

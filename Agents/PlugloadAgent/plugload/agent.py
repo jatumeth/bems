@@ -225,8 +225,6 @@ def PlugloadAgent(config_path, **kwargs):
 
         def postgresAPI(self):
 
-
-
             try:
                 self.cur.execute("SELECT * from plugload WHERE plugload_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
@@ -235,6 +233,7 @@ def PlugloadAgent(config_path, **kwargs):
                     self.cur.execute(
                         """INSERT INTO plugload (plugload_id, last_scanned_time) VALUES (%s, %s);""",
                         (agent_id, datetime.datetime.now()))
+                    self.con.commit()
             except:
                 print "Error to check data base."
 
@@ -252,75 +251,84 @@ def PlugloadAgent(config_path, **kwargs):
             except:
                 print "Error to the database."
 
-            #TODO make tolerance more accessible
-            tolerance = 1
-
-            def isChanged(variable_name,value1,value2):
-                #Checks if two value of variable is to be considered different.
-                # Returns false if numerical value are different by less than the tolerance %
-                if variable_name=='status':
-                    return value1 == value2 #strict comparision for status
-                elif variable_name in ['power','energy','offline_count']:
-                    if value1 == 0:
-                        return True if value2 != 0 else False
-                    return True if 100*abs(value1-value2)/float(value1) > tolerance else False
-
-            self.changed_variables = dict()
-            for v in log_variables:
-                if v in Plugload.variables:
-                    if v not in self.variables or isChanged(v, self.variables[v],Plugload.variables[v]):
-                        self.variables[v] = Plugload.variables[v]
-                        self.changed_variables[v] = log_variables[v]
-                else:
-                    if v not in self.variables: #it won't be in self.variables either (in the first time)
-                        self.changed_variables[v] = log_variables[v]
-                        self.variables[v] = None
-
             try:
-                with threadingLock:
-                    if self.get_variable('offline_count')>=3:
-                        self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
-                                         ('OFFLINE', agent_id))
-                        self.con.commit()
-                        if self.already_offline is False:
-                            self.already_offline = True
-                            _time_stamp_last_offline = str(datetime.datetime.now())
-                            self.cur.execute("UPDATE "+db_table_plugload+" SET last_offline_time=%s "
-                                             "WHERE plugload_id=%s",
-                                             (_time_stamp_last_offline, agent_id))
-                            self.con.commit()
-                    else:
-                        self.already_offline = False
-                        self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
-                                         ('ONLINE', agent_id))
-                        self.con.commit()
+                self.cur.execute(
+                    """INSERT INTO ts_plugload (datetime,status, power,plugload_id) VALUES (%s, %s,%s, %s);""",
+                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id,))
 
-                # Step: Check if any Device is OFFLINE
-                self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-                if self.cur.rowcount != 0:
-                    self.device_offline_detection()
-
-                # Update scan time
-                _time_stamp_last_scanned = str(datetime.datetime.now())
-                self.cur.execute("UPDATE "+db_table_plugload+" SET last_scanned_time=%s "
-                                 "WHERE plugload_id=%s",
-                                 (_time_stamp_last_scanned, agent_id))
                 self.con.commit()
-            except Exception as er:
-                print er
-                print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
+            except:
+                print "Error to the database."
 
-            if len(self.changed_variables) == 0:
-                print 'nothing changed'
-                return
+            # #TODO make tolerance more accessible
+            # tolerance = 1
+            #
+            # def isChanged(variable_name,value1,value2):
+            #     #Checks if two value of variable is to be considered different.
+            #     # Returns false if numerical value are different by less than the tolerance %
+            #     if variable_name=='status':
+            #         return value1 == value2 #strict comparision for status
+            #     elif variable_name in ['power','energy','offline_count']:
+            #         if value1 == 0:
+            #             return True if value2 != 0 else False
+            #         return True if 100*abs(value1-value2)/float(value1) > tolerance else False
+            #
+            # self.changed_variables = dict()
+            # for v in log_variables:
+            #     if v in Plugload.variables:
+            #         if v not in self.variables or isChanged(v, self.variables[v],Plugload.variables[v]):
+            #             self.variables[v] = Plugload.variables[v]
+            #             self.changed_variables[v] = log_variables[v]
+            #     else:
+            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
+            #             self.changed_variables[v] = log_variables[v]
+            #             self.variables[v] = None
+            #
+            # try:
+            #     with threadingLock:
+            #         if self.get_variable('offline_count')>=3:
+            #             self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
+            #                              ('OFFLINE', agent_id))
+            #             self.con.commit()
+            #             if self.already_offline is False:
+            #                 self.already_offline = True
+            #                 _time_stamp_last_offline = str(datetime.datetime.now())
+            #                 self.cur.execute("UPDATE "+db_table_plugload+" SET last_offline_time=%s "
+            #                                  "WHERE plugload_id=%s",
+            #                                  (_time_stamp_last_offline, agent_id))
+            #                 self.con.commit()
+            #         else:
+            #             self.already_offline = False
+            #             self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
+            #                              ('ONLINE', agent_id))
+            #             self.con.commit()
+            #
+            #     # Step: Check if any Device is OFFLINE
+            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
+            #     if self.cur.rowcount != 0:
+            #         self.device_offline_detection()
+            #
+            #     # Update scan time
+            #     _time_stamp_last_scanned = str(datetime.datetime.now())
+            #     self.cur.execute("UPDATE "+db_table_plugload+" SET last_scanned_time=%s "
+            #                      "WHERE plugload_id=%s",
+            #                      (_time_stamp_last_scanned, agent_id))
+            #     self.con.commit()
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
+            #
+            # if len(self.changed_variables) == 0:
+            #     print 'nothing changed'
+            #     return
 
             self.updateStatus()
             #step6: debug agent knowledge
-            if debug_agent == True:
-                print("printing agent's knowledge")
-                for k, v in self.variables.items():
-                    print (k, v)
-                print('')
+            # if debug_agent == True:
+            #     print("printing agent's knowledge")
+            #     for k, v in self.variables.items():
+            #         print (k, v)
+            #     print('')
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_plugload + " WHERE plugload_id=%s",
