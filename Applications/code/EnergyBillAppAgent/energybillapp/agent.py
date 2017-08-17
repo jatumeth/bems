@@ -382,14 +382,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()[0]
-                self.grid_import_energy_today = float(data[1])
-                self.grid_export_energy_today = float(data[2])
-                self.solar_energy_today = float(data[3])
-                self.load_energy_today = float(data[4])
-                self.grid_import_bill_today = float(data[5])
-                self.grid_export_bill_today = float(data[6])
-                self.solar_bill_today = float(data[7])
-                self.load_bill_today = float(data[8])
+                self.grid_import_energy_today = float(data[2])
+                self.grid_export_energy_today = float(data[3])
+                self.solar_energy_today = float(data[4])
+                self.load_energy_today = float(data[5])
+                self.grid_import_bill_today = float(data[6])
+                self.grid_export_bill_today = float(data[7])
+                self.solar_bill_today = float(data[8])
+                self.load_bill_today = float(data[9])
 
             else:
                 self.start_new_day()
