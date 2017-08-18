@@ -110,11 +110,12 @@ def LightingAgent(config_path, **kwargs):
     topic = get_config('topic')
 
     #TODO get database parameters from settings.py, add db_table for specific table
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+
     db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
@@ -325,42 +326,46 @@ def LightingAgent(config_path, **kwargs):
             self.postgresAPI()
 
         def postgresAPI(self):
-            try:
-                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
-                                        user="peahive@peahivedev", password="28Sep1960",
-                                        dbname="postgres")
-            except:
-                print "I am unable to connect to the database."
 
             try:
-                cur = conn.cursor()
-                cur.execute('UPDATE lighting SET status=%s WHERE lighting_id=%s',
-                            (Light.variables['status'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE lighting SET brightness=%s WHERE lighting_id=%s',
-                            (Light.variables['brightness'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE lighting SET color=%s WHERE lighting_id=%s',
-                            (Light.variables['color'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE lighting SET last_scanned_time=%s WHERE lighting_id=%s',
-                            (datetime.datetime.now(), agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                            (Light.variables['status'], agent_id))
-                conn.commit()
-
-
+                self.cur.execute("SELECT * from lighting WHERE lighting_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO lighting (lighting_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
             except:
-                print "I am unable to connect to the database."
+                print "Data base error"
+
+
+            try:
+                self.cur.execute("""
+                    UPDATE lighting
+                    SET status=%s, brightness=%s, color=%s, last_scanned_time=%s
+                    WHERE lighting_id=%s
+                 """, (
+                    Light.variables['status'], Light.variables['brightness'], Light.variables['color'],
+                    datetime.datetime.now(), agent_id))
+
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (Light.variables['status'], agent_id))
+                self.con.commit()
+            except:
+                print "Update data base error"
+
+
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_lighting (datetime,status,brightness,color,lighting_id) VALUES (%s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(),Light.variables['status'],Light.variables['brightness'],Light.variables['color'],agent_id))
+                self.con.commit()
+            except:
+                print "Insert database error"
+
+
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_lighting + " WHERE lighting_id=%s",
