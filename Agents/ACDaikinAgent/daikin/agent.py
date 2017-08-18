@@ -190,21 +190,12 @@ def ACDaikinAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             # TODO make tolerance more accessible
-            #pub mqtt to azure
-            # try:
-            #     _data = ACDaikin.variables
-            #     message = json.dumps(_data)
-            #     ACDaikinMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            #     ACDaikinMQTT.iothub_client_sample_run(message)
-            # except Exception as er:
-            #     print er
-            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
-
             self.updateStatus()
             self.postgresAPI()
 
         def postgresAPI(self):
             try:
+                print ""
                 self.cur.execute("SELECT * from airconditioner WHERE airconditioner_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
                     pass
@@ -212,10 +203,12 @@ def ACDaikinAgent(config_path, **kwargs):
                     self.cur.execute(
                         """INSERT INTO airconditioner (airconditioner_id, last_scanned_time) VALUES (%s, %s);""",
                         (agent_id, datetime.datetime.now()))
+                    self.con.commit()
             except:
                 print "Error to check data base."
 
             try:
+                print ""
                 self.cur.execute("""
                     UPDATE airconditioner
                     SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, mode=%s
@@ -231,6 +224,19 @@ def ACDaikinAgent(config_path, **kwargs):
 
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (ACDaikin.variables['status'], agent_id))
+                self.con.commit()
+
+            except:
+                print "Error to the database."
+
+            try:
+                print ""
+                self.cur.execute(
+                    """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, set_temperature, current_humidity, set_humidity, mode) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (agent_id, datetime.datetime.now(), ACDaikin.variables['status'],
+                     ACDaikin.variables['current_temperature'],
+                     ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
+                     ACDaikin.variables['set_humidity'], ACDaikin.variables['mode']))
                 self.con.commit()
             except:
                 print "Error to the database."
@@ -398,12 +404,13 @@ def ACDaikinAgent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def backupSaveData(self):
-            try:
-                cassandraDB.insert(agent_id, ACDaikin.variables, log_variables)
-                print('Data Pushed to cassandra as a backup')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            print ""
+            # try:
+            #     cassandraDB.insert(agent_id, ACDaikin.variables, log_variables)
+            #     print('Data Pushed to cassandra as a backup')
+            # except Exception as er:
+            #     print("ERROR: {} fails to update cassandra database".format(agent_id))
+            #     print er
 
         def updateStatus(self,states=None):
 
