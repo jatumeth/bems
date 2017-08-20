@@ -121,7 +121,7 @@ class API:
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
             if checkconnect == 200:
-                self.set_variable('network_status', "Online")
+                self.set_variable('network_status', "ONLINE")
                 self.getDeviceStatusJson(request.content)
                 if self.debug is True:
                     self.printDeviceStatus()
@@ -134,7 +134,7 @@ class API:
         except Exception as er:
             print er
             print('ERROR: classAPI_PowerMeter failed to getDeviceStatus')
-            self.set_variable('network_status', "Offline")
+            self.set_variable('network_status', "OFFLINE")
 
     def getDeviceStatusJson(self,data):
 
