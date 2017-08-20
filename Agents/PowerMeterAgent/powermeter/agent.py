@@ -96,6 +96,7 @@ def powermeteragent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
+
     db_table_power_meter = settings.DATABASES['default']['TABLE_powermeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -113,7 +114,6 @@ def powermeteragent(config_path, **kwargs):
     api = get_config('api')
     apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
 
-    print "++++++++____________________++++++++++++++"
 
     # 4.1 initialize thermostat device object
     PowerMeter = apiLib.API(model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
@@ -205,32 +205,83 @@ def powermeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-            # pub mqtt to azure
-            # try:
-            #     _data = PowerMeter.variables
-            #     message = json.dumps(_data)
-            #     PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            #     PowermeterMQTT.iothub_client_sample_run(message)
-            # except Exception as er:
-            #     print er
-            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
-            #
-            # # pub mqtt to azure servicebus
-            # try:
-            #     _data = PowerMeter.variables
-            #     message = json.dumps(_data)
-            #     PowermeterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "azure_servicebus_pub")
-            #     PowermeterMQTT.pubazure("smappee",message)
-            # except Exception as er:
-            #     print er
-            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
-            # try:
-            #     cassandraDB.insert(agent_id, self.variables, log_variables)
-            #     print "{} success update cassandra database".format(agent_id)
-            # except Exception as er:
-            #     print("ERROR: {} fails to update casasasasandra database".format(agent_id))
-            #     print er
+            self.postgresAPI()
+
+        def postgresAPI(self):
+
+            try:
+                self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO power_meter (power_meter_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
+            except:
+                print "Data base error"
+
+            try:
+                self.cur.execute("""
+                    UPDATE power_meter
+                    SET grid_current=%s, grid_activepower=%s, grid_reactivepower=%s,
+                    grid_apparentpower=%s, grid_powerfactor=%s, grid_quadrant=%s,grid_phaseshift=%s,grid_phasediff=%s,network_status=%s, last_scanned_time=%s
+                    WHERE power_meter_id=%s
+                 """, (
+                    PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],PowerMeter.variables['grid_reactivePower'],
+                    PowerMeter.variables['grid_apparentPower'], PowerMeter.variables['grid_powerfactor'],PowerMeter.variables['grid_quadrant'],PowerMeter.variables['grid_phaseshift'], PowerMeter.variables['grid_phasediff'],PowerMeter.variables['network_status'],
+                    datetime.datetime.now(), agent_id))
+                self.con.commit()
+
+                self.cur.execute("""
+                    UPDATE power_meter
+                    SET load_current=%s, load_activepower=%s, load_reactivepower=%s,
+                    load_apparentpower=%s, load_powerfactor=%s, load_quadrant=%s,load_phaseshift=%s,load_phasediff=%s
+                    WHERE power_meter_id=%s
+                 """, (
+                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],PowerMeter.variables['load_reactivePower'],
+                    PowerMeter.variables['load_apparentPower'], PowerMeter.variables['load_powerfactor'],PowerMeter.variables['load_quadrant'],PowerMeter.variables['load_phaseshift'], PowerMeter.variables['load_phasediff'],agent_id))
+                self.con.commit()
+
+                self.cur.execute("""
+                    UPDATE power_meter
+                    SET solar_current=%s, solar_activepower=%s, solar_reactivepower=%s,
+                    solar_apparentpower=%s, solar_powerfactor=%s, solar_quadrant=%s,solar_phaseshift=%s,solar_phasediff=%s
+                    WHERE power_meter_id=%s
+                 """, (
+                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],PowerMeter.variables['solar_reactivePower'],
+                    PowerMeter.variables['solar_apparentPower'], PowerMeter.variables['solar_powerfactor'],PowerMeter.variables['solar_quadrant'],PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],agent_id))
+                self.con.commit()
+            except:
+                print "Update data base error"
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_power_meter (datetime,grid_current, grid_activepower, grid_reactivepower,
+                    grid_apparentpower, grid_powerfactor, grid_quadrant,grid_phaseshift,network_status,power_meter_id,load_current, load_activepower, load_reactivepower,
+                    load_apparentpower, load_powerfactor, load_quadrant,load_phaseshift,
+                    solar_current, solar_activepower, solar_reactivepower,
+                    solar_apparentpower, solar_powerfactor, solar_quadrant,solar_phaseshift
+                    ) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s);""",
+                    (
+                    datetime.datetime.now(), PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
+                    PowerMeter.variables['grid_reactivePower'],
+                    PowerMeter.variables['grid_apparentPower'], PowerMeter.variables['grid_powerfactor'],
+                    PowerMeter.variables['grid_quadrant'], PowerMeter.variables['grid_phaseshift'],
+                    PowerMeter.variables['network_status'],agent_id,
+                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],
+                    PowerMeter.variables['load_reactivePower'],
+                    PowerMeter.variables['load_apparentPower'], PowerMeter.variables['load_powerfactor'],
+                    PowerMeter.variables['load_quadrant'], PowerMeter.variables['load_phaseshift'],
+                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],
+                    PowerMeter.variables['solar_reactivePower'],
+                    PowerMeter.variables['solar_apparentPower'], PowerMeter.variables['solar_powerfactor'],
+                    PowerMeter.variables['solar_quadrant'], PowerMeter.variables['solar_phaseshift']
+                    ))
+                self.con.commit()
+            except:
+                print "update data base error"
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",

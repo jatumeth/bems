@@ -121,6 +121,7 @@ class API:
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
             if checkconnect == 200:
+                self.set_variable('network_status', "ONLINE")
                 self.getDeviceStatusJson(request.content)
                 if self.debug is True:
                     self.printDeviceStatus()
@@ -129,22 +130,25 @@ class API:
                 url_l = 'http://192.168.1.7/gateway/apipublic/logon'
                 head_l = "admin"
                 requests.post(url_l, data=head_l)
+
         except Exception as er:
             print er
             print('ERROR: classAPI_PowerMeter failed to getDeviceStatus')
+            self.set_variable('network_status', "OFFLINE")
 
     def getDeviceStatusJson(self,data):
 
         x = json.loads(data, "utf-8")
+        print x
         volttage = float((x['report'].split('<BR>'))[1][8:13])
         self.set_variable('volttage', volttage)
         ts = time.time()
         self.set_variable('time', ts)
 
         # Grid
-        z1 = ((x['report'].split('<BR>'))[10]).split(',')
+        z1 = ((x['report'].split('<BR>'))[19]).split(',')
         grid_current = float(((z1[0].split('='))[1]).split(' ')[0])
-        grid_activePower = float(((z1[1].split('='))[1]).split(' ')[0])
+        grid_activePower = (float(((z1[1].split('='))[1]).split(' ')[0]))*-1
         grid_reactivePower = float(((z1[2].split('='))[1]).split(' ')[0])
         grid_apparentPower = float(((z1[3].split('='))[1]).split(' ')[0])
         grid_powerfactor = float((z1[4].split('='))[1].split(' ')[0]) / 100
@@ -164,7 +168,7 @@ class API:
         # Load
         #z3 = ((x['report'].split('<BR>'))[10]).split(',')
         #z3 change with new configuration
-        z3 = ((x['report'].split('<BR>'))[4]).split(',')
+        z3 = ((x['report'].split('<BR>'))[13]).split(',')
         load_current = float(((z3[0].split('='))[1]).split(' ')[0])
         load_activePower = float(((z3[1].split('='))[1]).split(' ')[0])
         load_reactivePower = float(((z3[2].split('='))[1]).split(' ')[0])
