@@ -456,7 +456,7 @@ def main():
                     db_database="bemossdb")
 
     Airsaijo.getDeviceStatus()
-    #Airsaijo.setDeviceStatus({"temp" : "24","fan_speed": "1",'status':'ON'})
+    Airsaijo.setDeviceStatus({"temp" : "19","fan_speed": "4",'status':'ON'})
     #Airsaijo.setDeviceStatus({"status": "ON"})
 
     # 1   "air_serial": "1608F00680620",  2# "air_serial": "1608F00680619",  Bed     "air_serial": "1604F00640667",

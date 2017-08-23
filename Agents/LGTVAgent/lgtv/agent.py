@@ -60,7 +60,6 @@ import psycopg2.extras
 import settings
 import socket
 import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def LGTVAgent(config_path, **kwargs):
     
@@ -212,28 +211,7 @@ def LGTVAgent(config_path, **kwargs):
                     print "Can't subscribe.", er
                 
         def updatePostgresDB(self):
-            try:
-                self.cur.execute("UPDATE "+db_table_LGTV+" SET status=%s "
-                                 "WHERE LGTV_id=%s",
-                                 (self.get_variable('status'), agent_id))
-                self.con.commit()
-                if self.get_variable('power')!=None:
-                    #self.set_variable('power', int(self.get_variable('power')))
-                    self.cur.execute("UPDATE "+db_table_LGTV+" SET power=%s "
-                                     "WHERE LGTV_id=%s",
-                                     (int(self.get_variable('power')), agent_id))
-                    self.con.commit()
-                if self.ip_address != None:
-                    psycopg2.extras.register_inet()
-                    _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_LGTV+" SET ip_address=%s WHERE LGTV_id=%s",
-                                     (_ip_address, agent_id))
-                    self.con.commit()
-
-                print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id,
-                                                                                                     db_database))
-            except:
-                print("ERROR: {} fails to update the database name {}".format(agent_id, db_database))
+            print""
 
         #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
         # @periodic(connection_renew_interval)
@@ -484,12 +462,7 @@ def LGTVAgent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def backupSaveData(self):
-            try:
-                cassandraDB.insert(agent_id, LGTV.variables, log_variables)
-                print('Data Pushed to cassandra as a backup')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            print ""
 
         def updateStatus(self,states=None):
 

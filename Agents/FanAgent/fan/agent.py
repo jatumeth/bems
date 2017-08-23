@@ -27,7 +27,6 @@ import psycopg2.extras
 import settings
 import socket
 import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def FanAgent(config_path, **kwargs):
     
