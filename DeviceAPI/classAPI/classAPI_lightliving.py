@@ -98,7 +98,7 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8",
                              headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
@@ -151,7 +151,7 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
+                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8",
                     headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data= _data, timeout=20);
                 # print "15456"
                 # print r.text

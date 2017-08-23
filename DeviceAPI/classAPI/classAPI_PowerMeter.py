@@ -148,7 +148,7 @@ class API:
         # Grid
         z1 = ((x['report'].split('<BR>'))[19]).split(',')
         grid_current = float(((z1[0].split('='))[1]).split(' ')[0])
-        grid_activePower = (float(((z1[1].split('='))[1]).split(' ')[0]))*-1
+        grid_activePower = (float(((z1[1].split('='))[1]).split(' ')[0]))
         grid_reactivePower = float(((z1[2].split('='))[1]).split(' ')[0])
         grid_apparentPower = float(((z1[3].split('='))[1]).split(' ')[0])
         grid_powerfactor = float((z1[4].split('='))[1].split(' ')[0]) / 100

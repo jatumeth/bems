@@ -92,6 +92,12 @@ class API:
         try:
             r = requests.get("http://192.168.1.12/aircon/get_control_info",
                               timeout=20);
+
+            print "deffffffffffffffffffff"
+            print r.text
+            print "ddddddddddddddd"
+
+
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
 
