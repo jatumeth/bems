@@ -60,7 +60,6 @@ import psycopg2.extras
 import settings
 import socket
 import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def ACAgent(config_path, **kwargs):
     
@@ -217,33 +216,7 @@ def ACAgent(config_path, **kwargs):
                     print "Can't subscribe.", er
                 
         def updatePostgresDB(self):
-            try:
-                self.cur.execute("UPDATE "+db_table_AC+" SET status=%s "
-                                 "WHERE AC_id=%s",
-                                 (self.get_variable('mode'), agent_id))
-                self.con.commit()
-                if self.get_variable('power')!=None:
-                    #self.set_variable('power', int(self.get_variable('power')))
-                    self.cur.execute("UPDATE "+db_table_AC+" SET power=%s "
-                                     "WHERE AC_id=%s",
-                                     (int(self.get_variable('power')), agent_id))
-                    self.con.commit()
-                if self.ip_address != None:
-                    psycopg2.extras.register_inet()
-                    _ip_address = psycopg2.extras.Inet(self.ip_address)
-                    self.cur.execute("UPDATE "+db_table_AC+" SET ip_address=%s WHERE AC_id=%s",
-                                     (_ip_address, agent_id))
-                    self.con.commit()
-
-                print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id,
-                                                                                                     db_database))
-            except:
-                print("ERROR: {} fails to update the database name {}".format(agent_id, db_database))
-
-        #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
-        # @periodic(connection_renew_interval)
-        # def renewConnection(self):
-        #     AC.renewConnection()
+            print ""
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -254,88 +227,7 @@ def ACAgent(config_path, **kwargs):
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-
-            #TODO make tolerance more accessible
-            # tolerance = 1
-            #
-            # def isChanged(variable_name,value1,value2):
-            #     #Checks if two value of variable is to be considered different.
-            #     # Returns false if numerical value are different by less than the tolerance %
-            #     if variable_name=='status':
-            #         return value1 == value2 #strict comparision for status
-            #     elif variable_name in ['power','energy','offline_count']:
-            #         if value1 == 0:
-            #             return True if value2 != 0 else False
-            #         return True if 100*abs(value1-value2)/float(value1) deviceMonitorBehavior(self):
-
-            #pub mqtt to azure
-            try:
-                _data = AC.variables
-                message = json.dumps(_data)
-                ACMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                ACMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
-
-            #TODO make tolerance more accessible > tolerance else False
-            #
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in AC.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],AC.variables[v]):
-            #             self.variables[v] = AC.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            #
-            # try:
-            #     with threadingLock:
-            #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_AC+" SET network_status=%s WHERE AC_id=%s",
-            #                              ('OFFLINE', agent_id))
-            #             self.con.commit()
-            #             if self.already_offline is False:
-            #                 self.already_offline = True
-            #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_AC+" SET last_offline_time=%s "
-            #                                  "WHERE AC_id=%s",
-            #                                  (_time_stamp_last_offline, agent_id))
-            #                 self.con.commit()
-            #         else:
-            #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_AC+" SET network_status=%s WHERE AC_id=%s",
-            #                              ('ONLINE', agent_id))
-            #             self.con.commit()
-            #
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Update scan time
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_AC+" SET last_scanned_time=%s "
-            #                      "WHERE AC_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-            #
             self.updateStatus()
-            # #step6: debug agent knowledge
-            # if debug_agent == True:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
             self.backupSaveData()
 
         def device_offline_detection(self):
@@ -501,53 +393,17 @@ def ACAgent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def backupSaveData(self):
-            try:
-                cassandraDB.insert(agent_id, AC.variables, log_variables)
-                print('Data Pushed to cassandra as a backup')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+            print ""
 
         def updateStatus(self, states=None):
 
-            # if states is not None:
-            #     print "got state change:",states
-            #     self.changed_variables = dict()
-            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
-            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
-            #         self.changed_variables['status'] = log_variables['status']
-            #     if 'power' in states:
-            #         if(self.get_variable('power') != states['power']):
-            #             self.changed_variables['power'] = log_variables['power']
-            #             self.set_variable('power',states['power'])
-            #
-            #
-            #
-            #     with threadingLock:
-            #         try:
-            #             cassandraDB.insert(agent_id,self.variables,log_variables)
-            #             print "cassandra success"
-            #         except Exception as er:
-            #             print("ERROR: {} fails to update cassandra database".format(agent_id))
-            #             print er
-            #
-            #         self.updatePostgresDB()
 
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
-                # headers_mod.DATE: now,
             }
-            # if self.get_variable('power') is not None:
-            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
-            # else:
-            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
-            # message = json.dumps(_data)
-            # message = message.encode(encoding='utf_8')
-            # self.publish(topic, headers, message)
-
             _data = AC.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
