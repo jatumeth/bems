@@ -3,8 +3,8 @@
     "agent": {
         "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1LR221445K1200138",
-    "api": "classAPI_lightliving",
+    "agent_id": "1KR221445K1200138",
+    "api": "classAPI_lightkitchen",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 
@@ -15,6 +15,6 @@
     "macaddress": "221445K1200138",
     "model": "FAN123",
     "type": "light",
-    "vendor": "Hitari",
+    "vendor": "phillip",
     "zone_id": 999
 }
