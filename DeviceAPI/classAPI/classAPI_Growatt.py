@@ -98,15 +98,16 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/8b3707a7-0506-4ace-a0dc-c2ea89b41d01",
-                             headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
+            r = requests.get("http://192.168.1.118/cgi-bin/realInfo.cgi", timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
                 getDeviceStatusResult = False
-                self.getDeviceStatusJson(r.text)
-                if self.debug is True:
-                    self.printDeviceStatus()
+                data = r.text.split('\n')
+
+                print data[19]
+                self.getDeviceStatusJson(data)
+                self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
                 getDeviceStatusResult = False
@@ -122,20 +123,67 @@ class API:
 
     def getDeviceStatusJson(self, data):
 
-        conve_json = json.loads(data)
-        self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]))
-        self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('energy_use_mode', data[0])
+        self.set_variable('inverter_temp', (int(data[1]))/10)
+        self.set_variable('grid_voltage', (int(data[7]))/10)
+        self.set_variable('grid_activepower', (int(data[8]))/10)
+        self.set_variable('grid_frequency', (int(data[9]))/10)
+        self.set_variable('load_level', (int(data[10]))/1)
+        self.set_variable('battery_voltage', (int(data[12]))/10)
+        self.set_variable('battery_current', (int(data[13])) / 10)
+        self.set_variable('battery_percent', (int(data[14])) / 10)
+        self.set_variable('load_activepower', (int(data[16])) / 10)
+        self.set_variable('solar_activepower', (int(data[19])) / 10)
+
+
+
+        # self.set_variable('grid_current', register5)
+        # self.set_variable('load_current', register6)
+        # self.set_variable('Inverter_activepower', register7)
+
+        # self.set_variable('load_activepower', register9)
+        # self.set_variable('Inverter_apparentpower', register11)
+        # self.set_variable('grid_apparentpower', register12)
+        # self.set_variable('load_apparentpower', register13)
+        # self.set_variable('Inverter_reactivepower', register10)
+        # self.set_variable('grid_reactivepower', register16)
+        # self.set_variable('load_reactivepower', register17)
+        # self.set_variable('battery_power', register73)
+        # self.set_variable('accumulated_charger_power', register46)
+        # self.set_variable('accumulated_discharge_power', register48)
+        # self.set_variable('accumulated_buy_power', register50)
+        # self.set_variable('accumulated_sell_power', register52)
+        # self.set_variable('accumulated_load_power', register54)
+        # self.set_variable('accumulated_self_use_power', register56)
+        # self.set_variable('accumulated_pv_sell_power', register58)
+        # self.set_variable('accumulated_grid_charger_power', register60)
+        # self.set_variable('Inverter_activepower', register7)
+        # self.set_variable('grid_activepower', register8)
+        # self.set_variable('grid_activepower', (register8 - 65536))
+
+
+        # self.set_variable('battery_power', batterypower)
+        # self.set_variable('solar_activepower', solarActivePower)
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('status')))
-        print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" energy_use_mode = {}".format(self.get_variable('energy_use_mode')))
+        print(" inverter_temp = {}".format(self.get_variable('inverter_temp')))
+        print(" grid_voltage = {}".format(self.get_variable('grid_voltage')))
+        print(" grid_activepower = {}".format(self.get_variable('grid_activepower')))
+        print(" grid_frequency = {}".format(self.get_variable('grid_frequency')))
+        print(" load_level = {}".format(self.get_variable('load_level')))
+        print(" battery_voltage = {}".format(self.get_variable('battery_voltage')))
+        print(" battery_current = {}".format(self.get_variable('battery_current')))
+        print(" battery_percent = {}".format(self.get_variable('battery_percent')))
+        print(" load_activepower = {}".format(self.get_variable('load_activepower')))
+        print(" load_activepower = {}".format(self.get_variable('load_activepower')))
+        print(" solar_activepower = {}".format(self.get_variable('solar_activepower')))
+
+        # print(" unitTime = {}".format(self.get_variable('unitTime')))
+        # print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
@@ -148,14 +196,12 @@ class API:
             print _data
             try:
                 print "sending requests put"
-                r = requests.put(
-                    "https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/8b3707a7-0506-4ace-a0dc-c2ea89b41d01",
-                    headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, data= _data, timeout=20);
+                r = requests.get("http://192.168.1.118/cgi-bin/realInfo.cgi", timeout=20);
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
             except:
-                print("ERROR: classAPI_Sonos connection failure! @ setDeviceStatus")
+                print("ERROR: classAPI_Fan connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
@@ -179,26 +225,8 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Sonos = API(model='Sonos', type='tv', api='API3', agent_id='SonosAgent')
-    Sonos.getDeviceStatus()
+    PVInverter = API(model='GrowattPV3000', type='Inverter', api='API3', agent_id='PVInverterAgent')
 
-    # import time
-    # Sonos.setDeviceStatus({"status": "ON"})
-    #
-    # time.sleep(10)
-    #
-    # Sonos.setDeviceStatus({"status": "OFF"})
-    #
-    # time.sleep(10)
-    #
-    # Sonos.setDeviceStatus({"status": "ON"})
-    #
-    # time.sleep(10)
-    #
-    # Sonos.setDeviceStatus({"status": "OFF"})
-    #
-    # time.sleep(10)
-    #
-    # Sonos.setDeviceStatus({"status": "ON"})
+    PVInverter.getDeviceStatus()
 
 if __name__ == "__main__": main()
