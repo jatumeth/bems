@@ -59,6 +59,7 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/NetworkAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/RTUAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/VAVAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/DeviceDiscoveryAgent
+
 volttron-pkg configure /tmp/volttron_wheels/devicediscoveryagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DeviceDiscoveryAgent/devicediscoveryagent.launch.json
 volttron-ctl install devicediscoveryagent=/tmp/volttron_wheels/devicediscoveryagent-0.1-py2-none-any.whl
 volttron-pkg package ~/workspace/bemoss_os/Agents/AppLauncherAgent
@@ -75,6 +76,7 @@ volttron-ctl install approvalhelperagent=/tmp/volttron_wheels/approvalhelperagen
 volttron-pkg package ~/workspace/bemoss_os/Agents/MultiBuilding/
 volttron-pkg configure /tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiBuilding/multibuildingagent.launch.json
 volttron-ctl install multibuildingagent=/tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl
+
 # Run network agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/NetworkAgent/
 volttron-pkg configure /tmp/volttron_wheels/networkagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetworkAgent/networkagent.launch.json
@@ -106,10 +108,10 @@ volttron-ctl install LivingroomAir2=/tmp/volttron_wheels/acagent-0.1-py2-none-an
 volttron-pkg configure /tmp/volttron_wheels/acagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACAgent/1TH221445K12bedroom.launch.json
 volttron-ctl install BedroomAir=/tmp/volttron_wheels/acagent-0.1-py2-none-any.whl
 
-# Run Refridgerator Agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/FridgeAgent/
-volttron-pkg configure /tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FridgeAgent/1FR221445K1200111.launch.json
-volttron-ctl install 1FR221445K1200111=/tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl
+## Run Refridgerator Agent
+#volttron-pkg package ~/workspace/bemoss_os/Agents/FridgeAgent/
+#volttron-pkg configure /tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FridgeAgent/1FR221445K1200111.launch.json
+#volttron-ctl install 1FR221445K1200111=/tmp/volttron_wheels/fridgeagent-0.1-py2-none-any.whl
 
 # Run MultisensorAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/MultiSensorAgent/
@@ -141,25 +143,25 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/DemandResponeAgent
 volttron-pkg configure /tmp/volttron_wheels/demandresponseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DemandResponeAgent/DemandResponeAgent.launch.json
 volttron-ctl install DemandResponseAgent=/tmp/volttron_wheels/demandresponseagent-0.1-py2-none-any.whl
 
-# Run NETPIESensor Agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/NETPIESensorgent
-volttron-pkg configure /tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NETPIESensorgent/NETPIESensoragent.launch.json
-volttron-ctl install NETPIESensorgent=/tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl
-
-# Run NETPIEButton Agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/NetpieButtonAgent
-volttron-pkg configure /tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetpieButtonAgent/netpiebuttonagent.launch.json
-volttron-ctl install NETPIEButton=/tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl
+## Run NETPIESensor Agent
+#volttron-pkg package ~/workspace/bemoss_os/Agents/NETPIESensorgent
+#volttron-pkg configure /tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NETPIESensorgent/NETPIESensoragent.launch.json
+#volttron-ctl install NETPIESensorgent=/tmp/volttron_wheels/netpiesensoragent-0.1-py2-none-any.whl
+#
+## Run NETPIEButton Agent
+#volttron-pkg package ~/workspace/bemoss_os/Agents/NetpieButtonAgent
+#volttron-pkg configure /tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetpieButtonAgent/netpiebuttonagent.launch.json
+#volttron-ctl install NETPIEButton=/tmp/volttron_wheels/netpiebuttonagent-0.1-py2-none-any.whl
 
 # Run ACApp
 volttron-pkg package ~/workspace/bemoss_os/Applications/code/ACApp
 volttron-pkg configure /tmp/volttron_wheels/acappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/ACApp/acappagent.launch.json
 volttron-ctl install ACAPP=/tmp/volttron_wheels/acappagent-0.1-py2-none-any.whl
 
-# Run Alexa SmartThings Agent
-volttron-pkg package ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent
-volttron-pkg configure /tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent/alexasmartthingsagent.launch.json
-volttron-ctl install AlexaSmartThings=/tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl
+## Run Alexa SmartThings Agent
+#volttron-pkg package ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent
+#volttron-pkg configure /tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/AlexaSmartThingsAgent/alexasmartthingsagent.launch.json
+#volttron-ctl install AlexaSmartThings=/tmp/volttron_wheels/alexasmartthingsagent-0.1-py2-none-any.whl
 
 # Run LightingApp Agent
 volttron-pkg package ~/workspace/bemoss_os/Applications/code/LightingApp
@@ -222,10 +224,34 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/ACDaikinAgent/
 volttron-pkg configure /tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/ACDaikinAgent/daikinagent.launch.json
 volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-any.whl
 
-volttron-pkg package ~/workspace/bemoss_os/Agents/mqttsubscribe/
-volttron-pkg configure /tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/mqttsubscribe/mqttsubagent.launch.json
-volttron-ctl install MQTTSub=/tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl
+#volttron-pkg package ~/workspace/bemoss_os/Agents/mqttsubscribe/
+#volttron-pkg configure /tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/mqttsubscribe/mqttsubagent.launch.json
+#volttron-ctl install MQTTSub=/tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl
 
+# kitchen light
+volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1KR221445K1200138.launch.json
+volttron-ctl install KitchenLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+# Living light
+volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1LR221445K1200138.launch.json
+volttron-ctl install LivingLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+# Phillip-Hue
+volttron-pkg package ~/workspace/bemoss_os/Agents/LightingAgent/
+volttron-pkg configure /tmp/volttron_wheels/lightingagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LightingAgent/2HUE0017881cab4b.launch.json
+volttron-ctl install PEASmartHomeHue=/tmp/volttron_wheels/lightingagent-0.1-py2-none-any.whl
+
+# Wemo-PEASmarthome
+volttron-pkg package ~/workspace/bemoss_os/Agents/PlugloadAgent/
+volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WIS221445K1200321.launch.json
+volttron-ctl install PEASmartHomeWemo=/tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl
+
+# Home-SceneApp
+volttron-pkg package ~/workspace/bemoss_os/Agents/HomeScenceAgent/
+volttron-pkg configure /tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/HomeScenceAgent/homescenceagent.launch.json
+volttron-ctl install HomeSceneApp=/tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps

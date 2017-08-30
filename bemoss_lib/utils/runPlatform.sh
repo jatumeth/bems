@@ -61,10 +61,12 @@ sleep 2
 #sleep 2
 volttron-ctl start --tag gridappagent
 sleep 2
-volttron-ctl start --tag NETPIEButton
-sleep 2
+
+#volttron-ctl start --tag NETPIEButton
+#sleep 2
 #volttron-ctl start --tag DemandResponseAgent
 #sleep 2
+
 volttron-ctl start --tag gridappagent
 sleep 2
 volttron-ctl start --tag powermeteragent
@@ -94,21 +96,29 @@ volttron-ctl start --tag LivingroomAir2
 sleep 2
 volttron-ctl start --tag BedroomAir
 sleep 2
-#volttron-ctl start --tag 1FR221445K1200111
-#sleep 2
+volttron-ctl start --tag 1FR221445K1200111
+sleep 2
 volttron-ctl start --tag 1MS221445K1200132
 sleep 2
-#volttron-ctl start --tag 1LG221445K1200137
-#sleep 2
-#volttron-ctl start --tag 1IN221445K1300011
-#sleep 2
-#volttron-ctl start --tag 1FN221445K1200138
-#sleep 2
-#volttron-ctl start --tag RelaySRD05VDCSLCIP0035
-#sleep 2
+volttron-ctl start --tag 1LG221445K1200137
 
-#volttron-ctl start --tag MQTTSub
-#sleep 2
+sleep 2
+volttron-ctl start --tag Daikinagent
+sleep 2
+volttron-ctl start --tag Netatmoagent
+sleep 2
+volttron-ctl start --tag PVInverterAgent
+sleep 2
+volttron-ctl start --tag KitchenLight
+sleep 2
+volttron-ctl start --tag LivingLight
+sleep 2
+volttron-ctl start --tag PEASmartHomeHue
+sleep 2
+volttron-ctl start --tag PEASmartHomeWemo
+sleep 2
+volttron-ctl start --tag HomeSceneApp
+
 
 volttron-ctl status
 deactivate
