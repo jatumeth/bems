@@ -427,27 +427,34 @@ def ACAgent(config_path, **kwargs):
             print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"),topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message by AC Agent : {message}\n".format(message=message)
-            #step1: change device status according to the receive message
-            if self.isPostmsgValid(message[0]):  # check if the data is valid
-                t1=json.loads(message[0])
-                setDeviceStatusResult = AC.setDeviceStatus(t1)
-                #send reply message back to the UI
-                topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
-                # now = datetime.utcnow().isoformat(' ') + 'Z'
-                headers = {
-                    'AgentID': agent_id,
-                    headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-                    # headers_mod.DATE: now,
-                }
-                if setDeviceStatusResult:
-                    message = 'success'
+
+            try:
+                #step1: change device status according to the receive message
+                if self.isPostmsgValid(message[0]):  # check if the data is valid
+                    try:
+                        t1=json.loads(message[0])
+                        setDeviceStatusResult = AC.setDeviceStatus(t1)
+                        #send reply message back to the UI
+                    except Exception as er:
+                        print er
+                    topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
+                    # now = datetime.utcnow().isoformat(' ') + 'Z'
+                    headers = {
+                        'AgentID': agent_id,
+                        headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+                        # headers_mod.DATE: now,
+                    }
+                    if setDeviceStatusResult:
+                        message = 'success'
+                    else:
+                        message = 'failure'
                 else:
+                    print("The POST message is invalid, check status setting and try again\n")
                     message = 'failure'
-            else:
-                print("The POST message is invalid, check status setting and try again\n")
-                message = 'failure'
-            self.publish(topic, headers, message)
-            #self.deviceMonitorBehavior() #Get device status, and get updated data
+                self.publish(topic, headers, message)
+                #self.deviceMonitorBehavior() #Get device status, and get updated data
+            except Exception as er:
+                print er
 
 
         def isPostmsgValid(self, postmsg):  # check validity of postmsg

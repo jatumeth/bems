@@ -185,7 +185,7 @@ volttron-ctl install EnergyBillAppAgent=/tmp/volttron_wheels/energybillappagent-
 
 # Run PVinverter Agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PVInverterAgent
-volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PV221445K1200138.launch.json
+volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PVGW1445K1200138.launch.json
 volttron-ctl install PVInverterAgent=/tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl
 
 # Run DC Agent
