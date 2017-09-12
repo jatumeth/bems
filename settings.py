@@ -86,9 +86,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'postgres',                      # Or path to database file if using sqlite3.
-        'USER': 'peahive@peahivedev',                      # Not used with sqlite3.
+        'USER': 'peahive@peahivestaging',                      # Not used with sqlite3.
         'PASSWORD': '28Sep1960',                  # Not used with sqlite3.
-        'HOST': 'peahivedev.postgres.database.azure.com',
+        'HOST': 'peahivestaging.postgres.database.azure.com',
         'PORT': '5432',                    # Set to empty string for default. Not used with sqlite3.
         'TABLE_dashboard_device_info': 'dashboard_device_info',
         'TABLE_dashboard_current_status': 'dashboard_current_status',

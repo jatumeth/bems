@@ -11,7 +11,7 @@
     "db_password": "admin", 
     "db_port": "5432", 
     "db_user": "admin", 
-    "device_monitor_time": 20, 
+    "device_monitor_time": 10,
     "macaddress": "221445K1200138",
     "model": "FAN123",
     "type": "fan",

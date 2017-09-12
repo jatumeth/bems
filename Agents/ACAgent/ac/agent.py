@@ -117,11 +117,13 @@ def ACAgent(config_path, **kwargs):
     # mac_address = get_config('mac_address')
 
     #TODO get database parameters from settings.py, add db_table for specific table
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+
+
     db_table_AC = settings.DATABASES['default']['TABLE_AC']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
@@ -227,8 +229,16 @@ def ACAgent(config_path, **kwargs):
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            self.updateStatus()
-            self.backupSaveData()
+            try:
+                self.updateStatus()
+                self.backupSaveData()
+
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (AC.variables['status'], agent_id))
+                self.con.commit()
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_AC + " WHERE AC_id=%s",

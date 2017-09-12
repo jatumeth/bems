@@ -3,7 +3,7 @@
     "agent": {
         "exec": "pvinverteragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1PVGW1445K1200138",
+    "agent_id": "1PV221445K1200138",
     "api": "classAPI_Growatt",
     "building_name": "bemoss",
     "db_database": "bemossdb", 

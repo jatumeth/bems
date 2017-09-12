@@ -205,16 +205,18 @@ def PVInverterAgent(config_path, **kwargs):
 
         def postgresAPI(self):
 
-            try:
-                self.cur.execute("SELECT * from inverter WHERE inverter_id=%s", (agent_id,))
-                if bool(self.cur.rowcount):
-                    pass
-                else:
-                    self.cur.execute(
-                        """INSERT INTO inverter (inverter_id, last_scanned_time) VALUES (%s, %s);""",
-                        (agent_id, datetime.datetime.now()))
-            except:
-                print "Error to check data base."
+            # try:
+            #     self.cur.execute("SELECT * from inverter WHERE inverter_id=%s", (agent_id,))
+            #     if bool(self.cur.rowcount):
+            #         pass
+            #     else:
+            #         self.cur.execute(
+            #             """INSERT INTO inverter (inverter_id, last_scanned_time) VALUES (%s, %s);""",
+            #             (agent_id, datetime.datetime.now()))
+            # except:
+            #     print "Error to check data base."
+
+
 
             try:
                 self.cur.execute('UPDATE inverter SET last_scanned_time=%s WHERE inverter_id=%s',
@@ -223,13 +225,25 @@ def PVInverterAgent(config_path, **kwargs):
 
                 self.cur.execute("""
                     UPDATE inverter
-                    SET grid_activepower=%s, load_activepower=%s, load_activepower=%s, grid_voltage=%s
+                    SET grid_activepower=%s, load_activepower=%s, inverter_activepower=%s, grid_voltage=%s
                     WHERE inverter_id=%s
                  """, (PVInverter.variables['grid_activepower'], PVInverter.variables['load_activepower'],
                        PVInverter.variables['solar_activepower'], PVInverter.variables['grid_voltage'], agent_id))
                 self.con.commit()
             except:
                 print "Error to the database."
+
+            try:
+
+                self.cur.execute("""
+                    UPDATE inverter
+                    SET grid_reactivepower=%s, load_reactivepower=%s, inverter_reactivepower=%s
+                    WHERE inverter_id=%s
+                 """, (PVInverter.variables['grid_reactivepower'], PVInverter.variables['load_reactivepower'],
+                       PVInverter.variables['solar_reactivepower'], agent_id))
+                self.con.commit()
+            except:
+                print "Error to the database2."
 
 
         def device_offline_detection(self):
