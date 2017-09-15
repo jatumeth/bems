@@ -114,11 +114,13 @@ def LGTVAgent(config_path, **kwargs):
     # mac_address = get_config('mac_address')
 
     #TODO get database parameters from settings.py, add db_table for specific table
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+
+
     db_table_LGTV = settings.DATABASES['default']['TABLE_LGTV']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
@@ -228,76 +230,19 @@ def LGTVAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             # TODO make tolerance more accessible
-            # tolerance = 1
-            #
-            # def isChanged(variable_name,value1,value2):
-            #     #Checks if two value of variable is to be considered different.
-            #     # Returns false if numerical value are different by less than the tolerance %
-            #     if variable_name=='status':
-            #         return value1 == value2 #strict comparision for status
-            #     elif variable_name in ['power','energy','offline_count']:
-            #         if value1 == 0:
-            #             return True if value2 != 0 else False
-            #         return True if 100*abs(value1-value2)/float(value1) > tolerance else False
-            #
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in LGTV.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],LGTV.variables[v]):
-            #             self.variables[v] = LGTV.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            #
-            # try:
-            #     with threadingLock:
-            #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_LGTV+" SET network_status=%s WHERE LGTV_id=%s",
-            #                              ('OFFLINE', agent_id))
-            #             self.con.commit()
-            #             if self.already_offline is False:
-            #                 self.already_offline = True
-            #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_LGTV+" SET last_offline_time=%s "
-            #                                  "WHERE LGTV_id=%s",
-            #                                  (_time_stamp_last_offline, agent_id))
-            #                 self.con.commit()
-            #         else:
-            #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_LGTV+" SET network_status=%s WHERE LGTV_id=%s",
-            #                              ('ONLINE', agent_id))
-            #             self.con.commit()
-            #
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Update scan time
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_LGTV+" SET last_scanned_time=%s "
-            #                      "WHERE LGTV_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
+
             #
             self.updateStatus()
-            # #step6: debug agent knowledge
-            # if debug_agent == True:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
-
             self.backupSaveData()
+            try:
+                status1 = str(LGTV.variables['status'].upper())
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (status1, agent_id))
+                self.con.commit()
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
+
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_LGTV + " WHERE LGTV_id=%s",

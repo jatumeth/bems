@@ -136,42 +136,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def disconnect(self):
         logging.debug("disconnect is work")
 
-    # @matching.match_start('/ui/agent/airconditioner/')
-    # def on_match(self, topic, headers, message, match):
-    #     '''Use match_all to receive all messages and print them out.'''
-    #     _log.debug("Topic: {topic}, Headers: {headers}, "
-    #                      "Message: {message}".format(
-    #                      topic=topic, headers=headers, message=message))
-    #     print("")
 
-    # @periodic(10)
-    # def testModal(self):
-    #     self.publish_heartbeat()
-    #     self.message = '1'
-    #     print("publish_heartbeat message sent")
-
-    # @periodic(5)
-    # def check_PEA_DR_trigger_button(self):
-    #
-    #     try:
-    #         r = requests.get("https://graph.api.smartthings.com/api/smartapps/installations/17244bfb-7963-41dc-beb2-f0acf9f2085c/switches/cbc76b94-35f6-4278-b231-768dd11e89e0",
-    #                          headers={"Authorization": "Bearer adc2ff7d-5afe-4614-8590-fea0ad4cffcd"}, timeout=20);
-    #         print("NetpieButtonAgent is querying its current status (status:{}) please wait ...".format(r.status_code))
-    #         if r.status_code == 200:
-    #             conve_json = json.loads(r.text)
-    #             if (conve_json["status"] == "on"):
-    #                 self.status = "ON"
-    #                 self.message = '1'
-    #                 self.publish_heartbeat()
-    #             elif (conve_json["status"] == "off"):
-    #                 self.status = "OFF"
-    #             print (" Received status from PEA DR Trigger button as: {}".format(self.status))
-    #         else:
-    #             print (" Received an error from server, cannot retrieve results")
-    #             getDeviceStatusResult = False
-    #     except Exception as er:
-    #         print er
-    #         print('ERROR: Netpit button cannot get status from SmartThings PEA DR button')
 
     @matching.match_exact('/agent/ui/dashboard/netpiebutton')
     def on_match(self, topic, headers, message, match):

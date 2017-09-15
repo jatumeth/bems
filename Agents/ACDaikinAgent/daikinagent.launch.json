@@ -3,10 +3,10 @@
     "agent": {
         "exec": "daikinagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "ACD1200138",
+    "agent_id": "1ACD1200138",
     "api": "classAPI_Daikin",
     "building_name": "bemoss",
-    "device_monitor_time": 20, 
+    "device_monitor_time": 10,
     "macaddress": "1200138",
     "model": "AC123",
     "type": "AC",

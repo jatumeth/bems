@@ -198,7 +198,7 @@ def main():
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
     AC.getDeviceStatus()
 
-    AC.setDeviceStatus({"status" : "ON","stemp": "23",'mode':'3','mode2':'3'})
+    AC.setDeviceStatus({"status": "ON", "device": "1DAIK", "stemp": "20", "mode": "3"})
     # AC.setDeviceStatus({'stemp':'24'})
 
 if __name__ == "__main__": main()

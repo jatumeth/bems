@@ -186,7 +186,7 @@ def main():
     LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
     # LGTV.getDeviceStatus()
 
-    LGTV.setDeviceStatus({"status": "ON"})
+    LGTV.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #

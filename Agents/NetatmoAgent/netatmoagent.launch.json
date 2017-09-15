@@ -2,7 +2,7 @@
     "agent": {
         "exec": "netatmoagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agent_id": "Netatmo001",
+    "agent_id": "12Netatmo001",
     "device_monitor_time":5,
     "building_name": "bemoss",
     "zone_id": 999,

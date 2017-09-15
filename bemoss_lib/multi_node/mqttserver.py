@@ -13,7 +13,8 @@ sys.path.append(current_working_directory)
 from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
 from zmqhelper.ZMQHelper.zmq_pub import ZMQ_PUB
 import time
-
+import requests
+import json
 
 
 
@@ -24,10 +25,67 @@ kwargs = {'subscribe_address': SUB_SOCKET, 'publish_address': PUSH_SOCKET}
 zmq_pub = ZMQ_PUB(**kwargs)
 
 sbs = ServiceBusService(
-                service_namespace='hiveservicebus',
+                service_namespace='peahiveservicebus',
                 shared_access_key_name='RootManageSharedAccessKey',
-                shared_access_key_value='vZmK7ee4YhIbaUEW5e/sgT0S8JV09LnToCOEqIU+7Qw=')
+                shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
 
+def send_requeston():
+    # scene
+    # PUT https://api.netpie.io/topic/P1Site/SMH
+    try:
+        response = requests.put(
+            url="https://api.netpie.io/topic/P1Site/SMH",
+            params={
+                "retain": "OFF",
+                "auth": "U0Qa6TlkPIjpwXP:tXk4e5hra3OFGt1aZyaAnu0rP",
+            },
+            headers={
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "id": "C1",
+                "state": "on",
+                "site": "7727a0190f32d6bc59a52a26c69b3336b49be7bcc1c4",
+                "agent": "N2",
+                "branch": "control",
+                "sender": "webview"
+            })
+        )
+        print('Response HTTP Status Code: {status_code}'.format(
+            status_code=response.status_code))
+        print('Response HTTP Response Body: {content}'.format(
+            content=response.content))
+    except requests.exceptions.RequestException:
+        print('HTTP Request failed')
+
+def send_requestoff():
+    # scene
+    # PUT https://api.netpie.io/topic/P1Site/SMH
+    try:
+        response = requests.put(
+            url="https://api.netpie.io/topic/P1Site/SMH",
+            params={
+                "retain": "OFF",
+                "auth": "U0Qa6TlkPIjpwXP:tXk4e5hra3OFGt1aZyaAnu0rP",
+            },
+            headers={
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "id": "C1",
+                "state": "off",
+                "site": "7727a0190f32d6bc59a52a26c69b3336b49be7bcc1c4",
+                "agent": "N2",
+                "branch": "control",
+                "sender": "webview"
+            })
+        )
+        print('Response HTTP Status Code: {status_code}'.format(
+            status_code=response.status_code))
+        print('Response HTTP Response Body: {content}'.format(
+            content=response.content))
+    except requests.exceptions.RequestException:
+        print('HTTP Request failed')
 
 def hue(commsg):
     # TODO this is example how to write an app to control Lighting
@@ -138,7 +196,9 @@ def wemo(commsg):
 def daikin(commsg):
     # TODO this is example how to write an app to control Lighting
 
-    topic = '/ui/agent/AC/update/bemoss/999/ACD1200138'
+    print "99999999999999999999999999999"
+
+    topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
     # topic = '/ui/agent/AC/update/bemoss/999/ACD1200138'
     # {"status": "OFF"}
     # now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -200,31 +260,44 @@ while True:
 
         for k, v in commsg.items():
             if k == 'device':
-                if (commsg['device']) == "hue1":
+                if (commsg['device']) == "2HUEH":
                     hue(commsg)
-                elif (commsg['device']) == "wemo1":
+                elif (commsg['device']) == "3WSP2":
+                    try :
+                        if (commsg['status']) == "ON":
+                            print "on"
+                            send_requeston()
+                        else:
+                            print "off"
+                            send_requestoff()
+                    except:
+                        print ""
+
+                elif (commsg['device']) == "16SCH":
                     wemo(commsg)
-                elif (commsg['device']) == "daikin1":
+                elif (commsg['device']) == "1DAIK":
                     daikin(commsg)
-                elif (commsg['device']) == "lgtv1":
+                elif (commsg['device']) == "11LG1":
                     lg(commsg)
-                elif (commsg['device']) == "fan1":
+                elif (commsg['device']) == "11LG2":
+                    lg(commsg)
+                elif (commsg['device']) == "7FAN":
                     fan(commsg)
-                elif (commsg['device']) == "saijo1":
+                elif (commsg['device']) == "1SAJ1":
                     saijo1(commsg)
                     time.sleep(3)
                     saijo1(commsg)
-                elif (commsg['device']) == "saijo2":
+                elif (commsg['device']) == "1SAJ2":
                     saijo2(commsg)
                     time.sleep(3)
                     saijo2(commsg)
-                elif (commsg['device']) == "saijo3":
+                elif (commsg['device']) == "1SAJ3":
                     saijo3(commsg)
                     time.sleep(3)
                     saijo3(commsg)
-                elif (commsg['device']) == "living":
+                elif (commsg['device']) == "2HUEL":
                     living(commsg)
-                elif (commsg['device']) == "kitchen":
+                elif (commsg['device']) == "2HUEK":
                     kitchen(commsg)
                 else:
                     print ""

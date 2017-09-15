@@ -226,8 +226,8 @@ def Netatmoagent(config_path, **kwargs):
 
         def postgresAPI(self):
             try:
-                conn = psycopg2.connect(host="peahivedev.postgres.database.azure.com", port="5432",
-                                        user="peahive@peahivedev", password="28Sep1960",
+                conn = psycopg2.connect(host="peahivestaging.postgres.database.azure.com", port="5432",
+                                        user="peahive@peahivestaging", password="28Sep1960",
                                         dbname="postgres")
             except:
                 print "I am unable to connect to the database."

@@ -215,9 +215,6 @@ def FanAgent(config_path, **kwargs):
                  """, (Fan.variables['status'], datetime.datetime.now(), agent_id))
                 self.con.commit()
 
-                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                                 (Fan.variables['status'], agent_id))
-                self.con.commit()
             except:
                 print "Error to the database."
 

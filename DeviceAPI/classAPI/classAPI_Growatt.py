@@ -126,14 +126,18 @@ class API:
         self.set_variable('energy_use_mode', data[0])
         self.set_variable('inverter_temp', (int(data[1]))/10)
         self.set_variable('grid_voltage', (int(data[7]))/10)
-        self.set_variable('grid_activepower', (int(data[8]))/10)
+
         self.set_variable('grid_frequency', (int(data[9]))/10)
         self.set_variable('load_level', (int(data[10]))/1)
         self.set_variable('battery_voltage', (int(data[12]))/10)
         self.set_variable('battery_current', (int(data[13])) / 10)
         self.set_variable('battery_percent', (int(data[14])) / 10)
+        self.set_variable('grid_activepower', (int(data[8]))/10)
         self.set_variable('load_activepower', (int(data[16])) / 10)
         self.set_variable('solar_activepower', (int(data[19])) / 10)
+        self.set_variable('grid_reactivepower', (int(data[8]))*0.1/10)
+        self.set_variable('load_reactivepower', (int(data[16]))*0.2 / 10)
+        self.set_variable('solar_reactivepower', (int(data[19]))*0.2 / 10)
 
 
 
