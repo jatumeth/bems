@@ -95,9 +95,9 @@ class API:
         try:
 
             http = urllib3.PoolManager()
-            r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc')
+            r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc&page=1')
             conve_json = json.loads(r.data)
-
+            print r.data
 
             self.set_variable('grid_current', conve_json['cpletrix']['records'][0][6])
             self.set_variable('grid_activePower', conve_json['cpletrix']['records'][0][9])
