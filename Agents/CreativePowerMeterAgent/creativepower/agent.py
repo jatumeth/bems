@@ -27,7 +27,6 @@ import settings
 import datetime
 import time
 import math
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -55,7 +54,6 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
-    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
     debug_agent = False
 
     log_variables = dict(grid_current='double', grid_activePower='double', grid_reactivePower='double',
@@ -172,19 +170,11 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": CreativePowerMeter.identifyDevice()
 
-        @periodic(cassandra_update_time)  # save all data every max_monitor_time
-        def backupSaveData(self):
-            try:
-                CreativePowerMeter.getDeviceStatus()
-                cassandraDB.insert(agent_id, CreativePowerMeter.variables, log_variables)
-                print('Data Pushed to cassandra')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             # step1: get current status, then map keywords and variables to agent knowledge
+
             try:
                 CreativePowerMeter.getDeviceStatus()
                 self.updateUI()
@@ -192,38 +182,19 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            self.changed_variables = dict()
-            for v in log_variables:
-                if v in CreativePowerMeter.variables:
-                    if not v in self.variables or self.variables[v] != CreativePowerMeter.variables[v]:
-                        self.variables[v] = CreativePowerMeter.variables[v]
-                        self.changed_variables[v] = log_variables[v]
-                else:
-                    if v not in self.variables:  # it won't be in self.variables either (in the first time)
-                        self.changed_variables[v] = log_variables[v]
-                        self.variables[v] = None
-
+            self.updateStatus()
 
             # pub creative power meter mqtt to azure
-            try:
-                _data = CreativePowerMeter.variables
-                message = json.dumps(_data)
-                CreativePowerMeterMQTT = importlib.import_module(
-                    "DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                CreativePowerMeterMQTT.iothub_client_sample_run(message)
-            except Exception as er:
-                print er
-                print "Data to Azure IoT hub {} is not successful".format(agent_id)
-
-
-
-            try:
-                cassandraDB.insert(agent_id, self.variables, log_variables)
-                print "{} success update cassandra database".format(agent_id)
-            except Exception as er:
-                print("ERROR: {} fails to update casasasasandra database".format(agent_id))
-                print er
-
+            # try:
+            #     _data = CreativePowerMeter.variables
+            #     message = json.dumps(_data)
+            #     CreativePowerMeterMQTT = importlib.import_module(
+            #         "DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+            #     CreativePowerMeterMQTT.iothub_client_sample_run(message)
+            # except Exception as er:
+            #     print er
+            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
+            #
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
@@ -396,6 +367,7 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
         def updateUI(self):
+
             topic = '/agent/ui/' + device_type + '/device_status_response/' + _topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
@@ -409,6 +381,25 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
             message = json.dumps(_data)
             # message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
+
+        def updateStatus(self,states=None):
+
+            topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            # now = datetime.utcnow().isoformat(' ') + 'Z'
+            headers = {
+                'AgentID': agent_id,
+                headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
+                # headers_mod.DATE: now,
+            }
+
+            _data = CreativePowerMeter.variables
+            message = json.dumps(_data)
+            message = message.encode(encoding='utf_8')
+            self.publish(topic, headers, message)
+            print "message sent from creativepowermeter agent with topic: {}".format(topic)
+            print "message sent from creativepowermeter agent with data: {}".format(message)
+
+        #
 
         # 4. updateUIBehavior (generic behavior)
         @matching.match_exact('/ui/agent/' + device_type + '/device_status/' + _topic_Agent_UI_tail)
