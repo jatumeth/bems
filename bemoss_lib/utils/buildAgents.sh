@@ -44,6 +44,7 @@
 #__created__ = "2014-09-12 12:04:50"
 #__lastUpdated__ = "2016-03-14 11:23:33"
 
+cd ~/workspace/bemoss_os/
 . env/bin/activate
 volttron -vv 2>&1 | tee ~/workspace/bemoss_os/log/volttron.log &
 
