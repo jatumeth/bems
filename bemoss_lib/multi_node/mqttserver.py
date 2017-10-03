@@ -16,8 +16,6 @@ import time
 import requests
 import json
 
-
-
 PUSH_SOCKET = "ipc:///home/dell-hive01/.volttron/run/publish"
 SUB_SOCKET = "ipc:///home/dell-hive01/.volttron/run/subscribe"
 
@@ -252,7 +250,7 @@ def HC(commsg):
 
 while True:
     try:
-
+	print("mqtt server is waiting for message from Azure")
         msg = sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
         print msg.body
         commsg = json.loads(msg.body)
@@ -283,6 +281,7 @@ while True:
                     lg(commsg)
                 elif (commsg['device']) == "7FAN":
                     fan(commsg)
+
                 elif (commsg['device']) == "1SAJ1":
                     saijo1(commsg)
                     time.sleep(3)

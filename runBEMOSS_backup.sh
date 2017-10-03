@@ -44,26 +44,40 @@
 #__created__ = "2014-09-12 12:04:50"
 #__lastUpdated__ = "2016-03-14 11:23:33"
 
+
 #Step1: Find own IP
-#sudo python ~/workspace/bemoss_os/bemoss_lib/utils/find_own_ip.py
+sudo python ~/workspace/bemoss_os/bemoss_lib/utils/find_own_ip.py
+#Step2: Run Platform Initiator
 
-#Step2: Build agents
-#source ~/workspace/bemoss_os/bemoss_lib/utils/buildAgents.sh
-
-#Step3: Run Volttron Platform and Agents
-#source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh
-
-echo 123 | sudo -S gnome-terminal --tab -t "RunAgents" -e "bash -c 'source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh; bash'" --tab -t "MQTTServer" -e "bash -c 'cd ~/workspace/bemoss_os; . env/bin/activate; cd ~/workspace/bemoss_os/bemoss_lib/multi_node; python mqttserver.py; bash'"
-
-#Step4: save pid of running agents
-#sudo echo $! > ~/workspace/bemoss_os/BEMOSS.pid
-
-#Step5: MultiNode server, and Web UI
-#sudo gnome-terminal --tab -t "Multinode server" -e "bash -c 'python ~/workspace/bemoss_os/bemoss_lib/#multi_node/udpserver.py'" --tab -t "WebServer" -e "bash -c 'cd ~/workspace/bemoss_web_ui; $webcommand; bash'"
+read -t 5 -p "Press ENTER to start fresh BEMOSS within 5 seconds...." input
+if [[ $? -ne 0 ]]
+then
+  echo "Retaining previous state of BEMOSS..."
+else
+  echo "Performing fresh restart of BEMOSS..."
+  sudo python ~/workspace/bemoss_os/bemoss_lib/utils/platform_initiator.py
+  sleep 2
+fi
+#sudo PYTHONPATH='.' python ~/workspace/bemoss_os/bemoss_lib/databases/cassandraAPI/startCassandra.py
+sleep 2
+#Step3: Build agents
+source ~/workspace/bemoss_os/bemoss_lib/utils/buildAgents.sh
+#Step4: Run Volttron Platform and Agents
+source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh
+#Step5: Configure webserver to run on own IP and Bind BACnet with IP
+ipfile="${HOME}/workspace/bemoss_os/machine_ip.txt"
+ipaddress=$(tail -1 $ipfile)
+ipaddressBACnet=$(head -1 $ipfile)
+#read the first ip
+case "$ipaddress" in
+  *.*)
+    webcommand="python ./run/bemoss_server.py --port=8000 --host=$ipaddress"
+    export BACNET_IFACE=$ipaddressBACnet
+    ;;
+  *)
+    webcommand="python ./run/bemoss_server.py --port=8000"
+esac
+sudo echo $! > ~/workspace/bemoss_os/BEMOSS.pid
+#Step6: MultiNode server, and Web UI
+sudo gnome-terminal --tab -t "Multinode server" -e "bash -c 'python ~/workspace/bemoss_os/bemoss_lib/multi_node/udpserver.py'" --tab -t "WebServer" -e "bash -c 'cd ~/workspace/bemoss_web_ui; $webcommand; bash'"
 #---------
-
-
-
-
-
-

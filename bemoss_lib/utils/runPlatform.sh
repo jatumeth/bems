@@ -46,8 +46,12 @@
 #__lastUpdated__ = "2016-03-14 11:23:33"
 
 
+
 cd ~/workspace/bemoss_os/
+. env/bin/activate
+volttron -vv 2>&1 | tee ~/workspace/bemoss_os/log/volttron.log &
 echo $i > ~/workspace/bemoss_os/.temp/BEMOSS.pid
+
 volttron-ctl start --tag devicediscoveryagent
 sleep 2
 volttron-ctl start --tag applauncheragent
