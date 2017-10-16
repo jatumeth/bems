@@ -53,7 +53,7 @@
 #Step3: Run Volttron Platform and Agents
 #source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh
 
-echo 123 | sudo -S gnome-terminal --tab -t "RunAgents" -e "bash -c 'source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh; bash'" --tab -t "MQTTServer" -e "bash -c 'cd ~/workspace/bemoss_os; . env/bin/activate; cd ~/workspace/bemoss_os/bemoss_lib/multi_node; python mqttserver.py; bash'"
+echo 123 | sudo -S gnome-terminal --tab -t "RunAgents" -e "bash -c 'source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh; bash'" --tab -t "MQTTServer" -e "bash -c 'cd ~/workspace/bemoss_os; . env/bin/activate; cd ~/workspace/bemoss_os/bemoss_lib/multi_node; python mqttserver.py; bash'" --tab -t "VNC Server" -e "bash -c 'x11vnc -forever -rfbport 5900 -passwd 28Sep1960; bash'"
 
 #Step4: save pid of running agents
 #sudo echo $! > ~/workspace/bemoss_os/BEMOSS.pid
