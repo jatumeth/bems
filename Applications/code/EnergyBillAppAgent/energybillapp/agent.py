@@ -45,7 +45,7 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
     db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
     print(db_table_monthly_consumption)
-
+    print ""
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
 
