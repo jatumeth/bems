@@ -13,7 +13,6 @@ All rights reserved.
 #__lastUpdated__ = "2017-08-15 19:09:33"
 '''
 
-
 import sys
 import json
 import importlib
@@ -28,12 +27,9 @@ import psycopg2.extras
 import settings
 import socket
 import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def ACDaikinAgent(config_path, **kwargs):
-    
-    threadingLock = threading.Lock()
-    
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -88,22 +84,18 @@ def ACDaikinAgent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
     db_table_ACDaikin = settings.DATABASES['default']['TABLE_ACDaikin']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    db_table_alerts_notificationchanneladdress = settings.DATABASES['default'][
-        'TABLE_alerts_notificationchanneladdress']
+    db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
     #construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-
     api = get_config('api')
-
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
     #4.1 initialize ACDaikinAgent device object
@@ -116,8 +108,6 @@ def ACDaikinAgent(config_path, **kwargs):
                                                                         ACDaikin.get_variable('api'),
                                                                         ACDaikin.get_variable('address')))
 
-    # connection_renew_interval = ACDaikinAgent.variables['connection_renew_interval']
-
     #params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
@@ -129,7 +119,6 @@ def ACDaikinAgent(config_path, **kwargs):
 
     class Agent(PublishMixin, BaseAgent):
         """Agent for querying WeatherUndergrounds API"""
-
         # 1. agent initialization
         def __init__(self, **kwargs):
             #1. initialize all agent variables
@@ -168,17 +157,7 @@ def ACDaikinAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
-
-            self.timer(10, self.deviceMonitorBehavior)
-
-            #TODO do this for all devices that supports event subscriptions
-            if api == 'classAPI_WeMo':
-                #Do a one time push when we start up so we don't have to wait for the periodic polling
-                try:
-                    ACDaikin.startListeningEvents(threadingLock,self.updateStatus)
-                    self.subscriptionTime=datetime.datetime.now()
-                except Exception as er:
-                    print "Can't subscribe.", er
+            self.timer(1, self.deviceMonitorBehavior)
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -190,7 +169,9 @@ def ACDaikinAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             # TODO make tolerance more accessible
+            # real-time update web ui
             self.updateStatus()
+            # update postgres database
             self.postgresAPI()
 
         def postgresAPI(self):
@@ -208,33 +189,32 @@ def ACDaikinAgent(config_path, **kwargs):
                 print "Error to check data base."
 
             try:
-                print ""
                 self.cur.execute("""
                     UPDATE airconditioner
-                    SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, mode=%s
-                    WHERE airconditioner_id=%s
-                 """, (ACDaikin.variables['status'], ACDaikin.variables['current_temperature'],
-                       ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
-                       ACDaikin.variables['set_humidity'], ACDaikin.variables['mode'], agent_id))
+                    SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, 
+                    mode=%s, last_scanned_time=%s WHERE airconditioner_id=%s""",
+                    (ACDaikin.variables['status'], ACDaikin.variables['current_temperature'],
+                    ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
+                    ACDaikin.variables['set_humidity'], ACDaikin.variables['mode'], datetime.datetime.now(), agent_id))
                 self.con.commit()
-
                 self.cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
                                  (datetime.datetime.now(), agent_id))
                 self.con.commit()
+            except Exception as er:
+                print("Error push data to the database: {}".format(er))
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, 
+                       set_temperature, current_humidity, set_humidity, mode) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (agent_id, datetime.datetime.now(), ACDaikin.variables['status'],
+                     ACDaikin.variables['current_temperature'],
+                     ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
+                     ACDaikin.variables['set_humidity'], ACDaikin.variables['mode']))
+                self.con.commit()
             except:
                 print "Error to the database."
-
-            # try:
-            #     print ""
-            #     self.cur.execute(
-            #         """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, set_temperature, current_humidity, set_humidity, mode) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
-            #         (agent_id, datetime.datetime.now(), ACDaikin.variables['status'],
-            #          ACDaikin.variables['current_temperature'],
-            #          ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
-            #          ACDaikin.variables['set_humidity'], ACDaikin.variables['mode']))
-            #     self.con.commit()
-            # except:
-            #     print "Error to the database."
 
             try:
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
@@ -345,7 +325,6 @@ def ACDaikinAgent(config_path, **kwargs):
             print _active_alert_phone_number_misoperation
             smsService = SMSService()
             smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
-
 
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
@@ -467,7 +446,6 @@ def ACDaikinAgent(config_path, **kwargs):
             self.publish(topic, headers, message)
             self.deviceMonitorBehavior() #Get device status, and get updated data
 
-
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
@@ -504,7 +482,6 @@ def ACDaikinAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
-
 
     Agent.__name__ = 'ACDaikinAgent'
     return Agent(**kwargs)

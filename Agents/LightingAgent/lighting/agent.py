@@ -60,8 +60,6 @@ import psycopg2
 import psycopg2.extras
 import socket
 import settings
-
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
@@ -115,7 +113,6 @@ def LightingAgent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
     db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
@@ -192,16 +189,6 @@ def LightingAgent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": Light.identifyDevice()
 
-        # @periodic(max_monitor_time) #save all data every max_monitor_time
-        # def backupSaveData(self):
-        #     try:
-        #         Light.getDeviceStatus()
-        #         cassandraDB.insert(agent_id,Light.variables,log_variables)
-        #         print('Every Data Pushed to cassandra')
-        #     except Exception as er:
-        #         print("ERROR: {} fails to update cassandra database".format(agent_id))
-        #         print er
-
         #3. deviceMonitorBehavior (TickerBehavior)
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -210,123 +197,12 @@ def LightingAgent(config_path, **kwargs):
                 Light.getDeviceStatus()
             except:
                 print("device connection is not successful")
-
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in Light.variables:
-            #         if not v in self.variables or self.variables[v] != Light.variables[v]:
-            #             self.variables[v] = Light.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            # try:
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Put scan time in database
-            #     _time_stamp_last_scanned = datetime.datetime.now()
-            #     self.cur.execute("UPDATE "+db_table_lighting+" SET last_scanned_time=%s "
-            #                      "WHERE lighting_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update last scanned time".format(agent_id))
-
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-
+            # real-time update web ui
             self.updateUI()
-            #step4: update PostgresQL (meta-data) database
-            # try:
-            #     self.cur.execute("UPDATE "+db_table_lighting+" SET status=%s WHERE lighting_id=%s",
-            #                      (self.get_variable('status'), agent_id))
-            #     self.con.commit()
-            #     self.cur.execute("UPDATE "+db_table_lighting+" SET brightness=%s WHERE lighting_id=%s",
-            #                      (self.get_variable('brightness'), agent_id))
-            #     self.con.commit()
-            #     self.cur.execute("UPDATE "+db_table_lighting+" SET color=%s WHERE lighting_id=%s",
-            #                      (self.get_variable('hexcolor'), agent_id))
-            #     self.con.commit()
-            #     try:
-            #         if self.get_variable('status') == "ON":
-            #             multiple_on_off_status = ""
-            #             for dummyvar in range(self.get_variable('number_lights')):
-            #                 multiple_on_off_status += "1"
-            #             self.cur.execute("UPDATE "+db_table_lighting+" SET multiple_on_off=%s WHERE lighting_id=%s",
-            #                             (multiple_on_off_status, agent_id))
-            #             self.con.commit()
-            #         else:  # status is off
-            #             multiple_on_off_status = ""
-            #             for dummyvar in range(self.get_variable('number_lights')):
-            #                 multiple_on_off_status += "0"
-            #             self.cur.execute("UPDATE "+db_table_lighting+" SET multiple_on_off=%s WHERE lighting_id=%s",
-            #                             (multiple_on_off_status, agent_id))
-            #             self.con.commit()
-            #     except:
-            #         print("{} this agent has no multiple_on_off_status".format(agent_id))
-            #     #TODO check ip_address
-            #     if self.ip_address != None:
-            #         psycopg2.extras.register_inet()
-            #         _ip_address = psycopg2.extras.Inet(self.ip_address)
-            #         self.cur.execute("UPDATE "+db_table_lighting+" SET ip_address=%s WHERE lighting_id=%s",
-            #                          (_ip_address, agent_id))
-            #         self.con.commit()
-            #
-            #
-            #     if self.get_variable('offline_count') >= 3:
-            #         self.cur.execute("UPDATE "+db_table_lighting+" SET network_status=%s WHERE lighting_id=%s",
-            #                          ('OFFLINE', agent_id))
-            #         self.con.commit()
-            #         if self.already_offline is False:
-            #             self.already_offline = True
-            #             _time_stamp_last_offline = str(datetime.datetime.now())
-            #             self.cur.execute("UPDATE "+db_table_lighting+" SET last_offline_time=%s WHERE lighting_id=%s",
-            #                              (_time_stamp_last_offline, agent_id))
-            #             self.con.commit()
-            #     else:
-            #         self.already_offline = False
-            #         self.cur.execute("UPDATE "+db_table_lighting+" SET network_status=%s WHERE lighting_id=%s",
-            #                          ('ONLINE', agent_id))
-            #         self.con.commit()
-            #     print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id, db_database))
-            # except:
-            #     print("ERROR: {} fails to update the database name {}".format(agent_id,db_database))
-
-            #step5: update Cassandra (time-series) database
-            # try:
-            #     cassandraDB.insert(agent_id,self.variables,log_variables)
-            #     print('Data Pushed to cassandra')
-            #     print "{} success update".format(agent_id)
-            # except Exception as er:
-            #     print("ERROR: {} fails to update cassandra database".format(agent_id))
-            #     print er
-            #step6: debug agent knowledge
-            if debug_agent:
-                print("printing agent's knowledge")
-                for k,v in self.variables.items():
-                    print (k,v)
-                print('')
-
-            if debug_agent:
-                print("printing agentAPImapping's fields")
-                for k, v in agentAPImapping.items():
-                    if k is None:
-                        agentAPImapping.update({v: v})
-                        agentAPImapping.pop(k)
-                for k, v in agentAPImapping.items():
-                    print (k, v)
-
-
+            # update postgres database
             self.postgresAPI()
 
         def postgresAPI(self):
-
             try:
                 self.cur.execute("SELECT * from lighting WHERE lighting_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
@@ -347,7 +223,6 @@ def LightingAgent(config_path, **kwargs):
                  """, (
                     Light.variables['status'], Light.variables['brightness'], Light.variables['color'],
                     datetime.datetime.now(), agent_id))
-
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (Light.variables['status'], agent_id))
                 self.con.commit()
@@ -356,13 +231,13 @@ def LightingAgent(config_path, **kwargs):
 
             try:
                 self.cur.execute(
-                    """INSERT INTO ts_lighting (datetime,status,brightness,color,lighting_id) VALUES (%s, %s, %s, %s, %s);""",
-                    (datetime.datetime.now(),Light.variables['status'],Light.variables['brightness'],Light.variables['color'],agent_id))
+                    """INSERT INTO ts_lighting (datetime,status,brightness,color,lighting_id) 
+                    VALUES (%s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), Light.variables['status'],Light.variables['brightness'],
+                     Light.variables['color'], agent_id))
                 self.con.commit()
             except:
                 print "Insert database error"
-
-
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_lighting + " WHERE lighting_id=%s",
@@ -546,7 +421,6 @@ def LightingAgent(config_path, **kwargs):
             #reply message
             self.updateUI()
 
-
         #5. deviceControlBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/update/'+_topic_Agent_UI_tail)
         def deviceControlBehavior(self,topic,headers,message,match):
@@ -611,8 +485,6 @@ def LightingAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
-
-
 
     Agent.__name__ = 'LightingAgent'
     return Agent(**kwargs)
