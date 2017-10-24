@@ -118,7 +118,7 @@ DATABASES = {
         'TABLE_temp_failure_time': 'temp_failure_time',
         'TABLE_priority': 'priority',
         'TABLE_seen_notifications_counter': 'seen_notifications_counter',
-        'TABLE_powermeter': 'netatmo',
+        'TABLE_powermeter': 'power_meter',
         'TABLE_AC': 'ac',
         'TABLE_Refrigerator': 'Refrigerator',
         'TABLE_MultiSensor': 'MultiSensor',

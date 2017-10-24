@@ -370,7 +370,7 @@ class API:
 def main():
     # Test Codes
 
-    WeMoSwitch = API(model='Insight', api='classAPI_WeMo', address='http://192.168.1.31:49153', agent_id='plugloadagent')
+    WeMoSwitch = API(model='Insight', api='classAPI_WeMo', address='http://192.168.1.18:49153', agent_id='plugloadagent')
     # Find device Model
     # print WeMoSwitch.getDeviceModel()
     # Get and Print Device Status
@@ -382,7 +382,7 @@ def main():
     WeMoSwitch.getDeviceStatus()
     x = WeMoSwitch.get_variable('motion')
     # WeMoSwitch.identifyDevice()
-    WeMoSwitch.setDeviceStatus({"status": "OFF"})
+    # WeMoSwitch.setDeviceStatus({"status": "OFF"})
     print x
 
 if __name__ == "__main__": main()

@@ -27,7 +27,6 @@ import settings
 import datetime
 import time
 import math
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -35,6 +34,7 @@ _log = logging.getLogger(__name__)
 
 # Step1: Agent Initialization
 def Netatmoagent(config_path, **kwargs):
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -55,8 +55,8 @@ def Netatmoagent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
-    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
     debug_agent = False
+    print ("Get_Agent_ID")
 
     log_variables = dict(grid_current='double', grid_activePower='double', grid_reactivePower='double',
                          grid_apparentPower='double', grid_powerfactor='double', grid_quadrant='double',
@@ -79,8 +79,9 @@ def Netatmoagent(config_path, **kwargs):
     url_l = get_config('url_l')
     head_l = get_config('head_l')
     _address = address
+    print (_address)
     _address = _address.replace('http://', '')
-    _address = _address.replace('https://', '')
+    # _address = _address.replace('https://', '')
     _address = str(_address).split('/')[0]
     try:  # validate whether or not address is an ip address
         socket.inet_aton(_address)
@@ -93,19 +94,18 @@ def Netatmoagent(config_path, **kwargs):
         print "yes ip_address is None"
         ip_address = None
     identifiable = get_config('identifiable')
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
-    db_table_power_meter = settings.DATABASES['default']['TABLE_Netatmo']
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+    db_table_netatmo = settings.DATABASES['default']['TABLE_Netatmo']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
-    db_id_column_name = "power_meter_id"
+    db_id_column_name = "weather_sensor_id"
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    db_table_alerts_notificationchanneladdress = settings.DATABASES['default'][
-        'TABLE_alerts_notificationchanneladdress']
+    db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
@@ -120,7 +120,8 @@ def Netatmoagent(config_path, **kwargs):
     # 4.1 initialize thermostat device object
     Netatmo = apiLib.API(model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
                             addressl=url_l, usernamel=head_l, agent_id=agent_id, db_host=db_host, db_port=db_port,
-                            db_user=db_user, db_password=db_password, db_database=db_database)
+                            db_user=db_user, db_password=db_password, db_database=db_database,
+                            config_path=config_path)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id, Netatmo.get_variable('model'),
                                                                         Netatmo.get_variable('api'),
@@ -155,15 +156,15 @@ def Netatmoagent(config_path, **kwargs):
             self.lastUpdateTime = None
             self.stream_data_initialState = False
 
-            # 2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # # 2. setup connection with db -> Connect to bemossdb database
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
 
         def set_variable(self, k, v):  # k=key, v=value
@@ -179,101 +180,98 @@ def Netatmoagent(config_path, **kwargs):
             self.timer(1, self.deviceMonitorBehavior)
             if identifiable == "True": Netatmo.identifyDevice()
 
-        @periodic(cassandra_update_time)  # save all data every max_monitor_time
-        def backupSaveData(self):
-            try:
-                Netatmo.getDeviceStatus()
-                cassandraDB.insert(agent_id, Netatmo.variables, log_variables)
-                print('Data Pushed to cassandra')
-            except Exception as er:
-                print("ERROR: {} fails to update cassandra database".format(agent_id))
-                print er
+        # @periodic(device_monitor_time)  # save all data every max_monitor_time
+        # def backupSaveData(self):
+        #     try:
+        #         Netatmo.getDeviceStatus()
+        #     except Exception as er:
+        #         print er
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             # step1: get current status, then map keywords and variables to agent knowledge
+
+
             try:
                 Netatmo.getDeviceStatus()
-                self.updateUI()
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            self.changed_variables = dict()
-            for v in log_variables:
-                if v in Netatmo.variables:
-                    if not v in self.variables or self.variables[v] != Netatmo.variables[v]:
-                        self.variables[v] = Netatmo.variables[v]
-                        self.changed_variables[v] = log_variables[v]
-                else:
-                    if v not in self.variables:  # it won't be in self.variables either (in the first time)
-                        self.changed_variables[v] = log_variables[v]
-                        self.variables[v] = None
+                # self.changed_variables = dict()
+                # for v in log_variables:
+                #     if v in Netatmo.variables:
+                #         if not v in self.variables or self.variables[v] != Netatmo.variables[v]:
+                #             self.variables[v] = Netatmo.variables[v]
+                #             self.changed_variables[v] = log_variables[v]
+                #     else:
+                #         if v not in self.variables:  # it won't be in self.variables either (in the first time)
+                #             self.changed_variables[v] = log_variables[v]
+                #             self.variables[v] = None
 
-            # pub mqtt tu azure
+                # pub mqtt tu azure
 
-            # pub creative power meter mqtt to azure
-            # try:
-            #     _data = Netatmo.variables
-            #     message = json.dumps(_data)
-            #     NetatmoMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-            #     NetatmoMQTT.iothub_client_sample_run(message)
-            # except Exception as er:
-            #     print er
-            #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
+                # pub creative power meter mqtt to azure
+                # try:
+                #     _data = Netatmo.variables
+                #     message = json.dumps(_data)
+                #     NetatmoMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                #     NetatmoMQTT.iothub_client_sample_run(message)
+                # except Exception as er:
+                #     print er
+                #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
 
             self.postgresAPI()
 
         def postgresAPI(self):
-            try:
-                conn = psycopg2.connect(host="peahivestaging.postgres.database.azure.com", port="5432",
-                                        user="peahive@peahivestaging", password="28Sep1960",
-                                        dbname="postgres")
-            except:
-                print "I am unable to connect to the database."
+
+            self.connect_postgresdb()
+            print ("status con: {}".format(self.con))
 
             try:
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET noise=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['noise'], agent_id))
-                conn.commit()
+                print ""
+                self.cur.execute("SELECT * from weathersensor WHERE weather_sensor_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO weathersensor (weather_sensor_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
+            except Exception as er:
+                print "Error to check data base.: {}".format(er)
 
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET temperature=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['temperature'], agent_id))
-                conn.commit()
+            try:
+                self.cur.execute("""
+                      UPDATE weathersensor SET noise=%s, temperature=%s, humidity=%s, pressure=%s, 
+                      co2=%s, outdoor_temperature=%s, last_scanned_time=%s  WHERE weather_sensor_id=%s""",
+                      (Netatmo.variables['noise'], Netatmo.variables['temperature'],
+                       Netatmo.variables['humidity'], Netatmo.variables['pressure'],
+                       Netatmo.variables['co2'], Netatmo.variables['outdoor_temperature'],
+                       datetime.datetime.now(), agent_id))
+                self.con.commit()
+                print ("update_now")
+            except Exception as er:
+                print "I am unable to connect to the database.: {}".format(er)
 
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET humidity=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['humidity'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET pressure=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['pressure'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET co2=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['co2'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET outdoor_temperature=%s WHERE weather_sensor_id=%s',
-                            (Netatmo.variables['outdoor_temperature'], agent_id))
-                conn.commit()
-
-                cur = conn.cursor()
-                cur.execute('UPDATE weathersensor SET last_scanned_time=%s WHERE weather_sensor_id=%s',
-                            (datetime.datetime.now(), agent_id))
-                conn.commit()
-            except:
-                print "I am unable to connect to the database."
-
-
+            #Test coding to insert data
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_weathersensor (noise,temperature,humidity, pressure, 
+                       co2, outdoor_temperature, datetime, weather_sensor_id) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (Netatmo.variables['noise'], Netatmo.variables['temperature'],
+                     Netatmo.variables['humidity'], Netatmo.variables['pressure'],
+                     Netatmo.variables['co2'], Netatmo.variables['outdoor_temperature'],
+                     datetime.datetime.now(), agent_id))
+                self.con.commit()
+                print "Time series data inserted"
+            except Exception as er:
+                print "I cannot insert data to ts_weathersensor: {}".format(er)
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
-            self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
+            self.cur.execute("SELECT nickname FROM " + db_table_netatmo + " WHERE weather_sensor_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
@@ -284,7 +282,7 @@ def Netatmoagent(config_path, **kwargs):
             _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
             _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname, agent_id)
             _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname, agent_id)
-            self.cur.execute("SELECT network_status FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
+            self.cur.execute("SELECT network_status FROM " + db_table_netatmo + " WHERE weather_sensor_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
@@ -526,6 +524,7 @@ def Netatmoagent(config_path, **kwargs):
                                                                     "WHERE " + column_ref + "=%s",
                              (column_data, column_ref_data))
             self.con.commit()
+            print ("insert_now")
 
         @matching.match_exact('/ui/agent/' + device_type + '/add_notification_event/' + _topic_Agent_UI_tail)
         def add_notification_event(self, topic, headers, message, match):
@@ -739,6 +738,22 @@ def Netatmoagent(config_path, **kwargs):
                             "{} >> this event_id {} is not for this device".format(agent_id, event_id)
                 else:
                     pass
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'NetatmoAgent'
     return Agent(**kwargs)
