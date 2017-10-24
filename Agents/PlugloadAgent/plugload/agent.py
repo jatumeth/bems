@@ -26,13 +26,9 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
-import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def PlugloadAgent(config_path, **kwargs):
-    
-    threadingLock = threading.Lock()
-    
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -55,7 +51,6 @@ def PlugloadAgent(config_path, **kwargs):
     log_variables = dict(status='text',power='double',energy='double',offline_count='int')
 
     tolerance = 0.5 #if the numerical variables change less than this percent, its not conisdered change and not logged
-
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
@@ -80,38 +75,35 @@ def PlugloadAgent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
     # mac_address = get_config('mac_address')
-
     #TODO get database parameters from settings.py, add db_table for specific table
     db_host = settings.DATABASES['default']['HOST']
     db_port = settings.DATABASES['default']['PORT']
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
     db_table_plugload = settings.DATABASES['default']['TABLE_plugload']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    db_table_alerts_notificationchanneladdress = settings.DATABASES['default'][
-        'TABLE_alerts_notificationchanneladdress']
+    db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
     #construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-
     api = get_config('api')
-
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
     #4.1 initialize plugload device object
     if vendor == 'Digi':
         gateway_id = get_config('gateway_id')
-        Plugload = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address, macaddress = macaddress, agent_id=agent_id,  db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, db_database=db_database)
-
+        Plugload = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address,
+                              macaddress = macaddress, agent_id=agent_id,  db_host=db_host, db_port=db_port,
+                              db_user=db_user, db_password=db_password, db_database=db_database)
     else:
-        Plugload = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress, agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, db_database=db_database, config_path=config_path)
+        Plugload = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress,
+                              agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user,
+                              db_password=db_password, db_database=db_database, config_path=config_path)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
                                                                         Plugload.get_variable('model'),
@@ -149,13 +141,13 @@ def PlugloadAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             #2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except:
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
@@ -171,49 +163,15 @@ def PlugloadAgent(config_path, **kwargs):
         def setup(self):
             super(Agent, self).setup()
 
-            self.timer(10, self.deviceMonitorBehavior)
-
-            #TODO do this for all devices that supports event subscriptions
-            if api == 'classAPI_WeMo':
-                #Do a one time push when we start up so we don't have to wait for the periodic polling
-                try:
-                    Plugload.startListeningEvents(threadingLock,self.updateStatus)
-                    self.subscriptionTime=datetime.datetime.now()
-                except Exception as er:
-                    print "Can't subscribe.", er
-                
-        # def updatePostgresDB(self):
-        #     try:
-        #         self.cur.execute("UPDATE "+db_table_plugload+" SET status=%s "
-        #                          "WHERE plugload_id=%s",
-        #                          (self.get_variable('status'), agent_id))
-        #         self.con.commit()
-        #         if self.get_variable('power')!=None:
-        #             #self.set_variable('power', int(self.get_variable('power')))
-        #             self.cur.execute("UPDATE "+db_table_plugload+" SET power=%s "
-        #                              "WHERE plugload_id=%s",
-        #                              (int(self.get_variable('power')), agent_id))
-        #             self.con.commit()
-        #         if self.ip_address != None:
-        #             psycopg2.extras.register_inet()
-        #             _ip_address = psycopg2.extras.Inet(self.ip_address)
-        #             self.cur.execute("UPDATE "+db_table_plugload+" SET ip_address=%s WHERE plugload_id=%s",
-        #                              (_ip_address, agent_id))
-        #             self.con.commit()
-        #
-        #         print("{} updates database name {} during deviceMonitorBehavior successfully".format(agent_id,
-        #                                                                                              db_database))
-        #     except:
-        #         print("ERROR: {} fails to update the database name {}".format(agent_id, db_database))
+            self.timer(1, self.deviceMonitorBehavior)
 
         #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
-        @periodic(connection_renew_interval)
-        def renewConnection(self):
-            Plugload.renewConnection()
+        # @periodic(connection_renew_interval)
+        # def renewConnection(self):
+        #     Plugload.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
             try:
                 Plugload.getDeviceStatus()
                 self.variables['status'] = Plugload.variables['status']
@@ -222,20 +180,9 @@ def PlugloadAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
             self.postgresAPI()
 
-
         def postgresAPI(self):
 
-            try:
-                self.cur.execute("SELECT * from plugload WHERE plugload_id=%s", (agent_id,))
-                if bool(self.cur.rowcount):
-                    pass
-                else:
-                    self.cur.execute(
-                        """INSERT INTO plugload (plugload_id, last_scanned_time) VALUES (%s, %s);""",
-                        (agent_id, datetime.datetime.now()))
-                    self.con.commit()
-            except:
-                print "Error to check data base."
+            self.connect_postgresdb()
 
             try:
                 self.cur.execute("""
@@ -248,87 +195,22 @@ def PlugloadAgent(config_path, **kwargs):
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (Plugload.variables['status'], agent_id))
                 self.con.commit()
-            except:
+                print "OK1"
+            except Exception as er:
                 print "Error to the database."
 
             try:
-                self.cur.execute(
-                    """INSERT INTO ts_plugload (datetime,status, power,plugload_id) VALUES (%s, %s,%s, %s);""",
-                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id,))
-
+                self.cur.execute("""
+                    INSERT INTO ts_plugload
+                    (datetime, status, power, plugload_id)
+                    VALUES (%s, %s, %s, %s);""",
+                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id))
                 self.con.commit()
-            except:
-                print "Error to the database."
+                print 'OK2'
+            except Exception as er:
+                print "Insert database error: {}".format(er)
 
-            # #TODO make tolerance more accessible
-            # tolerance = 1
-            #
-            # def isChanged(variable_name,value1,value2):
-            #     #Checks if two value of variable is to be considered different.
-            #     # Returns false if numerical value are different by less than the tolerance %
-            #     if variable_name=='status':
-            #         return value1 == value2 #strict comparision for status
-            #     elif variable_name in ['power','energy','offline_count']:
-            #         if value1 == 0:
-            #             return True if value2 != 0 else False
-            #         return True if 100*abs(value1-value2)/float(value1) > tolerance else False
-            #
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in Plugload.variables:
-            #         if v not in self.variables or isChanged(v, self.variables[v],Plugload.variables[v]):
-            #             self.variables[v] = Plugload.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables: #it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-            #
-            # try:
-            #     with threadingLock:
-            #         if self.get_variable('offline_count')>=3:
-            #             self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
-            #                              ('OFFLINE', agent_id))
-            #             self.con.commit()
-            #             if self.already_offline is False:
-            #                 self.already_offline = True
-            #                 _time_stamp_last_offline = str(datetime.datetime.now())
-            #                 self.cur.execute("UPDATE "+db_table_plugload+" SET last_offline_time=%s "
-            #                                  "WHERE plugload_id=%s",
-            #                                  (_time_stamp_last_offline, agent_id))
-            #                 self.con.commit()
-            #         else:
-            #             self.already_offline = False
-            #             self.cur.execute("UPDATE "+db_table_plugload+" SET network_status=%s WHERE plugload_id=%s",
-            #                              ('ONLINE', agent_id))
-            #             self.con.commit()
-            #
-            #     # Step: Check if any Device is OFFLINE
-            #     self.cur.execute("SELECT id FROM " + db_table_active_alert + " WHERE event_trigger_id=%s", ('5',))
-            #     if self.cur.rowcount != 0:
-            #         self.device_offline_detection()
-            #
-            #     # Update scan time
-            #     _time_stamp_last_scanned = str(datetime.datetime.now())
-            #     self.cur.execute("UPDATE "+db_table_plugload+" SET last_scanned_time=%s "
-            #                      "WHERE plugload_id=%s",
-            #                      (_time_stamp_last_scanned, agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} failed to update database name {}".format(agent_id, db_database))
-            #
-            # if len(self.changed_variables) == 0:
-            #     print 'nothing changed'
-            #     return
-
-            self.updateStatus()
-            #step6: debug agent knowledge
-            # if debug_agent == True:
-            #     print("printing agent's knowledge")
-            #     for k, v in self.variables.items():
-            #         print (k, v)
-            #     print('')
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_plugload + " WHERE plugload_id=%s",
@@ -433,7 +315,6 @@ def PlugloadAgent(config_path, **kwargs):
             smsService = SMSService()
             smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
 
-
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
             # if greater than the counter limit then send notification and reset the value
@@ -532,7 +413,6 @@ def PlugloadAgent(config_path, **kwargs):
             #reply message
             self.updateStatus()
 
-
         # 5. deviceControlBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/update/'+_topic_Agent_UI_tail)
         def deviceControlBehavior(self,topic,headers,message,match):
@@ -559,7 +439,6 @@ def PlugloadAgent(config_path, **kwargs):
                 message = 'failure'
             self.publish(topic, headers, message)
             self.deviceMonitorBehavior() #Get device status, and get updated data
-
 
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
@@ -597,6 +476,22 @@ def PlugloadAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
 
     Agent.__name__ = 'PlugloadAgent'

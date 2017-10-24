@@ -136,13 +136,13 @@ def ACDaikinAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             #2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except:
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
@@ -175,6 +175,9 @@ def ACDaikinAgent(config_path, **kwargs):
             self.postgresAPI()
 
         def postgresAPI(self):
+
+            self.connect_postgresdb()
+
             try:
                 print ""
                 self.cur.execute("SELECT * from airconditioner WHERE airconditioner_id=%s", (agent_id,))
@@ -222,6 +225,8 @@ def ACDaikinAgent(config_path, **kwargs):
                 self.con.commit()
             except:
                 print "Error to the database."
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_ACDaikin + " WHERE ACDaikin_id=%s",
@@ -482,6 +487,22 @@ def ACDaikinAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'ACDaikinAgent'
     return Agent(**kwargs)

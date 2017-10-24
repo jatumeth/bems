@@ -96,7 +96,6 @@ def powermeteragent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
     db_table_power_meter = settings.DATABASES['default']['TABLE_powermeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -154,15 +153,14 @@ def powermeteragent(config_path, **kwargs):
             self.stream_data_initialState = False
 
             # 2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
@@ -179,24 +177,26 @@ def powermeteragent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
+
             # step1: get current status, then map keywords and variables to agent knowledge
             try:
+                print ("")
                 PowerMeter.getDeviceStatus()
                 self.updateUI()
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            self.changed_variables = dict()
-            for v in log_variables:
-                if v in PowerMeter.variables:
-                    if not v in self.variables or self.variables[v] != PowerMeter.variables[v]:
-                        self.variables[v] = PowerMeter.variables[v]
-                        self.changed_variables[v] = log_variables[v]
-                else:
-                    if v not in self.variables:  # it won't be in self.variables either (in the first time)
-                        self.changed_variables[v] = log_variables[v]
-                        self.variables[v] = None
+            # self.changed_variables = dict()
+            # for v in log_variables:
+            #     if v in PowerMeter.variables:
+            #         if not v in self.variables or self.variables[v] != PowerMeter.variables[v]:
+            #             self.variables[v] = PowerMeter.variables[v]
+            #             self.changed_variables[v] = log_variables[v]
+            #     else:
+            #         if v not in self.variables:  # it won't be in self.variables either (in the first time)
+            #             self.changed_variables[v] = log_variables[v]
+            #             self.variables[v] = None
 
             if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
                 self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
@@ -205,10 +205,11 @@ def powermeteragent(config_path, **kwargs):
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
-
             self.postgresAPI()
 
         def postgresAPI(self):
+
+            self.connect_postgresdb()
 
             try:
                 self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
@@ -225,33 +226,27 @@ def powermeteragent(config_path, **kwargs):
             try:
                 self.cur.execute("""
                     UPDATE power_meter
-                    SET grid_current=%s, grid_activepower=%s, grid_reactivepower=%s,
-                    grid_apparentpower=%s, grid_powerfactor=%s, grid_quadrant=%s,grid_phaseshift=%s,grid_phasediff=%s,network_status=%s, last_scanned_time=%s
-                    WHERE power_meter_id=%s
-                 """, (
-                    PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],PowerMeter.variables['grid_reactivePower'],
-                    PowerMeter.variables['grid_apparentPower'], PowerMeter.variables['grid_powerfactor'],PowerMeter.variables['grid_quadrant'],PowerMeter.variables['grid_phaseshift'], PowerMeter.variables['grid_phasediff'],PowerMeter.variables['network_status'],
-                    datetime.datetime.now(), agent_id))
-                self.con.commit()
-
-                self.cur.execute("""
-                    UPDATE power_meter
-                    SET load_current=%s, load_activepower=%s, load_reactivepower=%s,
-                    load_apparentpower=%s, load_powerfactor=%s, load_quadrant=%s,load_phaseshift=%s,load_phasediff=%s
-                    WHERE power_meter_id=%s
-                 """, (
-                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],PowerMeter.variables['load_reactivePower'],
-                    PowerMeter.variables['load_apparentPower'], PowerMeter.variables['load_powerfactor'],PowerMeter.variables['load_quadrant'],PowerMeter.variables['load_phaseshift'], PowerMeter.variables['load_phasediff'],agent_id))
-                self.con.commit()
-
-                self.cur.execute("""
-                    UPDATE power_meter
-                    SET solar_current=%s, solar_activepower=%s, solar_reactivepower=%s,
-                    solar_apparentpower=%s, solar_powerfactor=%s, solar_quadrant=%s,solar_phaseshift=%s,solar_phasediff=%s
-                    WHERE power_meter_id=%s
-                 """, (
-                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],PowerMeter.variables['solar_reactivePower'],
-                    PowerMeter.variables['solar_apparentPower'], PowerMeter.variables['solar_powerfactor'],PowerMeter.variables['solar_quadrant'],PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],agent_id))
+                    SET grid_current=%s, grid_activepower=%s, grid_reactivepower=%s, grid_apparentpower=%s, 
+                    grid_powerfactor=%s, grid_quadrant=%s,grid_phaseshift=%s,grid_phasediff=%s,
+                    load_current=%s, load_activepower=%s, load_reactivepower=%s, load_apparentpower=%s, 
+                    load_powerfactor=%s, load_quadrant=%s,load_phaseshift=%s,load_phasediff=%s,
+                    solar_current=%s, solar_activepower=%s, solar_reactivepower=%s,
+                    solar_apparentpower=%s, solar_powerfactor=%s, solar_quadrant=%s,solar_phaseshift=%s,solar_phasediff=%s,
+                    network_status=%s, last_scanned_time=%s, 
+                    WHERE power_meter_id=%s""", (
+                    PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
+                    PowerMeter.variables['grid_reactivePower'], PowerMeter.variables['grid_apparentPower'],
+                    PowerMeter.variables['grid_powerfactor'],PowerMeter.variables['grid_quadrant'],
+                    PowerMeter.variables['grid_phaseshift'], PowerMeter.variables['grid_phasediff'],
+                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],
+                    PowerMeter.variables['load_reactivePower'], PowerMeter.variables['load_apparentPower'],
+                    PowerMeter.variables['load_powerfactor'], PowerMeter.variables['load_quadrant'],
+                    PowerMeter.variables['load_phaseshift'], PowerMeter.variables['load_phasediff'],
+                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],
+                    PowerMeter.variables['solar_reactivePower'], PowerMeter.variables['solar_apparentPower'],
+                    PowerMeter.variables['solar_powerfactor'], PowerMeter.variables['solar_quadrant'],
+                    PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],
+                    PowerMeter.variables['network_status'],datetime.datetime.now(), agent_id))
                 self.con.commit()
             except:
                 print "Update data base error"
@@ -280,8 +275,10 @@ def powermeteragent(config_path, **kwargs):
                     PowerMeter.variables['solar_quadrant'], PowerMeter.variables['solar_phaseshift']
                     ))
                 self.con.commit()
-            except:
-                print "update data base error"
+            except Exception as er:
+                print "update data base error: {}".format(er)
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
@@ -751,6 +748,22 @@ def powermeteragent(config_path, **kwargs):
                             "{} >> this event_id {} is not for this device".format(agent_id, event_id)
                 else:
                     pass
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'PowerMeterAgent'
     return Agent(**kwargs)

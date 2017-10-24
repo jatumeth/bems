@@ -59,12 +59,9 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
-import threading
 
 def ACAgent(config_path, **kwargs):
-    
-    threadingLock = threading.Lock()
-    
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -105,7 +102,7 @@ def ACAgent(config_path, **kwargs):
     device_id = get_config('device_id')
     _address = address
     _address = _address.replace('http://', '')
-    _address = _address.replace('https://', '')
+    # _address = _address.replace('https://', '')
     try:  # validate whether or not address is an ip address
         socket.inet_aton(_address)
         ip_address = _address
@@ -122,15 +119,12 @@ def ACAgent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
-
     db_table_AC = settings.DATABASES['default']['TABLE_AC']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
     db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    db_table_alerts_notificationchanneladdress = settings.DATABASES['default'][
-        'TABLE_alerts_notificationchanneladdress']
+    db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
@@ -150,8 +144,6 @@ def ACAgent(config_path, **kwargs):
                                                                         AC.get_variable('model'),
                                                                         AC.get_variable('api'),
                                                                AC.get_variable('address')))
-
-    # connection_renew_interval = AC.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -182,15 +174,15 @@ def ACAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             self.stream_data_initialState = True
-            #2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            #3. send notification to notify building admin
+            # #2. setup connection with db -> Connect to bemossdb database
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except:
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
             # 3. setup connection with initialstate
@@ -205,18 +197,8 @@ def ACAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
+            self.timer(1, self.deviceMonitorBehavior)
 
-            self.timer(10, self.deviceMonitorBehavior)
-
-            #TODO do this for all devices that supports event subscriptions
-            if api == 'classAPI_WeMo':
-                #Do a one time push when we start up so we don't have to wait for the periodic polling
-                try:
-                    AC.startListeningEvents(threadingLock,self.updateStatus)
-                    self.subscriptionTime=datetime.datetime.now()
-                except Exception as er:
-                    print "Can't subscribe.", er
-                
         def updatePostgresDB(self):
             print ""
 
@@ -229,16 +211,76 @@ def ACAgent(config_path, **kwargs):
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
-            try:
-                self.updateStatus()
-                self.backupSaveData()
+            # TODO make tolerance more accessible
+            # real-time update web ui
+            self.updateStatus()
+            # update postgres database
+            self.postgresAPI()
 
+            # try:
+            #     self.updateStatus()
+            #     self.backupSaveData()
+            #
+            #     self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+            #                      (AC.variables['status'], agent_id))
+            #     self.con.commit()
+            # except Exception as er:
+            #     print er
+            #     print "device connection for {} is not successful".format(agent_id)
+
+        def postgresAPI(self):
+
+            self.connect_postgresdb()
+
+            try:
+                print ""
+                self.cur.execute("SELECT * from airconditioner WHERE airconditioner_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO airconditioner (airconditioner_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
+            except Exception as er:
+                print "Error to check data base.: {}".format(er)
+
+            try:
+                self.cur.execute("""
+                    UPDATE airconditioner
+                    SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, 
+                    mode=%s, last_scanned_time=%s WHERE airconditioner_id=%s""",
+                    (AC.variables['status'], AC.variables['current_temperature'],
+                     AC.variables['set_temperature'], AC.variables['set_humidity'],
+                     AC.variables['set_humidity'], AC.variables['mode'], datetime.datetime.now(), agent_id))
+                self.con.commit()
+                self.cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
+                                 (datetime.datetime.now(), agent_id))
+                self.con.commit()
+            except Exception as er:
+                print("Error push data to the database: {}".format(er))
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, 
+                       set_temperature, current_humidity, set_humidity, mode) 
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (agent_id, datetime.datetime.now(), AC.variables['status'],
+                     AC.variables['current_temperature'],
+                     AC.variables['set_temperature'], AC.variables['set_humidity'],
+                     AC.variables['set_humidity'], AC.variables['mode']))
+                self.con.commit()
+            except Exception as er:
+                print "Error to the database.: {}".format(er)
+
+            try:
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (AC.variables['status'], agent_id))
                 self.con.commit()
             except Exception as er:
-                print er
-                print "device connection for {} is not successful".format(agent_id)
+                print "Error to the database.: {}".format(er)
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_AC + " WHERE AC_id=%s",
@@ -343,7 +385,6 @@ def ACAgent(config_path, **kwargs):
             smsService = SMSService()
             smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
 
-
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
             # if greater than the counter limit then send notification and reset the value
@@ -407,7 +448,6 @@ def ACAgent(config_path, **kwargs):
 
         def updateStatus(self, states=None):
 
-
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
@@ -429,7 +469,6 @@ def ACAgent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             #reply message
             self.updateStatus()
-
 
         # 5. deviceControlBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/update/'+_topic_Agent_UI_tail)
@@ -505,6 +544,21 @@ def ACAgent(config_path, **kwargs):
                 message = 'failure'
             self.publish(topic, headers, message)
 
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'ACAgent'
     return Agent(**kwargs)

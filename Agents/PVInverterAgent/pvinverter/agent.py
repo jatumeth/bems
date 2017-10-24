@@ -25,13 +25,9 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
-import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def PVInverterAgent(config_path, **kwargs):
-    
-    threadingLock = threading.Lock()
-    
+
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -111,8 +107,8 @@ def PVInverterAgent(config_path, **kwargs):
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
     #4.1 initialize pvinverter device object
-    PVInverter = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
-                    agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
+    PVInverter = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress,
+                    agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password,
                     db_database=db_database, config_path=config_path)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
@@ -151,13 +147,13 @@ def PVInverterAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             #2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except:
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
 
             #3. send notification to notify building admin
@@ -174,49 +170,26 @@ def PVInverterAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
-
-            self.timer(10, self.deviceMonitorBehavior)
-
-            #TODO do this for all devices that supports event subscriptions
-            if api == 'classAPI_WeMo':
-                #Do a one time push when we start up so we don't have to wait for the periodic polling
-                try:
-                    PVInverter.startListeningEvents(threadingLock,self.updateStatus)
-                    self.subscriptionTime=datetime.datetime.now()
-                except Exception as er:
-                    print "Can't subscribe.", er
+            self.timer(1, self.deviceMonitorBehavior)
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
             try:
                 PVInverter.getDeviceStatus()
-                # _data = PVInverter.variables
-                # message = json.dumps(_data)
-                # PVInverterMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                # PVInverterMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
             # TODO make tolerance more accessible
+            # real-time update web ui
             self.updateStatus()
+            # update postgres database
             self.postgresAPI()
 
         def postgresAPI(self):
 
-            # try:
-            #     self.cur.execute("SELECT * from inverter WHERE inverter_id=%s", (agent_id,))
-            #     if bool(self.cur.rowcount):
-            #         pass
-            #     else:
-            #         self.cur.execute(
-            #             """INSERT INTO inverter (inverter_id, last_scanned_time) VALUES (%s, %s);""",
-            #             (agent_id, datetime.datetime.now()))
-            # except:
-            #     print "Error to check data base."
-
-
+            self.connect_postgresdb()
 
             try:
                 self.cur.execute('UPDATE inverter SET last_scanned_time=%s WHERE inverter_id=%s',
@@ -230,10 +203,6 @@ def PVInverterAgent(config_path, **kwargs):
                  """, (PVInverter.variables['grid_activepower'], PVInverter.variables['load_activepower'],
                        PVInverter.variables['solar_activepower'], PVInverter.variables['grid_voltage'], agent_id))
                 self.con.commit()
-            except:
-                print "Error to the database."
-
-            try:
 
                 self.cur.execute("""
                     UPDATE inverter
@@ -243,8 +212,24 @@ def PVInverterAgent(config_path, **kwargs):
                        PVInverter.variables['solar_reactivepower'], agent_id))
                 self.con.commit()
             except:
-                print "Error to the database2."
+                print "Error to the database."
 
+            try:
+                self.cur.execute("""
+                    INSERT INTO ts_inverter
+                    (datetime, grid_activepower, load_activepower, inverter_activepower, grid_voltage, 
+                    grid_reactivepower, load_reactivepower, inverter_reactivepower, inverter_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), PVInverter.variables['grid_activepower'], PVInverter.variables['load_activepower'],
+                     PVInverter.variables['solar_activepower'], PVInverter.variables['grid_voltage'],
+                     PVInverter.variables['grid_reactivepower'], PVInverter.variables['load_reactivepower'],
+                     PVInverter.variables['solar_reactivepower'], agent_id))
+                self.con.commit()
+                print "OK"
+            except:
+                print "Insert database error."
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_PVInverter + " WHERE PVInverter_id=%s",
@@ -505,6 +490,22 @@ def PVInverterAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
 
     Agent.__name__ = 'PVInverterAgent'
