@@ -167,10 +167,10 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
         def deviceDiscoveryBehavior(self,discoverylist):
             print "Start Discovery Process--------------------------------------------------"
             # Update bemossdb miscellaneous and bemoss_notify tables with discovery start
-            self.cur.execute("UPDATE miscellaneous SET value = 'ON' WHERE key = 'auto_discovery'")
-            self.con.commit()
-            self.cur.execute("INSERT INTO bemoss_notify VALUES(DEFAULT,%s,%s,%s)",('Plug and Play discovery process started',str(datetime.datetime.now()),'Discovery'))
-            self.con.commit()
+            # self.cur.execute("UPDATE miscellaneous SET value = 'ON' WHERE key = 'auto_discovery'")
+            # self.con.commit()
+            # self.cur.execute("INSERT INTO bemoss_notify VALUES(DEFAULT,%s,%s,%s)",('Plug and Play discovery process started',str(datetime.datetime.now()),'Discovery'))
+            # self.con.commit()
 
             # Send message to UI about discovery start
             topic = '/agent/ui/misc/bemoss/discovery_request_response'
@@ -199,10 +199,10 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                     self.scan_for_devices = False
 
                     # Update bemossdb miscellaneous and bemoss_notify tables with discovery end
-                    self.cur.execute("UPDATE miscellaneous SET value = 'OFF' WHERE key = 'auto_discovery'")
-                    self.con.commit()
-                    self.cur.execute("INSERT INTO bemoss_notify VALUES(DEFAULT,%s,%s)",('Plug and Play discovery process complete',str(datetime.datetime.now())))
-                    self.con.commit()
+                    # self.cur.execute("UPDATE miscellaneous SET value = 'OFF' WHERE key = 'auto_discovery'")
+                    # self.con.commit()
+                    # self.cur.execute("INSERT INTO bemoss_notify VALUES(DEFAULT,%s,%s)",('Plug and Play discovery process complete',str(datetime.datetime.now())))
+                    # self.con.commit()
 
                     # Send message to UI about discovery end
                     topic = '/agent/ui/misc/bemoss/discovery_request_response'
@@ -231,20 +231,27 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             print "{} >> current time {}".format(agent_id, str(self.device_discovery_time_now))
             print "{} >> is trying to discover all available devices\n".format(agent_id)
 
-            for discover_device_model in discoverylist:
-                self.cur.execute("SELECT * from "+db_table_supported_devices
-                                             +" where device_model=%s",(discover_device_model,))
-                devicedetails = self.cur.fetchone()
-                self.findDevicesbytype(devicedetails[2],devicedetails[3],devicedetails[4])
+
+            # for discover_device_model in discoverylist:
+            #     self.cur.execute("SELECT * from "+db_table_supported_devices
+            #                                  +" where device_model=%s",(discover_device_model,))
+            #     devicedetails = self.cur.fetchone()
+            #     self.findDevicesbytype(devicedetails[2],devicedetails[3],devicedetails[4])
+
+            # self.findDevicesbytype("WiFi", "plugload", "WeMo","3WSP")
+            self.findDevicesbytype("WiFi", "Lighting", "Philips","2HUE")
 
             print "Stop Discovery Cycle---------------------------------------------------"
 
-        def findDevicesbytype(self, com_type, controller_type, discovery_type):
+        def findDevicesbytype(self, com_type, controller_type, discovery_type,model):
             #******************************************************************************************************
 
-            self.cur.execute("SELECT device_type FROM "+db_table_device_info
-                             +" WHERE device_type=%s", (controller_type,))
-            num_Devices=self.cur.rowcount
+
+
+            # self.cur.execute("SELECT device_type FROM "+db_table_device_info
+            #                  +" WHERE device_type=%s", (controller_type,))
+            # num_Devices=self.cur.rowcount
+            num_Devices = 0
             num_new_Devices = 0
 
             print "{} >> is finding available {} {} devices ...".format(agent_id,com_type,discovery_type)
@@ -259,8 +266,6 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             if discovered_address == None:
                 discovered_address = list()
 
-
-            print discovered_address
 
             for address in discovered_address:
 
@@ -286,7 +291,6 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                         # print 'type macaddress: {} and macaddress: {}'.format(type(macaddress),macaddress)
                         ip_address = None
 
-
                         if macaddress != 'None' and macaddress is not None:
                             _valid_macaddress = True
                         else:
@@ -300,17 +304,53 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                         else:
                             _valid_macaddress = True
 
+                # self.cur.execute("INSERT INTO "+db_table_device_info+" VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                #                  (address, 'plugload', 'belkinwemo', 'wemo insight switch','indoor', address, '0',
+                #                   '100', True, 'WiFi', str(datetime.datetime.now()),'wemo','APR' , '3WSP1', 'device_images/wemoinsight.png','wemo',True,'ON','3'))
+                #
+                # self.con.commit()
+
+                # self.cur.execute(
+                #     "INSERT INTO " + db_table_device_info + " (device_id, device_type, vendor_name, device_model, "
+                #                                             "mac_address, min_range, max_range, "
+                #                                             "identifiable, communication, date_added, factory_id, "
+                #                                             "approval_status, device_model_id, image, device_name, is_enable, status, room_id)\
+                #                                                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                #     (address, 'plugload', 'belkinwemo', 'wemo insight switch','indoor', address, '0',
+                #               '100', True, 'WiFi', (datetime.datetime.now()),'wemo','APR' , '3WSP1', 'device_images/wemoinsight.png','wemo',True,'ON','3'))
+                # self.con.commit()
+                deviceID = str(model) + str(macaddress)
+                checkmac = True
+                checkmac = self.checkMACinDB(self.con, deviceID)
+
+
+
+                if (checkmac == False):
+                    print "start insert 1"
+                    print str(macaddress)
+                    self.cur.execute(
+                        """INSERT INTO device_info (device_id, device_type, date_added, device_model_id,image, device_name,is_enable) VALUES (%s,%s,%s,%s,%s,%s,%s);""",
+                        (str(deviceID), 'plugload', '2017-09-02 05:07:41.402+00', '3WSP1','device_images/wemoinsight.png','wemo',True))
+                    self.con.commit()
+
+                else:
+                    check =1
+
                 if _valid_macaddress:
-                    if self.checkMACinDB(self.con, macaddress):
+                    if self.checkMACinDB(self.con, deviceID):
                         newdeviceflag = False
-                        self.cur.execute("SELECT device_id from "+db_table_device_info
-                                         +" where mac_address=%s",(macaddress,))
-                        deviceID = self.cur.fetchone()[0]
+                        # self.cur.execute("SELECT device_id from "+db_table_device_info
+                        #                  +" where mac_address=%s",(macaddress,))
+                        # deviceID = self.cur.fetchone()[0]
+                        # deviceID = macaddress
+
+
                         # agent_launch_file=deviceID+".launch.json"
-                        agent_launch_file=deviceID
-                        self.cur.execute("SELECT approval_status from "+db_table_device_info
-                                         +" where device_id=%s",(deviceID,))
-                        bemoss_status = self.cur.fetchone()[0]
+                        agent_launch_file=macaddress
+                        # self.cur.execute("SELECT approval_status from "+db_table_device_info
+                        #                  +" where device_id=%s",(deviceID,))
+                        # bemoss_status = self.cur.fetchone()[0]
+                        bemoss_status = "APR"
                         if self.device_agent_still_running(agent_launch_file):
                             print "{} >> {} for device with MAC address {} is still running"\
                                     .format(agent_id, agent_launch_file, macaddress)
@@ -324,14 +364,18 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                     .format(agent_id, agent_launch_file, macaddress)
                             #restart agent if in BEMOSS Core
                             if bemoss_status == 'APR':
-                                self.cur.execute("SELECT device_type from "+db_table_device_info
-                                                +" where device_id=%s",(deviceID,))
-                                stopped_agent_device_type = self.cur.fetchone()[0]
-                                self.cur.execute("SELECT zone_id from "+stopped_agent_device_type
-                                                +" where "+stopped_agent_device_type+"_id=%s",(deviceID,))
-                                stopped_agent_zone_id = self.cur.fetchone()[0]
+                                # self.cur.execute("SELECT device_type from "+db_table_device_info
+                                #                 +" where device_id=%s",(deviceID,))
+                                # stopped_agent_device_type = self.cur.fetchone()[0]
+                                stopped_agent_device_type = 'plugload'
+
+                                # self.cur.execute("SELECT zone_id from "+stopped_agent_device_type
+                                #                 +" where "+stopped_agent_device_type+"_id=%s",(deviceID,))
+                                # stopped_agent_zone_id = self.cur.fetchone()[0]
+                                stopped_agent_zone_id = 111
+
                                 if stopped_agent_zone_id == 999:
-                                    self.launch_agent(Agents_Launch_DIR, agent_launch_file)
+                                    # self.launch_agent(Agents_Launch_DIR, agent_launch_file)
                                     print "{} >> {} has been restarted"\
                                             .format(agent_id, agent_launch_file)
                                 else:
@@ -354,6 +398,8 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                         .format(address)
                     newdeviceflag = False
 
+                newdeviceflag = True #lsgf
+
                 if newdeviceflag:
                     model_info_received = False
                     try:
@@ -368,48 +414,77 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                         print "exception: ",er
                         pass
 
+
+                    model_info_received = True
+                    deviceModel = 'model'
+                    deviceVendor = 'vendor'
+
                     if model_info_received:
+
+                        supported = True
+
                         try:
-                            self.cur.execute("SELECT device_type from "+db_table_supported_devices
-                                             +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
-                            controller_type_from_model = self.cur.fetchone()[0]
+                            # self.cur.execute("SELECT device_type from "+db_table_supported_devices
+                            #                  +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
+                            # controller_type_from_model = self.cur.fetchone()[0]
                             supported=True
                         except Exception as er:
                             print "exception: ",er
                             supported=False
-                        if (supported):
-                            if (controller_type=='All') | (controller_type_from_model == controller_type):
+                        if (True):
+                            print "999999999999999999999888888888888888888"
+                            # if (controller_type=='All') | (controller_type_from_model == controller_type):
+                            if (True):
                                 self.device_num+=1
                                 #deviceType = com_type + controller_type
-                                deviceType = controller_type_from_model
-                                self.cur.execute("SELECT device_model_id from "+db_table_supported_devices
-                                                 +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
-                                device_type_id = self.cur.fetchone()[0]
-                                self.cur.execute("SELECT identifiable from "+db_table_supported_devices
-                                                 +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
-                                identifiable = self.cur.fetchone()[0]
-                                if (ip_address != None):
-                                    if ('/' in ip_address):
-                                        IPparsed = urlparse(ip_address)
-                                        print IPparsed
-                                        deviceIP = str(IPparsed.netloc)
-                                        if str(IPparsed.scheme) != '':
-                                            address= str(IPparsed.scheme)+ "://" + str(IPparsed.netloc)
-                                        else:
-                                            address = deviceIP
-                                        if ':' in deviceIP:
-                                            deviceIP = deviceIP.split(':')[0]
-                                    else:
-                                        if ':' in ip_address:
-                                            deviceIP = ip_address.split(':')[0]
-                                        else:
-                                            deviceIP = ip_address
-                                        address = ip_address
+                                # deviceType = controller_type_from_model
+                                deviceType = 'plugload'
+
+                                # self.cur.execute("SELECT device_model_id from "+db_table_supported_devices
+                                #                  +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
+                                # device_type_id = self.cur.fetchone()[0]
+                                device_type_id = model
+
+                                # self.cur.execute("SELECT identifiable from "+db_table_supported_devices
+                                #                  +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
+                                # identifiable = self.cur.fetchone()[0]
+                                identifiable = '1'
+
+                                # if (ip_address != None):
+                                #     if ('/' in ip_address):
+                                #         IPparsed = urlparse(ip_address)
+                                #         print IPparsed
+                                #         deviceIP = str(IPparsed.netloc)
+                                #         if str(IPparsed.scheme) != '':
+                                #             address= str(IPparsed.scheme)+ "://" + str(IPparsed.netloc)
+                                #         else:
+                                #             address = deviceIP
+                                #         if ':' in deviceIP:
+                                #             deviceIP = deviceIP.split(':')[0]
+                                #     else:
+                                #         if ':' in ip_address:
+                                #             deviceIP = ip_address.split(':')[0]
+                                #         else:
+                                #             deviceIP = ip_address
+                                #         address = ip_address
+                                # else:
+                                #     deviceIP = ip_address
+                                # self.cur.execute("SELECT api_name from "+db_table_supported_devices
+                                #                  +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
+                                # deviceAPI = self.cur.fetchone()[0]
+
+
+                                if discovery_type ==  'WeMo':
+                                    deviceAPI = 'classAPI_WeMo'
+                                elif discovery_type ==  'Philips':
+                                    deviceAPI = 'classAPI_PhilipsHue'
                                 else:
-                                    deviceIP = ip_address
-                                self.cur.execute("SELECT api_name from "+db_table_supported_devices
-                                                 +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
-                                deviceAPI = self.cur.fetchone()[0]
+                                    deviceAPI = 'classAPI_WeMo'
+
+
+
+
+
                                 deviceID = device_type_id+macaddress
                                 if 'nickname' in modelinfo.keys():
                                     deviceNickname = modelinfo['nickname']
@@ -419,23 +494,31 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                 #                  (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
                                 #                   None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'PND'))
                                 try:
-                                    self.cur.execute("INSERT INTO "+db_table_device_info+" (device_id, device_type, vendor_name, device_model, "
-                                                                                         "device_model_id, mac_address, min_range, max_range, "
-                                                                                         "identifiable, communication, date_added, factory_id, "
-                                                                                         "approval_status, image, device_name, is_enable, status) \
-                                                                                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                                     (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
-                                                      None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'APR',
-                                                      'device_images/wemoinsight.png','wemo insight',True,'ON'))
-                                    self.con.commit()
-
-                                    self.cur.execute("INSERT INTO "+deviceType+" ("+deviceType+"_id, ip_address,nickname,zone_id,network_status) VALUES(%s,%s,%s,%s,%s)",
-                                                     (deviceID, deviceIP,deviceNickname,999,'ONLINE'))
-                                    self.con.commit()
+                                    check2 =1
+                                    # self.cur.execute("INSERT INTO "+db_table_device_info+" (device_id, device_type, vendor_name, device_model, "
+                                    #                                                      "device_model_id, mac_address, min_range, max_range, "
+                                    #                                                      "identifiable, communication, date_added, factory_id, "
+                                    #                                                      "approval_status, image, device_name, is_enable, status) \
+                                    #                                                     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                    #                  (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
+                                    #                   None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'APR',
+                                    #                   'device_images/wemoinsight.png','wemo insight',True,'ON'))
+                                    # self.con.commit()
+                                    #
+                                    # self.cur.execute("INSERT INTO "+deviceType+" ("+deviceType+"_id, ip_address,nickname,zone_id,network_status) VALUES(%s,%s,%s,%s,%s)",
+                                    #                  (deviceID, deviceID,deviceNickname,999,'ONLINE'))
+                                    # self.con.commit()
                                 except:
                                     print("Device with mac_addr is already exist".format(macaddress))
                                 agent_name = deviceType.replace('_','')
+
+                                agent_launch_file = Agents_Launch_DIR + deviceID
+
+
+
                                 num_new_Devices+=1
+
+
                                 #After found new device-> Assign a suitable agent to each device to communicate, control, and collect data
                                 print('Now DeviceDiscoverAgent is assigning a suitable agent to the discovered device to communicate, control, and collect data')
                                 self.write_launch_file(agent_name+"agent", deviceID, device_monitor_time, deviceModel,
@@ -443,7 +526,22 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                                db_database, db_user, db_password)
                                 # self.launch_agent(Agents_Launch_DIR, deviceID+".launch.json")
                                 #self.launch_agent(Agents_Launch_DIR, deviceID)
+
+
+                                if discovery_type == 'WeMo':
+                                    print "none"
+                                    self.launch_agent(Agents_Launch_DIR, agent_launch_file)
+                                elif discovery_type == 'Philips':
+                                    self.helpers({'DeviceId': deviceID})
+                                    time.sleep(30)
+                                    self.launch_agent(Agents_Launch_DIR, agent_launch_file)
+                                else:
+                                    print "none"
+
+
                                 self.new_discovery=True
+
+
                             else:
                                 pass
                         else:
@@ -456,10 +554,18 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             print("{} >> Found {} new {} {} devices".format(agent_id,num_new_Devices,com_type,controller_type))
             print("{} >> There are existing {} {} {} devices\n".format(agent_id,num_Devices,com_type,controller_type))
             print " "
-
-            self.con.commit()
+            #
+            # self.con.commit()
             return num_new_Devices
 
+        def helpers(self,id):
+            # TODO this is example how to write an app to control Lighting
+            topic = "/ui/agent/misc/bemoss/approvalhelper_get_hue_username"
+            header = "Content-Type:application/json"
+            print "Headers: {headers}".format(headers=headers)
+            print "Message: {message}\n".format(message=id)
+            message = json.dumps(id)
+            self.publish(topic, headers, message)
 
         def launch_agent(self, dir, launch_file):
             def is_agent_installed(agent_id):
@@ -478,15 +584,21 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                 return agent_installed
             _launch_file = os.path.join(dir, launch_file+".launch.json")
 
+
             with open(_launch_file, 'r') as infile:
                 data=json.load(infile)
-                agent_id = data['agent_id']
-            agentname=data["type"]
+                agent_id = str(data['agent_id'])
+                agentname=str(data["type"])
             os.chdir(os.path.expanduser("~/workspace/bemoss_os"))
             if not is_agent_installed(agent_id):
+                print'11111111111111111111113333333333333333333333333'
+                print agent_id
+                print agentname
+                print str(_launch_file)
+
                 os.system(#". env/bin/activate"
                               "volttron-ctl stop --tag " + agent_id+
-                              ";volttron-pkg configure /tmp/volttron_wheels/"+agentname+"agent-0.1-py2-none-any.whl "+ _launch_file+
+                              ";volttron-pkg configure /tmp/volttron_wheels/"+agentname+"agent-0.1-py2-none-any.whl "+ str(_launch_file)+
                               ";volttron-ctl install "+agent_id+"=/tmp/volttron_wheels/"+agentname+"agent-0.1-py2-none-any.whl"+
                               ";volttron-ctl start --tag " + agent_id +
                               ";volttron-ctl status")
@@ -512,13 +624,24 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             self.deviceDiscoveryBehavior(discovery_model_names)
 
         def checkMACinDB(self, conn, macaddr):
+
             cur = conn.cursor()
-            cur.execute("SELECT device_id FROM "+db_table_device_info+" WHERE mac_address=%(id)s",
-                        {'id': macaddr})
-            if cur.rowcount != 0:
-                mac_already_in_db = True
-            else:
-                mac_already_in_db = False
+            # cur.execute("SELECT device_id FROM "+db_table_device_info+" WHERE mac_address=%(id)s",
+            # {'id': macaddr})
+            cur.execute("SELECT device_id  from device_info")
+            rows = cur.fetchall()
+            mac_already_in_db = False
+
+            for row in rows:
+                if row[0] == macaddr:
+                    mac_already_in_db = True
+                else:
+                    print ""
+
+            print "Operation done successfully";
+            cur.close()
+
+
             return mac_already_in_db
 
         def device_agent_still_running(self,agent_launch_filename):
@@ -576,6 +699,9 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             #print(__launch_file)
             with open(__launch_file, 'w') as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
+
+            print "Done to write file name"
+            print __launch_file
 
     Agent.__name__ = 'DeviceDiscoveryAgent'
     return Agent(**kwargs)

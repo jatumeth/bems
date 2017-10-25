@@ -186,6 +186,7 @@ def ApprovalHelperAgent(config_path, **kwargs):
             infile.close()
             return agent_still_running
 
+
         @matching.match_exact('/ui/agent/misc/bemoss/approvalhelper_get_hue_username')
         def get_hue_username(self, topic, headers, message, match):
             print "ApprovalHelperAgent got\nTopic: {topic}".format(topic=topic)
@@ -196,9 +197,10 @@ def ApprovalHelperAgent(config_path, **kwargs):
             _launch_file = os.path.join(Agents_Launch_DIR, hue_id+".launch.json")
             f = open(_launch_file, 'r')
             data = json.load(f)
-            ip_addr = data['address'].replace(":80", "")
+            ip_addr1 = (data['address'].split('/des'))[0]
+            ip_addr2 = ip_addr1.replace(":80", "")
             try:
-                hue_hub_name = self.query_hue_hub(ip_addr)
+                hue_hub_name = self.query_hue_hub(ip_addr2)
                 f.close()
                 reply = dict()
                 if hue_hub_name:

@@ -16,8 +16,46 @@ import time
 import requests
 import json
 
-PUSH_SOCKET = "ipc:///home/dell-hive01/.volttron/run/publish"
-SUB_SOCKET = "ipc:///home/dell-hive01/.volttron/run/subscribe"
+
+import re
+import os
+import subprocess
+from datetime import datetime
+import logging
+import sys
+import json
+import time
+import random
+from volttron.platform.agent import BaseAgent, PublishMixin, periodic
+from volttron.platform.agent import utils, matching
+from volttron.platform.messaging import headers as headers_mod
+
+import importlib
+import psycopg2
+import sys
+import json
+import datetime
+import time
+import logging
+import os
+import re
+from volttron.platform.agent import BaseAgent, PublishMixin
+from volttron.platform.agent import utils, matching
+from volttron.platform.messaging import headers as headers_mod
+from urlparse import urlparse
+import settings
+import netifaces as ni
+import ast
+import subprocess
+
+utils.setup_logging()  # setup logger for debugging
+_log = logging.getLogger(__name__)
+
+import settings
+
+
+PUSH_SOCKET = "ipc:///home/tpponmat/.volttron/run/publish"
+SUB_SOCKET = "ipc:///home/tpponmat/.volttron/run/subscribe"
 
 kwargs = {'subscribe_address': SUB_SOCKET, 'publish_address': PUSH_SOCKET}
 zmq_pub = ZMQ_PUB(**kwargs)
@@ -26,6 +64,40 @@ sbs = ServiceBusService(
                 service_namespace='peahiveservicebus',
                 shared_access_key_name='RootManageSharedAccessKey',
                 shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
+
+def deviceMonitorBehavior():
+    print "99999999"
+
+    agent_id = "devicediscoveryagent"
+
+    os.system(  # ". env/bin/activate"
+        "volttron-ctl stop --tag " + agent_id +
+        ";volttron-ctl start --tag " + agent_id +
+        ";volttron-ctl status")
+    print "1"
+    time.sleep(60)
+
+    os.system(  # ". env/bin/activate"
+        "volttron-ctl stop --tag " + agent_id +
+        ";volttron-ctl status")
+
+
+
+def deviceMonitorBehavior2():
+    print "99999999"
+
+    # agent_id = 'TPc0017881cab4b'
+    # agentname = 'plugload'
+    # _launch_file = '/home/tpponmat/workspace/bemoss_os/Agents/LaunchFiles/TPc0017881cab4b.launch.json'
+    #
+    # os.system(  # ". env/bin/activate"
+    #     "volttron-ctl stop --tag " + agent_id +
+    #     ";volttron-pkg configure /tmp/volttron_wheels/" + agentname + "agent-0.1-py2-none-any.whl " + str(
+    #         _launch_file) +
+    #     ";volttron-ctl install " + agent_id + "=/tmp/volttron_wheels/" + agentname + "agent-0.1-py2-none-any.whl" +
+    #     ";volttron-ctl start --tag " + agent_id +
+    #     ";volttron-ctl status")
+
 
 def send_requeston():
     # scene
@@ -84,6 +156,10 @@ def send_requestoff():
             content=response.content))
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
+
+
+
+
 
 def hue(commsg):
     # TODO this is example how to write an app to control Lighting
@@ -248,12 +324,23 @@ def HC(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
+
 while True:
     try:
-	print("mqtt server is waiting for message from Azure")
+	print "mqtt server is waiting for message from Azure"
+        deviceMonitorBehavior2()
+        time.sleep(10)
         msg = sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
+
         print msg.body
-        commsg = json.loads(msg.body)
+        commsg = eval(msg.body)
+
+        if (commsg['devicediscovery'] == True):
+            print "777"
+            deviceMonitorBehavior()
+        else:
+            print ""
+
         print("message MQTT received")
 
         for k, v in commsg.items():
