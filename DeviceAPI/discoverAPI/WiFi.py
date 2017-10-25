@@ -100,6 +100,8 @@ def discover(type, timeout=2, retries=1):
         elif type=='Philips':
             service="urn:schemas-upnp-org:device:Basic:1"
             message=message.format(*group, st=service)
+            print "msgmsg"
+            print message
 
     socket.setdefaulttimeout(timeout)
     responses = list()
@@ -203,8 +205,9 @@ def getmodelvendor(type,ipaddress):
 # This main method will not be executed when this class is used as a module
 def main():
     print discover('Philips')
+    print discover('WeMo')
     # print discover('thermostat')
-    # print getMACaddress('Philips','http://192.168.1.102:80/description.xml')
+    # print getMACaddress('Philips','http://192.168.1.6:80/description.xml')
     # print type(getMACaddress('Philips','http://192.168.102.:80'))
     # print getmodelvendor('Philips','http://192.168.1.102:80/description.xml')
 
