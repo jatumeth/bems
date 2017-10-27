@@ -271,21 +271,18 @@ def HC(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
-mac = hex(get_mac())[0:10]
-print mac
-
+mac = hex(get_mac())[2:10]
+topic = 'hive'+str(mac)
+print topic
 while True:
 
     try:
-
 	print "mqtt server is waiting for message from Azure"
-        msg = sbs.receive_subscription_message(str(mac), 'client1', peek_lock=False)
-
+        msg = sbs.receive_subscription_message(str(topic), 'client1', peek_lock=False)
         print msg.body
         commsg = eval(msg.body)
 
         if (commsg['devicediscovery'] == True):
-            print "777"
             deviceMonitorBehavior()
         else:
             print ""
