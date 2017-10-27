@@ -184,7 +184,6 @@ class API:
         print(" weather'= {}".format(self.get_variable('weather')))
         print(" location= {}".format(self.get_variable('location')))
         print(" icon= {}".format(self.get_variable('icon')))
-
     # ----------------------------------------------------------------------
 
 

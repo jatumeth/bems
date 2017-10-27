@@ -59,12 +59,9 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
-import threading
-from bemoss_lib.databases.cassandraAPI import cassandraDB
 
 def WeatherAgent(config_path, **kwargs):
-    
-    threadingLock = threading.Lock()
+
     
     config = utils.load_config(config_path)
 
@@ -110,11 +107,11 @@ def WeatherAgent(config_path, **kwargs):
     # mac_address = get_config('mac_address')
 
     #TODO get database parameters from settings.py, add db_table for specific table
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
     db_table_Weather = settings.DATABASES['default']['TABLE_Weather']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
@@ -172,14 +169,16 @@ def WeatherAgent(config_path, **kwargs):
             self.lastUpdateTime = None
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
-            #2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # 2. setup connection with db -> Connect to bemossdb database
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
             #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
@@ -194,7 +193,7 @@ def WeatherAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
-            self.timer(10, self.deviceMonitorBehavior)
+            self.timer(1, self.deviceMonitorBehavior)
 
         # def updatePostgresDB(self):
         #     try:
@@ -231,8 +230,8 @@ def WeatherAgent(config_path, **kwargs):
                 Weather.getDeviceStatus()
                 _data = Weather.variables
                 message = json.dumps(_data)
-                WeatherMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                WeatherMQTT.iothub_client_sample_run(message)
+                #WeatherMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                #WeatherMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
@@ -307,7 +306,54 @@ def WeatherAgent(config_path, **kwargs):
             #         print (k, v)
             #     print('')
 
-            self.backupSaveData()
+            #self.backupSaveData()
+            self.postgresAPI()
+
+        def postgresAPI(self):
+
+            self.connect_postgresdb()
+
+            try:
+                self.cur.execute("SELECT * from weather WHERE weather_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO weather (weather_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
+            except:
+                print "Data base error"
+
+            try:
+                self.cur.execute("""
+                    UPDATE weather
+                    SET wind_speed=%s, city=%s, country=%s, temp_c=%s, humidity=%s, observ_time=%s,weather=%s,
+                    location=%s, icon=%s, last_scanned_time=%s 
+                    WHERE weather_id=%s""", (
+                    Weather.variables['wind_speed'], Weather.variables['city'],
+                    Weather.variables['country'], Weather.variables['temp_c'],
+                    Weather.variables['humidity'],Weather.variables['observ_time'],
+                    Weather.variables['weather'], Weather.variables['location'],
+                    Weather.variables['icon'],datetime.datetime.now(), agent_id))
+                self.con.commit()
+            except Exception as er:
+                print "update data base error: {}".format(er)
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_weather (datetime, wind_speed, city, country, temp_c, 
+                    humidity, observ_time, weather, location, icon, weather_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), Weather.variables['wind_speed'], Weather.variables['city'],
+                    Weather.variables['country'], Weather.variables['temp_c'],
+                    Weather.variables['humidity'],Weather.variables['observ_time'],i
+                    Weather.variables['weather'], Weather.variables['location'],
+                    Weather.variables['icon'], agent_id))
+                self.con.commit()
+            except Exception as er:
+                print "insert data base error: {}".format(er)
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_Weather + " WHERE Weather_id=%s",
@@ -619,6 +665,22 @@ def WeatherAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
 
     Agent.__name__ = 'WeatherAgent'

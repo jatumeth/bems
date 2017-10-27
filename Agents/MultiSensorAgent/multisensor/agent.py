@@ -26,10 +26,8 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
-import threading
 
 def MultiSensorAgent(config_path, **kwargs):
-    threadingLock = threading.Lock()
 
     config = utils.load_config(config_path)
 
@@ -145,13 +143,14 @@ def MultiSensorAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             # 2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # 3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
@@ -166,15 +165,7 @@ def MultiSensorAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
-            self.timer(10, self.deviceMonitorBehavior)
-            # TODO do this for all devices that supports event subscriptions
-            if api == 'classAPI_Multisensor':
-                # Do a one time push when we start up so we don't have to wait for the periodic polling
-                try:
-                    MultiSensor.startListeningEvents(threadingLock, self.updateStatus)
-                    self.subscriptionTime = datetime.datetime.now()
-                except Exception as er:
-                    print "Can't subscribe.", er
+            self.timer(1, self.deviceMonitorBehavior)
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -183,11 +174,13 @@ def MultiSensorAgent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-            self.updateStatus()
-            self.backupSaveData()
+            #self.updateStatus()
+            #self.backupSaveData()
             self.postgresAPI()
 
         def postgresAPI(self):
+
+            self.connect_postgresdb()
 
             try:
                 self.cur.execute("SELECT * from multisensor WHERE multisensor_id=%s", (agent_id,))
@@ -203,18 +196,30 @@ def MultiSensorAgent(config_path, **kwargs):
             try:
                 self.cur.execute("""
                     UPDATE multisensor
-                    SET illuminance=%s, temperature=%s, battery=%s, motion=%s, tamper=%s
+                    SET illuminance=%s, temperature=%s, battery=%s, motion=%s, tamper=%s, last_scanned_time=%s
                     WHERE multisensor_id=%s
                  """, (MultiSensor.variables['illuminance'], MultiSensor.variables['temperature'],
                        MultiSensor.variables['battery'], MultiSensor.variables['motion'],
-                       MultiSensor.variables['tamper'], agent_id))
+                       MultiSensor.variables['tamper'], datetime.datetime.now(), agent_id))
                 self.con.commit()
 
-                self.cur.execute('UPDATE multisensor SET last_scanned_time=%s WHERE multisensor_id=%s',
-                                 (datetime.datetime.now(), agent_id))
-                self.con.commit()
             except:
                 print "Error to the database."
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_multisensor (datetime, illuminance, temperature, 
+                    battery, motion, tamper, multisensor_id) VALUES (%s, %s, %s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), MultiSensor.variables['illuminance'], MultiSensor.variables['temperature'],
+                    MultiSensor.variables['battery'], MultiSensor.variables['motion'],
+                    MultiSensor.variables['tamper'], agent_id))
+                self.con.commit()
+
+            except Exception as er:
+                print "insert data base error: {}".format(er)
+
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_MultiSensor + " WHERE MultiSensor_id=%s",
@@ -474,6 +479,22 @@ def MultiSensorAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'MultiSensorAgent'
     return Agent(**kwargs)

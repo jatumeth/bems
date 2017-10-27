@@ -3,7 +3,7 @@
         "exec": "powermeteragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "5Smappee001",
-    "device_monitor_time":5,
+    "device_monitor_time":10,
     "building_name": "bemoss",
     "zone_id": 999,
     "url_q": "http://192.168.1.7/gateway/apipublic/reportInstantaneousValues",

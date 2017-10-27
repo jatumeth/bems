@@ -100,7 +100,7 @@ class API:
             print r.data
 
             self.set_variable('grid_current', conve_json['cpletrix']['records'][0][6])
-            self.set_variable('grid_activePower', conve_json['cpletrix']['records'][0][9])
+            self.set_variable('grid_activePower', float(conve_json['cpletrix']['records'][0][9])*-1)
             self.set_variable('grid_reactivePower', conve_json['cpletrix']['records'][0][10])
             self.set_variable('grid_powerfactor', conve_json['cpletrix']['records'][0][8])
 

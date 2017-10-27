@@ -232,7 +232,7 @@ def powermeteragent(config_path, **kwargs):
                     load_powerfactor=%s, load_quadrant=%s,load_phaseshift=%s,load_phasediff=%s,
                     solar_current=%s, solar_activepower=%s, solar_reactivepower=%s,
                     solar_apparentpower=%s, solar_powerfactor=%s, solar_quadrant=%s,solar_phaseshift=%s,solar_phasediff=%s,
-                    network_status=%s, last_scanned_time=%s, 
+                    network_status=%s, last_scanned_time=%s 
                     WHERE power_meter_id=%s""", (
                     PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
                     PowerMeter.variables['grid_reactivePower'], PowerMeter.variables['grid_apparentPower'],
@@ -248,8 +248,8 @@ def powermeteragent(config_path, **kwargs):
                     PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],
                     PowerMeter.variables['network_status'],datetime.datetime.now(), agent_id))
                 self.con.commit()
-            except:
-                print "Update data base error"
+            except Exception as er:
+                print "update data base error: {}".format(er)
 
             try:
                 self.cur.execute(
@@ -276,7 +276,7 @@ def powermeteragent(config_path, **kwargs):
                     ))
                 self.con.commit()
             except Exception as er:
-                print "update data base error: {}".format(er)
+                print "insert data base error: {}".format(er)
 
             self.disconnect_postgresdb()
 
