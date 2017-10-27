@@ -84,11 +84,11 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
         print "yes ip_address is None"
         ip_address = None
     identifiable = get_config('identifiable')
-    db_host = get_config('db_host')
-    db_port = get_config('db_port')
-    db_database = get_config('db_database')
-    db_user = get_config('db_user')
-    db_password = get_config('db_password')
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
     db_table_power_meter = settings.DATABASES['default']['TABLE_CreativePowerMeter']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_id_column_name = "power_meter_id"
@@ -147,14 +147,14 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
             self.stream_data_initialState = False
 
             # 2. setup connection with db -> Connect to bemossdb database
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                                 password=db_password)
+            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            # except Exception as er:
+            #     print er
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
 
         def set_variable(self, k, v):  # k=key, v=value
@@ -183,6 +183,7 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
+            self.postgresAPI()
 
             # pub creative power meter mqtt to azure
             # try:
@@ -195,6 +196,48 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
             #     print er
             #     print "Data to Azure IoT hub {} is not successful".format(agent_id)
             #
+
+        def postgresAPI(self):
+
+            self.connect_postgresdb()
+
+            try:
+                self.cur.execute("SELECT * from etrix_meter WHERE etrix_meter_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO etrix_meter (etrix_meter_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    self.con.commit()
+            except:
+                print "Data base error"
+
+            try:
+                self.cur.execute("""
+                    UPDATE etrix_meter
+                    SET grid_current=%s, grid_activepower=%s, grid_reactivepower=%s, grid_powerfactor=%s, 
+                    last_scanned_time=%s 
+                    WHERE etrix_meter_id=%s""", (
+                    CreativePowerMeter.variables['grid_current'], CreativePowerMeter.variables['grid_activePower'],
+                    CreativePowerMeter.variables['grid_reactivePower'], CreativePowerMeter.variables['grid_powerfactor'],
+                    datetime.datetime.now(), agent_id))
+                self.con.commit()
+            except Exception as er:
+                print "update data base error: {}".format(er)
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_etrix_meter (datetime, grid_current, grid_activepower, 
+                    grid_reactivepower, grid_powerfactor, etrix_meter_id) VALUES (%s, %s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), CreativePowerMeter.variables['grid_current'],
+                    CreativePowerMeter.variables['grid_activePower'], CreativePowerMeter.variables['grid_reactivePower'],
+                    CreativePowerMeter.variables['grid_powerfactor'], agent_id))
+                self.con.commit()
+            except Exception as er:
+                print "insert data base error: {}".format(er)
+
+            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
@@ -683,6 +726,22 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                             "{} >> this event_id {} is not for this device".format(agent_id, event_id)
                 else:
                     pass
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
 
     Agent.__name__ = 'creativeCreativePowerMeteragent'
     return Agent(**kwargs)

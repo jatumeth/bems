@@ -517,7 +517,7 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
                     self.solar_bill_this_week_until_last_day += float(data[i][8])
                     self.load_bill_this_week_until_last_day += float(data[i][9])
             else:
-                self.start_new_month()
+                self.start_new_week()
 
         def get_this_month_data(self):
             self.grid_import_energy_this_month_until_last_day = 0
