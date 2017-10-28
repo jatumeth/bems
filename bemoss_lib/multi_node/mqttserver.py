@@ -1,58 +1,24 @@
 # -*- coding: utf-8 -*-
 #UDP server responds to broadcast packets
 #you can have only one instance of this running as a BEMOSS core!!
-# from soco import SoCo
-
-# sonos = SoCo('192.168.1.4') # Pass in the IP of your Sonos speaker
 import os
-import json
 import sys
 os.chdir(os.path.expanduser("~/workspace/bemoss_os/"))  # = ~/workspace/bemoss_os
 current_working_directory = os.getcwd()
 sys.path.append(current_working_directory)
 from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
 from zmqhelper.ZMQHelper.zmq_pub import ZMQ_PUB
-import time
 import requests
 import json
-
-
-import re
-import os
-import subprocess
-from datetime import datetime
-import logging
-import sys
-import json
-import time
-import random
-from volttron.platform.agent import BaseAgent, PublishMixin, periodic
-from volttron.platform.agent import utils, matching
-from volttron.platform.messaging import headers as headers_mod
-
-import importlib
-import psycopg2
-import sys
-import json
-import datetime
 import time
 import logging
 import os
-import re
-from volttron.platform.agent import BaseAgent, PublishMixin
 from volttron.platform.agent import utils, matching
-from volttron.platform.messaging import headers as headers_mod
-from urlparse import urlparse
-import settings
-import netifaces as ni
-import ast
-import subprocess
+from uuid import getnode as get_mac
+
 
 utils.setup_logging()  # setup logger for debugging
 _log = logging.getLogger(__name__)
-
-import settings
-
 
 PUSH_SOCKET = "ipc:///home/tpponmat/.volttron/run/publish"
 SUB_SOCKET = "ipc:///home/tpponmat/.volttron/run/subscribe"
@@ -66,7 +32,6 @@ sbs = ServiceBusService(
                 shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
 
 def deviceMonitorBehavior():
-    print "99999999"
 
     agent_id = "devicediscoveryagent"
 
@@ -80,24 +45,6 @@ def deviceMonitorBehavior():
     os.system(  # ". env/bin/activate"
         "volttron-ctl stop --tag " + agent_id +
         ";volttron-ctl status")
-
-
-
-def deviceMonitorBehavior2():
-    print "99999999"
-
-    # agent_id = 'TPc0017881cab4b'
-    # agentname = 'plugload'
-    # _launch_file = '/home/tpponmat/workspace/bemoss_os/Agents/LaunchFiles/TPc0017881cab4b.launch.json'
-    #
-    # os.system(  # ". env/bin/activate"
-    #     "volttron-ctl stop --tag " + agent_id +
-    #     ";volttron-pkg configure /tmp/volttron_wheels/" + agentname + "agent-0.1-py2-none-any.whl " + str(
-    #         _launch_file) +
-    #     ";volttron-ctl install " + agent_id + "=/tmp/volttron_wheels/" + agentname + "agent-0.1-py2-none-any.whl" +
-    #     ";volttron-ctl start --tag " + agent_id +
-    #     ";volttron-ctl status")
-
 
 def send_requeston():
     # scene
@@ -324,13 +271,15 @@ def HC(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
+mac = hex(get_mac())[0:10]
+print mac
 
 while True:
+
     try:
+
 	print "mqtt server is waiting for message from Azure"
-        deviceMonitorBehavior2()
-        time.sleep(10)
-        msg = sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
+        msg = sbs.receive_subscription_message(str(mac), 'client1', peek_lock=False)
 
         print msg.body
         commsg = eval(msg.body)
