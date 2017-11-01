@@ -223,6 +223,7 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                     CreativePowerMeter.variables['grid_reactivePower'], CreativePowerMeter.variables['grid_powerfactor'],
                     datetime.datetime.now(), agent_id))
                 self.con.commit()
+                print "update database: success"
             except Exception as er:
                 print "update data base error: {}".format(er)
 
@@ -234,6 +235,7 @@ def creativeCreativePowerMeteragent(config_path, **kwargs):
                     CreativePowerMeter.variables['grid_activePower'], CreativePowerMeter.variables['grid_reactivePower'],
                     CreativePowerMeter.variables['grid_powerfactor'], agent_id))
                 self.con.commit()
+                print "insert database: success"
             except Exception as er:
                 print "insert data base error: {}".format(er)
 
