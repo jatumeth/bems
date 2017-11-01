@@ -116,6 +116,8 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
 
             sys.path.append(PROJECT_DIR)
 
+            self.help = True
+
             self.device_scan_time = device_scan_time
             self.device_discovery_start_time = datetime.datetime.now()
             self.scan_for_devices = True
@@ -163,6 +165,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             self.valid_data = False
             '''Discovery Processes'''
             self.deviceDiscoveryBehavior(self.discovery_list)
+
 
         def deviceDiscoveryBehavior(self,discoverylist):
             print "Start Discovery Process--------------------------------------------------"
@@ -238,8 +241,10 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             #     devicedetails = self.cur.fetchone()
             #     self.findDevicesbytype(devicedetails[2],devicedetails[3],devicedetails[4])
 
-            # self.findDevicesbytype("WiFi", "plugload", "WeMo","3WSP")
-            self.findDevicesbytype("WiFi", "Lighting", "Philips","2HUE")
+
+            self.findDevicesbytype("WiFi", "lighting", "Philips","2HUEK")
+            self.findDevicesbytype("WiFi", "plugload", "WeMo","3WSP")
+
 
             print "Stop Discovery Cycle---------------------------------------------------"
 
@@ -323,6 +328,26 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                 checkmac = True
                 checkmac = self.checkMACinDB(self.con, deviceID)
 
+                if discovery_type == 'WeMo':
+                    deviceAPI = 'classAPI_WeMo'
+                    address = address.split('/set')[0]
+                    deviceModel = 'Belkin Wemo'
+                    deviceVendor = 'Belkin'
+                    pic = 'device_images/wemoinsight.png'
+
+
+                elif discovery_type == 'Philips':
+                    deviceAPI = 'classAPI_PhilipsHue'
+                    address = address.split('/des')[0]
+                    deviceModel = 'Philips hue bridge'
+                    deviceVendor = 'Royal Philips Electronics'
+                    pic = 'device_images/hue.png'
+
+                else:
+                    deviceAPI = 'classAPI_WeMo'
+
+
+                devicename = str(discovery_type) + str(macaddress[0:3])
 
 
                 if (checkmac == False):
@@ -330,7 +355,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                     print str(macaddress)
                     self.cur.execute(
                         """INSERT INTO device_info (device_id, device_type, date_added, device_model_id,image, device_name,is_enable) VALUES (%s,%s,%s,%s,%s,%s,%s);""",
-                        (str(deviceID), 'plugload', '2017-09-02 05:07:41.402+00', '3WSP1','device_images/wemoinsight.png','wemo',True))
+                        (str(deviceID), controller_type, '2017-09-02 05:07:41.402+00', model,pic,devicename,True))
                     self.con.commit()
 
                 else:
@@ -405,7 +430,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                     try:
                         modelinfo = discovery_module.getmodelvendor(discovery_type, address)
                         if modelinfo != None:
-                            deviceModel = modelinfo['model']
+                            deviceModel = modelinfo['Philips hue bridge']
                             deviceVendor = modelinfo['vendor']
                             print 'Model information found: '
                             print {'model':deviceModel,'vendor':deviceVendor}
@@ -416,8 +441,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
 
 
                     model_info_received = True
-                    deviceModel = 'model'
-                    deviceVendor = 'vendor'
+
 
                     if model_info_received:
 
@@ -432,13 +456,12 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                             print "exception: ",er
                             supported=False
                         if (True):
-                            print "999999999999999999999888888888888888888"
                             # if (controller_type=='All') | (controller_type_from_model == controller_type):
                             if (True):
                                 self.device_num+=1
                                 #deviceType = com_type + controller_type
                                 # deviceType = controller_type_from_model
-                                deviceType = 'plugload'
+                                deviceType = controller_type
 
                                 # self.cur.execute("SELECT device_model_id from "+db_table_supported_devices
                                 #                  +" where vendor_name=%s and device_model=%s",(deviceVendor,deviceModel))
@@ -474,22 +497,13 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                 # deviceAPI = self.cur.fetchone()[0]
 
 
-                                if discovery_type ==  'WeMo':
-                                    deviceAPI = 'classAPI_WeMo'
-                                elif discovery_type ==  'Philips':
-                                    deviceAPI = 'classAPI_PhilipsHue'
-                                else:
-                                    deviceAPI = 'classAPI_WeMo'
-
-
-
-
-
                                 deviceID = device_type_id+macaddress
-                                if 'nickname' in modelinfo.keys():
-                                    deviceNickname = modelinfo['nickname']
-                                else:
-                                    deviceNickname = deviceType+str(self.device_num)
+                                # if 'nickname' in modelinfo.keys():
+                                #     deviceNickname = modelinfo['nickname']
+                                # else:
+                                #     deviceNickname = deviceType+str(self.device_num)
+
+
                                 # self.cur.execute("INSERT INTO "+db_table_device_info+" VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                                 #                  (deviceID, deviceType, deviceVendor, deviceModel, device_type_id, macaddress,
                                 #                   None, None, identifiable, com_type, str(datetime.datetime.now()), macaddress, 'PND'))
@@ -519,6 +533,7 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                 num_new_Devices+=1
 
 
+
                                 #After found new device-> Assign a suitable agent to each device to communicate, control, and collect data
                                 print('Now DeviceDiscoverAgent is assigning a suitable agent to the discovered device to communicate, control, and collect data')
                                 self.write_launch_file(agent_name+"agent", deviceID, device_monitor_time, deviceModel,
@@ -531,9 +546,16 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                                 if discovery_type == 'WeMo':
                                     print "none"
                                     self.launch_agent(Agents_Launch_DIR, agent_launch_file)
+
+
                                 elif discovery_type == 'Philips':
-                                    self.helpers({'DeviceId': deviceID})
-                                    time.sleep(30)
+
+                                    if self.help == True:
+                                        self.helpers({'DeviceId': deviceID})
+                                        time.sleep(30)
+                                    else :
+                                        self.help = False
+
                                     self.launch_agent(Agents_Launch_DIR, agent_launch_file)
                                 else:
                                     print "none"
@@ -553,12 +575,12 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
             #Print how many WiFi devices this DeviceDiscoverAgent found!
             print("{} >> Found {} new {} {} devices".format(agent_id,num_new_Devices,com_type,controller_type))
             print("{} >> There are existing {} {} {} devices\n".format(agent_id,num_Devices,com_type,controller_type))
-            print " "
             #
             # self.con.commit()
             return num_new_Devices
 
         def helpers(self,id):
+            self.help = False
             # TODO this is example how to write an app to control Lighting
             topic = "/ui/agent/misc/bemoss/approvalhelper_get_hue_username"
             header = "Content-Type:application/json"
@@ -584,14 +606,13 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                 return agent_installed
             _launch_file = os.path.join(dir, launch_file+".launch.json")
 
-
             with open(_launch_file, 'r') as infile:
                 data=json.load(infile)
                 agent_id = str(data['agent_id'])
                 agentname=str(data["type"])
             os.chdir(os.path.expanduser("~/workspace/bemoss_os"))
             if not is_agent_installed(agent_id):
-                print'11111111111111111111113333333333333333333333333'
+                print'launch_agent'
                 print agent_id
                 print agentname
                 print str(_launch_file)
