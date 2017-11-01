@@ -3,7 +3,7 @@
         "exec": "creativepoweragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "CreativePower",
-    "device_monitor_time":15,
+    "device_monitor_time":20,
     "building_name": "bemoss",
     "zone_id": 999,
     "url_q": "http://creative/gateway/apipublic/reportInstantaneousValues",

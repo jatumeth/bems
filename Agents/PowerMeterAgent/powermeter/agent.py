@@ -248,6 +248,7 @@ def powermeteragent(config_path, **kwargs):
                     PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],
                     PowerMeter.variables['network_status'],datetime.datetime.now(), agent_id))
                 self.con.commit()
+                print "update database: success"
             except Exception as er:
                 print "update data base error: {}".format(er)
 
@@ -275,6 +276,7 @@ def powermeteragent(config_path, **kwargs):
                     PowerMeter.variables['solar_quadrant'], PowerMeter.variables['solar_phaseshift']
                     ))
                 self.con.commit()
+                print "insert database: success"
             except Exception as er:
                 print "insert data base error: {}".format(er)
 

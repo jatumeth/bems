@@ -229,6 +229,7 @@ def LightingAgent(config_path, **kwargs):
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (Light.variables['status'], agent_id))
                 self.con.commit()
+                print "update database: success"
             except:
                 print "Update data base error"
 
@@ -239,6 +240,7 @@ def LightingAgent(config_path, **kwargs):
                     (datetime.datetime.now(), Light.variables['status'],Light.variables['brightness'],
                      Light.variables['color'], agent_id))
                 self.con.commit()
+                print "insert database: success"
             except:
                 print "Insert database error"
 

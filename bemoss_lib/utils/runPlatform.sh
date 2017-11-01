@@ -122,6 +122,8 @@ sleep 2
 volttron-ctl start --tag PEASmartHomeWemo
 sleep 2
 volttron-ctl start --tag HomeSceneApp
+sleep 2
+volttron-ctl start --tag CreativePowerAgent
 
 
 volttron-ctl status

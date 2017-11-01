@@ -346,7 +346,7 @@ def WeatherAgent(config_path, **kwargs):
                     humidity, observ_time, weather, location, icon, weather_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""",
                     (datetime.datetime.now(), Weather.variables['wind_speed'], Weather.variables['city'],
                     Weather.variables['country'], Weather.variables['temp_c'],
-                    Weather.variables['humidity'],Weather.variables['observ_time'],i
+                    Weather.variables['humidity'],Weather.variables['observ_time'],
                     Weather.variables['weather'], Weather.variables['location'],
                     Weather.variables['icon'], agent_id))
                 self.con.commit()
