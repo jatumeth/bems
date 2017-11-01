@@ -278,7 +278,7 @@ while True:
 
     try:
 	print "mqtt server is waiting for message from Azure"
-        msg = sbs.receive_subscription_message(str(topic), 'client1', peek_lock=False)
+        msg = sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
         print msg.body
         commsg = eval(msg.body)
 

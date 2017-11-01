@@ -45,7 +45,7 @@ under Contract DE-EE0006352
 #__created__ = "2014-09-12 12:04:50"
 #__lastUpdated__ = "2016-03-14 11:23:33"
 '''
-
+import importlib
 import socket
 import os
 import re
@@ -98,10 +98,16 @@ def discover(type, timeout=2, retries=1):
             service="upnp:rootdevice"
             message=message.format(*group, st=service)
         elif type=='Philips':
-            service="urn:schemas-upnp-org:device:Basic:1"
+            service="urn:schemasupnp-org:device:Basic:1"
             message=message.format(*group, st=service)
             print "msgmsg"
             print message
+        elif type == 'Daikin':
+            print ""
+            daikinLib = importlib.import_module("daikin")
+            daikin = daikinLib.Daikin()
+            daikin.update()
+            print daikin.entries
 
     socket.setdefaulttimeout(timeout)
     responses = list()
@@ -204,8 +210,9 @@ def getmodelvendor(type,ipaddress):
 
 # This main method will not be executed when this class is used as a module
 def main():
-    print discover('Philips')
-    print discover('WeMo')
+    # print discover('Philips')
+    # print discover('WeMo')
+    print discover('Daikin')
     # print discover('thermostat')
     # print getMACaddress('Philips','http://192.168.1.6:80/description.xml')
     # print type(getMACaddress('Philips','http://192.168.102.:80'))

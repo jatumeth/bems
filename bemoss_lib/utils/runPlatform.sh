@@ -52,8 +52,8 @@ cd ~/workspace/bemoss_os/
 volttron -vv 2>&1 | tee ~/workspace/bemoss_os/log/volttron.log &
 echo $i > ~/workspace/bemoss_os/.temp/BEMOSS.pid
 
-volttron-ctl start --tag devicediscoveryagent
-sleep 2
+#volttron-ctl start --tag devicediscoveryagent
+#sleep 2
 volttron-ctl start --tag applauncheragent
 sleep 2
 volttron-ctl start --tag approvalhelperagent
