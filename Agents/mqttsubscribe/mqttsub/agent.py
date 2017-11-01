@@ -2,7 +2,7 @@
 from datetime import datetime
 import logging
 import sys
-
+import time
 from volttron.platform.agent import BaseAgent, PublishMixin, periodic
 from volttron.platform.agent import utils, matching
 from volttron.platform.messaging import headers as headers_mod
@@ -44,62 +44,76 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def main(self):
         print ""
 
-    @periodic(1)
+    @periodic(20)
     def on_matchmode(self):
+        # self.wemo_on()
+        # time.sleep(5)
+        # self.wemo_off()
+        # time.sleep(5)
+        # self.wemo_on()
+        # time.sleep(5)
+        # self.wemo_off()
 
-        try:
-            print("message MQTT received")
-            msg = self.sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
+        self.hue_min()
+        time.sleep(5)
+        self.hue_max()
+        time.sleep(5)
+        self.hue_min()
+        time.sleep(5)
+        self.hue_max()
 
-            self.commsg = json.loads(msg.body)
-            device = str(self.commsg['device'])
-
-            if str(device) == "hue1":  # check if the data is valid
-                self.hue()
-            elif str(device) == "wemo1":
-                self.wemo()
-
-            elif str(device) == "daikin1":
-                self.daikin()
-
-            elif str(device) == "fan1":
-                self.fan()
-            else:
-                print "Receiving message not in HiVE IoT Device "
-        except:
-            print "No MQTT to"
-        print "End"
-
-    def hue(self):
+    def hue_max(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUEK0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps(self.commsg)
-        print type(message)
-
+        message = json.dumps({"status": "ON", "brightness": 100})
         self.publish(topic, headers, message)
-        print ("topic{}".format(topic))
-        print ("message{}".format(message))
+        print ("HUE max")
 
-
-    def wemo(self):
+    def hue_min(self):
         # TODO this is example how to write an app to control Lighting
-        topic = '/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321'
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUEK0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps(self.commsg)
+        message = json.dumps({"status": "OFF", "brightness": 5})
         self.publish(topic, headers, message)
-        print ("topic{}".format(topic))
-        print ("message{}".format(message))
+        print ("HUE min")
+
+
+    def wemo_on(self):
+        # TODO this is example how to write an app to control plugload EV
+        topic = "/ui/agent/plugload/update/bemoss/999/3WSP231613K1200162"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("plug EV turn ON")
+
+    def wemo_off(self):
+        # TODO this is example how to write an app to control plugload EV
+        topic = "/ui/agent/plugload/update/bemoss/999/3WSP231613K1200162"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("plug EV turn OFF")
 
     def daikin(self):
         # TODO this is example how to write an app to control Lighting
