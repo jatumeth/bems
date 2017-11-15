@@ -3,7 +3,7 @@
     "agent": {
         "exec": "multisensoragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "8MS221445K1200132",
+    "agent_id": "8MS221445K1200135",
     "api": "classAPI_Fibaro",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
