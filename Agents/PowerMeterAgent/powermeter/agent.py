@@ -207,9 +207,14 @@ def powermeteragent(config_path, **kwargs):
 
             self.postgresAPI()
 
+            print "777"
+            print PowerMeter.variables['grid_activePower']
+
         def postgresAPI(self):
 
             self.connect_postgresdb()
+
+
 
             try:
                 self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
@@ -222,63 +227,45 @@ def powermeteragent(config_path, **kwargs):
                     self.con.commit()
             except:
                 print "Data base error"
-
+            #
             try:
                 self.cur.execute("""
                     UPDATE power_meter
-                    SET grid_current=%s, grid_activepower=%s, grid_reactivepower=%s, grid_apparentpower=%s, 
-                    grid_powerfactor=%s, grid_quadrant=%s,grid_phaseshift=%s,grid_phasediff=%s,
-                    load_current=%s, load_activepower=%s, load_reactivepower=%s, load_apparentpower=%s, 
-                    load_powerfactor=%s, load_quadrant=%s,load_phaseshift=%s,load_phasediff=%s,
-                    solar_current=%s, solar_activepower=%s, solar_reactivepower=%s,
-                    solar_apparentpower=%s, solar_powerfactor=%s, solar_quadrant=%s,solar_phaseshift=%s,solar_phasediff=%s,
-                    network_status=%s, last_scanned_time=%s 
+                    SET load_activepower=%s, last_scanned_time=%s
                     WHERE power_meter_id=%s""", (
-                    PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
-                    PowerMeter.variables['grid_reactivePower'], PowerMeter.variables['grid_apparentPower'],
-                    PowerMeter.variables['grid_powerfactor'],PowerMeter.variables['grid_quadrant'],
-                    PowerMeter.variables['grid_phaseshift'], PowerMeter.variables['grid_phasediff'],
-                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],
-                    PowerMeter.variables['load_reactivePower'], PowerMeter.variables['load_apparentPower'],
-                    PowerMeter.variables['load_powerfactor'], PowerMeter.variables['load_quadrant'],
-                    PowerMeter.variables['load_phaseshift'], PowerMeter.variables['load_phasediff'],
-                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],
-                    PowerMeter.variables['solar_reactivePower'], PowerMeter.variables['solar_apparentPower'],
-                    PowerMeter.variables['solar_powerfactor'], PowerMeter.variables['solar_quadrant'],
-                    PowerMeter.variables['solar_phaseshift'], PowerMeter.variables['solar_phasediff'],
-                    PowerMeter.variables['network_status'],datetime.datetime.now(), agent_id))
+                    PowerMeter.variables['grid_activePower'], datetime.datetime.now(), agent_id))
                 self.con.commit()
                 print "update database: success"
             except Exception as er:
                 print "update data base error: {}".format(er)
-
-            try:
-                self.cur.execute(
-                    """INSERT INTO ts_power_meter (datetime,grid_current, grid_activepower, grid_reactivepower,
-                    grid_apparentpower, grid_powerfactor, grid_quadrant,grid_phaseshift,network_status,power_meter_id,load_current, load_activepower, load_reactivepower,
-                    load_apparentpower, load_powerfactor, load_quadrant,load_phaseshift,
-                    solar_current, solar_activepower, solar_reactivepower,
-                    solar_apparentpower, solar_powerfactor, solar_quadrant,solar_phaseshift
-                    ) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s);""",
-                    (
-                    datetime.datetime.now(), PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
-                    PowerMeter.variables['grid_reactivePower'],
-                    PowerMeter.variables['grid_apparentPower'], PowerMeter.variables['grid_powerfactor'],
-                    PowerMeter.variables['grid_quadrant'], PowerMeter.variables['grid_phaseshift'],
-                    PowerMeter.variables['network_status'],agent_id,
-                    PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],
-                    PowerMeter.variables['load_reactivePower'],
-                    PowerMeter.variables['load_apparentPower'], PowerMeter.variables['load_powerfactor'],
-                    PowerMeter.variables['load_quadrant'], PowerMeter.variables['load_phaseshift'],
-                    PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],
-                    PowerMeter.variables['solar_reactivePower'],
-                    PowerMeter.variables['solar_apparentPower'], PowerMeter.variables['solar_powerfactor'],
-                    PowerMeter.variables['solar_quadrant'], PowerMeter.variables['solar_phaseshift']
-                    ))
-                self.con.commit()
-                print "insert database: success"
-            except Exception as er:
-                print "insert data base error: {}".format(er)
+            #
+            # try:
+            #     self.cur.execute(
+            #         """INSERT INTO ts_power_meter (datetime,grid_current, grid_activepower, grid_reactivepower,
+            #         grid_apparentpower, grid_powerfactor, grid_quadrant,grid_phaseshift,network_status,power_meter_id,load_current, load_activepower, load_reactivepower,
+            #         load_apparentpower, load_powerfactor, load_quadrant,load_phaseshift,
+            #         solar_current, solar_activepower, solar_reactivepower,
+            #         solar_apparentpower, solar_powerfactor, solar_quadrant,solar_phaseshift
+            #         ) VALUES (%s, %s, %s, %s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s,%s, %s,%s, %s, %s, %s, %s);""",
+            #         (
+            #         datetime.datetime.now(), PowerMeter.variables['grid_current'], PowerMeter.variables['grid_activePower'],
+            #         PowerMeter.variables['grid_reactivePower'],
+            #         PowerMeter.variables['grid_apparentPower'], PowerMeter.variables['grid_powerfactor'],
+            #         PowerMeter.variables['grid_quadrant'], PowerMeter.variables['grid_phaseshift'],
+            #         PowerMeter.variables['network_status'],agent_id,
+            #         PowerMeter.variables['load_current'], PowerMeter.variables['load_activePower'],
+            #         PowerMeter.variables['load_reactivePower'],
+            #         PowerMeter.variables['load_apparentPower'], PowerMeter.variables['load_powerfactor'],
+            #         PowerMeter.variables['load_quadrant'], PowerMeter.variables['load_phaseshift'],
+            #         PowerMeter.variables['solar_current'], PowerMeter.variables['solar_activePower'],
+            #         PowerMeter.variables['solar_reactivePower'],
+            #         PowerMeter.variables['solar_apparentPower'], PowerMeter.variables['solar_powerfactor'],
+            #         PowerMeter.variables['solar_quadrant'], PowerMeter.variables['solar_phaseshift']
+            #         ))
+            #     self.con.commit()
+            #     print "insert database: success"
+            # except Exception as er:
+            #     print "insert data base error: {}".format(er)
 
             self.disconnect_postgresdb()
 
