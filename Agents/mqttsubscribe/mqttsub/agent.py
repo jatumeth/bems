@@ -91,7 +91,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def wemo_on(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WSP231613K1200162"
+        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -104,7 +104,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def wemo_off(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WSP231613K1200162"
+        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
