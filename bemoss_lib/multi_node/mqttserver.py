@@ -20,8 +20,8 @@ from uuid import getnode as get_mac
 utils.setup_logging()  # setup logger for debugging
 _log = logging.getLogger(__name__)
 
-PUSH_SOCKET = "ipc:///home/tpponmat/.volttron/run/publish"
-SUB_SOCKET = "ipc:///home/tpponmat/.volttron/run/subscribe"
+PUSH_SOCKET = "ipc:///home/dell-hive01/.volttron/run/publish"
+SUB_SOCKET = "ipc:///home/dell-hive01/.volttron/run/subscribe"
 
 kwargs = {'subscribe_address': SUB_SOCKET, 'publish_address': PUSH_SOCKET}
 zmq_pub = ZMQ_PUB(**kwargs)
@@ -103,10 +103,6 @@ def send_requestoff():
             content=response.content))
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
-
-
-
-
 
 def hue(commsg):
     # TODO this is example how to write an app to control Lighting
@@ -202,7 +198,7 @@ def saijo3(commsg):
 
 def wemo(commsg):
     # TODO this is example how to write an app to control Lighting
-    topic = '/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321'
+    topic = '/ui/agent/plugload/update/bemoss/999/3WSP231613K1200162'
     # now = datetime.utcnow().isoformat(' ') + 'Z'
     # headers = {
     #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
@@ -274,26 +270,26 @@ def HC(commsg):
 mac = hex(get_mac())[2:10]
 topic = 'hive'+str(mac)
 print topic
+
+
+
 while True:
 
     try:
 	print "mqtt server is waiting for message from Azure"
-        msg = sbs.receive_subscription_message('home1', 'client1', peek_lock=False)
-        print msg.body
-        commsg = eval(msg.body)
+        msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)
 
-        if (commsg['devicediscovery'] == True):
-            deviceMonitorBehavior()
-        else:
-            print ""
+        commsg = eval(msg.body)
+        print commsg
 
         print("message MQTT received")
 
         for k, v in commsg.items():
             if k == 'device':
+                print k
                 if (commsg['device']) == "2HUEH":
                     hue(commsg)
-                elif (commsg['device']) == "3WSP2":
+                elif (commsg['device']) == "3WSP":
                     try :
                         if (commsg['status']) == "ON":
                             print "on"
@@ -337,6 +333,13 @@ while True:
                 HC(commsg)
             else:
                 print ""
+
+        if (commsg['devicediscovery'] == True):
+            deviceMonitorBehavior()
+        else:
+            print ""
+
+
     except Exception as er:
         print er
 

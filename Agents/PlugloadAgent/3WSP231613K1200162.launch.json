@@ -1,0 +1,20 @@
+{
+    "address": "http://192.168.1.18:49153", 
+    "agent": {
+        "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "3WSP231613K1200162", 
+    "api": "classAPI_WeMo", 
+    "building_name": "bemoss", 
+    "db_database": "postgres", 
+    "db_host": "peahivestaging.postgres.database.azure.com", 
+    "db_password": "28Sep1960", 
+    "db_port": "5432", 
+    "db_user": "peahive@peahivestaging", 
+    "device_monitor_time": 20, 
+    "macaddress": "231613K1200162", 
+    "model": "Belkin Wemo", 
+    "type": "plugload", 
+    "vendor": "Belkin", 
+    "zone_id": 999
+}

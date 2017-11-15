@@ -148,7 +148,7 @@ class API:
         # Grid
         z1 = ((x['report'].split('<BR>'))[7]).split(',')
         grid_current = float(((z1[0].split('='))[1]).split(' ')[0])
-        grid_activePower = (float(((z1[1].split('='))[1]).split(' ')[0]))*2
+        grid_activePower = (float(((z1[1].split('='))[1]).split(' ')[0]))
         grid_reactivePower = float(((z1[2].split('='))[1]).split(' ')[0])
         grid_apparentPower = float(((z1[3].split('='))[1]).split(' ')[0])
         grid_powerfactor = float((z1[4].split('='))[1].split(' ')[0]) / 100
@@ -168,7 +168,7 @@ class API:
         # Load
         #z3 = ((x['report'].split('<BR>'))[10]).split(',')
         #z3 change with new configuration
-        z3 = ((x['report'].split('<BR>'))[4]).split(',')
+        z3 = ((x['report'].split('<BR>'))[10]).split(',')
         load_current = float(((z3[0].split('='))[1]).split(' ')[0])
         load_activePower = float(((z3[1].split('='))[1]).split(' ')[0])
         load_reactivePower = float(((z3[2].split('='))[1]).split(' ')[0])
