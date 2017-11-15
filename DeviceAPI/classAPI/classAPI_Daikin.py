@@ -145,6 +145,8 @@ class API:
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
 
+        postmsg = str(postmsg)
+
         print(" postmsg = {}".format(postmsg))
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
@@ -153,6 +155,9 @@ class API:
             stemp = format(self.get_variable('set_temperature'))
             mode = format(self.get_variable('mode'))
 
+            if  type(postmsg)== str:
+                print "888"
+                postmsg = eval(postmsg)
 
             for k, v in postmsg.items():
                 if k == 'status':
@@ -161,13 +166,16 @@ class API:
                     elif (postmsg['status']) == "OFF":
                         status = "0"
                 elif k == 'stemp':
-                    stemp = (postmsg['stemp'])
+                    stemp = str((postmsg['stemp']))
                 elif k == 'mode':
-                    mode = (postmsg['mode'])
+                    mode = str((postmsg['mode']))
                 else:
                     m = 1
 
             data="pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3"
+            print "9999999999"
+            print data
+
 
             try:
                 print "sending requests put"
@@ -196,9 +204,10 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
-    AC.getDeviceStatus()
+
 
     AC.setDeviceStatus({"status": "ON", "device": "1DAIK", "stemp": "20", "mode": "3"})
+    AC.getDeviceStatus()
     # AC.setDeviceStatus({'stemp':'24'})
 
 if __name__ == "__main__": main()

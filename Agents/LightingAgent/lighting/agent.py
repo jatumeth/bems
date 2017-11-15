@@ -200,7 +200,7 @@ def LightingAgent(config_path, **kwargs):
             # real-time update web ui
             self.updateUI()
             # update postgres database
-            self.postgresAPI()
+            # self.postgresAPI()
 
         def postgresAPI(self):
 

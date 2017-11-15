@@ -21,7 +21,7 @@ utils.setup_logging()
 _log = logging.getLogger(__name__)
 
 
-def TestEnergyBillAppAgent(config_path, **kwargs):
+def EnergyBillAppAgent(config_path, **kwargs):
     config = utils.load_config(config_path)
 
     def get_config(name):
@@ -60,14 +60,14 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             self.check_year = datetime.datetime.now().year
             self.current_electricity_price = 0
 
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                            user=db_user, password=db_password)
-                self.cur = self.con.cursor()
-                print ("{} connects to the database name {} successfully".format(agent_id, db_database))
-
-            except:
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            # try:
+            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                                 user=db_user, password=db_password)
+            #     self.cur = self.con.cursor()
+            #     print ("{} connects to the database name {} successfully".format(agent_id, db_database))
+            #
+            # except:
+            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
         def set_variable(self, k, v):  # postgre k=key, v=value
             self.variables[k] = v
@@ -80,6 +80,7 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             # Demonstrate accessing value from the config file
             _log.info(config['message'])
             self._agent_id = agent_id
+            self.connect_postgresdb()
             self.get_yesterday_data()
             self.get_today_data()
             self.get_last_week_data()
@@ -87,6 +88,7 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             self.get_last_month_data()
             self.get_this_month_data()
             self.get_annual_data()
+            self.disconnect_postgresdb()
 
         def start_new_day(self):
             self.load_energy_today = 0
@@ -139,17 +141,34 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             self.current_electricity_price = message_from_gridApp['current_electricity_price']
             print "Current electricity price : {}".format(self.current_electricity_price)
 
-        @matching.match_exact('/agent/ui/PVInverter/device_status_response/bemoss/999/1PV221445K1200138')
-        def on_match_growatt(self, topic, headers, message, match):
-            print "Hello from Growatt"
-            message_from_Growatt = json.loads(message[0])
-            self.power_from_load = message_from_Growatt['load_activepower']
-            self.power_from_solar = message_from_Growatt['solar_activepower']
-            if (message_from_Growatt['grid_activepower'] < 0):
-                self.power_from_grid_import = abs(message_from_Growatt['grid_activepower'])
+        # inverter
+        # @matching.match_exact('/agent/ui/PVInverter/device_status_response/bemoss/999/1PV221445K1200138')
+        # smappee
+        # @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/5Smappee001')
+        # def on_match_growatt(self, topic, headers, message, match):
+        #     print "Hello from Growatt"
+        #     message_from_Growatt = json.loads(message[0])
+        #     self.power_from_load = message_from_Growatt['load_activePower']
+        #     self.power_from_solar = message_from_Growatt['solar_activePower']
+        #     if (message_from_Growatt['grid_activePower'] > 0):
+        #         self.power_from_grid_import = abs(message_from_Growatt['grid_activePower'])
+        #         self.power_from_grid_export = 0
+        #     else:
+        #         self.power_from_grid_export = message_from_Growatt['grid_activePower']
+        #         self.power_from_grid_import = 0
+        # etrix
+        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/CreativePower')
+        def on_match_etrix(self, topic, headers, message, match):
+            print "Hello from Etrix"
+            message_from_Etrix = json.loads(message[0])
+            self.power_from_load = message_from_Etrix['grid_activePower']
+            # self.power_from_solar = message_from_Etrix['solar_activePower']
+            self.power_from_solar = 0
+            if (message_from_Etrix['grid_activePower'] > 0):
+                self.power_from_grid_import = abs(message_from_Etrix['grid_activePower'])
                 self.power_from_grid_export = 0
             else:
-                self.power_from_grid_export = message_from_Growatt['grid_activepower']
+                self.power_from_grid_export = message_from_Etrix['grid_activePower']
                 self.power_from_grid_import = 0
 
             # This for calculate the period of power which got from Inverter
@@ -170,7 +189,9 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             self.calculate_this_week_energy_and_bill()
             self.calculate_this_month_energy_and_bill()
             self.calculate_annual_energy_and_bill()
+            self.connect_postgresdb()
             self.updateDB()
+            self.disconnect_postgresdb()
             self.publish_message()
 
         def calculate_energy_today(self):
@@ -214,6 +235,23 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
                 # self.insertDB()
             else:
                 pass
+
+        def connect_postgresdb(self):
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+
+        def disconnect_postgresdb(self):
+            if(self.con.closed == False):
+                self.con.close()
+            else:
+                print("postgresdb is not connected")
+
 
         def start_new_week_checking(self):
             this_week = datetime.datetime.now().isocalendar()[1]
@@ -568,7 +606,7 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.d += float(data[i][2])
+                    self.grid_import_energy_annual_until_last_month += float(data[i][2])
                     self.grid_export_energy_annual_until_last_month += float(data[i][3])
                     self.solar_energy_annual_until_last_month += float(data[i][4])
                     self.load_energy_annual_until_last_month += float(data[i][5])
@@ -638,14 +676,14 @@ def TestEnergyBillAppAgent(config_path, **kwargs):
             except:
                 pass
 
-    Agent.__name__ = 'TestEnergyBillAppAgent'
+    Agent.__name__ = 'EnergyBillAppAgent'
     return Agent(**kwargs)
 
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
-    utils.default_main(TestEnergyBillAppAgent,
-                       description='TestEnergyBillApp agent',
+    utils.default_main(EnergyBillAppAgent,
+                       description='EnergyBillApp agent',
                        argv=argv)
 
 

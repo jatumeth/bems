@@ -246,7 +246,7 @@ volttron-ctl install PEASmartHomeHue=/tmp/volttron_wheels/lightingagent-0.1-py2-
 
 # Wemo-PEASmarthome
 volttron-pkg package ~/workspace/bemoss_os/Agents/PlugloadAgent/
-volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WIS221445K1200321.launch.json
+volttron-pkg configure /tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PlugloadAgent/3WSP231613K1200162.launch.json
 volttron-ctl install PEASmartHomeWemo=/tmp/volttron_wheels/plugloadagent-0.1-py2-none-any.whl
 
 # Home-SceneApp

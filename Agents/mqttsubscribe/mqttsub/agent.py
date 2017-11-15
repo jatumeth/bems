@@ -46,13 +46,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     @periodic(20)
     def on_matchmode(self):
-        # self.wemo_on()
-        # time.sleep(5)
-        # self.wemo_off()
-        # time.sleep(5)
-        # self.wemo_on()
-        # time.sleep(5)
-        # self.wemo_off()
+        self.wemo_on()
+        time.sleep(5)
+        self.wemo_off()
+        time.sleep(5)
+        self.wemo_on()
+        time.sleep(5)
+        self.wemo_off()
 
         self.hue_min()
         time.sleep(5)
@@ -64,7 +64,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def hue_max(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUEK0017881cab4b"
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -77,7 +77,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def hue_min(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUEK0017881cab4b"
+        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

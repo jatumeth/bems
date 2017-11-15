@@ -95,7 +95,8 @@ class API:
         try:
 
             http = urllib3.PoolManager()
-            r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc&page=1')
+            # r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc&page=1')
+            r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,699639095&order=trans_id,desc&page=1')
             conve_json = json.loads(r.data)
             print r.data
 

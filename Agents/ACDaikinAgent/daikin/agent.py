@@ -432,7 +432,9 @@ def ACDaikinAgent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
-                setDeviceStatusResult = ACDaikin.setDeviceStatus(json.loads(message[0]))
+                setDeviceStatusResult = ACDaikin.setDeviceStatus(message[0])
+                # setDeviceStatusResult = ACDaikin.setDeviceStatus(json.loads(message[0]))
+
                 #send reply message back to the UI
                 topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'

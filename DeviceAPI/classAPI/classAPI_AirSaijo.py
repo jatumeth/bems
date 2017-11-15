@@ -160,17 +160,24 @@ class API:
             post_url_get = 'https://saijom2s.ddns.net/cmd_data.php'
             post_data_get = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self. token, 'air_command': getAC_Data,
                           'air_serial': self.variables['air_serial']}
+            print "11"
+
             requests_get= requests.post(post_url_get, data=post_data_get, verify=False)
             content_get = eval(requests_get.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
             print content_get['status']
             if int(content_get['status']) == 200:
                 print (" Get / Received from server is OK")
+
+                print "33"
             elif int(content_get['status']) == 400:
                 print "Token is change"
                 self.gettoken()
                 post_url_newtoken = 'https://saijom2s.ddns.net/cmd_data.php'
                 post_data_newtoken = {'cus_email': "tisanaluk@hotmail.com", 'cus_token': self.token, 'air_command': getAC_Data,
                               'air_serial': self.variables['air_serial']}
+
+                print "22"
+
                 r2 = requests.post(post_url_newtoken, data=post_data_newtoken, verify=False)
                 content_get = eval(r2.content.decode().replace('null', 'None').replace('true', 'True').replace('false', 'False'))
             else:
@@ -180,6 +187,8 @@ class API:
                 print('Get / ERROR: classAPI_AC failed to getDeviceStatus')
         #
         indoor = content_get["data"]['indoor']
+        print indoor
+
         print "Start Get /  --------------++++++++++++++++++---------"
         data = indoor
 
@@ -411,9 +420,9 @@ class API:
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
 
         print "New Token"
-        conn = psycopg2.connect(host=self.variables['db_host'], port=self.variables['db_port'],
-                                user=self.variables['db_user'], password=self.variables['db_password'],
-                                dbname=self.variables['db_database'])
+
+
+        conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
 
         cur = conn.cursor()
         cur.execute("SELECT * from information_schema.tables where table_name=%s", ("ac_saijo_token",))
@@ -436,9 +445,7 @@ class API:
         conn.commit()
 
     def opentoken(self):
-        conn = psycopg2.connect(host=self.variables['db_host'], port=self.variables['db_port'],
-                                user=self.variables['db_user'], password=self.variables['db_password'],
-                                dbname=self.variables['db_database'])
+        conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
         cur = conn.cursor()
         cur.execute("""SELECT * from ac_saijo_token""")
         rows = cur.fetchall()
@@ -451,13 +458,13 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Airsaijo = API(model='Saijo Denki GPS', type='airconditioner', api='classAPI_KMITL_testNetAirSaijo',
-                   address='http://192.168.1.13', username='acquired username', agent_id='ACAgent1',
-                   device_id="LivingroomAir1",air_serial="1608F00680620",db_host="localhost", db_port="5432", db_user="admin", db_password="admin",
+                   address='http://192.168.1.130', username='acquired username', agent_id='ACAgent1',
+                   device_id="BedroomAir",air_serial="1608F00680619",db_host="localhost", db_port="5432", db_user="admin", db_password="admin",
                     db_database="bemossdb")
 
     Airsaijo.getDeviceStatus()
-    Airsaijo.setDeviceStatus({"temp" : "19","fan_speed": "4",'status':'ON'})
-    #Airsaijo.setDeviceStatus({"status": "ON"})
+    # Airsaijo.setDeviceStatus({"temp" : "19","fan_speed": "4",'status':'OFF'})
+    # Airsaijo.setDeviceStatus({"status": "ON"})
 
     # 1   "air_serial": "1608F00680620",  2# "air_serial": "1608F00680619",  Bed     "air_serial": "1604F00640667",
     # 'BedroomAir' or 'LivingroomAir1' or 'LivingroomAir2'
