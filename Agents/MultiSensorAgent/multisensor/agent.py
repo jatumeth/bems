@@ -206,17 +206,18 @@ def MultiSensorAgent(config_path, **kwargs):
             except:
                 print "Error to the database."
 
-            try:
-                self.cur.execute(
-                    """INSERT INTO ts_multisensor (datetime, illuminance, temperature, 
-                    battery, motion, tamper, multisensor_id) VALUES (%s, %s, %s, %s, %s, %s, %s);""",
-                    (datetime.datetime.now(), MultiSensor.variables['illuminance'], MultiSensor.variables['temperature'],
-                    MultiSensor.variables['battery'], MultiSensor.variables['motion'],
-                    MultiSensor.variables['tamper'], agent_id))
-                self.con.commit()
 
-            except Exception as er:
-                print "insert data base error: {}".format(er)
+            # try:
+            #     self.cur.execute(
+            #         """INSERT INTO ts_multisensor (datetime, illuminance, temperature,
+            #         battery, motion, tamper, multisensor_id) VALUES (%s, %s, %s, %s, %s, %s, %s);""",
+            #         (datetime.datetime.now(), MultiSensor.variables['illuminance'], MultiSensor.variables['temperature'],
+            #         MultiSensor.variables['battery'], MultiSensor.variables['motion'],
+            #         MultiSensor.variables['tamper'], agent_id))
+            #     self.con.commit()
+            #
+            # except Exception as er:
+            #     print "insert data base error: {}".format(er)
 
 
             self.disconnect_postgresdb()
