@@ -254,6 +254,12 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/HomeScenceAgent/
 volttron-pkg configure /tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/HomeScenceAgent/homescenceagent.launch.json
 volttron-ctl install HomeSceneApp=/tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl
 
+
+volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/18DOR06.launch.json
+volttron-ctl install YaleDoorLock=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent

@@ -79,14 +79,14 @@ volttron-ctl start --tag modeappagent
 sleep 2
 volttron-ctl start --tag devicestatusappagent
 sleep 2
-volttron-ctl start --tag ACAPP
-sleep 2
-volttron-ctl start --tag LightingApp
-sleep 2
-volttron-ctl start --tag PlugloadApp
-sleep 2
-volttron-ctl start --tag evappagent
-sleep 2
+#volttron-ctl start --tag ACAPP
+#sleep 2
+#volttron-ctl start --tag LightingApp
+#sleep 2
+#volttron-ctl start --tag PlugloadApp
+#sleep 2
+#volttron-ctl start --tag evappagent
+#sleep 2
 volttron-ctl start --tag EnergyBillAppAgent
 sleep 2
 volttron-ctl start --tag GridAppAgent
@@ -94,14 +94,14 @@ sleep 2
 volttron-ctl start --tag 1WE221445K1200132  #weatheragent
 sleep 2
 
-volttron-ctl start --tag LivingroomAir1
-sleep 2
-volttron-ctl start --tag LivingroomAir2
-sleep 2
-volttron-ctl start --tag BedroomAir
-sleep 2
-volttron-ctl start --tag 1FR221445K1200111
-sleep 2
+#volttron-ctl start --tag LivingroomAir1
+#sleep 2
+#volttron-ctl start --tag LivingroomAir2
+#sleep 2
+#volttron-ctl start --tag BedroomAir
+#sleep 2
+#volttron-ctl start --tag 1FR221445K1200111
+#sleep 2
 volttron-ctl start --tag 1MS221445K1200132
 sleep 2
 volttron-ctl start --tag 1LG221445K1200137
@@ -110,20 +110,23 @@ sleep 2
 volttron-ctl start --tag Daikinagent
 sleep 2
 volttron-ctl start --tag Netatmoagent
-sleep 2
-volttron-ctl start --tag PVInverterAgent
-sleep 2
-volttron-ctl start --tag KitchenLight
-sleep 2
-volttron-ctl start --tag LivingLight
+#sleep 2
+#volttron-ctl start --tag PVInverterAgent
+#sleep 2
+#volttron-ctl start --tag KitchenLight
+#sleep 2
+#volttron-ctl start --tag LivingLight
 sleep 2
 volttron-ctl start --tag PEASmartHomeHue
 sleep 2
 volttron-ctl start --tag PEASmartHomeWemo
 sleep 2
 volttron-ctl start --tag HomeSceneApp
+
 sleep 2
-volttron-ctl start --tag CreativePowerAgent
+volttron-ctl start --tag YaleDoorLock
+#sleep 2
+#volttron-ctl start --tag CreativePowerAgent
 
 
 volttron-ctl status
