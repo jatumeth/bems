@@ -61,6 +61,7 @@ class API:
         self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
 
+
     def renewConnection(self):
         pass
 
@@ -98,14 +99,8 @@ class API:
         getDeviceStatusResult = True
 
         try:
-
-            # r = requests.get(
-            #     "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
-                # headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
-
-
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/ada8bd02-11ba-4e87-bdfe-29e41211be7e",
-                             headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, timeout=20);
+            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/locks/3d8ed759-245a-4bb6-93a8-5e92dc9fc452",
+                             headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
             print r.text
@@ -131,47 +126,49 @@ class API:
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
-        self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]))
-        self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        print conve_json
+        # self.set_variable('label', str(conve_json["label"]))
+        # self.set_variable('status', str(conve_json["status"]))
+        # self.set_variable('unitTime', conve_json["unitTime"])
+        # self.set_variable('type', str(conve_json["type"]))
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('status')))
-        print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        # print(" the current status is as follows:")
+        # print(" label = {}".format(self.get_variable('label')))
+        # print(" status = {}".format(self.get_variable('status')))
+        # print(" unitTime = {}".format(self.get_variable('unitTime')))
+        # print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
+
+        if type(postmsg) == str:
+            postmsg = eval(postmsg)
+
         setDeviceStatusResult = True
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
             _data = _data.encode(encoding='utf_8')
             print _data
+            print _data
+
             try:
+
                 print "sending requests put"
-
-                # r = requests.put(
-                #     "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
-                #     headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data=_data, timeout=20);
-
-
                 r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/ada8bd02-11ba-4e87-bdfe-29e41211be7e",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data, timeout=20);
+                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/locks/3d8ed759-245a-4bb6-93a8-5e92dc9fc452",
+                    headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data= _data, timeout=20);
                 # print "15456"
                 # print r.text
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
             except:
-                print("ERROR: classAPI_LGTV connection failure! @ setDeviceStatus")
+                print("ERROR: classAPI_Yale connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
@@ -184,8 +181,12 @@ class API:
 
     def convertPostMsg(self, postmsg):
         msgToDevice = {}
-        if 'status' in postmsg.keys():
-            msgToDevice['command'] = str(postmsg['status'].lower())
+        print
+
+        if postmsg['status'] == 'ON':
+            msgToDevice['command'] = "lock"
+        elif postmsg['status'] == 'OFF':
+            msgToDevice['command'] = "unlock"
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -195,25 +196,26 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    # LGTV.getDeviceStatus()
+    Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent')
+    # Yale.getDeviceStatus()
 
-    LGTV.setDeviceStatus({"status": "OFF"})
+    # Yale.setDeviceStatus({"command": "unlock"})
+    #{"command":"lock"}
+# {"command":"unlock"}
+    # time.sleep(10)
+    #
+    Yale.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "OFF"})
+    # Yale.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "ON"})
+    # Yale.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "OFF"})
-    #
-    # time.sleep(10)
-    #
-    # LGTV.setDeviceStatus({"status": "ON"})
+    # Yale.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()

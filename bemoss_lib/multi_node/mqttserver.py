@@ -135,6 +135,22 @@ def kitchen(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
+
+def yale(commsg):
+    # TODO this is example how to write an app to control Lighting
+    topic = "/ui/agent/tv/update/bemoss/999/18DOR06"
+    # now = datetime.utcnow().isoformat(' ') + 'Z'
+    # headers = {
+    #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+    #     headers_mod.DATE: now,
+    # }
+    message = json.dumps(commsg)
+    print type(message)
+
+    zmq_pub.requestAgent(topic, message, "text/plain", "UI")
+    print ("topic{}".format(topic))
+    print ("message{}".format(message))
+
 def living(commsg):
     # TODO this is example how to write an app to control Lighting
     topic = "/ui/agent/light/update/bemoss/999/1LR221445K1200138"
@@ -213,7 +229,6 @@ def wemo(commsg):
 def daikin(commsg):
     # TODO this is example how to write an app to control Lighting
 
-    print "99999999999999999999999999999"
 
     topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
     # topic = '/ui/agent/AC/update/bemoss/999/ACD1200138'
@@ -287,7 +302,7 @@ while True:
         for k, v in commsg.items():
             if k == 'device':
                 print k
-                if (commsg['device']) == "2HUEH":
+                if (commsg['device']) == "2HUEK0017881cab46":
                     hue(commsg)
                 elif (commsg['device']) == "3WSP":
                     try :
@@ -302,11 +317,17 @@ while True:
 
                 elif (commsg['device']) == "16SCH":
                     wemo(commsg)
-                elif (commsg['device']) == "1DAIK":
+
+
+                elif (commsg['device']) == "18DOR06":
+                    yale(commsg)
+
+
+                elif (commsg['device']) == "1ACD1200136":
                     daikin(commsg)
-                elif (commsg['device']) == "11LG1":
+                elif (commsg['device']) == "11LG221445K120016":
                     lg(commsg)
-                elif (commsg['device']) == "11LG2":
+                elif (commsg['device']) == "11LG221445K120017":
                     lg(commsg)
                 elif (commsg['device']) == "7FAN":
                     fan(commsg)
