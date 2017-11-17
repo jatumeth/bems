@@ -55,7 +55,8 @@
 #Author : Payyoh
 #}}}
 
-
+from soco import SoCo
+sonos = SoCo('192.168.1.110')
 from datetime import datetime
 import logging
 import sys
@@ -117,14 +118,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def Morning(self):
         '''Use match_all to receive all messages and print them out.'''
         print "change mode to morning"
-        # sonos.play_uri(
-        #
-        #     'https://dl.dropbox.com/s/pus8oswb8ic4443/morning.m4a?dl=0')
-        #
-        # track = sonos.get_current_track_info()
-        #
-        # print track['title']
-        # sonos.play()
+        sonos.play_uri(
+
+            'https://dl.dropboxusercontent.com/s/8x4i9c91e4aozfk/goodmorning.m4a?dl=0')
+
+        track = sonos.get_current_track_info()
+
+        print track['title']
+        sonos.play()
 
 
         self.yale_off()
@@ -146,15 +147,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def Night(self):
         '''Use match_all to receive all messages and print them out.'''
-        # print "change mode to night"
-        # sonos.play_uri(
-        #
-        #     'https://dl.dropbox.com/s/ozj0vjmj1n3dp8g/night.m4a?dl=0')
-        #
-        # track = sonos.get_current_track_info()
-        #
-        # print track['title']
-        # sonos.play()
+        print "change mode to night"
+        sonos.play_uri(
+
+            'https://dl.dropboxusercontent.com/s/dy38rmyqncfowww/goodnight.m4a?dl=0')
+
+        track = sonos.get_current_track_info()
+
+        print track['title']
+        sonos.play()
 
         # self.living_off()
         self.yale_on()
@@ -174,6 +175,16 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def Bye(self):
         '''Use match_all to receive all messages and print them out.'''
 
+        sonos.play_uri(
+
+            'https://dl.dropbox.com/s/yv82s4q7c7jmlju/goodbye.m4a?dl=0')
+
+        track = sonos.get_current_track_info()
+
+        print track['title']
+        sonos.play()
+
+
         print "change mode to bye"
         # self.living_off()
         self.yale_on()
@@ -192,6 +203,16 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def Back(self):
         '''Use match_all to receive all messages and print them out.'''
         print "change mode to back"
+
+        sonos.play_uri(
+
+            'https://dl.dropbox.com/s/pus8oswb8ic4443/morning.m4a?dl=0')
+
+        track = sonos.get_current_track_info()
+
+        print track['title']
+        sonos.play()
+
         # self.living_on()
         # time.sleep(1)
         self.yale_off()
@@ -208,6 +229,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def eco(self):
         '''Use match_all to receive all messages and print them out.'''
+
+        sonos.play_uri(
+
+            'https://dl.dropbox.com/s/yv82s4q7c7jmlju/goodbye.m4a?dl=0')
+
+        track = sonos.get_current_track_info()
+
+        print track['title']
+        sonos.play()
 
         print "change mode to eco"
         # self.living_off()
