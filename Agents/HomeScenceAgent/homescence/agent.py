@@ -127,7 +127,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print track['title']
         sonos.play()
 
-
+        self.somfy_on()
         self.yale_off()
         # self.living_on()
         # self.kitchen_on()
@@ -157,6 +157,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print track['title']
         sonos.play()
 
+        self.somfy_off()
         # self.living_off()
         self.yale_on()
         self.hue_off()
@@ -184,7 +185,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print track['title']
         sonos.play()
 
-
+        self.somfy_off()
         print "change mode to bye"
         # self.living_off()
         self.yale_on()
@@ -206,13 +207,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
         sonos.play_uri(
 
-            'https://dl.dropbox.com/s/pus8oswb8ic4443/morning.m4a?dl=0')
+            'https://dl.dropboxusercontent.com/s/bpdgpong5y66nnb/welcomback.m4a')
 
         track = sonos.get_current_track_info()
 
         print track['title']
         sonos.play()
-
+        self.somfy_on()
         # self.living_on()
         # time.sleep(1)
         self.yale_off()
@@ -232,7 +233,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
         sonos.play_uri(
 
-            'https://dl.dropbox.com/s/yv82s4q7c7jmlju/goodbye.m4a?dl=0')
+            'https://dl.dropbox.com/s/0lq6qy2l5zjkvt4/ecomode.m4a?dl=0')
 
         track = sonos.get_current_track_info()
 
@@ -256,14 +257,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # TODO this is example how to write an app to control AC
         # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
 
-        topic = '/ui/agent/AC/update/bemos/999/1ACD1200138'
+        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"LivingroomAir1":"0","status": "ON", "temp": "20","fan_speed": "4"})
+        message = json.dumps({"status": "ON", "device": "1DAIK", "stemp": "20", "mode": "3"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 20")
 
@@ -296,14 +297,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def AC1_temp27(self):
         # TODO this is example how to write an app to control AC
-        topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
+        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"LivingroomAir1":"0","status": "ON", "temp": "27","fan_speed": "1"})
+        message = json.dumps({"status": "ON", "device": "1DAIK", "stemp": "20", "mode": "3"})
         self.publish(topic, headers, message)
         print ("AC1 turned on : temp 27")
 
@@ -311,14 +312,14 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # TODO this is example how to write an app to control AC
 
         # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
-        topic = '/ui/agent/AC/update/bemos/999/1ACD1200138'
+        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
             headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
             headers_mod.DATE: now,
         }
-        message = json.dumps({"LivingroomAir1":"0","status": "OFF"})
+        message = json.dumps({"status": "ON", "device": "1DAIK", "stemp": "20", "mode": "3"})
         self.publish(topic, headers, message)
         print ("AC1 turned off")
     #
@@ -553,6 +554,34 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "OFF"})
         self.publish(topic, headers, message)
         print ("Yale turn OFF")
+
+    def somfy_on(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/tv/update/bemoss/999/3WSP221445K1200328"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("Yale turn ON")
+
+    def somfy_off(self):
+        # TODO this is example how to write an app to control FAN
+        topic = "/ui/agent/tv/update/bemoss/999/3WSP221445K1200328"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("Yale turn OFF")
+
+
 
     def kitchen_on(self):
         # TODO this is example how to write an app to control FAN

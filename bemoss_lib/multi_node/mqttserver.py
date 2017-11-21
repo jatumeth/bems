@@ -272,6 +272,21 @@ def lg(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
+
+def somfy(commsg):
+    # TODO this is example how to write an app to control Lighting
+    topic = '/ui/agent/tv/update/bemoss/999/3WSP221445K1200328'
+    # {"status": "OFF"}
+    # now = datetime.utcnow().isoformat(' ') + 'Z'
+    # headers = {
+    #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+    #     headers_mod.DATE: now,
+    # }
+    message = json.dumps(commsg)
+    zmq_pub.requestAgent(topic, message, "text/plain", "UI")
+    print ("topic{}".format(topic))
+    print ("message{}".format(message))
+
 def HC(commsg):
     print commsg
     print "testhomescence"
@@ -336,6 +351,11 @@ while True:
                     saijo1(commsg)
                     time.sleep(3)
                     saijo1(commsg)
+
+                elif (commsg['device']) == "3WSP221445K1200328":
+                    somfy(commsg)
+                    time.sleep(3)
+
                 elif (commsg['device']) == "1SAJ2":
                     saijo2(commsg)
                     time.sleep(3)

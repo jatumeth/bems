@@ -259,6 +259,18 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
 volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/18DOR06.launch.json
 volttron-ctl install YaleDoorLock=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
 
+volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/3WSP221445K1200328.launch.json
+volttron-ctl install somfy=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+
+
+# Run MultisensorAgent
+volttron-pkg package ~/workspace/bemoss_os/Agents/MultiSensorAgent/
+volttron-pkg configure /tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiSensorAgent/openclose221445K1200135.launch.json
+volttron-ctl install openclose=/tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl
+
+
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
