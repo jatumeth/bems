@@ -44,8 +44,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
     db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
     db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
-    print(db_table_monthly_consumption)
-    print ""
+
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
 
@@ -143,32 +142,23 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
         # inverter
         # @matching.match_exact('/agent/ui/PVInverter/device_status_response/bemoss/999/1PV221445K1200138')
+
         # smappee
         # @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/5Smappee001')
-        # def on_match_growatt(self, topic, headers, message, match):
-        #     print "Hello from Growatt"
-        #     message_from_Growatt = json.loads(message[0])
-        #     self.power_from_load = message_from_Growatt['load_activePower']
-        #     self.power_from_solar = message_from_Growatt['solar_activePower']
-        #     if (message_from_Growatt['grid_activePower'] > 0):
-        #         self.power_from_grid_import = abs(message_from_Growatt['grid_activePower'])
-        #         self.power_from_grid_export = 0
-        #     else:
-        #         self.power_from_grid_export = message_from_Growatt['grid_activePower']
-        #         self.power_from_grid_import = 0
+
         # etrix
-        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/CreativePower')
-        def on_match_etrix(self, topic, headers, message, match):
-            print "Hello from Etrix"
-            message_from_Etrix = json.loads(message[0])
-            self.power_from_load = message_from_Etrix['grid_activePower']
-            # self.power_from_solar = message_from_Etrix['solar_activePower']
+        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/5PMCP009')
+        def on_match_power_meter(self, topic, headers, message, match):
+            print "Hello from power meter"
+            message_from_power_meter = json.loads(message[0])
+            self.power_from_load = float(message_from_power_meter['grid_activePower'])
+            # self.power_from_solar = float(message_from_power_meter['solar_activePower'])
             self.power_from_solar = 0
-            if (message_from_Etrix['grid_activePower'] > 0):
-                self.power_from_grid_import = abs(message_from_Etrix['grid_activePower'])
+            if (message_from_power_meter['grid_activePower'] > 0):
+                self.power_from_grid_import = float(message_from_power_meter['grid_activePower'])
                 self.power_from_grid_export = 0
             else:
-                self.power_from_grid_export = message_from_Etrix['grid_activePower']
+                self.power_from_grid_export = abs(float(message_from_power_meter['grid_activePower']))
                 self.power_from_grid_import = 0
 
             # This for calculate the period of power which got from Inverter
@@ -292,6 +282,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
                                   self.get_variable('solarBill'), self.get_variable('loadBill'),
                                   datetime.datetime.now()))
+                self.con.commit()
 
             elif (table == 'weekly'):
                 self.cur.execute("INSERT INTO " + db_table_weekly_consumption +
@@ -303,6 +294,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.solar_energy_this_week, self.load_energy_this_week,
                                   self.grid_import_bill_this_week, self.grid_export_bill_this_week,
                                   self.solar_bill_this_week, self.load_bill_this_week))
+                self.con.commit()
 
             elif (table == 'monthly'):
                 self.cur.execute("INSERT INTO " + db_table_monthly_consumption +
@@ -312,6 +304,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.solar_energy_this_month, self.load_energy_this_month,
                                   self.grid_import_bill_this_month, self.grid_export_bill_this_month,
                                   self.solar_bill_this_month, self.load_bill_this_month))
+                self.con.commit()
 
             elif (table == 'annual'):
                 self.cur.execute("INSERT INTO " + db_table_annual_consumption +
@@ -321,6 +314,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.solar_energy_annual, self.load_energy_annual,
                                   self.grid_import_bill_annual, self.grid_export_bill_annual,
                                   self.solar_bill_annual, self.load_bill_annual))
+                self.con.commit()
 
             elif (table == 'cumulative'):
                 self.cur.execute("INSERT INTO " + db_table_cumulative_energy +
@@ -355,8 +349,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
                          self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
                     self.con.commit()
                     print"Success"
-                except:
-                    print"Cannot update database"
+                except Exception as er:
+                    print "update data base error: {}".format(er)
             else:
                 self.insertDB('daily')
 
@@ -377,10 +371,9 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
                     self.con.commit()
                     print"Success"
-                except:
-                    print"Cannot update database"
+                except Exception as er:
+                    print "update data base error: {}".format(er)
             else:
-                print('error')
                 self.insertDB('weekly')
 
             # Update table "monthly consumption"
@@ -400,8 +393,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
                     self.con.commit()
                     print"Success"
-                except:
-                    print"Cannot update database"
+                except Exception as er:
+                    print "update data base error: {}".format(er)
             else:
                 self.insertDB('monthly')
 
@@ -422,8 +415,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
                     self.con.commit()
                     print"Success"
-                except:
-                    print"Cannot update database"
+                except Exception as er:
+                    print "update data base error: {}".format(er)
             else:
                 self.insertDB('annual')
 
