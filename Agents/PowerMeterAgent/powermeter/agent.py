@@ -206,9 +206,7 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
 
             self.postgresAPI()
-
-            print "777"
-            print PowerMeter.variables['grid_activePower']
+            print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
 
         def postgresAPI(self):
 
