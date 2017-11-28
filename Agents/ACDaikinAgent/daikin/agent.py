@@ -197,8 +197,8 @@ def ACDaikinAgent(config_path, **kwargs):
                     SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, 
                     mode=%s, last_scanned_time=%s WHERE airconditioner_id=%s""",
                     (ACDaikin.variables['status'], ACDaikin.variables['current_temperature'],
-                    ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
-                    ACDaikin.variables['set_humidity'], ACDaikin.variables['mode'], datetime.datetime.now(), agent_id))
+                    ACDaikin.variables['set_temperature'], ACDaikin.variables['current_temperature'],
+                    ACDaikin.variables['current_temperature'], ACDaikin.variables['mode'], datetime.datetime.now(), agent_id))
                 self.con.commit()
                 self.cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
                                  (datetime.datetime.now(), agent_id))
@@ -207,22 +207,24 @@ def ACDaikinAgent(config_path, **kwargs):
                 print("Error push data to the database: {}".format(er))
 
             try:
-                self.cur.execute(
-                    """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, 
-                       set_temperature, current_humidity, set_humidity, mode) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
-                    (agent_id, datetime.datetime.now(), ACDaikin.variables['status'],
-                     ACDaikin.variables['current_temperature'],
-                     ACDaikin.variables['set_temperature'], ACDaikin.variables['set_humidity'],
-                     ACDaikin.variables['set_humidity'], ACDaikin.variables['mode']))
-                self.con.commit()
+                print ""
+                # self.cur.execute(
+                #     """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature,
+                #        set_temperature, current_humidity, set_humidity, mode)
+                #        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                #     (agent_id, datetime.datetime.now(), ACDaikin.variables['status'],
+                #      ACDaikin.variables['current_temperature'],
+                #      ACDaikin.variables['set_temperature'], ACDaikin.variables['current_temperature'],
+                #      ACDaikin.variables['current_temperature'], ACDaikin.variables['mode']))
+                # self.con.commit()
             except:
                 print "Error to the database."
 
             try:
-                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                                 (ACDaikin.variables['status'], agent_id))
-                self.con.commit()
+                print ""
+                # self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                #                  (ACDaikin.variables['status'], agent_id))
+                # self.con.commit()
             except:
                 print "Error to the database."
 
