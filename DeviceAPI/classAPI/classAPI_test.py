@@ -41,7 +41,7 @@ conn.commit()
 
 # cur.execute("INSERT INTO device_info "
 #             "(device_id, device_type, vendor_name, device_model, device_model_id, mac_address,min_range, max_range, identifiable, communication, date_added, factory_id, approval_status) "
-#             "VALUES ('1FN221445K1200138','fan','hatari','fan','2WL','0a4f437e63c1',100,0,True,'WiFi','2017-08-12 21:45:58.208000 +07:00','hatario','APR')")
+#             "VALUES ('1FN221445K1200138','relaysw','hatari','relaysw','2WL','0a4f437e63c1',100,0,True,'WiFi','2017-08-12 21:45:58.208000 +07:00','hatario','APR')")
 #
 # conn.commit()
 

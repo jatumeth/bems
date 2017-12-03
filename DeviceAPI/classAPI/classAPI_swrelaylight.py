@@ -50,7 +50,6 @@ import time
 import json
 import requests
 
-#from bemoss_lib.utils import rgb_cie
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
@@ -59,10 +58,9 @@ class API:
         self.variables = kwargs
         self.debug = True
         self.set_variable('offline_count',0)
-        self.set_variable('connection_renew_interval',6000) #nothing to renew, right now
+        self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
-        # to initialize the only white bulb value
-        # self.getDeviceStatus()
+
     def renewConnection(self):
         pass
 
@@ -96,18 +94,20 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
+
+        getDeviceStatusResult = True
+
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
         try:
-
-
-
-            headers = {"Authorization": self.get_variable("bearer")}
-            url = str(self.get_variable("url") + self.get_variable("device"))
             r = requests.get(url,
                              headers=headers, timeout=20);
-            print(" {0}Agent is querying its current status (status:{1}) please wait ...")
+            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
+            print r.text
             if r.status_code == 200:
                 getDeviceStatusResult = False
+
                 self.getDeviceStatusJson(r.text)
                 if self.debug is True:
                     self.printDeviceStatus()
@@ -121,45 +121,101 @@ class API:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
         except Exception as er:
             print er
-            print('ERROR: classAPI_Fibaro failed to getDeviceStatus')
+            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+            self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
         self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('illuminance', float(conve_json["illuminance"]))
-        self.set_variable('temperature', float(conve_json["temperature"]))
-        self.set_variable('battery', float(conve_json["battery"]))
-        self.set_variable('motion', str(conve_json["motion"]))
-        self.set_variable('tamper', str(conve_json["tamper"]))
+        self.set_variable('status', str(conve_json["status"]))
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('type', str(conve_json["type"]))
-
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
         print(" label = {}".format(self.get_variable('label')))
-        print(" illuminance = {}".format(self.get_variable('illuminance')))
-        print(" temperature = {}".format(self.get_variable('temperature')))
-        print(" battery = {}".format(self.get_variable('battery')))
-        print(" motion = {}".format(self.get_variable('motion')))
-        print(" tamper = {}".format(self.get_variable('tamper')))
+        print(" status = {}".format(self.get_variable('status')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
-    # ----------------------------------------------------------------------
+    # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
+    def setDeviceStatus(self, postmsg):
+        setDeviceStatusResult = True
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
 
+
+        if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
+            _data = json.dumps(self.convertPostMsg(postmsg))
+            _data = _data.encode(encoding='utf_8')
+            print _data
+            try:
+                print "sending requests put"
+                r = requests.put(
+                    url,
+                    headers=headers, data= _data, timeout=20);
+                # print "15456"
+                # print r.text
+                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
+                      .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
+                print(" after send a POST request: {}".format(r.status_code))
+            except:
+                print("ERROR: classAPI_RelaySW connection failure! @ setDeviceStatus")
+                setDeviceStatusResult = False
+        else:
+            print("The POST message is invalid, try again\n")
+        return setDeviceStatusResult
+
+    def isPostMsgValid(self, postmsg):  # check validity of postmsg
+        dataValidity = True
+        # TODO algo to check whether postmsg is valid
+        return dataValidity
+
+    def convertPostMsg(self, postmsg):
+        msgToDevice = {}
+        if 'status' in postmsg.keys():
+            msgToDevice['command'] = str(postmsg['status'].lower())
+        return msgToDevice
+
+    # ----------------------------------------------------------------------
 
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/illuminances/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'fdb84473-69f9-42c8-ba8b-6bcb0663b65b')
-    Fibaro.getDeviceStatus()
-    #Fibaro.printDeviceStatus()
+
+    # RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',
+    #               url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
+    #               bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
+
+    # -------------Kittchen----------------
+    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = 'b51760e0-35b2-4b69-ab67-a36621f12f08')
+    RelaySW.getDeviceStatus()
+
+
+
+
+    RelaySW.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(10)
+    #
+    # RelaySW.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(10)
+    #
+    # RelaySW.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(10)
+    #
+    # RelaySW.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(10)
+    #
+    # RelaySW.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()

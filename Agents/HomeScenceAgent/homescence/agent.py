@@ -475,7 +475,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/fan/update/bemoss/999/1FN221445K1200138"
+        topic = "/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -489,7 +489,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/fan/update/bemoss/999/1FN221445K1200138"
+        topic = "/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

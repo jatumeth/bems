@@ -1,16 +1,49 @@
 # -*- coding: utf-8 -*-
 '''
-Copyright (c) 2017, HiVE Team (PEA - Provincial Electricity Authority)
+Copyright (c) 2016, Virginia Tech
 All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ following conditions are met:
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The views and conclusions contained in the software and documentation are those of the authors and should not be
+interpreted as representing official policies, either expressed or implied, of the FreeBSD Project.
+
+This material was prepared as an account of work sponsored by an agency of the United States Government. Neither the
+United States Government nor the United States Department of Energy, nor Virginia Tech, nor any of their employees,
+nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty,
+express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or
+any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe
+privately owned rights.
+
+Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or
+otherwise does not necessarily constitute or imply its endorsement, recommendation, favoring by the United States
+Government or any agency thereof, or Virginia Tech - Advanced Research Institute. The views and opinions of authors
+expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
+
+VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
+under Contract DE-EE0006352
 
 #__author__ = "HiVE Team"
 #__credits__ = ""
-#__version__ = "1.0"
+#__version__ = "2.0"
 #__maintainer__ = "HiVE Team"
-#__email__ = "teerapong.pon@gmail.com"
-#__website__ = "www.pea.co.th"
-#__created__ = "2015-09-12 12:04:50"
-#__lastUpdated__ = "2017-08-15 23:09:13"
+#__email__ = "peahive@gmail.com"
+#__website__ = "www.peahive.org"
+#__created__ = "2017-09-12 12:04:50"
+#__lastUpdated__ = "2017-03-14 11:23:33"
 '''
 
 import sys
@@ -28,7 +61,7 @@ import settings
 import socket
 import threading
 
-def FanAgent(config_path, **kwargs):
+def OpenCloseAgent(config_path, **kwargs):
     
     threadingLock = threading.Lock()
     
@@ -70,6 +103,8 @@ def FanAgent(config_path, **kwargs):
     url = get_config('url')
     device = get_config('device')
     bearer = get_config('bearer')
+
+
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -90,7 +125,8 @@ def FanAgent(config_path, **kwargs):
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
 
-    db_table_Fan = settings.DATABASES['default']['TABLE_Fan']
+
+    db_table_OpenClose = settings.DATABASES['default']['TABLE_OpenClose']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
@@ -107,17 +143,17 @@ def FanAgent(config_path, **kwargs):
 
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize Fan device object
-    Fan = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
+    #4.1 initialize OpenClose device object
+    OpenClose = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
                     db_database=db_database, config_path=config_path,bearer=bearer,device =device,url=url)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
-                                                                        Fan.get_variable('model'),
-                                                                        Fan.get_variable('api'),
-                                                                        Fan.get_variable('address')))
+                                                                        OpenClose.get_variable('model'),
+                                                                        OpenClose.get_variable('api'),
+                                                                        OpenClose.get_variable('address')))
 
-    # connection_renew_interval = Fan.variables['connection_renew_interval']
+    # connection_renew_interval = OpenClose.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -176,53 +212,45 @@ def FanAgent(config_path, **kwargs):
             if api == 'classAPI_WeMo':
                 #Do a one time push when we start up so we don't have to wait for the periodic polling
                 try:
-                    Fan.startListeningEvents(threadingLock,self.updateStatus)
+                    OpenClose.startListeningEvents(threadingLock,self.updateStatus)
                     self.subscriptionTime=datetime.datetime.now()
                 except Exception as er:
                     print "Can't subscribe.", er
+                
+        def updatePostgresDB(self):
+            print""
+
+        #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
+        # @periodic(connection_renew_interval)
+        # def renewConnection(self):
+        #     OpenClose.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
             try:
-                Fan.getDeviceStatus()
-                # _data = Fan.variables
-                # message = json.dumps(_data)
-                # FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                # FANMQTT.iothub_client_sample_run(message)
+                OpenClose.getDeviceStatus()
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
+            # TODO make tolerance more accessible
+
+            #
             self.updateStatus()
-            self.postgresAPI()
-
-        def postgresAPI(self):
-
+            self.backupSaveData()
             try:
-                self.cur.execute("SELECT * from relaysw WHERE fan_id=%s", (agent_id,))
-                if bool(self.cur.rowcount):
-                    pass
-                else:
-                    self.cur.execute(
-                        """INSERT INTO relaysw (fan_id, last_scanned_time) VALUES (%s, %s);""",
-                        (agent_id, datetime.datetime.now()))
-            except:
-                print "Error to check data base."
-
-            try:
-                self.cur.execute("""
-                    UPDATE relaysw
-                    SET status=%s, last_scanned_time=%s
-                    WHERE fan_id=%s
-                 """, (Fan.variables['status'], datetime.datetime.now(), agent_id))
+                status1 = str(OpenClose.variables['status'].upper())
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (status1, agent_id))
                 self.con.commit()
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
 
-            except:
-                print "Error to the database."
 
         def device_offline_detection(self):
-            self.cur.execute("SELECT nickname FROM " + db_table_Fan + " WHERE Fan_id=%s",
+            self.cur.execute("SELECT nickname FROM " + db_table_OpenClose + " WHERE OpenClose_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
@@ -233,7 +261,7 @@ def FanAgent(config_path, **kwargs):
             _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            self.cur.execute("SELECT network_status FROM " + db_table_Fan + " WHERE Fan_id=%s",
+            self.cur.execute("SELECT network_status FROM " + db_table_OpenClose + " WHERE OpenClose_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
@@ -388,13 +416,45 @@ def FanAgent(config_path, **kwargs):
 
         def updateStatus(self,states=None):
 
+            # if states is not None:
+            #     print "got state change:",states
+            #     self.changed_variables = dict()
+            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
+            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
+            #         self.changed_variables['status'] = log_variables['status']
+            #     if 'power' in states:
+            #         if(self.get_variable('power') != states['power']):
+            #             self.changed_variables['power'] = log_variables['power']
+            #             self.set_variable('power',states['power'])
+            #
+            #
+            #
+            #     with threadingLock:
+            #         try:
+            #             cassandraDB.insert(agent_id,self.variables,log_variables)
+            #             print "cassandra success"
+            #         except Exception as er:
+            #             print("ERROR: {} fails to update cassandra database".format(agent_id))
+            #             print er
+            #
+            #         self.updatePostgresDB()
+
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
+            # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
+                # headers_mod.DATE: now,
             }
+            # if self.get_variable('power') is not None:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
+            # else:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            # message = json.dumps(_data)
+            # message = message.encode(encoding='utf_8')
+            # self.publish(topic, headers, message)
 
-            _data = Fan.variables
+            _data = OpenClose.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
@@ -418,7 +478,7 @@ def FanAgent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
-                setDeviceStatusResult = Fan.setDeviceStatus(json.loads(message[0]))
+                setDeviceStatusResult = OpenClose.setDeviceStatus(json.loads(message[0]))
                 #send reply message back to the UI
                 topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -459,7 +519,7 @@ def FanAgent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
-            identifyDeviceResult = Fan.identifyDevice()
+            identifyDeviceResult = OpenClose.identifyDevice()
             #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
             #step2: send reply message back to the UI
             topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
@@ -476,13 +536,13 @@ def FanAgent(config_path, **kwargs):
             self.publish(topic, headers, message)
 
 
-    Agent.__name__ = 'FanAgent'
+    Agent.__name__ = 'OpenCloseAgent'
     return Agent(**kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
-    utils.default_main(FanAgent,
-                       description='Fan agent',
+    utils.default_main(OpenCloseAgent,
+                       description='OpenClose agent',
                        argv=argv)
 
 if __name__ == '__main__':

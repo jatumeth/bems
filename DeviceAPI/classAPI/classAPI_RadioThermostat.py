@@ -87,14 +87,14 @@ class API:
     temp            GET              current temp(deg F)
     override        GET              target temp temporary override (0:disabled, 1:enabled) 
     tstate          GET              HVAC operating state (0:OFF,1:HEAT,2:COOL)
-    fstate          GET              fan operating state (0:OFF, 1:ON)
+    fstate          GET              relaysw operating state (0:OFF, 1:ON)
     t_type_post
     time            GET    POST      Thermostat's internal time (day:int,hour:int,minute:int)
     tmode           GET    POST      Thermostat operating mode (0:OFF,1:HEAT,2:COOL,3:AUTO)
     t_heat          GET    POST      temporary target heat setpoint (floating point in deg F)
     t_cool          GET    POST      temporary target 
     .cool setpoint (floating point in deg F)
-    fmode           GET    POST      fan operating mode (0:AUTO,1:AUTO/CIRCULATE,2:ON)
+    fmode           GET    POST      relaysw operating mode (0:AUTO,1:AUTO/CIRCULATE,2:ON)
     hold            GET    POST      target temp hold status (0:disabled, 1:enabled)
     scheduleData*   GET    POST      thermostat's schedule data.
     energy_led             POST      energy LED status code (0:OFF,1:Green,2:Yellow,4:Red) 

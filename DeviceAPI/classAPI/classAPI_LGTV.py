@@ -36,14 +36,14 @@ expressed herein do not necessarily state or reflect those of the United States 
 VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
 under Contract DE-EE0006352
 
-#__author__ = "BEMOSS Team"
+#__author__ = "HiVETEAM"
 #__credits__ = ""
 #__version__ = "2.0"
-#__maintainer__ = "BEMOSS Team"
-#__email__ = "aribemoss@gmail.com"
-#__website__ = "www.bemoss.org"
-#__created__ = "2014-09-12 12:04:50"
-#__lastUpdated__ = "2016-03-14 11:23:33"
+#__maintainer__ = "HiVETEAM Team"
+#__email__ = "peahive@gmail.com"
+#__website__ = "www.peahive.org"
+#__created__ = "2017-09-12 12:04:50"
+#__lastUpdated__ = "2017-03-14 11:23:33"
 '''
 
 import time
@@ -76,12 +76,8 @@ class API:
     Attributes:
      ------------------------------------------------------------------------------------------
     label            GET          label in string
-    illuminance      GET          illuminance
-    temperature      GET          temporary target heat setpoint (floating point in deg F)
-    battery          GET          percent battery of Fibaro censor
-    motion           GET          motion  status (active/inactive)
-    tamper           GET          tamper  status (active/inactive)
-    unitTime         GET          Hue light effect 'none' or 'colorloop'
+    status           GET          Status On/Off
+    status           SET          Status On/Off
      ------------------------------------------------------------------------------------------
 
     '''
@@ -98,17 +94,14 @@ class API:
         getDeviceStatusResult = True
 
         try:
+            headers = {"Authorization": self.get_variable("bearer")}
+            url = str(self.get_variable("url") + self.get_variable("device"))
+            r = requests.get(url,
+                             headers=headers, timeout=20);
+            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(
+                self.get_variable('agent_id'), r.status_code))
 
-            # r = requests.get(
-            #     "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
-                # headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
-
-
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/ada8bd02-11ba-4e87-bdfe-29e41211be7e",
-                             headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, timeout=20);
-            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
-            print r.text
             if r.status_code == 200:
                 getDeviceStatusResult = False
 
@@ -149,6 +142,8 @@ class API:
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
@@ -156,17 +151,7 @@ class API:
             print _data
             try:
                 print "sending requests put"
-
-                # r = requests.put(
-                #     "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/0248cd7c-9a63-451f-98f1-7bd2e69a276d",
-                #     headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data=_data, timeout=20);
-
-
-                r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/ada8bd02-11ba-4e87-bdfe-29e41211be7e",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data, timeout=20);
-                # print "15456"
-                # print r.text
+                r = requests.put(url,headers=headers, data=_data, timeout=20);
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
@@ -195,9 +180,8 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    # LGTV.getDeviceStatus()
-
+    LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '0248cd7c-9a63-451f-98f1-7bd2e69a276d')
+    LGTV.getDeviceStatus()
     LGTV.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)

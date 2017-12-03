@@ -381,7 +381,7 @@ class API:
             elif k == 'mode':
                 if postmsg.get('mode') == "cool":
                     msgToDevice['mode'] = 0
-                elif postmsg.get('mode') == "fan":
+                elif postmsg.get('mode') == "relaysw":
                     msgToDevice['mode'] = 1
                 elif postmsg.get('mode') == "dry":
                     msgToDevice['mode'] = 2

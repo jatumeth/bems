@@ -28,7 +28,7 @@ import settings
 import socket
 import threading
 
-def FanAgent(config_path, **kwargs):
+def RelaySWAgent(config_path, **kwargs):
     
     threadingLock = threading.Lock()
     
@@ -65,11 +65,12 @@ def FanAgent(config_path, **kwargs):
     auth_header = get_config('auth_header')
     smt_username = get_config('smt_username')
     smt_password = get_config('smt_password')
-    address = get_config('address')
-    device_id = get_config('device_id')
     url = get_config('url')
     device = get_config('device')
     bearer = get_config('bearer')
+
+    address = get_config('address')
+    device_id = get_config('device_id')
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -90,7 +91,7 @@ def FanAgent(config_path, **kwargs):
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
 
-    db_table_Fan = settings.DATABASES['default']['TABLE_Fan']
+    db_table_RelaySW = settings.DATABASES['default']['TABLE_RelaySW']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
@@ -107,17 +108,17 @@ def FanAgent(config_path, **kwargs):
 
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize Fan device object
-    Fan = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
+    #4.1 initialize RelaySW device object
+    RelaySW = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
                     db_database=db_database, config_path=config_path,bearer=bearer,device =device,url=url)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
-                                                                        Fan.get_variable('model'),
-                                                                        Fan.get_variable('api'),
-                                                                        Fan.get_variable('address')))
+                                                                        RelaySW.get_variable('model'),
+                                                                        RelaySW.get_variable('api'),
+                                                                        RelaySW.get_variable('address')))
 
-    # connection_renew_interval = Fan.variables['connection_renew_interval']
+    # connection_renew_interval = RelaySW.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -176,7 +177,7 @@ def FanAgent(config_path, **kwargs):
             if api == 'classAPI_WeMo':
                 #Do a one time push when we start up so we don't have to wait for the periodic polling
                 try:
-                    Fan.startListeningEvents(threadingLock,self.updateStatus)
+                    RelaySW.startListeningEvents(threadingLock,self.updateStatus)
                     self.subscriptionTime=datetime.datetime.now()
                 except Exception as er:
                     print "Can't subscribe.", er
@@ -185,11 +186,11 @@ def FanAgent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             try:
-                Fan.getDeviceStatus()
-                # _data = Fan.variables
+                RelaySW.getDeviceStatus()
+                # _data = RelaySW.variables
                 # message = json.dumps(_data)
-                # FANMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                # FANMQTT.iothub_client_sample_run(message)
+                # RelaySWMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
+                # RelaySWMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
@@ -199,30 +200,31 @@ def FanAgent(config_path, **kwargs):
 
         def postgresAPI(self):
 
-            try:
-                self.cur.execute("SELECT * from relaysw WHERE fan_id=%s", (agent_id,))
-                if bool(self.cur.rowcount):
-                    pass
-                else:
-                    self.cur.execute(
-                        """INSERT INTO relaysw (fan_id, last_scanned_time) VALUES (%s, %s);""",
-                        (agent_id, datetime.datetime.now()))
-            except:
-                print "Error to check data base."
-
-            try:
-                self.cur.execute("""
-                    UPDATE relaysw
-                    SET status=%s, last_scanned_time=%s
-                    WHERE fan_id=%s
-                 """, (Fan.variables['status'], datetime.datetime.now(), agent_id))
-                self.con.commit()
-
-            except:
-                print "Error to the database."
+            print "non postgres"
+            # try:
+            #     self.cur.execute("SELECT * from RelaySW WHERE RelaySW_id=%s", (agent_id,))
+            #     if bool(self.cur.rowcount):
+            #         pass
+            #     else:
+            #         self.cur.execute(
+            #             """INSERT INTO RelaySW (RelaySW_id, last_scanned_time) VALUES (%s, %s);""",
+            #             (agent_id, datetime.datetime.now()))
+            # except Exception as er:
+            #     print er
+            #
+            # try:
+            #     self.cur.execute("""
+            #         UPDATE RelaySW
+            #         SET status=%s, last_scanned_time=%s
+            #         WHERE RelaySW_id=%s
+            #      """, (RelaySW.variables['status'], datetime.datetime.now(), agent_id))
+            #     self.con.commit()
+            #
+            # except Exception as er:
+            #     print er
 
         def device_offline_detection(self):
-            self.cur.execute("SELECT nickname FROM " + db_table_Fan + " WHERE Fan_id=%s",
+            self.cur.execute("SELECT nickname FROM " + db_table_RelaySW + " WHERE RelaySW_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
@@ -233,7 +235,7 @@ def FanAgent(config_path, **kwargs):
             _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            self.cur.execute("SELECT network_status FROM " + db_table_Fan + " WHERE Fan_id=%s",
+            self.cur.execute("SELECT network_status FROM " + db_table_RelaySW + " WHERE RelaySW_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
@@ -394,7 +396,7 @@ def FanAgent(config_path, **kwargs):
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
             }
 
-            _data = Fan.variables
+            _data = RelaySW.variables
             message = json.dumps(_data)
             message = message.encode(encoding='utf_8')
             self.publish(topic, headers, message)
@@ -418,7 +420,7 @@ def FanAgent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):  # check if the data is valid
-                setDeviceStatusResult = Fan.setDeviceStatus(json.loads(message[0]))
+                setDeviceStatusResult = RelaySW.setDeviceStatus(json.loads(message[0]))
                 #send reply message back to the UI
                 topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
                 # now = datetime.utcnow().isoformat(' ') + 'Z'
@@ -459,7 +461,7 @@ def FanAgent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
-            identifyDeviceResult = Fan.identifyDevice()
+            identifyDeviceResult = RelaySW.identifyDevice()
             #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
             #step2: send reply message back to the UI
             topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
@@ -476,13 +478,13 @@ def FanAgent(config_path, **kwargs):
             self.publish(topic, headers, message)
 
 
-    Agent.__name__ = 'FanAgent'
+    Agent.__name__ = 'RelaySWAgent'
     return Agent(**kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
-    utils.default_main(FanAgent,
-                       description='Fan agent',
+    utils.default_main(RelaySWAgent,
+                       description='RelaySW agent',
                        argv=argv)
 
 if __name__ == '__main__':
