@@ -118,146 +118,146 @@ class ListenerAgent(PublishMixin, BaseAgent):
     def Morning(self):
         '''Use match_all to receive all messages and print them out.'''
         print "change mode to morning"
-        sonos.play_uri(
-
-            'https://dl.dropboxusercontent.com/s/8x4i9c91e4aozfk/goodmorning.m4a?dl=0')
-
-        track = sonos.get_current_track_info()
-
-        print track['title']
-        sonos.play()
+        # sonos.play_uri(
+        #
+        #     'https://dl.dropboxusercontent.com/s/8x4i9c91e4aozfk/goodmorning.m4a?dl=0')
+        #
+        # track = sonos.get_current_track_info()
+        #
+        # print track['title']
+        # sonos.play()
 
         self.somfy_on()
         self.yale_off()
-        # self.living_on()
-        # self.kitchen_on()
+        self.living_on()
+        self.kitchen_on()
         self.hue_on()
         self.AC1_temp20()
-        # time.sleep(1)
-        # self.AC2_temp20()
-        # self.AC3_off()
+        time.sleep(1)
+        self.AC2_temp20()
+        self.AC3_off()
         self.tv_on()
-        # self.fan_off()
-        # time.sleep(1)
+        self.fan_off()
+        time.sleep(1)
         self.plug_off()
         time.sleep(1)
-        # self.living_on()
-        # time.sleep(1)
-        # self.kitchen_on()
+        self.living_on()
+        time.sleep(1)
+        self.kitchen_on()
 
     def Night(self):
         '''Use match_all to receive all messages and print them out.'''
         print "change mode to night"
-        sonos.play_uri(
-
-            'https://dl.dropboxusercontent.com/s/dy38rmyqncfowww/goodnight.m4a?dl=0')
-
-        track = sonos.get_current_track_info()
-
-        print track['title']
-        sonos.play()
+        # sonos.play_uri(
+        #
+        #     'https://dl.dropboxusercontent.com/s/dy38rmyqncfowww/goodnight.m4a?dl=0')
+        #
+        # track = sonos.get_current_track_info()
+        #
+        # print track['title']
+        # sonos.play()
 
         self.somfy_off()
-        # self.living_off()
+        self.living_off()
         self.yale_on()
         self.hue_off()
         time.sleep(1)
         self.AC1_off()
         time.sleep(1)
-        # self.AC2_off()
-        # self.AC3_temp20()
-        # time.sleep(1)
+        self.AC2_off()
+        self.AC3_temp20()
+        time.sleep(1)
         self.tv_off()
-        # self.fan_off()
+        self.fan_off()
         self.plug_on()
-        # self.living_off()
-        # self.kitchen_off()
+        self.living_off()
+        self.kitchen_off()
 
     def Bye(self):
         '''Use match_all to receive all messages and print them out.'''
 
-        sonos.play_uri(
-
-            'https://dl.dropbox.com/s/yv82s4q7c7jmlju/goodbye.m4a?dl=0')
-
-        track = sonos.get_current_track_info()
-
-        print track['title']
-        sonos.play()
+        # sonos.play_uri(
+        #
+        #     'https://dl.dropbox.com/s/yv82s4q7c7jmlju/goodbye.m4a?dl=0')
+        #
+        # track = sonos.get_current_track_info()
+        #
+        # print track['title']
+        # sonos.play()
 
         self.somfy_off()
         print "change mode to bye"
-        # self.living_off()
+        self.living_off()
         self.yale_on()
         self.hue_off()
         self.AC1_off()
-        # time.sleep(1)
-        # self.AC2_off()
-        # self.AC3_off()
+        time.sleep(1)
+        self.AC2_off()
+        self.AC3_off()
         time.sleep(1)
         self.tv_off()
-        # self.fan_off()
+        self.fan_off()
         self.plug_off()
-        # self.living_off()
-        # self.kitchen_off()
+        self.living_off()
+        self.kitchen_off()
 
     def Back(self):
         '''Use match_all to receive all messages and print them out.'''
         print "change mode to back"
 
-        sonos.play_uri(
-
-            'https://dl.dropboxusercontent.com/s/bpdgpong5y66nnb/welcomback.m4a')
-
-        track = sonos.get_current_track_info()
-
-        print track['title']
-        sonos.play()
+        # sonos.play_uri(
+        #
+        #     'https://dl.dropboxusercontent.com/s/bpdgpong5y66nnb/welcomback.m4a')
+        #
+        # track = sonos.get_current_track_info()
+        #
+        # print track['title']
+        # sonos.play()
         self.somfy_on()
-        # self.living_on()
-        # time.sleep(1)
+        self.living_on()
+        time.sleep(1)
         self.yale_off()
         self.hue_on()
         self.AC1_temp20()
-        # time.sleep(1)
-        # self.AC2_temp20()
-        # self.AC3_temp20()
+        time.sleep(1)
+        self.AC2_temp20()
+        self.AC3_temp20()
         self.tv_on()
         self.fan_off()
         self.plug_on()
-        # self.living_on()
-        # self.kitchen_off()
+        self.living_on()
+        self.kitchen_off()
 
     def eco(self):
         '''Use match_all to receive all messages and print them out.'''
 
-        sonos.play_uri(
-
-            'https://dl.dropbox.com/s/0lq6qy2l5zjkvt4/ecomode.m4a?dl=0')
-
-        track = sonos.get_current_track_info()
-
-        print track['title']
-        sonos.play()
+        # sonos.play_uri(
+        #
+        #     'https://dl.dropbox.com/s/0lq6qy2l5zjkvt4/ecomode.m4a?dl=0')
+        #
+        # track = sonos.get_current_track_info()
+        #
+        # print track['title']
+        # sonos.play()
 
         print "change mode to eco"
-        # self.living_off()
+        self.living_off()
         self.hue_dim()
         self.AC1_temp27()
         time.sleep(1)
-        # self.AC2_temp27()
-        # self.AC3_temp27()
+        self.AC2_temp27()
+        self.AC3_temp27()
         self.tv_on()
-        # self.fan_on()
+        self.fan_on()
         self.plug_off()
-        # self.living_off()
-        # self.kitchen_off()
+        self.living_off()
+        self.kitchen_off()
 
     def AC1_temp20(self):
         # TODO this is example how to write an app to control AC
         # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
 
-        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
+        topic = '/ui/agent/1DAIK/update/bemoss/999/DAIK1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -312,7 +312,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         # TODO this is example how to write an app to control AC
 
         # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
-        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
+        topic = '/ui/agent/1DAIK/update/bemoss/999/1DAIK1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -379,7 +379,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def ChangeActor(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/2HUEH/update/bemoss/999/2HUE0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -392,7 +392,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def hue_on(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/2HUEH/update/bemoss/999/2HUEH0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -407,7 +407,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def hue_off(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/2HUEH/update/bemoss/999/2HUEH0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -420,7 +420,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #
     def hue_dim(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/2HUEH/update/bemoss/999/2HUEH0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -433,7 +433,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def hue_max(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/2HUEH/update/bemoss/999/2HUEH0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -475,7 +475,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138"
+        topic = "/ui/agent/07FAN/update/bemoss/999/1FN221445K1200138"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -489,7 +489,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138"
+        topic = "/ui/agent/07FAN/update/bemoss/999/1FN221445K1200138"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -503,7 +503,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def tv_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/tv/update/bemoss/999/1LG221445K1200137"
+        topic = "/ui/agent/11LG1/update/bemoss/999/11LG121445K1200137"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -517,7 +517,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def tv_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/tv/update/bemoss/999/1LG221445K1200137"
+        topic = "/ui/agent/11LG1/update/bemoss/999/11LG121445K1200137"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -585,7 +585,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def kitchen_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/light/update/bemoss/999/1KR221445K1200138'
+        topic = '/ui/agent/2HUEK/update/bemoss/999/2HUEK1445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -598,7 +598,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def kitchen_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/light/update/bemoss/999/1KR221445K1200138'
+        topic = '/ui/agent/2HUEK/update/bemoss/999/2HUEK1445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -611,7 +611,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def living_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/light/update/bemoss/999/1LR221445K1200138'
+        topic = '/ui/agent/2HUEL/update/bemoss/999/2HUEL1445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -624,7 +624,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def living_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/light/update/bemoss/999/1LR221445K1200138'
+        topic = '/ui/agent/2HUEL/update/bemoss/999/2HUEL1445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
