@@ -121,7 +121,7 @@ volttron-ctl install 1MS221445K1200132=/tmp/volttron_wheels/multisensoragent-0.1
 
 # Run LGTVAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/1LG221445K1200137.launch.json
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/11LG121445K1200137.launch.json
 volttron-ctl install 1LG221445K1200137=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
 
 # Run Fan
