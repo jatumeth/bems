@@ -927,7 +927,7 @@ def ThermostatAgent(config_path, **kwargs):
                     and self.authorized_fan_mode is not None:
                 # collect this result for alarm notification & device control
                 _unauthorized_fan_mode = self.get_variable('fan_mode')
-                print_out = "Unauthorized fan mode changed to " + str(_unauthorized_fan_mode)
+                print_out = "Unauthorized relaysw mode changed to " + str(_unauthorized_fan_mode)
                 print print_out
                 self.set_variable('fan_mode', self.authorized_fan_mode)
                 self.unauthorized_settings['fan_mode'] = self.get_variable('fan_mode')

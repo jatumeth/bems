@@ -97,9 +97,11 @@ class API:
 
         getDeviceStatusResult = True
 
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8",
-                             headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
+            r = requests.get(url,
+                             headers=headers, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
             print r.text
@@ -143,6 +145,9 @@ class API:
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
+
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
@@ -151,15 +156,15 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8",
-                    headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data= _data, timeout=20);
+                    url,
+                    headers=headers, data= _data, timeout=20);
                 # print "15456"
                 # print r.text
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
             except:
-                print("ERROR: classAPI_LGTV connection failure! @ setDeviceStatus")
+                print("ERROR: classAPI_RelaySW connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
@@ -183,25 +188,27 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    LGTV = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
-    # LGTV.getDeviceStatus()
 
-    LGTV.setDeviceStatus({"status": "ON"})
+    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',
+                  url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
+                  bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
+    RelaySW.getDeviceStatus()
+    RelaySW.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "OFF"})
+    # RelaySW.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "ON"})
+    # RelaySW.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "OFF"})
+    # RelaySW.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
-    # LGTV.setDeviceStatus({"status": "ON"})
+    # RelaySW.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()

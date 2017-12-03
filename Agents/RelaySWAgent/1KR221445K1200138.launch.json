@@ -3,11 +3,11 @@
     "agent": {
         "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1FN221445K1200138",
+    "agent_id": "2HUEK1445K1200138",
+    "api": "classAPI_swrelaylight",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",
-    "device": "5500e07f-1f41-4716-b89c-723c98cc2c0e",
+    "device": "b51760e0-35b2-4b69-ab67-a36621f12f08",
     "bearer": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7",
-    "api": "classAPI_Fan",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 
@@ -16,8 +16,8 @@
     "db_user": "admin", 
     "device_monitor_time": 10,
     "macaddress": "221445K1200138",
-    "model": "FAN123",
-    "type": "07FAN",
-    "vendor": "Hitari",
+    "model": "Obivo",
+    "type": "2HUEK",
+    "vendor": "phillip",
     "zone_id": 999
 }

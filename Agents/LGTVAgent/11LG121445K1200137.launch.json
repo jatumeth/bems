@@ -1,13 +1,13 @@
 {
     "address": "http://192.168.1.30:49153", 
     "agent": {
-        "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "lgtvagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1FN221445K1200138",
+    "agent_id": "11LG121445K1200137",
+    "api": "classAPI_LGTV",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",
-    "device": "5500e07f-1f41-4716-b89c-723c98cc2c0e",
+    "device": "0248cd7c-9a63-451f-98f1-7bd2e69a276d",
     "bearer": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7",
-    "api": "classAPI_Fan",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 
@@ -15,9 +15,9 @@
     "db_port": "5432", 
     "db_user": "admin", 
     "device_monitor_time": 10,
-    "macaddress": "221445K1200138",
-    "model": "FAN123",
-    "type": "07FAN",
-    "vendor": "Hitari",
+    "macaddress": "221445K1200137",
+    "model": "LG123",
+    "type": "11LG1",
+    "vendor": "LG",
     "zone_id": 999
 }

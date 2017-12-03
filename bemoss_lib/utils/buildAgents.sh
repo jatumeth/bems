@@ -229,15 +229,16 @@ volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-a
 #volttron-pkg configure /tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/mqttsubscribe/mqttsubagent.launch.json
 #volttron-ctl install MQTTSub=/tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl
 
+
 # kitchen light
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1KR221445K1200138.launch.json
-volttron-ctl install KitchenLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1KR221445K1200138.launch.json
+volttron-ctl install KitchenLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Living light
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1LR221445K1200138.launch.json
-volttron-ctl install LivingLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1LR221445K1200138.launch.json
+volttron-ctl install LivingLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Phillip-Hue
 volttron-pkg package ~/workspace/bemoss_os/Agents/LightingAgent/
@@ -263,14 +264,10 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
 volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/3WSP221445K1200328.launch.json
 volttron-ctl install somfy=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
 
-
-
-# Run MultisensorAgent
-volttron-pkg package ~/workspace/bemoss_os/Agents/MultiSensorAgent/
-volttron-pkg configure /tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiSensorAgent/openclose221445K1200135.launch.json
-volttron-ctl install openclose=/tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl
-
-
+# Run Openclose
+volttron-pkg package ~/workspace/bemoss_os/Agents/OpenCloseAgent/
+volttron-pkg configure /tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/OpenCloseAgent/openclose221445K1200135.launch.json
+volttron-ctl install openclose=/tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps

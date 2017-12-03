@@ -146,6 +146,8 @@ DATABASES = {
         'TABLE_CreativePowerMeter': 'CreativePowerMeter',
         'TABLE_ACDaikin': 'ACDaikin',
         'TABLE_Netatmo': 'Netatmo',
+        'TABLE_RelaySW': 'RelaySW',
+        'TABLE_OpenClose': 'OpenClose',
     }
 }
 

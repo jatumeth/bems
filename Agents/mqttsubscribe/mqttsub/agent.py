@@ -46,21 +46,54 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     @periodic(20)
     def on_matchmode(self):
-        self.wemo_on()
-        time.sleep(5)
-        self.wemo_off()
-        time.sleep(5)
-        self.wemo_on()
-        time.sleep(5)
-        self.wemo_off()
+        self.l_off()
+        time.sleep(10)
+        self.l_on()
+        time.sleep(10)
+        self.l_off()
+        time.sleep(10)
+        self.l_on()
+        time.sleep(10)
 
-        self.hue_min()
-        time.sleep(5)
-        self.hue_max()
-        time.sleep(5)
-        self.hue_min()
-        time.sleep(5)
-        self.hue_max()
+        # self.wemo_on()
+        # time.sleep(5)
+        # self.wemo_off()
+        #
+        # self.hue_min()
+        # time.sleep(5)
+        # self.hue_max()
+        # time.sleep(5)
+        # self.hue_min()
+        # time.sleep(5)
+        # self.hue_max()
+
+    def l_on(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/11LG1/update/bemoss/999/1LG221445K1200137"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("HUE on")
+
+
+    def l_off(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/11LG1/update/bemoss/999/1LG221445K1200137"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("HUE off")
+
 
     def hue_max(self):
         # TODO this is example how to write an app to control Lighting
@@ -132,7 +165,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan(self):
         # TODO this is example how to write an app to control Lighting
-        topic = '/ui/agent/fan/update/bemoss/999/1FN221445K1200138'
+        topic = '/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138'
         # {"status": "OFF"}
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
