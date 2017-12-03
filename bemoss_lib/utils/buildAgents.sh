@@ -231,13 +231,14 @@ volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-a
 
 
 # kitchen light
+
 volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
-volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1KR221445K1200138.launch.json
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/RelaySWAgent/1KR221445K1200138.launch.json
 volttron-ctl install KitchenLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Living light
 volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
-volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1LR221445K1200138.launch.json
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/RelaySWAgent/1LR221445K1200138.launch.json
 volttron-ctl install LivingLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Phillip-Hue

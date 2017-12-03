@@ -20,8 +20,8 @@ from uuid import getnode as get_mac
 utils.setup_logging()  # setup logger for debugging
 _log = logging.getLogger(__name__)
 
-PUSH_SOCKET = "ipc:///home/tpponmat/.volttron/run/publish"
-SUB_SOCKET = "ipc:///home/tpponmat/.volttron/run/subscribe"
+PUSH_SOCKET = "ipc:///home/dell-hive01/.volttron/run/publish"
+SUB_SOCKET = "ipc:///home/dell-hive01/.volttron/run/subscribe"
 
 kwargs = {'subscribe_address': SUB_SOCKET, 'publish_address': PUSH_SOCKET}
 zmq_pub = ZMQ_PUB(**kwargs)

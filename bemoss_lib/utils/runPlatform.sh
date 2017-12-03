@@ -112,10 +112,10 @@ sleep 2
 volttron-ctl start --tag Netatmoagent
 #sleep 2
 #volttron-ctl start --tag PVInverterAgent
-#sleep 2
-#volttron-ctl start --tag KitchenLight
-#sleep 2
-#volttron-ctl start --tag LivingLight
+sleep 2
+volttron-ctl start --tag KitchenLight
+sleep 2
+volttron-ctl start --tag LivingLight
 sleep 2
 volttron-ctl start --tag PEASmartHomeHue
 sleep 2
