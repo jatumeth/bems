@@ -81,7 +81,7 @@ class API:
     API3 available methods:
     1. getDeviceStatus() GET
     2. setDeviceStatus() SET
-    '''    
+    '''
 
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
@@ -92,6 +92,7 @@ class API:
         try:
             r = requests.get("http://192.168.1.12/aircon/get_control_info",
                               timeout=20);
+
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
 
@@ -114,17 +115,20 @@ class API:
 
     def getDeviceStatusJson(self, r, q):
 
-        status = (r.text.split(','))[1].split('=')[1]
-        current_temperature = (q.text.split(','))[1].split('=')[1]
-        set_temperature = (r.text.split(','))[4].split('=')[1]
-        set_humidity = (r.text.split(','))[5].split('=')[1]
-        mode = (r.text.split(','))[2].split('=')[1]
+        statusraw = (r.text.split(','))[1].split('=')[1]
+        if statusraw == "1":
+            status = "ON"
+        elif statusraw == "0":
+            status = "OFF"
+        else:
+            status = "ON"
+        print status
 
         self.set_variable('status', status)
-        self.set_variable('current_temperature', current_temperature)
-        self.set_variable('set_temperature', set_temperature)
-        self.set_variable('set_humidity', set_humidity)
-        self.set_variable('mode', mode)
+        self.set_variable('current_temperature', (q.text.split(','))[1].split('=')[1])
+        self.set_variable('set_temperature', (r.text.split(','))[4].split('=')[1])
+        self.set_variable('set_humidity', (r.text.split(','))[5].split('=')[1])
+        self.set_variable('mode', (r.text.split(','))[2].split('=')[1])
 
     def printDeviceStatus(self):
 
@@ -141,6 +145,8 @@ class API:
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
 
+        postmsg = str(postmsg)
+
         print(" postmsg = {}".format(postmsg))
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
@@ -149,6 +155,8 @@ class API:
             stemp = format(self.get_variable('set_temperature'))
             mode = format(self.get_variable('mode'))
 
+            if  type(postmsg)== str:
+                postmsg = eval(postmsg)
 
             for k, v in postmsg.items():
                 if k == 'status':
@@ -157,13 +165,16 @@ class API:
                     elif (postmsg['status']) == "OFF":
                         status = "0"
                 elif k == 'stemp':
-                    stemp = (postmsg['stemp'])
+                    stemp = str((postmsg['stemp']))
                 elif k == 'mode':
-                    mode = (postmsg['mode'])
+                    mode = str((postmsg['mode']))
                 else:
                     m = 1
 
             data="pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3"
+            print "9999999999"
+            print data
+
 
             try:
                 print "sending requests put"
@@ -192,25 +203,10 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
+
+
+    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "3"})
     AC.getDeviceStatus()
-
-    # AC.setDeviceStatus({"status" : "OFF","stemp": "22",'mode':'3'})
     # AC.setDeviceStatus({'stemp':'24'})
-    #
-    # time.sleep(10)
-    #
-    #Fan.setDeviceStatus({"stemp": "20"})
-
-    # time.sleep(10)
-    #
-    # Fan.setDeviceStatus({"status": "ON"})
-    #
-    # time.sleep(10)
-    #
-    # Fan.setDeviceStatus({"status": "OFF"})
-    #
-    # time.sleep(10)
-    #
-    # Fan.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()
