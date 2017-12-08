@@ -60,6 +60,7 @@ import psycopg2
 import psycopg2.extras
 import socket
 import settings
+import collections
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
@@ -446,7 +447,7 @@ def LightingAgent(config_path, **kwargs):
             }
             #step1: change device status according to the receive message
             if self.isPostmsgValid(message[0]):
-                setDeviceStatusResult = Light.setDeviceStatus(json.loads(message[0])) #convert received message from string to JSON
+                setDeviceStatusResult = Light.setDeviceStatus(self.convert(json.loads(message[0]))) #convert received message from string to JSON
                 #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
                 #step3: send reply message back to the UI
                 if setDeviceStatusResult:
@@ -471,6 +472,17 @@ def LightingAgent(config_path, **kwargs):
                 dataValidity = False
                 print("dataValidity failed to validate data coming from UI")
             return dataValidity
+
+        def convert(self, data):
+            import collections
+            if isinstance(data, basestring):
+                return str(data)
+            elif isinstance(data, collections.Mapping):
+                return dict(map(self.convert, data.iteritems()))
+            elif isinstance(data, collections.Iterable):
+                return type(data)(map(self.convert, data))
+            else:
+                return data
 
         #6. deviceIdentifyBehavior(generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/identify/'+_topic_Agent_UI_tail)

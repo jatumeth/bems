@@ -85,7 +85,7 @@ volttron-ctl install networkagent=/tmp/volttron_wheels/networkagent-0.1-py2-none
 
 # Run Powermeter agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PowerMeterAgent/
-volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/powermeteragent.launch.json
+volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/creativepoweragent.launch.json
 volttron-ctl install powermeteragent=/tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl
 
 # Run Mode agent
