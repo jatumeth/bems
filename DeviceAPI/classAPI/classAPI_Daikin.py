@@ -171,7 +171,7 @@ class API:
                 else:
                     m = 1
 
-            data="pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3"
+            data=str("pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3")
             print "9999999999"
             print data
 
@@ -205,8 +205,9 @@ def main():
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
 
 
-    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "3"})
+    AC.setDeviceStatus({'status': 'OFF', 'device': '1DAIK1200138'})
     AC.getDeviceStatus()
+    # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "3"})
     # AC.setDeviceStatus({'stemp':'24'})
 
 if __name__ == "__main__": main()
