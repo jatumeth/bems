@@ -247,8 +247,6 @@ def main():
 
     TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '5500e07f-1f41-4716-b89c-723c98cc2c0e')
 
-
-    import time
     TPlinkPlug.setDeviceStatus({"status": "ON"})
     TPlinkPlug.getDeviceStatus()
     #
