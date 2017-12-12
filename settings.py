@@ -148,6 +148,8 @@ DATABASES = {
         'TABLE_Netatmo': 'Netatmo',
         'TABLE_RelaySW': 'RelaySW',
         'TABLE_OpenClose': 'OpenClose',
+        'TABLE_Curtain': 'Curtain',
+        'TABLE_Doorlock': 'Doorlock',
     }
 }
 

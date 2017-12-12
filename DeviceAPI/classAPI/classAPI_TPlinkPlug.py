@@ -61,7 +61,6 @@ class API:
         self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
 
-
     def renewConnection(self):
         pass
 
@@ -98,74 +97,131 @@ class API:
 
         getDeviceStatusResult = True
 
+        r0 = requests.post(
+            url="https://wap.tplinkcloud.com/",
+            params={
+                "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+            },
+            headers={
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "method": "getDeviceList"
+            })
+        )
+        w = json.loads(r0.text)
+        status = w['result']['deviceList'][0]['status']
+        r = requests.post(
+            url="https://wap.tplinkcloud.com/",
+            params={
+                "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+            },
+            headers={
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "method": "passthrough",
+                "params": {
+                    "requestData": "{\"emeter\":{\"get_realtime\":{}}}",
+                    "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+                }
+            })
+        )
+
+        b = json.loads(r.text)
+        c = b['result']['responseData']
+        d = json.loads(c)
+        current = d['emeter']['get_realtime']['current']
+        volt = d['emeter']['get_realtime']['voltage']
+        power = d['emeter']['get_realtime']['power']
+
+        self.set_variable('status', status)
+        self.set_variable('current', current)
+        self.set_variable('voltage', volt)
+        self.set_variable('power', power)
+
         try:
+            print ""
 
-            headers = {"Authorization": self.get_variable("bearer")}
-            url = str(self.get_variable("url") + self.get_variable("device"))
-            r = requests.get(url,
-                             headers=headers, timeout=20);
-            format(self.variables.get('agent_id', None), str(r.status_code))
 
-            if r.status_code == 200:
-                getDeviceStatusResult = False
 
-                self.getDeviceStatusJson(r.text)
-                if self.debug is True:
-                    self.printDeviceStatus()
-            else:
-                print (" Received an error from server, cannot retrieve results")
-                getDeviceStatusResult = False
-            # Check the connectivity
-            if getDeviceStatusResult==True:
-                self.set_variable('offline_count', 0)
-            else:
-                self.set_variable('offline_count', self.get_variable('offline_count')+1)
+
         except Exception as er:
             print er
             print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
-
+        self.printDeviceStatus()
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
-        print conve_json
-        # self.set_variable('label', str(conve_json["label"]))
-        # self.set_variable('status', str(conve_json["status"]))
-        # self.set_variable('unitTime', conve_json["unitTime"])
-        # self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('label', str(conve_json["label"]))
+        if str(conve_json["status"]) == "on":
+            self.set_variable('status', "ON")
+        else:
+            self.set_variable('status', "OFF")
+        self.set_variable('unitTime', conve_json["unitTime"])
+        self.set_variable('type', str(conve_json["type"]))
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        # print(" the current status is as follows:")
-        # print(" label = {}".format(self.get_variable('label')))
-        # print(" status = {}".format(self.get_variable('status')))
-        # print(" unitTime = {}".format(self.get_variable('unitTime')))
-        # print(" type= {}".format(self.get_variable('type')))
+        print(" the current status is as follows:")
+        print(" status = {}".format(self.get_variable('status')))
+        print(" current = {}".format(self.get_variable('current')))
+        print(" volt = {}".format(self.get_variable('volt')))
+        print(" power = {}".format(self.get_variable('power')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
-
-        if type(postmsg) == str:
-            postmsg = eval(postmsg)
-
-        headers = {"Authorization": self.get_variable("bearer")}
-        url = str(self.get_variable("url") + self.get_variable("device"))
-
         setDeviceStatusResult = True
+
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
             _data = _data.encode(encoding='utf_8')
+            print _data
+            command = postmsg['status'].lower()
             try:
-                print "sending requests put"
-                r = requests.put(url, headers=headers, data=_data, timeout=20);
-                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
-                      .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
-                print(" after send a POST request: {}".format(r.status_code))
+                if command == 'on':
+                    print "on"
+                    r = requests.post(
+                        url="https://wap.tplinkcloud.com/",
+                        params={
+                            "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+                        },
+                        headers={
+                            "Content-Type": "application/json",
+                        },
+                        data=json.dumps({
+                            "method": "passthrough",
+                            "params": {
+                                "requestData": "{\"system\":{\"set_relay_state\":{\"state\":1}}}",
+                                "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+                            }
+                        })
+                    )
+
+                elif command == 'off':
+                    print "off"
+                    r = requests.post(
+                        url="https://wap.tplinkcloud.com/",
+                        params={
+                            "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+                        },
+                        headers={
+                            "Content-Type": "application/json",
+                        },
+                        data=json.dumps({
+                            "method": "passthrough",
+                            "params": {
+                                "requestData": "{\"system\":{\"set_relay_state\":{\"state\":0}}}",
+                                "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+                            }
+                        })
+                    )
             except:
-                print("ERROR: classAPI_Yale connection failure! @ setDeviceStatus")
+                print("ERROR: classAPI_TPlinkPlug connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
         else:
             print("The POST message is invalid, try again\n")
@@ -178,12 +234,8 @@ class API:
 
     def convertPostMsg(self, postmsg):
         msgToDevice = {}
-        print
-
-        if postmsg['status'] == 'ON':
-            msgToDevice['command'] = "lock"
-        elif postmsg['status'] == 'OFF':
-            msgToDevice['command'] = "unlock"
+        if 'status' in postmsg.keys():
+            msgToDevice['command'] = str(postmsg['status'].lower())
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -193,26 +245,25 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/locks/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'a3270d83-90a7-4960-a292-18dd71454ae5')
-    # Yale.getDeviceStatus()
+    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '5500e07f-1f41-4716-b89c-723c98cc2c0e')
 
-    # Yale.setDeviceStatus({"command": "unlock"})
-    #{"command":"lock"}
-    # {"command":"unlock"}
-    # time.sleep(10)
-    #
-    Yale.setDeviceStatus({"status": "ON"})
+    TPlinkPlug.setDeviceStatus({"status": "ON"})
+    TPlinkPlug.getDeviceStatus()
     #
     # time.sleep(10)
     #
-    # Yale.setDeviceStatus({"status": "ON"})
+    # TPlinkPlug.setDeviceStatus({"status": "Off"})
     #
     # time.sleep(10)
     #
-    # Yale.setDeviceStatus({"status": "OFF"})
+    # TPlinkPlug.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
-    # Yale.setDeviceStatus({"status": "ON"})
+    # TPlinkPlug.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(10)
+    #
+    # TPlinkPlug.setDeviceStatus({"status": "ON"})
 
 if __name__ == "__main__": main()
