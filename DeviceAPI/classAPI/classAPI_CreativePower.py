@@ -100,10 +100,12 @@ class API:
             conve_json = json.loads(r.data)
             # print r.data
 
-            self.set_variable('grid_current', conve_json['cpletrix']['records'][0][6])
-            self.set_variable('grid_activePower', conve_json['cpletrix']['records'][0][9])
-            self.set_variable('grid_reactivePower', conve_json['cpletrix']['records'][0][10])
-            self.set_variable('grid_powerfactor', conve_json['cpletrix']['records'][0][8])
+            self.set_variable('grid_voltage', float(conve_json['cpletrix']['records'][0][5]))
+            self.set_variable('grid_current', float(conve_json['cpletrix']['records'][0][6]))
+            self.set_variable('grid_activePower', float(conve_json['cpletrix']['records'][0][9]))
+            self.set_variable('grid_reactivePower', float(conve_json['cpletrix']['records'][0][10]))
+            self.set_variable('grid_powerfactor', float(conve_json['cpletrix']['records'][0][8]))
+            self.set_variable('grid_accumulated_energy', float(conve_json['cpletrix']['records'][0][11]))
 
         except Exception as er:
             print er
@@ -113,10 +115,12 @@ class API:
     def printDeviceStatus(self):
 
         print ("--------------------------------Creative Power status--------------------------------")
+        print(" Voltage(V) = {}".format(self.get_variable('grid_voltage')))
         print(" Current(A) = {}".format(self.get_variable('grid_current')))
         print(" ActivePower(W) = {}".format(self.get_variable('grid_activePower')))
         print(" ReactivePower(Var) = {}".format(self.get_variable('grid_reactivePower')))
         print(" Powerfactor = {}".format(self.get_variable('grid_powerfactor')))
+        print(" AccumulatedEnergy(Wh) = {}".format(self.get_variable('grid_accumulated_energy')))
 
 
     # ----------------------------------------------------------------------

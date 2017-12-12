@@ -270,6 +270,11 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/OpenCloseAgent/
 volttron-pkg configure /tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/OpenCloseAgent/openclose221445K1200135.launch.json
 volttron-ctl install openclose=/tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl
 
+# Run openclosedoor
+volttron-pkg package ~/workspace/bemoss_os/Agents/OpenCloseAgent/
+volttron-pkg configure /tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/OpenCloseAgent/18DOR08.launch.json
+volttron-ctl install openclosedoor=/tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl
+
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
 #cd ~/workspace/bemoss_os/Applications/code/AppLauncherAgent

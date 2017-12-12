@@ -55,7 +55,7 @@ from azure.storage.blob import ContentSettings
 from azure.storage.blob import BlockBlobService
 import os
 
-RTSP_URL = 'rtsp://admin:12345678@192.168.1.75:10554/tcp/av1_1'
+RTSP_URL = 'rtsp://admin:12345678@192.168.1.23:10554/tcp/av1_1'
 #from bemoss_lib.utils import rgb_cie
 camera_id ='6SAM0006'
 class API:
@@ -142,7 +142,7 @@ class API:
 
             try:
                 sp.call(
-                    'ffmpeg -y -r 15 -rtsp_transport tcp -i rtsp://admin:12345678@192.168.1.75:10554/tcp/av1_1 -vf "scale=320:240" -c:v libx264 -crf 30 -t 30 -preset ultrafast -tune zerolatency  -b:v 64k -bufsize 192k -an -dn /home/dell-hive01/workspace/RecEvent/%s.mp4' % (fileName), shell=True, stdout=sp.PIPE)
+                    'ffmpeg -y -r 15 -rtsp_transport tcp -i rtsp://admin:12345678@192.168.1.23:10554/tcp/av1_1 -vf "scale=320:240" -c:v libx264 -crf 30 -t 30 -preset ultrafast -tune zerolatency  -b:v 64k -bufsize 192k -an -dn /home/dell-hive01/workspace/RecEvent/%s.mp4' % (fileName), shell=True, stdout=sp.PIPE)
                 # print("Try Record")
                 # sp.call('ffmpeg -y -r 20 -t 10 -f avfoundation -i 0 -vf "scale=320:240" -c:v libx264 -an -dn ./RecEvent/%s.mp4' % (fileName),shell=True, stdout=sp.PIPE)  # for FaceTime Camera
                 print("Record Successful")
