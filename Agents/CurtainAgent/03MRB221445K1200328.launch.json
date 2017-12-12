@@ -1,0 +1,23 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "somfyagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "03MRB221445K1200328",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/switches/",
+    "device": "e75fb1ac-aebe-427d-a4e4-5d50f0572c18",
+    "bearer": "Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4",
+    "api": "classAPI_somfy",
+    "building_name": "bemoss",
+    "db_database": "bemossdb", 
+    "db_host": "localhost", 
+    "db_password": "admin", 
+    "db_port": "5432", 
+    "db_user": "admin", 
+    "device_monitor_time": 10,
+    "macaddress": "221445K1200138",
+    "model": "FAN123",
+    "type": "03MRB2",
+    "vendor": "Hitari",
+    "zone_id": 999
+}

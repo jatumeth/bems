@@ -124,17 +124,15 @@ sleep 2
 volttron-ctl start --tag HomeSceneApp
 
 sleep 2
-volttron-ctl start --tag YaleDoorLock
+volttron-ctl start --tag doorlock
 #sleep 2
 
 sleep 2
-volttron-ctl start --tag somfy
-#volttron-ctl start --tag CreativePowerAgent
+volttron-ctl start --tag curtain
 
 sleep 2
 volttron-ctl start --tag openclose
 #volttron-ctl start --tag CreativePowerAgent
-
 
 volttron-ctl status
 deactivate
