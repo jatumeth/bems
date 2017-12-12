@@ -61,6 +61,14 @@ import threading
 import random
 from DeviceAPI.discoverAPI import WiFi
 
+#for streaming
+import plotly
+import numpy as np
+import plotly.plotly as py
+import plotly.tools as tls
+import plotly.graph_objs as go
+tls.set_credentials_file(username='kwarodom', api_key='ljMtxORMkyx0JmiDwIyT')
+stream_id = 'z672u440m7'
 
 def keepListening(threadingLock, address, port, callback):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -286,8 +294,22 @@ class API:
 
         if getDeviceStatusResult==True:
             self.set_variable('offline_count',0)
+            # TODO call streaming method
+            self.streamToPlotly(stream_id)
         else:
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
+
+    def streamToPlotly(self, stream_id):
+        try:
+            # stream_id = 'h9wluesnpy'
+            s = py.Stream('z672u440m7')
+            s.open()
+            x = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+            y = self.get_variable('power')
+            print("streamed {},{} to plotly".format(x, y))
+            s.write(dict(x=x, y=self.get_variable('power')))
+        except Exception as er:
+            print("streamToPlotly cannot stream to plotly error: {}".format(er))
 
     def printDeviceStatus(self):
         print(" The current Wemo status is as follows:")
@@ -370,7 +392,7 @@ class API:
 def main():
     # Test Codes
 
-    WeMoSwitch = API(model='Insight', api='classAPI_WeMo', address='http://192.168.1.18:49153', agent_id='plugloadagent')
+    WeMoSwitch = API(model='Insight', api='classAPI_WeMo', address='http://192.168.1.31:49153', agent_id='plugloadagent')
     # Find device Model
     # print WeMoSwitch.getDeviceModel()
     # Get and Print Device Status
@@ -380,9 +402,8 @@ def main():
     # k = threading.Lock
     # WeMoSwitch.startListeningEvents(k,dummy)
     WeMoSwitch.getDeviceStatus()
-    x = WeMoSwitch.get_variable('motion')
+    # x = WeMoSwitch.get_variable('motion')
     # WeMoSwitch.identifyDevice()
     # WeMoSwitch.setDeviceStatus({"status": "OFF"})
-    print x
 
 if __name__ == "__main__": main()

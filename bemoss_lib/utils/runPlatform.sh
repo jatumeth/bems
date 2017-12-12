@@ -134,6 +134,9 @@ sleep 2
 volttron-ctl start --tag openclose
 #volttron-ctl start --tag CreativePowerAgent
 
+sleep 2
+volttron-ctl start --tag openclosedoor
+
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish
