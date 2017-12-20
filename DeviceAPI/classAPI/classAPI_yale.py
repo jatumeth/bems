@@ -194,14 +194,14 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/locks/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'a3270d83-90a7-4960-a292-18dd71454ae5')
-    # Yale.getDeviceStatus()
+    Yale.getDeviceStatus()
 
     # Yale.setDeviceStatus({"command": "unlock"})
     #{"command":"lock"}
     # {"command":"unlock"}
     # time.sleep(10)
     #
-    Yale.setDeviceStatus({"status": "ON"})
+    # Yale.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #

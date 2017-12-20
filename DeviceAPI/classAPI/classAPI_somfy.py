@@ -163,6 +163,19 @@ class API:
 
 
             try:
+                _data2 =   json.dumps({"command": "TwoOff"})
+                print (_data2)
+                print "sending requests put"
+                r3 = requests.put(url, headers=headers, data=_data, timeout=20);
+                time.sleep(1)
+
+                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
+                _data3 =   json.dumps({"command": "OneOff"})
+                print (_data3)
+                print "sending requests put"
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                time.sleep(1)
+
 
                 print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
@@ -171,38 +184,25 @@ class API:
 
 
 
-
-                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                _data3 =  json.dumps({"command": "TwoOn"})
+                _data3 =  json.dumps({"command": "OneOff"})
                 print (_data3)
                 print "sending requests put"
-                r2 = requests.put(url, headers=headers, data=_data, timeout=20);
-
-                time.sleep(3)
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
                 _data2 =   json.dumps({"command": "TwoOff"})
                 print (_data2)
                 print "sending requests put"
-                r3 = requests.put(url, headers=headers, data=_data, timeout=20);
-
-                time.sleep(3)
+                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                time.sleep(1)
 
                 # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 _data3 =   json.dumps({"command": "OneOff"})
                 print (_data3)
                 print "sending requests put"
-                r2 = requests.put(url, headers=headers, data=_data, timeout=20);
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
-                time.sleep(3)
 
-                _data2 =  ({"command": "TwoOff"})
-                print (_data2)
-                print "sending requests put"
-                r3 = requests.put(url, headers=headers, data=_data, timeout=20);
 
-                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
-                      .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
-                print(" after send a POST request: {}".format(r.status_code))
             except:
                 print("ERROR: classAPI_Somfy connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
@@ -236,11 +236,11 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/switches/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'e75fb1ac-aebe-427d-a4e4-5d50f0572c18')
-    # Somfy.getDeviceStatus()
+    Somfy.getDeviceStatus()
 
 
     #
-    # Somfy.setDeviceStatus({"status": "ON"})
+    Somfy.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
@@ -248,6 +248,6 @@ def main():
     #
     # time.sleep(10)
     #
-    Somfy.setDeviceStatus({"status": "OFF"})
+    # Somfy.setDeviceStatus({"status": "OFF"})
 
 if __name__ == "__main__": main()

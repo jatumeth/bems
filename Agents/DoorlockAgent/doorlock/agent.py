@@ -199,6 +199,8 @@ def DoorlockAgent(config_path, **kwargs):
 
         def postgresAPI(self):
 
+
+
             try:
                 self.cur.execute("SELECT * from relaysw WHERE Doorlock_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
