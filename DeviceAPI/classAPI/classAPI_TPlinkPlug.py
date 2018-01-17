@@ -49,6 +49,8 @@ under Contract DE-EE0006352
 import time
 import json
 import requests
+import psycopg2
+import datetime
 
 class API:
     # 1. constructor : gets call every time when create a new class
@@ -94,63 +96,57 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
+        deviceid = str(self.get_variable("deviceid"))
 
-        getDeviceStatusResult = True
-
-        r0 = requests.post(
-            url="https://wap.tplinkcloud.com/",
-            params={
-                "token": "1a6b68f0-2ad615fdb4134d728e72e77",
-            },
-            headers={
-                "Content-Type": "application/json",
-            },
-            data=json.dumps({
-                "method": "getDeviceList"
-            })
-        )
-        w = json.loads(r0.text)
-        status = w['result']['deviceList'][0]['status']
-        r = requests.post(
-            url="https://wap.tplinkcloud.com/",
-            params={
-                "token": "1a6b68f0-2ad615fdb4134d728e72e77",
-            },
-            headers={
-                "Content-Type": "application/json",
-            },
-            data=json.dumps({
-                "method": "passthrough",
-                "params": {
-                    "requestData": "{\"emeter\":{\"get_realtime\":{}}}",
-                    "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
-                }
-            })
-        )
-
-        b = json.loads(r.text)
-        c = b['result']['responseData']
-        d = json.loads(c)
-        current = d['emeter']['get_realtime']['current']
-        volt = d['emeter']['get_realtime']['voltage']
-        power = d['emeter']['get_realtime']['power']
-
-        self.set_variable('status', status)
-        self.set_variable('current', current)
-        self.set_variable('voltage', volt)
-        self.set_variable('power', power)
-
+        self.opentoken()
         try:
-            print ""
+            r0 = requests.post(
+                url="https://wap.tplinkcloud.com/",
+                params={
+                    "token": self.token,
+                },
+                headers={
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps({
+                    "method": "getDeviceList"
+                })
+            )
+            w = json.loads(r0.text)
+            status = w['result']['deviceList'][0]['status']
+            r = requests.post(
+                url="https://wap.tplinkcloud.com/",
+                params={
+                    "token": self.token,
+                },
+                headers={
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps({
+                    "method": "passthrough",
+                    "params": {
+                        "requestData": "{\"emeter\":{\"get_realtime\":{}}}",
+                        "deviceId": deviceid
+                    }
+                })
+            )
 
+            b = json.loads(r.text)
+            c = b['result']['responseData']
+            d = json.loads(c)
+            current = d['emeter']['get_realtime']['current']
+            volt = d['emeter']['get_realtime']['voltage']
+            power = d['emeter']['get_realtime']['power']
 
-
-
-        except Exception as er:
-            print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-            self.set_variable('offline_count',self.get_variable('offline_count')+1)
+            self.set_variable('status', status)
+            self.set_variable('current', current)
+            self.set_variable('voltage', volt)
+            self.set_variable('power', power)
+        except:
+            print "newtoken"
+            self.newtoken()
         self.printDeviceStatus()
+
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
@@ -175,7 +171,8 @@ class API:
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
-
+        self.getDeviceStatus()
+        deviceid = str(self.get_variable("deviceid"))
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
@@ -188,7 +185,7 @@ class API:
                     r = requests.post(
                         url="https://wap.tplinkcloud.com/",
                         params={
-                            "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+                            "token": self.token,
                         },
                         headers={
                             "Content-Type": "application/json",
@@ -197,7 +194,7 @@ class API:
                             "method": "passthrough",
                             "params": {
                                 "requestData": "{\"system\":{\"set_relay_state\":{\"state\":1}}}",
-                                "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+                                "deviceId": deviceid
                             }
                         })
                     )
@@ -207,7 +204,7 @@ class API:
                     r = requests.post(
                         url="https://wap.tplinkcloud.com/",
                         params={
-                            "token": "1a6b68f0-2ad615fdb4134d728e72e77",
+                            "token": self.token,
                         },
                         headers={
                             "Content-Type": "application/json",
@@ -216,7 +213,7 @@ class API:
                             "method": "passthrough",
                             "params": {
                                 "requestData": "{\"system\":{\"set_relay_state\":{\"state\":0}}}",
-                                "deviceId": "8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+                                "deviceId": deviceid
                             }
                         })
                     )
@@ -238,20 +235,79 @@ class API:
             msgToDevice['command'] = str(postmsg['status'].lower())
         return msgToDevice
 
+        self.printDeviceStatus()
     # ----------------------------------------------------------------------
+
+    def newtoken(self):
+
+        cloudUserName = str(self.get_variable("cloudUserName"))
+        cloudPassword = str(self.get_variable("cloudPassword"))
+        response = requests.post(
+            url="https://wap.tplinkcloud.com",
+            headers={
+                "Content-Type": "application/json",
+            },
+            data=json.dumps({
+                "method": "login",
+                "params": {
+                    "cloudUserName": cloudUserName,
+                    "appType": "Kasa_Android",
+                    "terminalUUID": "MY_UUID_v4",
+                    "cloudPassword": cloudPassword
+                }
+            })
+        )
+        print('Response HTTP Status Code: {status_code}'.format(
+            status_code=response.status_code))
+        print('Response HTTP Response Body: {content}'.format(
+            content=response.content))
+
+        find_token = json.loads(response.text)
+        self.token=(find_token['result']['token']).encode("utf-8")
+
+        conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
+
+        cur = conn.cursor()
+        cur.execute("SELECT * from information_schema.tables where table_name=%s", ("plug_tplink_token",))
+        if bool(cur.rowcount):
+            pass
+        else:
+            cur.execute('''CREATE TABLE plug_tplink_token(id SERIAL PRIMARY KEY NOT NULL,
+                    accesstoken VARCHAR(50) NOT NULL, time TIMESTAMP);''')
+            print "create new database plug_tplink_token"
+            conn.commit()
+            cur.execute('INSERT INTO plug_tplink_token (id, accesstoken, time) VALUES (%s, %s ,%s)',
+                        ('1', 'aaa', datetime.datetime.now()))
+            conn.commit()
+
+        cur = conn.cursor()
+        cur.execute('UPDATE plug_tplink_token SET accesstoken=%s WHERE id=%s', (self.token, "1"))
+        conn.commit()
+        cur = conn.cursor()
+        cur.execute('UPDATE plug_tplink_token SET time=%s WHERE id=%s', (datetime.datetime.now(), "1"))
+        conn.commit()
+
+    def opentoken(self):
+
+        conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
+        cur = conn.cursor()
+        cur.execute("""SELECT * from plug_tplink_token""")
+        rows = cur.fetchall()
+        for row in rows:
+            self.token = str(row[1])
 
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '5500e07f-1f41-4716-b89c-723c98cc2c0e')
+    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='smarthome.pea@gmail.com',cloudPassword='28Sep1960',deviceid='8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F')
 
-    TPlinkPlug.setDeviceStatus({"status": "ON"})
+    TPlinkPlug.setDeviceStatus({"status": "OFF"})
     TPlinkPlug.getDeviceStatus()
+
     #
     # time.sleep(10)
-    #
     # TPlinkPlug.setDeviceStatus({"status": "Off"})
     #
     # time.sleep(10)
