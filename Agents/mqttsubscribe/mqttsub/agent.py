@@ -47,13 +47,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
     @periodic(20)
     def on_matchmode(self):
         self.l_off()
-        time.sleep(10)
+        time.sleep(5)
         self.l_on()
-        time.sleep(10)
+        time.sleep(5)
         self.l_off()
-        time.sleep(10)
+        time.sleep(5)
         self.l_on()
-        time.sleep(10)
+        time.sleep(5)
 
         # self.wemo_on()
         # time.sleep(5)
@@ -69,7 +69,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def l_on(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/11LG1/update/bemoss/999/1LG221445K1200137"
+        topic = "/ui/agent/03WIS/update/bemoss/999/03WIS231613K1200162"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -83,7 +83,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def l_off(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/11LG1/update/bemoss/999/1LG221445K1200137"
+        topic = "/ui/agent/03WIS/update/bemoss/999/03WIS231613K1200162"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -123,8 +123,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
 
     def wemo_on(self):
-        # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        # TODO this is example how to write an app to control tplink EV
+        topic = "/ui/agent/tplink/update/bemoss/999/3WIS221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -136,8 +136,8 @@ class ListenerAgent(PublishMixin, BaseAgent):
         print ("plug EV turn ON")
 
     def wemo_off(self):
-        # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        # TODO this is example how to write an app to control tplink EV
+        topic = "/ui/agent/tplink/update/bemoss/999/3WIS221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
