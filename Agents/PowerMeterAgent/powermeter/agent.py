@@ -124,6 +124,8 @@ def powermeteragent(config_path, **kwargs):
                                                                         PowerMeter.get_variable('api'),
                                                                         PowerMeter.get_variable('address')))
 
+    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+
     # 5. @params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
@@ -220,16 +222,21 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
-
-            self.postgresAPI()
+            # self.postgresAPI()
             print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+            x = {}
+            x["agent_id"] = PowerMeter.variables['agent_id']
+            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["gridvoltage"] = PowerMeter.variables['grid_voltage']
+            x["gridcurrent"] = PowerMeter.variables['grid_current']
+            x["gridactivePower"] = PowerMeter.variables['grid_activePower']
+            x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
+
+            discovered_address = iotmodul.iothub_client_sample_run(x)
 
         def postgresAPI(self):
 
             self.connect_postgresdb()
-
-
-
             try:
                 self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
