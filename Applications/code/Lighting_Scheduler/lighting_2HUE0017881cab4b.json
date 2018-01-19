@@ -1,0 +1,41 @@
+{
+    "lighting": {
+        "2HUE0017881cab4b": {
+            "active": [
+                "everyday",
+                "holiday"
+            ],
+            "inactive": [],
+            "schedulers": {
+                "everyday": {
+                    "friday": [
+                        {
+                            "at": 1045,
+                            "brightness": 50,
+                            "color": "(0, 255, 255)",
+                            "status": "ON"
+                        },
+                        {
+                            "at": 1046,
+                            "brightness": 50,
+                            "color": "(255, 255, 0)",
+                            "status": "ON"
+                        },
+                        {
+                            "at": 1047,
+                            "brightness": 50,
+                            "color": "(255, 0, 255)",
+                            "status": "ON"
+                        },
+                        {
+                            "at": 1048,
+                            "brightness": 100,
+                            "color": "(255, 255, 255)",
+                            "status": "ON"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

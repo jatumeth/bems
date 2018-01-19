@@ -2,6 +2,6 @@
     "agent": {
         "exec": "lighting_scheduleragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agent_id": "WifiLight5",
+    "agent_id": "2HUE0017881cab4b",
     "type": "lighting_scheduler"
 }
