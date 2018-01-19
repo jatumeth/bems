@@ -66,13 +66,13 @@ clock_time = 1
 time_to_start_previous_apps = 30  # sec
 
 # @params agent & DB interfaces
-db_host = settings.DATABASES['default']['HOST']
-db_port = settings.DATABASES['default']['PORT']
-db_database = settings.DATABASES['default']['NAME']
-db_user = settings.DATABASES['default']['USER']
-db_password = settings.DATABASES['default']['PASSWORD']
-db_table_application_registered = settings.DATABASES['default']['TABLE_application_registered']
-db_table_application_running = settings.DATABASES['default']['TABLE_application_running']
+db_host = "localhost"
+db_port = "5432"
+db_database = "bemossdb"
+db_user = "admin"
+db_password = "admin"
+db_table_application_registered = "application_registered"
+db_table_application_running = "application_running"
 
 class AppLauncherAgent(PublishMixin, BaseAgent):
     '''Listens to UI to launch new APP in the BEMOSS APP Store'''
@@ -171,7 +171,7 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
     def launch_app(self, ui_app_name, ui_agent_id, ui_auth_token):
         # 1. query database whether the app_name is verified and registered
         # if app_name is in database with the valid authorization_token, then launch agent
-        self.cur.execute("SELECT auth_token FROM "+db_table_application_registered+" WHERE app_name=%s", (ui_app_name,))
+        self.cur.execute("SELECT auth_token FROM "+db_table_application_registered+" WHERE app_name=%s", (ui_app_name))
         if self.cur.rowcount != 0:
             app_auth_token = self.cur.fetchone()[0]
             if ui_auth_token == app_auth_token:
@@ -247,6 +247,7 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
             print "The APP that UI requested is neither REGISTERED nor AVAILABLE"
 
     def launch_existing_app(self, ui_app_name, ui_agent_id):
+        print "launch existing app: start"
         self.cur.execute("SELECT executable FROM "+db_table_application_registered+" WHERE app_name=%s", (ui_app_name,))
         # 1. launch app for an agent based on the exec file and agent_id
         if self.cur.rowcount != 0:
@@ -256,11 +257,12 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
                 "agent": {
                     "exec": _exec
                 },
-                "agent_id": ui_agent_id
+                "agent_id": ui_agent_id,
+                "message": "hello my name is "+ui_agent_id
             }
             PROJECT_DIR = settings.PROJECT_DIR
             _launch_file = os.path.join(PROJECT_DIR, "Applications/launch/"
-                                        + str(ui_app_name) + "_" + str(ui_agent_id))
+                                        + str(ui_app_name) + "_" + str(ui_agent_id)+".launch.json")
             if debug_agent: print(_launch_file)
             with open(_launch_file, 'w') as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
@@ -284,10 +286,12 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
                     installed = True
 
             if not installed:
-                os.system("volttron-pkg configure /tmp/volttron_wheels/"+ui_app_name+"agent-0.1-py2-none-any.whl "+ _launch_file+
-                ";volttron-ctl install "+ui_app_name+"_"+ui_agent_id+"=/tmp/volttron_wheels/"+ui_app_name+"agent-0.1-py2-none-any.whl")
+                os.system("volttron-pkg configure /tmp/volttron_wheels/"+ui_app_name+"agent-0.1-py2-none-any.whl "+ _launch_file)
+                os.system("volttron-ctl install " + ui_app_name + "_" + ui_agent_id +"=/tmp/volttron_wheels/" + ui_app_name + "agent-0.1-py2-none-any.whl")
 
-            os.system("volttron-ctl start --tag "+os.path.basename(_launch_file))
+            print("OK")
+            # os.system("volttron-ctl start --tag "+os.path.basename(_launch_file))
+            os.system("volttron-ctl start --tag "+ui_app_name+"_"+ui_agent_id)
             os.system("volttron-ctl status")
             # os.system("bin/volttron-ctrl load-agent "+_launch_file)
             # os.system("bin/volttron-ctrl start-agent "+os.path.basename(_launch_file))
@@ -304,6 +308,7 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
             self.publish(_topic_appLauncher_ui, _headers, _message)
 
     def launch_new_app(self, ui_app_name, ui_agent_id):
+        print "launch new app: start"
         self.cur.execute("SELECT executable FROM "+db_table_application_registered+" WHERE app_name=%s", (ui_app_name,))
         # 1. launch app for an agent based on the exec file and agent_id
         if self.cur.rowcount != 0:
@@ -313,11 +318,12 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
                 "agent": {
                     "exec": _exec
                 },
-                "agent_id": ui_agent_id
+                "agent_id": ui_agent_id,
+                "message": "hello my name is " + ui_agent_id
             }
             PROJECT_DIR = settings.PROJECT_DIR
             _launch_file = os.path.join(PROJECT_DIR, "Applications/launch/"
-                                        + str(ui_app_name) + "_" + str(ui_agent_id))
+                                        + str(ui_app_name) + "_" + str(ui_agent_id)+".launch.json")
             if debug_agent: print(_launch_file)
             with open(_launch_file, 'w') as outfile:
                 json.dump(data, outfile, indent=4, sort_keys=True)
@@ -336,10 +342,11 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
                     installed = True
 
             if not installed:
-                os.system("volttron-pkg configure /tmp/volttron_wheels/"+ui_app_name+"agent-0.1-py2-none-any.whl "+ _launch_file+
-                ";volttron-ctl install "+ui_app_name+"_"+ui_agent_id+"=/tmp/volttron_wheels/"+ui_app_name+"agent-0.1-py2-none-any.whl")
+                os.system("volttron-pkg configure /tmp/volttron_wheels/" + ui_app_name + "agent-0.1-py2-none-any.whl " + _launch_file)
+                os.system("volttron-ctl install " + ui_app_name + "_" + ui_agent_id +"=/tmp/volttron_wheels/" + ui_app_name + "agent-0.1-py2-none-any.whl")
 
-            os.system("volttron-ctl start --tag "+os.path.basename(_launch_file))
+            # os.system("volttron-ctl start --tag "+os.path.basename(_launch_file))
+            os.system("volttron-ctl start --tag " + ui_app_name + "_" + ui_agent_id)
             os.system("volttron-ctl status")
 
             print "AppLauncher has successfully launched APP: {} for Agent: {}"\
@@ -380,6 +387,7 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
             print "AppLauncher failed to launch APP: {} for Agent: {}".format(ui_app_name, ui_agent_id)
 
     def disable_app(self, ui_app_name, ui_agent_id, ui_auth_token):
+        print "disable app: start"
         #1. query database whether the ui_app_name is verified and registered
         self.cur.execute("SELECT auth_token FROM "+db_table_application_registered+" WHERE app_name=%s", (ui_app_name,))
         if self.cur.rowcount != 0:
@@ -393,7 +401,8 @@ class AppLauncherAgent(PublishMixin, BaseAgent):
                 infile = open('app_running_agent.txt', 'r')
                 for line in infile:
                     #print(line, end='') #write to a next file name outfile
-                    match = re.search(ui_app_name+'_'+ui_agent_id+'.launch.json', line) \
+                    print(line)
+                    match = re.search(ui_app_name+'_'+ui_agent_id, line) \
                             and re.search('running', line)  # have results in match
                     if match: # The app that ui requested has already launched
                         self.app_has_already_launched = True
