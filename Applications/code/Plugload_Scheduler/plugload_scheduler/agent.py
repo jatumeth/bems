@@ -72,7 +72,7 @@ def scheduleragent(config_path, **kwargs):
             return config.get(name, '')
 
     # 1. define name of this application
-    app_name = "alert_scheduler"
+    app_name = "plugload_scheduler"
     building_name = settings.PLATFORM['node']['building_name']
 
     # 2. @params agent
