@@ -114,6 +114,9 @@ def TplinkAgent(config_path, **kwargs):
                                                                         Tplink.get_variable('api'),
                                                                Tplink.get_variable('address')))
 
+    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+
+
     connection_renew_interval = Tplink.variables['connection_renew_interval']
 
     #params notification_info
@@ -184,6 +187,17 @@ def TplinkAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
             # self.postgresAPI()
             self.updateStatus()
+            x = {}
+            x["agent_id"] = Tplink.variables['agent_id']
+            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["plstatus"] = Tplink.variables['status']
+            x["plcurrent"] = Tplink.variables['current']
+            x["plvolt"] = Tplink.variables['volt']
+            x["plpower"] = Tplink.variables['power']
+            x["device_type"] = 'plugload'
+
+            discovered_address = iotmodul.iothub_client_sample_run(x)
+
 
         def postgresAPI(self):
 

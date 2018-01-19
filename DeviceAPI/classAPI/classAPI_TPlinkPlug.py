@@ -140,7 +140,7 @@ class API:
 
             self.set_variable('status', status)
             self.set_variable('current', current)
-            self.set_variable('voltage', volt)
+            self.set_variable('volt', volt)
             self.set_variable('power', power)
         except:
             print "newtoken"
@@ -303,7 +303,7 @@ def main():
 
     TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='smarthome.pea@gmail.com',cloudPassword='28Sep1960',deviceid='8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F')
 
-    TPlinkPlug.setDeviceStatus({"status": "OFF"})
+    # TPlinkPlug.setDeviceStatus({"status": "OFF"})
     TPlinkPlug.getDeviceStatus()
 
     #
