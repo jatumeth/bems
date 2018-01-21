@@ -181,7 +181,7 @@ def powermeteragent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
+            print "11111111111111111111"
             # step1: get current status, then map keywords and variables to agent knowledge
             try:
                 print ("")
@@ -231,8 +231,11 @@ def powermeteragent(config_path, **kwargs):
             x["gridcurrent"] = PowerMeter.variables['grid_current']
             x["gridactivePower"] = PowerMeter.variables['grid_activePower']
             x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
+            x["device_type"] = 'powermeter'
 
             discovered_address = iotmodul.iothub_client_sample_run(x)
+
+            print x
 
         def postgresAPI(self):
 
