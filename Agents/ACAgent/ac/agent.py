@@ -215,7 +215,7 @@ def ACAgent(config_path, **kwargs):
             # real-time update web ui
             self.updateStatus()
             # update postgres database
-            self.postgresAPI()
+            # self.postgresAPI()
 
             # try:
             #     self.updateStatus()

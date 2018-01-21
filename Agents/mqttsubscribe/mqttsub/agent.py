@@ -46,26 +46,15 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     @periodic(20)
     def on_matchmode(self):
-        self.l_off()
-        time.sleep(5)
-        self.l_on()
-        time.sleep(5)
-        self.l_off()
-        time.sleep(5)
-        self.l_on()
-        time.sleep(5)
 
-        # self.wemo_on()
-        # time.sleep(5)
-        # self.wemo_off()
-        #
-        # self.hue_min()
-        # time.sleep(5)
-        # self.hue_max()
-        # time.sleep(5)
-        # self.hue_min()
-        # time.sleep(5)
-        # self.hue_max()
+        self.wemo_on()
+        time.sleep(10)
+        self.wemo_off()
+        time.sleep(10)
+        self.wemo_on()
+        time.sleep(10)
+        self.wemo_off()
+
 
     def l_on(self):
         # TODO this is example how to write an app to control Lighting
@@ -120,33 +109,6 @@ class ListenerAgent(PublishMixin, BaseAgent):
         message = json.dumps({"status": "OFF", "brightness": 5})
         self.publish(topic, headers, message)
         print ("HUE min")
-
-
-    def wemo_on(self):
-        # TODO this is example how to write an app to control tplink EV
-        topic = "/ui/agent/tplink/update/bemoss/999/3WIS221445K1200321"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
-        headers = {
-            'AgentID': self._agent_id,
-            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-            headers_mod.DATE: now,
-        }
-        message = json.dumps({"status": "ON"})
-        self.publish(topic, headers, message)
-        print ("plug EV turn ON")
-
-    def wemo_off(self):
-        # TODO this is example how to write an app to control tplink EV
-        topic = "/ui/agent/tplink/update/bemoss/999/3WIS221445K1200321"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
-        headers = {
-            'AgentID': self._agent_id,
-            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-            headers_mod.DATE: now,
-        }
-        message = json.dumps({"status": "OFF"})
-        self.publish(topic, headers, message)
-        print ("plug EV turn OFF")
 
     def daikin(self):
         # TODO this is example how to write an app to control Lighting
