@@ -1,0 +1,18 @@
+{
+    "address": "http://192.168.1.31:49153",
+    "agent": {
+        "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "03WIS231613K1200162",
+    "api": "classAPI_TPlinkPlug",
+    "building_name": "bemoss", 
+    "device_monitor_time": 20,
+    "macaddress": "221445K1200321", 
+    "model": "Insight", 
+    "type": "03WIS",
+    "vendor": "Belkin International Inc.", 
+    "zone_id": 999,
+    "cloudUserName": "smarthome.pea@gmail.com",
+    "cloudPassword": "28Sep1960",
+    "deviceid":"8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F"
+}

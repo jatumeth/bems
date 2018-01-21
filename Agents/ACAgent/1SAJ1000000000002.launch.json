@@ -3,10 +3,10 @@
     "agent": {
         "exec": "acagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1TH20000000000002",
+    "agent_id": "1SAJ1000000000002",
     "device_id": "LivingroomAir2",
     "air_serial": "1608F00680619",
-    "api": "classAPI_AirSaijo",
+    "api": "classAPI_broadlink",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 
@@ -16,7 +16,7 @@
     "device_monitor_time": 10,
     "macaddress": "20000000000002",
     "model": "Saijo Denki GPS",
-    "type": "airconditioner",
+    "type": "1SAJ1",
     "vendor": "Saijo Denki",
     "zone_id": 999
 }

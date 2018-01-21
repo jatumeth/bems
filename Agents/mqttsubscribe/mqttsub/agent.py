@@ -47,20 +47,20 @@ class ListenerAgent(PublishMixin, BaseAgent):
     @periodic(20)
     def on_matchmode(self):
         self.wemo_on()
-        time.sleep(5)
+        time.sleep(10)
         self.wemo_off()
-        time.sleep(5)
+        time.sleep(10)
         self.wemo_on()
-        time.sleep(5)
+        time.sleep(10)
         self.wemo_off()
-
-        self.hue_min()
-        time.sleep(5)
-        self.hue_max()
-        time.sleep(5)
-        self.hue_min()
-        time.sleep(5)
-        self.hue_max()
+        #
+        # self.hue_min()
+        # time.sleep(5)
+        # self.hue_max()
+        # time.sleep(5)
+        # self.hue_min()
+        # time.sleep(5)
+        # self.hue_max()
 
     def hue_max(self):
         # TODO this is example how to write an app to control Lighting
@@ -91,7 +91,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def wemo_on(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        topic = "/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -104,7 +104,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def wemo_off(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        topic = "/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

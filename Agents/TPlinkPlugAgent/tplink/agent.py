@@ -1,49 +1,16 @@
 # -*- coding: utf-8 -*-
 '''
-Copyright (c) 2016, Virginia Tech
+Copyright (c) 2017, HiVE Team (PEA - Provincial Electricity Authority)
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- following conditions are met:
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
-disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the distribution.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-The views and conclusions contained in the software and documentation are those of the authors and should not be
-interpreted as representing official policies, either expressed or implied, of the FreeBSD Project.
-
-This material was prepared as an account of work sponsored by an agency of the United States Government. Neither the
-United States Government nor the United States Department of Energy, nor Virginia Tech, nor any of their employees,
-nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty,
-express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or
-any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe
-privately owned rights.
-
-Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or
-otherwise does not necessarily constitute or imply its endorsement, recommendation, favoring by the United States
-Government or any agency thereof, or Virginia Tech - Advanced Research Institute. The views and opinions of authors
-expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
-
-VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
-under Contract DE-EE0006352
-
-#__author__ = "BEMOSS Team"
+#__author__ = "HiVE Team"
 #__credits__ = ""
-#__version__ = "2.0"
-#__maintainer__ = "BEMOSS Team"
-#__email__ = "aribemoss@gmail.com"
-#__website__ = "www.bemoss.org"
+#__version__ = "1.0"
+#__maintainer__ = "HiVE Team"
+#__email__ = "teerapong.pon@gmail.com"
+#__website__ = "www.pea.co.th"
 #__created__ = "2014-09-12 12:04:50"
-#__lastUpdated__ = "2016-03-14 11:23:33"
+#__lastUpdated__ = "2017-08-15 19:09:33"
 '''
 
 import sys
@@ -60,7 +27,7 @@ import psycopg2.extras
 import settings
 import socket
 
-def ACAgent(config_path, **kwargs):
+def TplinkAgent(config_path, **kwargs):
 
     config = utils.load_config(config_path)
 
@@ -74,22 +41,19 @@ def ACAgent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
+    cassandra_update_time = int(settings.DEVICES['cassandra_update_time'])
 
     debug_agent = False
     #Dictionary of Variables supposed to be saved in postgress database
-    #agentAPImapping = dict(status=[], power=[], energy=[])
+    agentAPImapping = dict(status=[], power=[], energy=[])
 
     #Dictionary of Variables supposed to be saved into timeseries database
-    log_variables = dict(status='text', fin_angle='double', current_humidity='double',
-                         current_temperature='double', fan_speed='double', set_humidity='double',
-                         set_temperature='double',mode='text' )
+    log_variables = dict(status='text',power='double',energy='double',offline_count='int')
 
     tolerance = 0.5 #if the numerical variables change less than this percent, its not conisdered change and not logged
-
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    air_serial=get_config('air_serial')
     device_type = get_config('type')
     macaddress = get_config('macaddress')
     address_get = get_config('address_get')
@@ -99,10 +63,13 @@ def ACAgent(config_path, **kwargs):
     smt_username = get_config('smt_username')
     smt_password = get_config('smt_password')
     address = get_config('address')
-    device_id = get_config('device_id')
+    cloudUserName = get_config('cloudUserName')
+    cloudPassword = get_config('cloudPassword')
+    deviceid = get_config('deviceid')
+
     _address = address
     _address = _address.replace('http://', '')
-    # _address = _address.replace('https://', '')
+    _address = _address.replace('https://', '')
     try:  # validate whether or not address is an ip address
         socket.inet_aton(_address)
         ip_address = _address
@@ -112,14 +79,13 @@ def ACAgent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
     # mac_address = get_config('mac_address')
-
     #TODO get database parameters from settings.py, add db_table for specific table
     db_host = settings.DATABASES['default']['HOST']
     db_port = settings.DATABASES['default']['PORT']
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-    db_table_AC = settings.DATABASES['default']['TABLE_AC']
+    db_table_Tplink = settings.DATABASES['default']['TABLE_Tplink']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     db_table_device_type = settings.DATABASES['default']['TABLE_device_type']
@@ -127,23 +93,31 @@ def ACAgent(config_path, **kwargs):
     db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
     #construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-
     api = get_config('api')
-
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize AC device object
-    AC = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress, 
-                    agent_id=agent_id,air_serial=air_serial, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password,
-                    db_database=db_database, config_path=config_path, device_id=device_id)
+    #4.1 initialize tplink device object
+    if vendor == 'Digi':
+        gateway_id = get_config('gateway_id')
+        Tplink = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address,
+                              macaddress = macaddress, agent_id=agent_id,  db_host=db_host, db_port=db_port,
+                              db_user=db_user, db_password=db_password, db_database=db_database,cloudUserName=cloudUserName,cloudPassword=cloudPassword,deviceid=deviceid)
+    else:
+        Tplink = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress,
+                              agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user,
+                              db_password=db_password, db_database=db_database, config_path=config_path,cloudUserName=cloudUserName,cloudPassword=cloudPassword,deviceid=deviceid)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
-                                                                        AC.get_variable('model'),
-                                                                        AC.get_variable('api'),
-                                                               AC.get_variable('address')))
+                                                                        Tplink.get_variable('model'),
+                                                                        Tplink.get_variable('api'),
+                                                               Tplink.get_variable('address')))
+
+    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+
+
+    connection_renew_interval = Tplink.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -173,8 +147,7 @@ def ACAgent(config_path, **kwargs):
             self.lastUpdateTime = None
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
-            self.stream_data_initialState = True
-            # #2. setup connection with db -> Connect to bemossdb database
+            #2. setup connection with db -> Connect to bemossdb database
             # try:
             #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
             #                                 password=db_password)
@@ -182,10 +155,9 @@ def ACAgent(config_path, **kwargs):
             #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
             # except:
             #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # #3. send notification to notify building admin
+            #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
-            # 3. setup connection with initialstate
 
         # These set and get methods allow scalability
         def set_variable(self,k,v): #k=key, v=value
@@ -197,93 +169,71 @@ def ACAgent(config_path, **kwargs):
         # 2. agent setup method
         def setup(self):
             super(Agent, self).setup()
+
             self.timer(1, self.deviceMonitorBehavior)
 
-        def updatePostgresDB(self):
-            print ""
+        #Re-login / re-subcribe to devices periodically. The API might choose to have empty function if not necessary
+        # @periodic(connection_renew_interval)
+        # def renewConnection(self):
+        #     Tplink.renewConnection()
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
             try:
-                AC.getDeviceStatus()
+                Tplink.getDeviceStatus()
+                self.variables['status'] = Tplink.variables['status']
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-
-            # TODO make tolerance more accessible
-            # real-time update web ui
-            self.updateStatus()
-            # update postgres database
             # self.postgresAPI()
+            self.updateStatus()
+            x = {}
+            x["agent_id"] = Tplink.variables['agent_id']
+            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["plstatus"] = Tplink.variables['status']
+            x["plcurrent"] = Tplink.variables['current']
+            x["plvolt"] = Tplink.variables['volt']
+            x["plpower"] = Tplink.variables['power']
+            x["device_type"] = 'plugload'
 
-            # try:
-            #     self.updateStatus()
-            #     self.backupSaveData()
-            #
-            #     self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-            #                      (AC.variables['status'], agent_id))
-            #     self.con.commit()
-            # except Exception as er:
-            #     print er
-            #     print "device connection for {} is not successful".format(agent_id)
+            discovered_address = iotmodul.iothub_client_sample_run(x)
+
 
         def postgresAPI(self):
 
             self.connect_postgresdb()
 
             try:
-                print ""
-                self.cur.execute("SELECT * from airconditioner WHERE airconditioner_id=%s", (agent_id,))
-                if bool(self.cur.rowcount):
-                    pass
-                else:
-                    self.cur.execute(
-                        """INSERT INTO airconditioner (airconditioner_id, last_scanned_time) VALUES (%s, %s);""",
-                        (agent_id, datetime.datetime.now()))
-                    self.con.commit()
+                self.cur.execute("""
+                    UPDATE tplink
+                    SET status=%s, power=%s, last_scanned_time=%s
+                    WHERE Tplink_id=%s
+                 """, (Tplink.variables['status'], Tplink.variables['power'],
+                       datetime.datetime.now(), agent_id))
+                self.con.commit()
+
+                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+                                 (Tplink.variables['status'], agent_id))
+                self.con.commit()
+                print "Update database: success"
             except Exception as er:
-                print "Error to check data base.: {}".format(er)
+                print "Update database error: {}".format(er)
 
             try:
                 self.cur.execute("""
-                    UPDATE airconditioner
-                    SET status=%s, current_temperature=%s, set_temperature=%s, current_humidity=%s, set_humidity=%s, 
-                    mode=%s, last_scanned_time=%s WHERE airconditioner_id=%s""",
-                    (AC.variables['status'], AC.variables['current_temperature'],
-                     AC.variables['set_temperature'], AC.variables['set_humidity'],
-                     AC.variables['set_humidity'], AC.variables['mode'], datetime.datetime.now(), agent_id))
+                    INSERT INTO ts_Tplink
+                    (datetime, status, power, Tplink_id, gateway_id)
+                    VALUES (%s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), Tplink.variables['status'], Tplink.variables['power'], agent_id, '1'))
                 self.con.commit()
-                self.cur.execute('UPDATE airconditioner SET last_scanned_time=%s WHERE airconditioner_id=%s',
-                                 (datetime.datetime.now(), agent_id))
-                self.con.commit()
+                print 'Insert database: success'
             except Exception as er:
-                print("Error push data to the database: {}".format(er))
-
-            try:
-                self.cur.execute(
-                    """INSERT INTO ts_airconditioner (airconditioner_id,datetime,status, current_temperature, 
-                       set_temperature, current_humidity, set_humidity, mode) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
-                    (agent_id, datetime.datetime.now(), AC.variables['status'],
-                     AC.variables['current_temperature'],
-                     AC.variables['set_temperature'], AC.variables['set_humidity'],
-                     AC.variables['set_humidity'], AC.variables['mode']))
-                self.con.commit()
-            except Exception as er:
-                print "Error to the database.: {}".format(er)
-
-            try:
-                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                                 (AC.variables['status'], agent_id))
-                self.con.commit()
-            except Exception as er:
-                print "Error to the database.: {}".format(er)
+                print "Insert database error: {}".format(er)
 
             self.disconnect_postgresdb()
 
         def device_offline_detection(self):
-            self.cur.execute("SELECT nickname FROM " + db_table_AC + " WHERE AC_id=%s",
+            self.cur.execute("SELECT nickname FROM " + db_table_Tplink + " WHERE Tplink_id=%s",
                              (agent_id,))
             print agent_id
             if self.cur.rowcount != 0:
@@ -294,7 +244,7 @@ def ACAgent(config_path, **kwargs):
             _db_notification_subject = 'BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_subject = '#Attention: BEMOSS Device {} {} went OFFLINE!!!'.format(device_nickname,agent_id)
             _email_text = '#Attention: BEMOSS Device {}  {} went OFFLINE!!!'.format(device_nickname,agent_id)
-            self.cur.execute("SELECT network_status FROM " + db_table_AC + " WHERE AC_id=%s",
+            self.cur.execute("SELECT network_status FROM " + db_table_Tplink + " WHERE Tplink_id=%s",
                              (agent_id,))
             self.network_status = self.cur.fetchone()[0]
             print self.network_status
@@ -443,23 +393,41 @@ def ACAgent(config_path, **kwargs):
                     "UPDATE " + db_table_temp_time_counter + " SET priority_counter=%s WHERE alert_id=%s AND device_id=%s",
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
-        def backupSaveData(self):
-            print ""
+        def updateStatus(self,states=None):
 
-        def updateStatus(self, states=None):
+            # if states is not None:
+            #     print "got state change:",states
+            #     self.changed_variables = dict()
+            #     if(self.get_variable('status') != 'ON' if states['status']==1 else 'OFF'):
+            #         self.set_variable('status','ON' if states['status']==1 else 'OFF')
+            #         self.changed_variables['status'] = log_variables['status']
+            #     if 'power' in states:
+            #         if(self.get_variable('power') != states['power']):
+            #             self.changed_variables['power'] = log_variables['power']
+            #             self.set_variable('power',states['power'])
+
+                    # self.updatePostgresDB()
 
             topic = '/agent/ui/'+device_type+'/device_status_response/'+_topic_Agent_UI_tail
             # now = datetime.utcnow().isoformat(' ') + 'Z'
             headers = {
                 'AgentID': agent_id,
                 headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
+                # headers_mod.DATE: now,
             }
-            _data = AC.variables
-            message = json.dumps(_data)
-            message = message.encode(encoding='utf_8')
-            self.publish(topic, headers, message)
-            print "message sent from AC agent with topic: {}".format(topic)
-            print "message sent from AC agent with data: {}".format(message)
+
+            print topic
+            #
+            # if self.get_variable('power') is not None:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status'), 'power':self.get_variable('power')}
+            # else:
+            #     _data={'device_id':agent_id, 'status':self.get_variable('status')}
+            #
+            # print topic
+            # print "published!!!!! :{}".format(self.get_variable('status'))
+            # message = json.dumps(_data)
+            # message = message.encode(encoding='utf_8')
+            # self.publish(topic, headers, message)
 
         # 4. updateUIBehavior (generic behavior)
         @matching.match_exact('/ui/agent/'+device_type+'/device_status/'+_topic_Agent_UI_tail)
@@ -475,50 +443,40 @@ def ACAgent(config_path, **kwargs):
         def deviceControlBehavior(self,topic,headers,message,match):
             print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"),topic=topic)
             print "Headers: {headers}".format(headers=headers)
-            print "Message by AC Agent : {message}\n".format(message=message)
-
-            try:
-                #step1: change device status according to the receive message
-                if self.isPostmsgValid(message[0]):  # check if the data is valid
-                    try:
-                        t1=json.loads(message[0])
-                        setDeviceStatusResult = AC.setDeviceStatus(t1)
-                        #send reply message back to the UI
-                    except Exception as er:
-                        print er
-                    topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
-                    # now = datetime.utcnow().isoformat(' ') + 'Z'
-                    headers = {
-                        'AgentID': agent_id,
-                        headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-                        # headers_mod.DATE: now,
-                    }
-                    if setDeviceStatusResult:
-                        message = 'success'
-                    else:
-                        message = 'failure'
+            print "Message: {message}\n".format(message=message)
+            #step1: change device status according to the receive message
+            if self.isPostmsgValid(message[0]):  # check if the data is valid
+                setDeviceStatusResult = Tplink.setDeviceStatus(json.loads(message[0]))
+                #send reply message back to the UI
+                topic = '/agent/ui/'+device_type+'/update_response/'+_topic_Agent_UI_tail
+                # now = datetime.utcnow().isoformat(' ') + 'Z'
+                headers = {
+                    'AgentID': agent_id,
+                    headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+                    # headers_mod.DATE: now,
+                }
+                if setDeviceStatusResult:
+                    message = 'success'
                 else:
-                    print("The POST message is invalid, check status setting and try again\n")
                     message = 'failure'
-                self.publish(topic, headers, message)
-                #self.deviceMonitorBehavior() #Get device status, and get updated data
-            except Exception as er:
-                print er
-
+            else:
+                print("The POST message is invalid, check status setting and try again\n")
+                message = 'failure'
+            self.publish(topic, headers, message)
+            self.deviceMonitorBehavior() #Get device status, and get updated data
 
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
-                # _data = json.dumps(postmsg)
-                _data = json.loads(postmsg)
-                print _data
-                for k, v in _data.items():
+                _data = json.dumps(postmsg)
+                _data = json.loads(_data)
+                for k,v in _data.items():
                     if k == 'status':
                         dataValidity = True
                         break
             except:
                 dataValidity = True
-                print("dataValidity failed to validate data comes from UI: {}".format(postmsg))
+                print("dataValidity failed to validate data comes from UI")
             return dataValidity
 
         # 6. deviceIdentifyBehavior (generic behavior)
@@ -528,7 +486,7 @@ def ACAgent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             #step1: change device status according to the receive message
-            identifyDeviceResult = AC.identifyDevice()
+            identifyDeviceResult = Tplink.identifyDevice()
             #TODO need to do additional checking whether the device setting is actually success!!!!!!!!
             #step2: send reply message back to the UI
             topic = '/agent/ui/identify_response/'+device_type+'/'+_topic_Agent_UI_tail
@@ -560,13 +518,14 @@ def ACAgent(config_path, **kwargs):
             else:
                 print("postgresdb is not connected")
 
-    Agent.__name__ = 'ACAgent'
+
+    Agent.__name__ = 'TplinkAgent'
     return Agent(**kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
-    utils.default_main(ACAgent,
-                       description='AC agent',
+    utils.default_main(TplinkAgent,
+                       description='Tplink agent',
                        argv=argv)
 
 if __name__ == '__main__':
