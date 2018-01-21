@@ -94,7 +94,7 @@ def PlugloadAgent(config_path, **kwargs):
     api = get_config('api')
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize plugload device object
+    #4.1 initialize tplink device object
     if vendor == 'Digi':
         gateway_id = get_config('gateway_id')
         Plugload = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address,
@@ -186,7 +186,7 @@ def PlugloadAgent(config_path, **kwargs):
 
             try:
                 self.cur.execute("""
-                    UPDATE plugload
+                    UPDATE tplink
                     SET status=%s, power=%s, last_scanned_time=%s
                     WHERE plugload_id=%s
                  """, (Plugload.variables['status'], Plugload.variables['power'],
