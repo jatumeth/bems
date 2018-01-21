@@ -151,14 +151,14 @@ def EnergyBillAppAgent(config_path, **kwargs):
         def on_match_power_meter(self, topic, headers, message, match):
             print "Hello from power meter"
             message_from_power_meter = json.loads(message[0])
-            self.power_from_load = float(message_from_power_meter['grid_activePower'])
+            self.power_from_load = message_from_power_meter['grid_activePower']
             # self.power_from_solar = float(message_from_power_meter['solar_activePower'])
             self.power_from_solar = 0
             if (message_from_power_meter['grid_activePower'] > 0):
-                self.power_from_grid_import = float(message_from_power_meter['grid_activePower'])
+                self.power_from_grid_import = message_from_power_meter['grid_activePower']
                 self.power_from_grid_export = 0
             else:
-                self.power_from_grid_export = abs(float(message_from_power_meter['grid_activePower']))
+                self.power_from_grid_export = message_from_power_meter['grid_activePower']
                 self.power_from_grid_import = 0
 
             # This for calculate the period of power which got from Inverter
@@ -322,6 +322,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                  (datetime.datetime.now(), self.load_energy_period, self.solar_energy_period))
 
                 self.con.commit()
+                print"insert to db:Success"
+
 
         # @periodic(10)
         def updateDB(self):
@@ -348,7 +350,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                          self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
                          self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
                     self.con.commit()
-                    print"Success"
+                    print"update daily db:Success"
                 except Exception as er:
                     print "update data base error: {}".format(er)
             else:
@@ -370,7 +372,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                          self.solar_bill_this_week, self.load_bill_this_week))
 
                     self.con.commit()
-                    print"Success"
+                    print"update weekly db:Success"
                 except Exception as er:
                     print "update data base error: {}".format(er)
             else:
@@ -392,7 +394,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                          self.solar_bill_this_month, self.load_bill_this_month))
 
                     self.con.commit()
-                    print"Success"
+                    print"update monthly db:Success"
                 except Exception as er:
                     print "update data base error: {}".format(er)
             else:
@@ -414,7 +416,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                          self.solar_bill_annual, self.load_bill_annual))
 
                     self.con.commit()
-                    print"Success"
+                    print"update annual db:Success"
                 except Exception as er:
                     print "update data base error: {}".format(er)
             else:

@@ -208,26 +208,35 @@ class API:
             datacontainsRGB = True
 
         for k, v in postmsg.items():
-            if k == 'status':
+            if str(k) == 'status':
                 if postmsg.get('status') == "ON":
                     msgToDevice['on'] = True
                 elif postmsg.get('status') == "OFF":
                     msgToDevice['on'] = False
-            elif k == 'brightness':
+            elif str(k) == 'brightness':
                 msgToDevice['bri'] = int(round(float(postmsg.get('brightness')) * 255.0 / 100.0, 0))
-            elif k == 'color':
+            elif str(k) == 'color':
                 if self.only_white_bulb is False:
                     print(type(postmsg['color']))
-                    _red = postmsg['color'][0]
-                    _green = postmsg['color'][1]
-                    _blue = postmsg['color'][2]
+                    if type(postmsg['color']) == tuple:
+                        _red = postmsg['color'][0]
+                        _green = postmsg['color'][1]
+                        _blue = postmsg['color'][2]
+                    elif type(postmsg['color']) == str:
+                        x=postmsg['color']
+                        y= x.replace("(", "")
+                        z= y.replace(")", "")
+                        msg = z.split(',')
+                        _red = int(float(msg[0]))
+                        _green = int(float(msg[1]))
+                        _blue = int(float(msg[2]))
                     _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
                     msgToDevice['xy'] = [_xyY.x, _xyY.y]
                     # msgToDevice['bri']= int(round(_xyY.y*255,0))
-            elif k == 'hue':
+            elif str(k) == 'hue':
                 if datacontainsRGB == False and self.only_white_bulb is False:
                     msgToDevice['hue'] = postmsg.get('hue')
-            elif k == 'saturation':
+            elif str(k) == 'saturation':
                 if datacontainsRGB == False and self.only_white_bulb is False:
                     msgToDevice['sat'] = int(round(float(postmsg.get('saturation')) * 255.0 / 100.0, 0))
             else:
@@ -270,12 +279,11 @@ class API:
         return identifyDeviceResult
         # ----------------------------------------------------------------------
 
-
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.102:80',
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.6:80',
                      username='ySPuFtnKskt8UbR95yCqEhGZefcBjaUhaHojUMzj', agent_id='LightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
                                                                        PhilipsHue.get_variable('model'),
@@ -283,8 +291,9 @@ def main():
                                                                        PhilipsHue.get_variable('address')))
 
     PhilipsHue.getDeviceStatus()
-    PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
-    # PhilipsHue.setDeviceStatus({"status": "ON", "color": (255, 255, 255)})
+    # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
+    #
+    PhilipsHue.setDeviceStatus({"status": "ON", "color": "(127.5,255,0)", "device": "2HUEH0017881cab4b", "brightness": 100})
     # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 
 

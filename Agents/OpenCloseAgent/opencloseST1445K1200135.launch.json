@@ -1,0 +1,23 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "multisensoragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "8MS221445K1200135",
+    "api": "classAPI_openclose",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/contactSensors/",
+    "device": "ebc3102f-9a3e-4f30-b7f6-65b0fc39582a",
+    "bearer": "Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4",
+    "building_name": "bemoss",
+    "db_database": "bemossdb", 
+    "db_host": "localhost", 
+    "db_password": "admin", 
+    "db_port": "5432", 
+    "db_user": "admin", 
+    "device_monitor_time": 3,
+    "macaddress": "221445K1200132",
+    "model": "Lampton",
+    "type": "8MS22",
+    "vendor": "Lampton",
+    "zone_id": 999
+}

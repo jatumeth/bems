@@ -3,7 +3,7 @@
     "agent": {
         "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "3WSP3424348ce97489",
+    "agent_id": "03WSP3424348ce97489",
     "api": "classAPI_PEASwitch1",
     "building_name": "bemoss", 
     "db_database": "bemossdb", 
@@ -14,7 +14,7 @@
     "device_monitor_time": 10,
     "macaddress": "3424348ce97489",
     "model": "Sim Switch",
-    "type": "plugload", 
+    "type": "03WIS",
     "vendor": "SmartThings",
     "zone_id": 999
 }

@@ -36,14 +36,14 @@ expressed herein do not necessarily state or reflect those of the United States 
 VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
 under Contract DE-EE0006352
 
-#__author__ = "BEMOSS Team"
+#__author__ = "HiVE Team"
 #__credits__ = ""
 #__version__ = "2.0"
-#__maintainer__ = "BEMOSS Team"
-#__email__ = "aribemoss@gmail.com"
-#__website__ = "www.bemoss.org"
-#__created__ = "2014-09-12 12:04:50"
-#__lastUpdated__ = "2016-03-14 11:23:33"
+#__maintainer__ = "HiVE Team"
+#__email__ = "peahive@gmail.com"
+#__website__ = "www.peahive.org"
+#__created__ = "2017-09-12 12:04:50"
+#__lastUpdated__ = "2017-03-14 11:23:33"
 '''
 
 import sys
@@ -100,6 +100,11 @@ def LGTVAgent(config_path, **kwargs):
     smt_password = get_config('smt_password')
     address = get_config('address')
     device_id = get_config('device_id')
+    url = get_config('url')
+    device = get_config('device')
+    bearer = get_config('bearer')
+
+
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -141,7 +146,7 @@ def LGTVAgent(config_path, **kwargs):
     #4.1 initialize LGTV device object
     LGTV = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
-                    db_database=db_database, config_path=config_path)
+                    db_database=db_database, config_path=config_path,bearer=bearer,device =device,url=url)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
                                                                         LGTV.get_variable('model'),

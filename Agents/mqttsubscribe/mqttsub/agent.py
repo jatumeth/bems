@@ -46,6 +46,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     @periodic(20)
     def on_matchmode(self):
+
         self.wemo_on()
         time.sleep(10)
         self.wemo_off()
@@ -53,14 +54,35 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.wemo_on()
         time.sleep(10)
         self.wemo_off()
-        #
-        # self.hue_min()
-        # time.sleep(5)
-        # self.hue_max()
-        # time.sleep(5)
-        # self.hue_min()
-        # time.sleep(5)
-        # self.hue_max()
+
+
+    def l_on(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/03WIS/update/bemoss/999/03WIS231613K1200162"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "ON"})
+        self.publish(topic, headers, message)
+        print ("HUE on")
+
+
+    def l_off(self):
+        # TODO this is example how to write an app to control Lighting
+        topic = "/ui/agent/03WIS/update/bemoss/999/03WIS231613K1200162"
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+        message = json.dumps({"status": "OFF"})
+        self.publish(topic, headers, message)
+        print ("HUE off")
+
 
     def hue_max(self):
         # TODO this is example how to write an app to control Lighting
@@ -88,33 +110,6 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.publish(topic, headers, message)
         print ("HUE min")
 
-
-    def wemo_on(self):
-        # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
-        headers = {
-            'AgentID': self._agent_id,
-            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-            headers_mod.DATE: now,
-        }
-        message = json.dumps({"status": "ON"})
-        self.publish(topic, headers, message)
-        print ("plug EV turn ON")
-
-    def wemo_off(self):
-        # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001"
-        now = datetime.utcnow().isoformat(' ') + 'Z'
-        headers = {
-            'AgentID': self._agent_id,
-            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-            headers_mod.DATE: now,
-        }
-        message = json.dumps({"status": "OFF"})
-        self.publish(topic, headers, message)
-        print ("plug EV turn OFF")
-
     def daikin(self):
         # TODO this is example how to write an app to control Lighting
         topic = '/ui/agent/AC/update/bemoss/999/ACD1200138'
@@ -132,7 +127,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def fan(self):
         # TODO this is example how to write an app to control Lighting
-        topic = '/ui/agent/fan/update/bemoss/999/1FN221445K1200138'
+        topic = '/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138'
         # {"status": "OFF"}
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {

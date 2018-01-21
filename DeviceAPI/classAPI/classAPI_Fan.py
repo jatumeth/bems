@@ -98,8 +98,10 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/5500e07f-1f41-4716-b89c-723c98cc2c0e",
-                             headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, timeout=20);
+            headers = {"Authorization": self.get_variable("bearer")}
+            url = str(self.get_variable("url") + self.get_variable("device"))
+            r = requests.get(url,
+                             headers=headers, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
@@ -144,6 +146,9 @@ class API:
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url")+self.get_variable("device"))
+
 
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
@@ -151,9 +156,7 @@ class API:
             print _data
             try:
                 print "sending requests put"
-                r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/5500e07f-1f41-4716-b89c-723c98cc2c0e",
-                    headers={"Authorization": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7"}, data= _data, timeout=20);
+                r = requests.put(url,headers=headers, data=_data, timeout=20);
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
@@ -182,7 +185,7 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Fan = API(model='Fan', type='tv', api='API3', agent_id='FanAgent')
+    Fan = API(model='Fan', type='tv', api='API3', agent_id='FanAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '5500e07f-1f41-4716-b89c-723c98cc2c0e')
 
 
     import time

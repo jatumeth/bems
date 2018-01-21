@@ -3,7 +3,7 @@
     "agent": {
         "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "3WSP231613K1200162", 
+    "agent_id": "03WSP231613K1200162",
     "api": "classAPI_WeMo", 
     "building_name": "bemoss", 
     "db_database": "postgres", 
@@ -14,7 +14,7 @@
     "device_monitor_time": 20, 
     "macaddress": "231613K1200162", 
     "model": "Belkin Wemo", 
-    "type": "plugload", 
+    "type": "03WIS",
     "vendor": "Belkin", 
     "zone_id": 999
 }

@@ -94,7 +94,7 @@ def PlugloadAgent(config_path, **kwargs):
     api = get_config('api')
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
-    #4.1 initialize plugload device object
+    #4.1 initialize tplink device object
     if vendor == 'Digi':
         gateway_id = get_config('gateway_id')
         Plugload = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address,
@@ -178,7 +178,7 @@ def PlugloadAgent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-            # self.postgresAPI()
+            self.postgresAPI()
 
         def postgresAPI(self):
 
@@ -186,27 +186,28 @@ def PlugloadAgent(config_path, **kwargs):
 
             try:
                 self.cur.execute("""
-                    UPDATE plugload
+                    UPDATE tplink
                     SET status=%s, power=%s, last_scanned_time=%s
                     WHERE plugload_id=%s
                  """, (Plugload.variables['status'], Plugload.variables['power'],
                        datetime.datetime.now(), agent_id))
                 self.con.commit()
+
                 self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
                                  (Plugload.variables['status'], agent_id))
                 self.con.commit()
-                print "OK1"
+                print "Update database: success"
             except Exception as er:
-                print "Error to the database."
+                print "Update database error: {}".format(er)
 
             try:
                 self.cur.execute("""
                     INSERT INTO ts_plugload
-                    (datetime, status, power, plugload_id)
-                    VALUES (%s, %s, %s, %s);""",
-                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id))
+                    (datetime, status, power, plugload_id, gateway_id)
+                    VALUES (%s, %s, %s, %s, %s);""",
+                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id, '1'))
                 self.con.commit()
-                print 'OK2'
+                print 'Insert database: success'
             except Exception as er:
                 print "Insert database error: {}".format(er)
 

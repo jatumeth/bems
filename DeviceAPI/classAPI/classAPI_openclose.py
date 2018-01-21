@@ -55,9 +55,9 @@ from azure.storage.blob import ContentSettings
 from azure.storage.blob import BlockBlobService
 import os
 
-RTSP_URL = 'rtsp://admin:12345678@192.168.1.107/onvif/profile2/media.smp'
+RTSP_URL = 'rtsp://admin:12345678@192.168.1.23:10554/tcp/av1_1'
 #from bemoss_lib.utils import rgb_cie
-
+camera_id ='6SAM0006'
 class API:
     # 1. constructor : gets call every time when create a new class
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
@@ -87,7 +87,7 @@ class API:
     label            GET          label in string
     illuminance      GET          illuminance
     temperature      GET          temporary target heat setpoint (floating point in deg F)
-    battery          GET          percent battery of Fibaro censor
+    battery          GET          percent battery of OpenClose censor
     motion           GET          motion  status (active/inactive)
     tamper           GET          tamper  status (active/inactive)
     unitTime         GET          Hue light effect 'none' or 'colorloop'
@@ -104,9 +104,10 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         try:
-
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/contactSensors/4f0d7ad0-8429-4676-aafc-ff8a5ffa222a",
-                             headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, timeout=20);
+            headers = {"Authorization": self.get_variable("bearer")}
+            url = str(self.get_variable("url") + self.get_variable("device"))
+            r = requests.get(url,
+                             headers=headers, timeout=20);
             print(" {0}Agent is querying its current status (status:{1}) please wait ...")
             format(self.variables.get('agent_id', None), str(r.status_code))
             if r.status_code == 200:
@@ -124,7 +125,7 @@ class API:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
         except Exception as er:
             print er
-            print('ERROR: classAPI_Fibaro failed to getDeviceStatus')
+            print('ERROR: classAPI_OpenClose failed to getDeviceStatus')
 
     def getDeviceStatusJson(self, data):
 
@@ -141,7 +142,7 @@ class API:
 
             try:
                 sp.call(
-                    'ffmpeg -y -r 15 -rtsp_transport tcp -i rtsp://admin:12345678@192.168.1.107/onvif/profile2/media.smp -vf "scale=320:240" -c:v libx264 -crf 30 -t 30 -preset ultrafast -tune zerolatency  -b:v 64k -bufsize 192k -an -dn /home/dell-hive01/workspace/peahive_addons/cognitive-services/RecEvent/%s.mp4' % (fileName), shell=True, stdout=sp.PIPE)
+                    'ffmpeg -y -r 15 -rtsp_transport tcp -i rtsp://admin:12345678@192.168.1.23:10554/tcp/av1_1 -vf "scale=320:240" -c:v libx264 -crf 30 -t 30 -preset ultrafast -tune zerolatency  -b:v 64k -bufsize 192k -an -dn /home/dell-hive01/workspace/RecEvent/%s.mp4' % (fileName), shell=True, stdout=sp.PIPE)
                 # print("Try Record")
                 # sp.call('ffmpeg -y -r 20 -t 10 -f avfoundation -i 0 -vf "scale=320:240" -c:v libx264 -an -dn ./RecEvent/%s.mp4' % (fileName),shell=True, stdout=sp.PIPE)  # for FaceTime Camera
                 print("Record Successful")
@@ -164,8 +165,8 @@ class API:
                 filePath = os.path.dirname(os.path.realpath('./RecEvent/*.mp4'))
                 block_blob_service.create_blob_from_path(
                     'videoclip',
-                    'intrusion',
-                    '/home/dell-hive01/workspace/peahive_addons/cognitive-services/RecEvent/'+filename_full,
+                    '6SAM0006',
+                    '/home/dell-hive01/workspace/RecEvent/'+filename_full,
                     content_settings=ContentSettings(content_type='video/mp4')
                 )
 
@@ -176,41 +177,18 @@ class API:
                 print(e)
                 pass
 
-
-                # self.set_variable('illuminance', float(conve_json["illuminance"]))
-        # self.set_variable('temperature', float(conve_json["temperature"]))
-        # self.set_variable('battery', float(conve_json["battery"]))
-        # self.set_variable('motion', str(conve_json["motion"]))
-        # self.set_variable('tamper', str(conve_json["tamper"]))
-        # self.set_variable('unitTime', conve_json["unitTime"])
-        # self.set_variable('type', str(conve_json["type"]))
-
     def printDeviceStatus(self):
-
 
         print(" the current status is as follows:")
         print(" contact = {}".format(self.get_variable('contact')))
-        # print(" illuminance = {}".format(self.get_variable('illuminance')))
-        # print(" temperature = {}".format(self.get_variable('temperature')))
-        # print(" battery = {}".format(self.get_variable('battery')))
-        # print(" motion = {}".format(self.get_variable('motion')))
-        # print(" tamper = {}".format(self.get_variable('tamper')))
-        # print(" unitTime = {}".format(self.get_variable('unitTime')))
-        # print(" type= {}".format(self.get_variable('type')))
-        # print("---------------------------------------------")
-
-    # ----------------------------------------------------------------------
-
 
 # This main method will not be executed when this class is used as a module
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    url = "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/contactSensors/4f0d7ad0-8429-4676-aafc-ff8a5ffa222a"
-    head = {"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3', address=url, username=head, agent_id='FibaroAgent')
-    Fibaro.getDeviceStatus()
-    #Fibaro.printDeviceStatus()
+    OpenClose = API(model='OpenClose',type='illuminance',api='API3', agent_id='OpenCloseAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/contactSensors/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'd8e492ee-18c7-49ee-af3d-4c4d65747585')
+    OpenClose.getDeviceStatus()
+    #OpenClose.printDeviceStatus()
 
 if __name__ == "__main__": main()

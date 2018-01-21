@@ -99,9 +99,10 @@ class API:
         getDeviceStatusResult = True
 
         try:
-            r = requests.get("https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                             headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, timeout=20);
-            print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
+            headers = {"Authorization": self.get_variable("bearer")}
+            url = str(self.get_variable("url") + self.get_variable("device"))
+            r = requests.get(url,
+                             headers=headers, timeout=20);
             format(self.variables.get('agent_id', None), str(r.status_code))
             print r.text
             if r.status_code == 200:
@@ -150,66 +151,58 @@ class API:
 
         setDeviceStatusResult = True
 
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url") + self.get_variable("device"))
+
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
             _data = _data.encode(encoding='utf_8')
             print type(postmsg)
             print (_data)
 
+
+
             try:
-
-                print "sending requests put"
-                r = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data, timeout=20);
-
-                time.sleep(15)
-
-
-
-
-                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                _data3 =  json.dumps({"command": "TwoOn"})
-                print (_data3)
-                print "sending requests put"
-                r2 = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data3, timeout=20);
-
-                time.sleep(3)
-
                 _data2 =   json.dumps({"command": "TwoOff"})
                 print (_data2)
                 print "sending requests put"
-                r3 = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data2, timeout=20);
-
-                time.sleep(3)
+                r3 = requests.put(url, headers=headers, data=_data, timeout=20);
+                time.sleep(1)
 
                 # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 _data3 =   json.dumps({"command": "OneOff"})
                 print (_data3)
                 print "sending requests put"
-                r2 = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data3, timeout=20);
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                time.sleep(1)
 
-                time.sleep(3)
 
-                _data2 =  ({"command": "TwoOff"})
+                print "sending requests put"
+                r = requests.put(url, headers=headers, data=_data, timeout=20);
+
+                time.sleep(15)
+
+
+
+                _data3 =  json.dumps({"command": "OneOff"})
+                print (_data3)
+                print "sending requests put"
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+
+                _data2 =   json.dumps({"command": "TwoOff"})
                 print (_data2)
                 print "sending requests put"
-                r3 = requests.put(
-                    "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/b95f3f30-4764-4ffd-b995-4ca7ed007358/switches/07d849c7-5ad9-4e59-804f-a8d0bcccd6ce",
-                    headers={"Authorization": "Bearer e3b0e22c-e7f3-4e11-aa5b-25f630ada9c2"}, data= _data2, timeout=20);
+                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                time.sleep(1)
+
+                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
+                _data3 =   json.dumps({"command": "OneOff"})
+                print (_data3)
+                print "sending requests put"
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
 
 
-
-                print(" {0}Agent for {1} is changing its status with {2} please wait ..."
-                      .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
-                print(" after send a POST request: {}".format(r.status_code))
             except:
                 print("ERROR: classAPI_Somfy connection failure! @ setDeviceStatus")
                 setDeviceStatusResult = False
@@ -242,19 +235,19 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent')
-    # Somfy.getDeviceStatus()
+    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/switches/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'e75fb1ac-aebe-427d-a4e4-5d50f0572c18')
+    Somfy.getDeviceStatus()
 
 
-    #
-    # Somfy.setDeviceStatus({"status": "ON"})
-    #
-    # time.sleep(10)
     #
     Somfy.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
     # Somfy.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(10)
+    #
+    # Somfy.setDeviceStatus({"status": "OFF"})
 
 if __name__ == "__main__": main()

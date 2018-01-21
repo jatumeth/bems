@@ -46,64 +46,6 @@ def deviceMonitorBehavior():
         "volttron-ctl stop --tag " + agent_id +
         ";volttron-ctl status")
 
-def send_requeston():
-    # scene
-    # PUT https://api.netpie.io/topic/P1Site/SMH
-    try:
-        response = requests.put(
-            url="https://api.netpie.io/topic/P1Site/SMH",
-            params={
-                "retain": "OFF",
-                "auth": "U0Qa6TlkPIjpwXP:tXk4e5hra3OFGt1aZyaAnu0rP",
-            },
-            headers={
-                "Content-Type": "application/json",
-            },
-            data=json.dumps({
-                "id": "C1",
-                "state": "on",
-                "site": "7727a0190f32d6bc59a52a26c69b3336b49be7bcc1c4",
-                "agent": "N2",
-                "branch": "control",
-                "sender": "webview"
-            })
-        )
-        print('Response HTTP Status Code: {status_code}'.format(
-            status_code=response.status_code))
-        print('Response HTTP Response Body: {content}'.format(
-            content=response.content))
-    except requests.exceptions.RequestException:
-        print('HTTP Request failed')
-
-def send_requestoff():
-    # scene
-    # PUT https://api.netpie.io/topic/P1Site/SMH
-    try:
-        response = requests.put(
-            url="https://api.netpie.io/topic/P1Site/SMH",
-            params={
-                "retain": "OFF",
-                "auth": "U0Qa6TlkPIjpwXP:tXk4e5hra3OFGt1aZyaAnu0rP",
-            },
-            headers={
-                "Content-Type": "application/json",
-            },
-            data=json.dumps({
-                "id": "C1",
-                "state": "off",
-                "site": "7727a0190f32d6bc59a52a26c69b3336b49be7bcc1c4",
-                "agent": "N2",
-                "branch": "control",
-                "sender": "webview"
-            })
-        )
-        print('Response HTTP Status Code: {status_code}'.format(
-            status_code=response.status_code))
-        print('Response HTTP Response Body: {content}'.format(
-            content=response.content))
-    except requests.exceptions.RequestException:
-        print('HTTP Request failed')
-
 def hue(commsg):
     # TODO this is example how to write an app to control Lighting
     topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
@@ -119,7 +61,6 @@ def hue(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
-
 def kitchen(commsg):
     # TODO this is example how to write an app to control Lighting
     topic = "/ui/agent/light/update/bemoss/999/1KR221445K1200138"
@@ -134,7 +75,6 @@ def kitchen(commsg):
     zmq_pub.requestAgent(topic, message, "text/plain", "UI")
     print ("topic{}".format(topic))
     print ("message{}".format(message))
-
 
 def yale(commsg):
     # TODO this is example how to write an app to control Lighting
@@ -246,7 +186,7 @@ def daikin(commsg):
 
 def fan(commsg):
     # TODO this is example how to write an app to control Lighting
-    topic = '/ui/agent/fan/update/bemoss/999/1FN221445K1200138'
+    topic = '/ui/agent/relaysw/update/bemoss/999/1FN221445K1200138'
     # {"status": "OFF"}
     # now = datetime.utcnow().isoformat(' ') + 'Z'
     # headers = {
@@ -297,10 +237,25 @@ def HC(commsg):
     print ("topic{}".format(topic))
     print ("message{}".format(message))
 
+def pub(commsg):
+    print commsg
+    print "testhomescence"
+    # TODO this is example how to write an app to control AC
+
+
+
+    topic = str('/ui/agent/'+ str(commsg['device'][0:5])+'/update/bemoss/999/'+str(commsg['device']))
+    print topic
+    message = json.dumps(commsg)
+    zmq_pub.requestAgent(topic, message, "text/plain", "UI")
+    print ("topic{}".format(topic))
+    print ("message{}".format(message))
+
 mac = hex(get_mac())[2:10]
 topic = 'hive'+str(mac)
 print topic
 
+topic = 'hiveac7ba18f'
 
 
 while True:
@@ -308,73 +263,16 @@ while True:
     try:
 	print "mqtt server is waiting for message from Azure"
         msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)
-
         commsg = eval(msg.body)
         print commsg
-
         print("message MQTT received")
-
         for k, v in commsg.items():
             if k == 'device':
-                print k
-                if (commsg['device']) == "2HUEK0017881cab46":
-                    hue(commsg)
-                elif (commsg['device']) == "3WSP":
-                    try :
-                        if (commsg['status']) == "ON":
-                            print "on"
-                            send_requeston()
-                        else:
-                            print "off"
-                            send_requestoff()
-                    except:
-                        print ""
-
-                elif (commsg['device']) == "16SCH":
-                    wemo(commsg)
-
-
-                elif (commsg['device']) == "18DOR06":
-                    yale(commsg)
-
-
-                elif (commsg['device']) == "1ACD1200136":
-                    daikin(commsg)
-                elif (commsg['device']) == "11LG221445K120016":
-                    lg(commsg)
-                elif (commsg['device']) == "11LG221445K120017":
-                    lg(commsg)
-                elif (commsg['device']) == "7FAN":
-                    fan(commsg)
-
-                elif (commsg['device']) == "1SAJ1":
-                    saijo1(commsg)
-                    time.sleep(3)
-                    saijo1(commsg)
-
-                elif (commsg['device']) == "3WSP221445K1200328":
-                    somfy(commsg)
-                    time.sleep(3)
-
-                elif (commsg['device']) == "1SAJ2":
-                    saijo2(commsg)
-                    time.sleep(3)
-                    saijo2(commsg)
-                elif (commsg['device']) == "1SAJ3":
-                    saijo3(commsg)
-                    time.sleep(3)
-                    saijo3(commsg)
-                elif (commsg['device']) == "2HUEL":
-                    living(commsg)
-                elif (commsg['device']) == "2HUEK":
-                    kitchen(commsg)
-                else:
-                    print ""
+                pub(commsg)
             elif k == 'scene':
                 HC(commsg)
             else:
                 print ""
-
         if (commsg['devicediscovery'] == True):
             deviceMonitorBehavior()
         else:

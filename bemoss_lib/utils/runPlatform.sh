@@ -112,10 +112,10 @@ sleep 2
 volttron-ctl start --tag Netatmoagent
 #sleep 2
 #volttron-ctl start --tag PVInverterAgent
-#sleep 2
-#volttron-ctl start --tag KitchenLight
-#sleep 2
-#volttron-ctl start --tag LivingLight
+sleep 2
+volttron-ctl start --tag KitchenLight
+sleep 2
+volttron-ctl start --tag LivingLight
 sleep 2
 volttron-ctl start --tag PEASmartHomeHue
 sleep 2
@@ -124,17 +124,18 @@ sleep 2
 volttron-ctl start --tag HomeSceneApp
 
 sleep 2
-volttron-ctl start --tag YaleDoorLock
+volttron-ctl start --tag doorlock
 #sleep 2
 
 sleep 2
-volttron-ctl start --tag somfy
-#volttron-ctl start --tag CreativePowerAgent
+volttron-ctl start --tag curtain
 
 sleep 2
 volttron-ctl start --tag openclose
 #volttron-ctl start --tag CreativePowerAgent
 
+sleep 2
+volttron-ctl start --tag openclosedoor
 
 volttron-ctl status
 deactivate

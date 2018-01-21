@@ -93,7 +93,7 @@ class API:
     pressure                  GET           presure
     outside_damper_position   GET    POST   outside damper position, int
     bypass_damper_position    GET    POST   outside damper position, int
-    fan_status                GET    POST   RTU fan status('ON'/'OFF')
+    fan_status                GET    POST   RTU relaysw status('ON'/'OFF')
     cooling_status            GET    POST   RTU cooling status('ON'/'OFF')
     cooling_mode              GET    POST   RTU cooling mode('None'/'STG1'/'STG2')
     ------------------------------------------------------------------------------------------

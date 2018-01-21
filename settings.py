@@ -100,7 +100,7 @@ DATABASES = {
         'TABLE_holiday': 'holiday',
         'TABLE_application_running': 'application_running',
         'TABLE_application_registered': 'application_registered',
-        'TABLE_plugload': 'plugload',
+        'TABLE_plugload': 'tplink',
         'TABLE_thermostat': 'thermostat',
         'TABLE_lighting': 'lighting',
         'TABLE_device_metadata': 'device_metadata',
@@ -146,6 +146,11 @@ DATABASES = {
         'TABLE_CreativePowerMeter': 'CreativePowerMeter',
         'TABLE_ACDaikin': 'ACDaikin',
         'TABLE_Netatmo': 'Netatmo',
+        'TABLE_RelaySW': 'RelaySW',
+        'TABLE_OpenClose': 'OpenClose',
+        'TABLE_Curtain': 'Curtain',
+        'TABLE_Doorlock': 'Doorlock',
+        'TABLE_Tplink': 'Tplink',
     }
 }
 
@@ -160,7 +165,7 @@ NOTIFICATION = {
         'subject' : 'Message from',
         'mailServer': 'smtp.gmail.com:587'
     },
-    'plugload':{
+    'tplink':{
         'status': "ON",
         'power': 200
     },

@@ -67,6 +67,9 @@ def FanAgent(config_path, **kwargs):
     smt_password = get_config('smt_password')
     address = get_config('address')
     device_id = get_config('device_id')
+    url = get_config('url')
+    device = get_config('device')
+    bearer = get_config('bearer')
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -107,7 +110,7 @@ def FanAgent(config_path, **kwargs):
     #4.1 initialize Fan device object
     Fan = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
-                    db_database=db_database, config_path=config_path)
+                    db_database=db_database, config_path=config_path,bearer=bearer,device =device,url=url)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
                                                                         Fan.get_variable('model'),
@@ -197,19 +200,19 @@ def FanAgent(config_path, **kwargs):
         def postgresAPI(self):
 
             try:
-                self.cur.execute("SELECT * from fan WHERE fan_id=%s", (agent_id,))
+                self.cur.execute("SELECT * from relaysw WHERE fan_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
                     pass
                 else:
                     self.cur.execute(
-                        """INSERT INTO fan (fan_id, last_scanned_time) VALUES (%s, %s);""",
+                        """INSERT INTO relaysw (fan_id, last_scanned_time) VALUES (%s, %s);""",
                         (agent_id, datetime.datetime.now()))
             except:
                 print "Error to check data base."
 
             try:
                 self.cur.execute("""
-                    UPDATE fan
+                    UPDATE relaysw
                     SET status=%s, last_scanned_time=%s
                     WHERE fan_id=%s
                  """, (Fan.variables['status'], datetime.datetime.now(), agent_id))

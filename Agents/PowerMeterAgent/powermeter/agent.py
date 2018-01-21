@@ -52,6 +52,7 @@ def powermeteragent(config_path, **kwargs):
 
     # 1. @params agent
     agent_id = get_config('agent_id')
+    print(agent_id)
     device_monitor_time = get_config('device_monitor_time')
     max_monitor_time = int(settings.DEVICES['max_monitor_time'])
     debug_agent = False
@@ -123,6 +124,8 @@ def powermeteragent(config_path, **kwargs):
                                                                         PowerMeter.get_variable('api'),
                                                                         PowerMeter.get_variable('address')))
 
+    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+
     # 5. @params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
@@ -151,6 +154,7 @@ def powermeteragent(config_path, **kwargs):
             self.changed_variables = None
             self.lastUpdateTime = None
             self.stream_data_initialState = False
+            self.start_first_time = True
 
             # 2. setup connection with db -> Connect to bemossdb database
             # try:
@@ -177,7 +181,7 @@ def powermeteragent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
+            print "11111111111111111111"
             # step1: get current status, then map keywords and variables to agent knowledge
             try:
                 print ("")
@@ -186,6 +190,20 @@ def powermeteragent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
+
+            if (self.start_first_time):
+                self.grid_energy = 0
+                self.start_first_time = False
+                self.last_energy = PowerMeter.variables['grid_accumulated_energy']
+            else:
+                try:
+                    self.energy_now = PowerMeter.variables['grid_accumulated_energy']
+                    self.grid_energy = float(self.energy_now) - float(self.last_energy)
+                    print "Energy Now = {}".format(self.grid_energy)
+                    self.last_energy = self.energy_now
+                except Exception as er:
+                    self.grid_energy = 0
+                    print "cannot read data: {}".format(er)
 
             # self.changed_variables = dict()
             # for v in log_variables:
@@ -204,16 +222,24 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
-
-            self.postgresAPI()
+            # self.postgresAPI()
             print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+            x = {}
+            x["agent_id"] = PowerMeter.variables['agent_id']
+            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["gridvoltage"] = PowerMeter.variables['grid_voltage']
+            x["gridcurrent"] = PowerMeter.variables['grid_current']
+            x["gridactivePower"] = PowerMeter.variables['grid_activePower']
+            x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
+            x["device_type"] = 'powermeter'
+
+            discovered_address = iotmodul.iothub_client_sample_run(x)
+
+            print x
 
         def postgresAPI(self):
 
             self.connect_postgresdb()
-
-
-
             try:
                 self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
@@ -264,6 +290,21 @@ def powermeteragent(config_path, **kwargs):
             #     print "insert database: success"
             # except Exception as er:
             #     print "insert data base error: {}".format(er)
+
+            try:
+                self.cur.execute(
+                    """INSERT INTO ts_power_meter (datetime, grid_voltage, grid_current, grid_activepower, 
+                    grid_accumulated_energy, grid_energy, power_meter_id, gateway_id
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (
+                    datetime.datetime.now(), PowerMeter.variables['grid_voltage'], PowerMeter.variables['grid_current'],
+                    PowerMeter.variables['grid_activePower'], PowerMeter.variables['grid_accumulated_energy'], self.grid_energy, agent_id, '1'
+                    ))
+                self.con.commit()
+                print "insert database: success"
+            except Exception as er:
+                print "insert data base error: {}".format(er)
+
 
             self.disconnect_postgresdb()
 

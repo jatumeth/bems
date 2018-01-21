@@ -85,7 +85,7 @@ volttron-ctl install networkagent=/tmp/volttron_wheels/networkagent-0.1-py2-none
 
 # Run Powermeter agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/PowerMeterAgent/
-volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/powermeteragent.launch.json
+volttron-pkg configure /tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PowerMeterAgent/creativepoweragent.launch.json
 volttron-ctl install powermeteragent=/tmp/volttron_wheels/powermeteragent-0.1-py2-none-any.whl
 
 # Run Mode agent
@@ -121,7 +121,7 @@ volttron-ctl install 1MS221445K1200132=/tmp/volttron_wheels/multisensoragent-0.1
 
 # Run LGTVAgent
 volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/1LG221445K1200137.launch.json
+volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/11LG121445K1200137.launch.json
 volttron-ctl install 1LG221445K1200137=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
 
 # Run Fan
@@ -188,11 +188,11 @@ volttron-ctl install EnergyBillAppAgent=/tmp/volttron_wheels/energybillappagent-
 volttron-pkg package ~/workspace/bemoss_os/Agents/PVInverterAgent
 volttron-pkg configure /tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/PVInverterAgent/1PVGW1445K1200138.launch.json
 volttron-ctl install PVInverterAgent=/tmp/volttron_wheels/pvinverteragent-0.1-py2-none-any.whl
-
-# Run DC Agent
-volttron-pkg package ~/workspace/bemoss_os/Agents/DCRelayAgent
-volttron-pkg configure /tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DCRelayAgent/RelaySRD05VDCSLCIP0035.launch.json
-volttron-ctl install DCRelayAgent=/tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl
+#
+## Run DC Agent
+#volttron-pkg package ~/workspace/bemoss_os/Agents/DCRelayAgent
+#volttron-pkg configure /tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DCRelayAgent/RelaySRD05VDCSLCIP0035.launch.json
+#volttron-ctl install DCRelayAgent=/tmp/volttron_wheels/dcrelayagent-0.1-py2-none-any.whl
 
 # Run Listener Agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/ListenerAgent
@@ -204,10 +204,10 @@ volttron-pkg package ~/workspace/bemoss_os/Applications/code/GridAppAgent/
 volttron-pkg configure /tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/GridAppAgent/gridappagent.launch.json
 volttron-ctl install GridAppAgent=/tmp/volttron_wheels/gridappagent-0.1-py2-none-any.whl
 
-# Run EVApp agent
-volttron-pkg package ~/workspace/bemoss_os/Applications/code/EVAppAgent/
-volttron-pkg configure /tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EVAppAgent/evappagent.launch.json
-volttron-ctl install evappagent=/tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl
+## Run EVApp agent
+#volttron-pkg package ~/workspace/bemoss_os/Applications/code/EVAppAgent/
+#volttron-pkg configure /tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EVAppAgent/evappagent.launch.json
+#volttron-ctl install evappagent=/tmp/volttron_wheels/evappagent-0.1-py2-none-any.whl
 
 # Run Netatmo agent
 volttron-pkg package ~/workspace/bemoss_os/Agents/NetatmoAgent/
@@ -229,15 +229,17 @@ volttron-ctl install Daikinagent=/tmp/volttron_wheels/daikinagent-0.1-py2-none-a
 #volttron-pkg configure /tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/mqttsubscribe/mqttsubagent.launch.json
 #volttron-ctl install MQTTSub=/tmp/volttron_wheels/mqttsubagent-0.1-py2-none-any.whl
 
+
 # kitchen light
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1KR221445K1200138.launch.json
-volttron-ctl install KitchenLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+
+volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/RelaySWAgent/1KR221445K1200138.launch.json
+volttron-ctl install KitchenLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Living light
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/FanAgent/1LR221445K1200138.launch.json
-volttron-ctl install LivingLight=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+volttron-pkg package ~/workspace/bemoss_os/Agents/RelaySWAgent/
+volttron-pkg configure /tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/RelaySWAgent/1LR221445K1200138.launch.json
+volttron-ctl install LivingLight=/tmp/volttron_wheels/relayswagent-0.1-py2-none-any.whl
 
 # Phillip-Hue
 volttron-pkg package ~/workspace/bemoss_os/Agents/LightingAgent/
@@ -255,21 +257,26 @@ volttron-pkg configure /tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl
 volttron-ctl install HomeSceneApp=/tmp/volttron_wheels/homescenceagent-0.1-py2-none-any.whl
 
 
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/18DOR06.launch.json
-volttron-ctl install YaleDoorLock=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
-
-volttron-pkg package ~/workspace/bemoss_os/Agents/LGTVAgent/
-volttron-pkg configure /tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/LGTVAgent/3WSP221445K1200328.launch.json
-volttron-ctl install somfy=/tmp/volttron_wheels/lgtvagent-0.1-py2-none-any.whl
+# Run Openclose
+volttron-pkg package ~/workspace/bemoss_os/Agents/OpenCloseAgent/
+volttron-pkg configure /tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/OpenCloseAgent/openclose221445K1200135.launch.json
+volttron-ctl install openclose=/tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl
 
 
+# Run openclosedoor
+volttron-pkg package ~/workspace/bemoss_os/Agents/OpenCloseAgent/
+volttron-pkg configure /tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/OpenCloseAgent/18DOR08.launch.json
+volttron-ctl install openclosedoor=/tmp/volttron_wheels/opencloseagent-0.1-py2-none-any.whl
 
-# Run MultisensorAgent
-volttron-pkg package ~/workspace/bemoss_os/Agents/MultiSensorAgent/
-volttron-pkg configure /tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiSensorAgent/openclose221445K1200135.launch.json
-volttron-ctl install openclose=/tmp/volttron_wheels/multisensoragent-0.1-py2-none-any.whl
+# Run doorlock
+volttron-pkg package ~/workspace/bemoss_os/Agents/DoorlockAgent/
+volttron-pkg configure /tmp/volttron_wheels/doorlockagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/DoorlockAgent/18DOR06.launch.json
+volttron-ctl install doorlock=/tmp/volttron_wheels/doorlockagent-0.1-py2-none-any.whl
 
+# Run curtain
+volttron-pkg package ~/workspace/bemoss_os/Agents/CurtainAgent/
+volttron-pkg configure /tmp/volttron_wheels/curtainagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/CurtainAgent/03MRB221445K1200328.launch.json
+volttron-ctl install curtain=/tmp/volttron_wheels/curtainagent-0.1-py2-none-any.whl
 
 
 sudo chmod 777 -R /tmp/volttron_wheels/

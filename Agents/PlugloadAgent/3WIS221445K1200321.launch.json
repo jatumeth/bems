@@ -1,15 +1,15 @@
 {
-    "address": "http://192.168.1.113:49153",
+    "address": "http://192.168.1.31:49153",
     "agent": {
         "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "3WIS221445K1200321", 
+    "agent_id": "3WIS221445K1200321",
     "api": "classAPI_WeMo", 
     "building_name": "bemoss", 
-    "device_monitor_time": 30,
+    "device_monitor_time": 20,
     "macaddress": "221445K1200321", 
     "model": "Insight", 
-    "type": "plugload", 
+    "type": "03WIS",
     "vendor": "Belkin International Inc.", 
     "zone_id": 999
 }
