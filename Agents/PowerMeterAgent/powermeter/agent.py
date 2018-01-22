@@ -27,10 +27,22 @@ import settings
 import datetime
 import time
 import math
+import pyrebase
+import os
+import random
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
+config = {
+  "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+  "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+  "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+  "storageBucket": "bucket.appspot.com",
+  "serviceAccount": os.getcwd()+"/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
+}
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
 
 # Step1: Agent Initialization
 def powermeteragent(config_path, **kwargs):
@@ -108,6 +120,9 @@ def powermeteragent(config_path, **kwargs):
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
+    gateway_id = settings.gateway_id
+    print('++++++++++++++++++++++++++++++++')
+    print('gateway_id : {}'.format(gateway_id))
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
 
     # 4. @params device_api
@@ -181,15 +196,15 @@ def powermeteragent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-            print "11111111111111111111"
             # step1: get current status, then map keywords and variables to agent knowledge
+
             try:
-                print ("")
+                print ("starting device monitor")
                 PowerMeter.getDeviceStatus()
                 self.updateUI()
             except Exception as er:
                 print er
-                print "device connection for {} is not successful".format(agent_id)
+                print "device connection for {} is not successful {}".format(agent_id, er)
 
             if (self.start_first_time):
                 self.grid_energy = 0
@@ -224,6 +239,10 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
             # self.postgresAPI()
             print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+
+            data = PowerMeter.variables['grid_activePower']
+            db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+
             x = {}
             x["agent_id"] = PowerMeter.variables['agent_id']
             x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
