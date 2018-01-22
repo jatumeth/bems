@@ -49,6 +49,12 @@ under Contract DE-EE0006352
 # settings file for BEMOSS project.
 
 import os
+import fcntl, socket, struct
+
+def getHwAddr(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', ifname[:15]))
+    return ':'.join(['%02x' % ord(char) for char in info[18:24]])
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -62,7 +68,9 @@ Loaded_Agents_DIR = os.path.expanduser("~/.volttron/agents/")
 Autostart_Agents_DIR = os.path.expanduser("~/.config/volttron/lite/autostart/")
 Communications_DIR = os.path.join(PROJECT_DIR, 'bemoss_lib/communication/')
 Custom_eggs_DIR = os.path.join(PROJECT_DIR, 'bemoss_lib/custom-eggs/')
-
+gateway_mac = getHwAddr('wlan0').replace(':','')
+gateway_id = 'hive'+ getHwAddr('wlan0').replace(':','')
+print(gateway_id)
 
 PLATFORM = {
     'node': {
