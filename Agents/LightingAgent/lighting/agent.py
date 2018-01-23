@@ -146,7 +146,7 @@ def LightingAgent(config_path, **kwargs):
     class Agent(PublishMixin, BaseAgent):
         """Agent for querying WeatherUndergrounds API"""
 
-        #1. agent initialization    
+        #1. agent initialization
         def __init__(self, **kwargs):
             super(Agent, self).__init__(**kwargs)
             #1. initialize all agent variables
@@ -176,13 +176,13 @@ def LightingAgent(config_path, **kwargs):
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
 
-        #These set and get methods allow scalability 
+        #These set and get methods allow scalability
         def set_variable(self,k,v):  # k=key, v=value
             self.variables[k] = v
-    
+
         def get_variable(self,k):
             return self.variables.get(k, None)  # default of get_variable is none
-        
+
         #2. agent setup method
         def setup(self):
             super(Agent, self).setup()
