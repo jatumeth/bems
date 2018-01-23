@@ -275,10 +275,6 @@ except:
 topic = gateway_id
 print topic
 
-
-
-topic = 'hiveac7ba18f'
-
 while True:
     try:
 	print "mqtt server is waiting for message from Azure"

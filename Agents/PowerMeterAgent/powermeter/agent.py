@@ -122,8 +122,7 @@ def powermeteragent(config_path, **kwargs):
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
-    # gateway_id = settings.gateway_id
-    gateway_id = 'hivec83a35cdbeab'
+    gateway_id = settings.gateway_id
     print('++++++++++++++++++++++++++++++++')
     print('gateway_id : {}'.format(gateway_id))
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
