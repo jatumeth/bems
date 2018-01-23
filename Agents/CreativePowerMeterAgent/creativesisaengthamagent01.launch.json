@@ -2,8 +2,8 @@
     "agent": {
         "exec": "creativepoweragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agent_id": "5PMCP009",
-    "device_id": "250883398",
+    "agent_id": "5PMCP124930529",
+    "device_id": "124930529",
     "device_monitor_time":10,
     "building_name": "bemoss",
     "zone_id": 999,

@@ -89,6 +89,8 @@ def powermeteragent(config_path, **kwargs):
     head_q = get_config('head_q')
     url_l = get_config('url_l')
     head_l = get_config('head_l')
+    agent_id = get_config('agent_id')
+    device_id = get_config('device_id')
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -120,7 +122,8 @@ def powermeteragent(config_path, **kwargs):
     db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
     db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
-    gateway_id = settings.gateway_id
+    # gateway_id = settings.gateway_id
+    gateway_id = 'hivec83a35cdbeab'
     print('++++++++++++++++++++++++++++++++')
     print('gateway_id : {}'.format(gateway_id))
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -131,7 +134,7 @@ def powermeteragent(config_path, **kwargs):
 
 
     # 4.1 initialize thermostat device object
-    PowerMeter = apiLib.API(model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
+    PowerMeter = apiLib.API(device_id = device_id, model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
                             addressl=url_l, usernamel=head_l, agent_id=agent_id, db_host=db_host, db_port=db_port,
                             db_user=db_user, db_password=db_password, db_database=db_database)
 

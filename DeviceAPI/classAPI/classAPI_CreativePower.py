@@ -92,11 +92,16 @@ class API:
     # ----------------------------------------------------------------------
     def getDeviceStatus(self):
 
+        device_id = str(self.get_variable("device_id"))
+
         try:
 
+            url = 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,'+device_id+'&order=trans_id,desc&page=1'
+            print url
             http = urllib3.PoolManager()
+            # r = http.request('GET','https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1')
             # r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc&page=1')
-            r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1')
+            r = http.request('GET', url)
             conve_json = json.loads(r.data)
             # print r.data
 
@@ -127,7 +132,7 @@ class API:
 
 # This main method will not be executed when this class is used as a module
 def main():
-    Creative_Power = API(model='e-Trix@Larm', type='powermeter', api='classAPI_CreativePower', agent_id='Creative_Power')
+    Creative_Power = API(model='e-Trix@Larm', type='powermeter', api='classAPI_CreativePower', agent_id='Creative_Power',device_id='250883398')
     Creative_Power.getDeviceStatus()
     Creative_Power.printDeviceStatus()
     # Creative_Power.printDeviceStatus()
