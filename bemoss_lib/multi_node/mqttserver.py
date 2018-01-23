@@ -15,7 +15,7 @@ import logging
 import os
 from volttron.platform.agent import utils, matching
 from uuid import getnode as get_mac
-
+import fcntl, socket, struct
 
 utils.setup_logging()  # setup logger for debugging
 _log = logging.getLogger(__name__)
@@ -30,6 +30,11 @@ sbs = ServiceBusService(
                 service_namespace='peahiveservicebus',
                 shared_access_key_name='RootManageSharedAccessKey',
                 shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
+
+def getHwAddr(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    info = fcntl.ioctl(s.fileno(), 0x8927,  struct.pack('256s', ifname[:15]))
+    return ':'.join(['%02x' % ord(char) for char in info[18:24]])
 
 def deviceMonitorBehavior():
 
@@ -252,14 +257,25 @@ def pub(commsg):
     print ("message{}".format(message))
 
 mac = hex(get_mac())[2:10]
-topic = 'hive'+str(mac)
+
+try:
+
+    gateway_mac = getHwAddr('eth0').replace(':', '')
+    gateway_id = 'hive' + getHwAddr('eth0').replace(':', '')
+    print(gateway_id)
+
+except:
+    print "no wlan0"
+    try:
+        gateway_mac = getHwAddr('wlan0').replace(':', '')
+        gateway_id = 'hive' + getHwAddr('wlan0').replace(':', '')
+        print(gateway_id)
+    except:
+        print "no eth0"
+topic = gateway_id
 print topic
 
-topic = 'hiveac7ba18f'
-
-
 while True:
-
     try:
 	print "mqtt server is waiting for message from Azure"
         msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)

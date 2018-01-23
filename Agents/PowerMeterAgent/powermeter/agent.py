@@ -89,6 +89,8 @@ def powermeteragent(config_path, **kwargs):
     head_q = get_config('head_q')
     url_l = get_config('url_l')
     head_l = get_config('head_l')
+    agent_id = get_config('agent_id')
+    device_id = get_config('device_id')
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
@@ -131,7 +133,7 @@ def powermeteragent(config_path, **kwargs):
 
 
     # 4.1 initialize thermostat device object
-    PowerMeter = apiLib.API(model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
+    PowerMeter = apiLib.API(device_id = device_id, model=model, type=device_type, api=api, addressq=url_q, usernameq=head_q,
                             addressl=url_l, usernamel=head_l, agent_id=agent_id, db_host=db_host, db_port=db_port,
                             db_user=db_user, db_password=db_password, db_database=db_database)
 
