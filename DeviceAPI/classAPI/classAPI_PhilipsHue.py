@@ -63,7 +63,7 @@ class API:
         self.set_variable('connection_renew_interval', 6000)  # nothing to renew, right now
         self.only_white_bulb = None
         # to initialize the only white bulb value
-        self.getDeviceStatus()
+        # self.getDeviceStatus()
     def renewConnection(self):
         pass
 
@@ -230,6 +230,14 @@ class API:
                         _red = int(float(msg[0]))
                         _green = int(float(msg[1]))
                         _blue = int(float(msg[2]))
+                    elif type(postmsg['color']) == list:
+                        # x=postmsg['color']
+                        # y= x.replace("(", "")
+                        # z= y.replace(")", "")
+                        msg = postmsg['color']
+                        _red = int(float(msg[0]))
+                        _green = int(float(msg[1]))
+                        _blue = int(float(msg[2]))
                     _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
                     msgToDevice['xy'] = [_xyY.x, _xyY.y]
                     # msgToDevice['bri']= int(round(_xyY.y*255,0))
@@ -292,8 +300,7 @@ def main():
 
     PhilipsHue.getDeviceStatus()
     # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
-    #
-    PhilipsHue.setDeviceStatus({"status": "ON", "color": "(127.5,255,0)", "device": "2HUEH0017881cab4b", "brightness": 100})
+    PhilipsHue.setDeviceStatus({"status": "OFF", "color": "(255,255,255)", "device": "2HUEH0017881cab4b", "brightness": 50})
     # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 
 
