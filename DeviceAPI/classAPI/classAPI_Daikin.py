@@ -143,6 +143,7 @@ class API:
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
+        self.getDeviceStatus()
         setDeviceStatusResult = True
 
         postmsg = str(postmsg)
@@ -172,7 +173,6 @@ class API:
                     m = 1
 
             data=str("pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3")
-            print "9999999999"
             print data
 
 
@@ -204,10 +204,11 @@ def main():
 
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
 
-
-    AC.setDeviceStatus({'status': 'OFF', 'device': '1DAIK1200138'})
-    AC.getDeviceStatus()
+    #
+    # AC.setDeviceStatus({'status': 'OFF', 'device': '1DAIK1200138'})
+    # AC.getDeviceStatus()
     # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "3"})
-    # AC.setDeviceStatus({'stemp':'24'})
+    # AC.setDeviceStatus({'status': 'OFF', 'stemp':'24','device': '1DAIK1200138'})
+    AC.getDeviceStatus()
 
 if __name__ == "__main__": main()

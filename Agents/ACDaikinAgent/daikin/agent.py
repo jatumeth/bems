@@ -172,7 +172,7 @@ def ACDaikinAgent(config_path, **kwargs):
             # real-time update web ui
             self.updateStatus()
             # update postgres database
-            self.postgresAPI()
+            # self.postgresAPI()
 
         def postgresAPI(self):
 
@@ -458,7 +458,7 @@ def ACDaikinAgent(config_path, **kwargs):
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
-                _data = json.dumps(postmsg)
+                # _data = json.dumps(postmsg)
                 _data = json.loads(_data)
                 for k,v in _data.items():
                     if k == 'status':
