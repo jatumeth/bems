@@ -9,7 +9,7 @@
     "device_monitor_time": 20,
     "macaddress": "221445K1200321", 
     "model": "Insight", 
-    "type": "03WIS",
+    "type": "plugload",
     "vendor": "Belkin International Inc.", 
     "zone_id": 999
 }
