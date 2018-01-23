@@ -236,38 +236,58 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     # Demonstrate periodic decorator and settings access
     # @periodic(settings.HEARTBEAT_PERIOD)
-    # @periodic(10)
-    # def publish_heartbeat(self):
-    #     '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
-    #
-    #     HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
-    #     '''
-    #
-    #     # TODO this is example how to write an app to control AC
-    #     # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
-    #     # now = datetime.utcnow().isoformat(' ') + 'Z'
-    #     # headers = {
-    #     #     'AgentID': self._agent_id,
-    #     #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-    #     #     headers_mod.DATE: now,
-    #     # }
-    #     # import time
-    #     # # message = json.dumps({"status": "OFF"});
-    #     # # self.publish(topic, headers, message)
-    #     # # time.sleep(30)
-    #     # message = json.dumps({"status": "ON"});
-    #     # self.publish(topic, headers, message)
-    #
-    #     # TODO this is example how to write an app to control Refrigerator
-    #     topic = '/ui/agent/refridgerator/update/bemoss/999/1FR221445K1200111'
-    #     now = datetime.utcnow().isoformat(' ') + 'Z'
-    #     headers = {
-    #         'AgentID': self._agent_id,
-    #         headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
-    #         headers_mod.DATE: now,
-    #     }
-    #     message = json.dumps({"temp":"-5"})
-    #     self.publish(topic, headers, message)
+    @periodic(20)
+    def publish_heartbeat(self):
+        '''Send heartbeat message every HEARTBEAT_PERIOD seconds.
+
+        HEARTBEAT_PERIOD is set and can be adjusted in the settings module.
+        '''
+
+        # TODO this is example how to write an app to control AC
+        # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000002'
+        # now = datetime.utcnow().isoformat(' ') + 'Z'
+        # headers = {
+        #     'AgentID': self._agent_id,
+        #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+        #     headers_mod.DATE: now,
+        # }
+        # import time
+        # # message = json.dumps({"status": "OFF"});
+        # # self.publish(topic, headers, message)
+        # # time.sleep(30)
+        # message = json.dumps({"status": "ON"});
+        # self.publish(topic, headers, message)
+
+        # TODO this is example how to write an app to launch Application update scheduler
+        # launch
+        topic = '/ui/appLauncher/dataanalyticsagent/GridAppAgent/launch'
+        # topic = '/ui/appLauncher/energybillapp/EnergyBillAppAgent/launch'
+
+        # stop
+        # topic = '/ui/appLauncher/dataanalyticsagent/GridAppAgent/disable'
+        # topic = '/ui/appLauncher/energybillapp/EnergyBillAppAgent/disable'
+
+        # update scheduler
+        # topic = '/ui/app/ac_scheduler/1DAIK1200138/update'
+        # topic = '/ui/app/lighting_scheduler/2HUE0017881cab4b/update
+        # topic = '/ui/app/alert_scheduler/3WIS221445K1200321/update'
+
+        now = datetime.utcnow().isoformat(' ') + 'Z'
+        headers = {
+            'AgentID': self._agent_id,
+            headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,
+            headers_mod.DATE: now,
+        }
+
+        # launch
+        message = json.dumps({"auth_token": "bemoss"})
+
+        # update scheduler
+        # message = json.dumps({"path":"/home/pear/workspace/bemoss_os/Applications/code/AC_Scheduler/ac_1DAIK1200138.json"})
+        # message = json.dumps({"path":"/home/pear/workspace/bemoss_os/Applications/code/Lighting_Scheduler/lighting_2HUE0017881cab4b.json"})
+        # message = json.dumps({"path":"/home/pear/workspace/bemoss_os/Applications/code/Plugload_Scheduler/alert_data.json"})
+        self.publish(topic, headers, message)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
@@ -275,7 +295,7 @@ def main(argv=sys.argv):
         utils.default_main(ListenerAgent,
                            description='Example VOLTTRON platform™ heartbeat agent',
                            argv=argv)
-    except Exception as e:
+    except Exception as er:
         _log.exception('unhandled exception')
 
 

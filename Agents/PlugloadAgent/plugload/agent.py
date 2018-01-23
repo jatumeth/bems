@@ -446,7 +446,7 @@ def PlugloadAgent(config_path, **kwargs):
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
-                _data = json.dumps(postmsg)
+                # _data = json.dumps(postmsg)
                 _data = json.loads(_data)
                 for k,v in _data.items():
                     if k == 'status':
