@@ -6,10 +6,10 @@
     "agent_id": "1DAIK1200138",
     "api": "classAPI_Daikin",
     "building_name": "bemoss",
-    "device_monitor_time": 3,
+    "device_monitor_time": 10,
     "macaddress": "1200138",
     "model": "AC123",
-    "type": "1DAIK",
+    "type": "ac",
     "vendor": "Daikin",
     "zone_id": 999
 }
