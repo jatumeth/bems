@@ -217,7 +217,7 @@ def powermeteragent(config_path, **kwargs):
                 try:
                     self.energy_now = PowerMeter.variables['grid_accumulated_energy']
                     print("grid accu = {}".format(self.energy_now))
-                    self.grid_energy = float(self.energy_now) - float(self.last_energy)
+                    self.grid_energy = (float(self.energy_now) - float(self.last_energy))/1000
                     print "Energy Now = {}".format(self.grid_energy)
                     self.last_energy = self.energy_now
                 except Exception as er:
