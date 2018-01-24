@@ -119,11 +119,11 @@ class API:
             _data = postmsg
 
             try:
-                status = _data['status'].upper()
+                status = str(_data['status']).upper()
                 if status == 'ON':
                     try:
                         response = requests.get(
-                            url="http://localhost:8080/sendCommand/saijoon",
+                            url="http://localhost:8080/sendCommand/acmitsuon",
                         )
                         print('Response HTTP Status Code: {status_code}'.format(
                             status_code=response.status_code))
@@ -136,7 +136,7 @@ class API:
                     print 'status to OFF'
                     try:
                         response = requests.get(
-                            url="http://localhost:8080/sendCommand/saijooff",
+                            url="http://localhost:8080/sendCommand/acmitsuoff",
                         )
                         print('Response HTTP Status Code: {status_code}'.format(
                             status_code=response.status_code))
@@ -177,7 +177,7 @@ def main():
 
 
     import time
-    broadlink.setDeviceStatus({"status": "ON"})
+    broadlink.setDeviceStatus({"status": "OFF"})
     broadlink.getDeviceStatus()
     #
     # time.sleep(10)
