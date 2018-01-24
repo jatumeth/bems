@@ -26,6 +26,22 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
+import pyrebase
+import os
+import random
+
+firebase = settings.DATABASES['default']['firebase']
+azureiot = settings.DATABASES['default']['azureiot']
+if firebase == True:
+    config = {
+        "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+        "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+        "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+        "storageBucket": "bucket.appspot.com",
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+
 
 def TplinkAgent(config_path, **kwargs):
 
@@ -85,6 +101,8 @@ def TplinkAgent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
+    firebase = settings.DATABASES['default']['firebase']
+    azureiot = settings.DATABASES['default']['azureiot']
     db_table_Tplink = settings.DATABASES['default']['TABLE_Tplink']
     db_table_notification_event = settings.DATABASES['default']['TABLE_notification_event']
     db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
@@ -97,6 +115,12 @@ def TplinkAgent(config_path, **kwargs):
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     api = get_config('api')
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
+
+
+    gateway_id = settings.gateway_id
+    print('++++++++++++++++++++++++++++++++')
+    print('gateway_id : {}'.format(gateway_id))
+    _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
 
     #4.1 initialize tplink device object
     if vendor == 'Digi':
@@ -114,11 +138,11 @@ def TplinkAgent(config_path, **kwargs):
                                                                         Tplink.get_variable('api'),
                                                                Tplink.get_variable('address')))
 
-    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+    if azureiot == True:
+        iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
 
 
     connection_renew_interval = Tplink.variables['connection_renew_interval']
-
     #params notification_info
     send_notification = False
     email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
@@ -179,6 +203,9 @@ def TplinkAgent(config_path, **kwargs):
 
         @periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
+
+            print firebase
+            print azureiot
             try:
                 Tplink.getDeviceStatus()
                 self.variables['status'] = Tplink.variables['status']
@@ -187,17 +214,32 @@ def TplinkAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
             # self.postgresAPI()
             self.updateStatus()
-            x = {}
-            x["agent_id"] = Tplink.variables['agent_id']
-            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
-            x["plstatus"] = Tplink.variables['status']
-            x["plcurrent"] = Tplink.variables['current']
-            x["plvolt"] = Tplink.variables['volt']
-            x["plpower"] = Tplink.variables['power']
-            x["device_type"] = 'plugload'
+            if firebase == True:
+                status = Tplink.variables['status']
+                db.child(gateway_id).child(agent_id).child("status").set(status)
 
-            discovered_address = iotmodul.iothub_client_sample_run(x)
+                current = Tplink.variables['current']
+                db.child(gateway_id).child(agent_id).child("current").set(current)
 
+                volt = Tplink.variables['volt']
+                db.child(gateway_id).child(agent_id).child("volt").set(volt)
+
+                power = Tplink.variables['power']
+                db.child(gateway_id).child(agent_id).child("power").set(power)
+
+            if azureiot ==True:
+                try:
+                    x = {}
+                    x["agent_id"] = Tplink.variables['agent_id']
+                    x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+                    x["plstatus"] = Tplink.variables['status']
+                    x["plcurrent"] = Tplink.variables['current']
+                    x["plvolt"] = Tplink.variables['volt']
+                    x["plpower"] = Tplink.variables['power']
+                    x["device_type"] = 'plugload'
+                    iotcall = iotmodul.iothub_client_sample_run(x)
+                except Exception as er:
+                    print er
 
         def postgresAPI(self):
 

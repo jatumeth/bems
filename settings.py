@@ -82,6 +82,8 @@ except:
     except:
         print "no eth0"
 
+gateway_id = 'hivec83a35cdbeab'
+
 PLATFORM = {
     'node': {
         'name': 'BEMOSS core',
@@ -108,6 +110,8 @@ DATABASES = {
         'PASSWORD': '28Sep1960',                  # Not used with sqlite3.
         'HOST': 'peahivedev2.postgres.database.azure.com',
         'PORT': '5432',                    # Set to empty string for default. Not used with sqlite3.
+        'firebase': True,
+        'azureiot': True,
         'TABLE_dashboard_device_info': 'dashboard_device_info',
         'TABLE_dashboard_current_status': 'dashboard_current_status',
         'TABLE_building_zone': 'building_zone',

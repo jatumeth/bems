@@ -1,0 +1,18 @@
+{
+    "address": "http://192.168.1.31:49153",
+    "agent": {
+        "exec": "plugloadagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "03WSP8006F822",
+    "api": "classAPI_TPlinkPlug",
+    "building_name": "bemoss", 
+    "device_monitor_time": 20,
+    "macaddress": "221445K1200321", 
+    "model": "Insight", 
+    "type": "03WSP",
+    "vendor": "Belkin International Inc.", 
+    "zone_id": 999,
+    "cloudUserName": "sisaengtham.hive@gmail.com",
+    "cloudPassword": "212@hive",
+    "deviceid":"800688015D2179821C720A6A008A87DF18940D3D"
+}
