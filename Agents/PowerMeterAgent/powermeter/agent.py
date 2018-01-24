@@ -203,7 +203,7 @@ def powermeteragent(config_path, **kwargs):
             try:
                 print ("starting device monitor")
                 PowerMeter.getDeviceStatus()
-                self.updateUI()
+
             except Exception as er:
                 print er
                 print "device connection for {} is not successful {}".format(agent_id, er)
@@ -212,15 +212,20 @@ def powermeteragent(config_path, **kwargs):
                 self.grid_energy = 0
                 self.start_first_time = False
                 self.last_energy = PowerMeter.variables['grid_accumulated_energy']
+                print("grid accu = {}".format(self.last_energy))
             else:
                 try:
                     self.energy_now = PowerMeter.variables['grid_accumulated_energy']
+                    print("grid accu = {}".format(self.energy_now))
                     self.grid_energy = float(self.energy_now) - float(self.last_energy)
                     print "Energy Now = {}".format(self.grid_energy)
                     self.last_energy = self.energy_now
                 except Exception as er:
                     self.grid_energy = 0
                     print "cannot read data: {}".format(er)
+
+            print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+            self.updateUI()
 
             # self.changed_variables = dict()
             # for v in log_variables:
@@ -239,8 +244,8 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
             if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
-            # self.postgresAPI()
-            print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+            self.postgresAPI()
+
 
             data = PowerMeter.variables['grid_activePower']
             db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
@@ -510,6 +515,12 @@ def powermeteragent(config_path, **kwargs):
                 headers_mod.TO: 'ui'
             }
             _data = PowerMeter.variables
+
+            try:
+                _data['grid_energy'] = self.grid_energy
+            except Exception as er:
+                print "add data error: {}".format(er)
+
             message = json.dumps(_data)
             # message = message.encode(encoding='utf_8')
             print("{} published topic: {} and message {}".format(agent_id, topic, message))
