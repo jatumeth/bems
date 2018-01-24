@@ -82,8 +82,6 @@ except:
     except:
         print "no eth0"
 
-gateway_id = 'hivec83a35cdbeab'
-
 PLATFORM = {
     'node': {
         'name': 'BEMOSS core',
