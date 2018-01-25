@@ -301,11 +301,10 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='smarthome.pea@gmail.com',cloudPassword='28Sep1960',deviceid='8006B1A9D3F4176D0B2B9F18A2BA0BB417A7DD7F')
+    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='sisaengtham.hive@gmail.com',cloudPassword='212@hive',deviceid='8006F8228DA43DED7A097C69544EB173189410E1')
 
     # TPlinkPlug.setDeviceStatus({"status": "OFF"})
     TPlinkPlug.getDeviceStatus()
-
     #
     # time.sleep(10)
     # TPlinkPlug.setDeviceStatus({"status": "Off"})
