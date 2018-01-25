@@ -137,8 +137,17 @@ class API:
             current = d['emeter']['get_realtime']['current']
             volt = d['emeter']['get_realtime']['voltage']
             power = d['emeter']['get_realtime']['power']
-
+            power0 = float(d['emeter']['get_realtime']['power'])  # /10000
             self.set_variable('status', status)
+            if power0 > 10000:
+                power = power0 / 10000
+            else:
+                power = power0
+            if power < 0.01:
+                self.set_variable('status', 'OFF')
+            else:
+                self.set_variable('status', 'ON')
+
             self.set_variable('current', current)
             self.set_variable('volt', volt)
             self.set_variable('power', power)
