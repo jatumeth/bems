@@ -16,6 +16,7 @@ import logging
 import sys
 import numpy as np
 import calendar
+import time
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -39,13 +40,11 @@ def EnergyBillAppAgent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
-    db_table_daily_consumption = "daily_consumption"
-    db_table_weekly_consumption = "weekly_consumption"
+    db_table_daily_consumption = settings.DATABASES['default']['TABLE_daily_consumption']
+    # db_table_weekly_consumption = settings.DATABASES['default']['TABLE_weekly_consumption']
     db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
-    # db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
-    db_table_cumulative_energy = "cumulative_consumption"
+    db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
 
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
@@ -56,7 +55,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
             self.start_first_time = True
             self.check_day = datetime.datetime.now().weekday()
-            self.check_week = datetime.datetime.now().isocalendar()[1]
+            # self.check_week = datetime.datetime.now().isocalendar()[1]
             self.check_month = datetime.datetime.now().month
             self.check_year = datetime.datetime.now().year
             self.current_electricity_price = 0
@@ -86,11 +85,12 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self._agent_id = agent_id
             self.get_yesterday_data()
             self.get_today_data()
-            self.get_last_week_data()
-            self.get_this_week_data()
+            # self.get_last_week_data()
+            # self.get_this_week_data()
             self.get_last_month_data()
             self.get_this_month_data()
             self.get_annual_data()
+            time.sleep(60)
 
         def start_new_day(self):
             self.load_energy_today = 0
@@ -102,19 +102,19 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_import_bill_today = 0
             self.grid_export_bill_today = 0
             self.get_yesterday_data()
-            self.get_this_week_data()
+            # self.get_this_week_data()
             self.get_this_month_data()
 
-        def start_new_week(self):
-            self.load_energy_this_week = 0
-            self.solar_energy_this_week = 0
-            self.grid_import_energy_this_week = 0
-            self.grid_export_energy_this_week = 0
-            self.load_bill_this_week = 0
-            self.solar_bill_this_week = 0
-            self.grid_import_bill_this_week = 0
-            self.grid_export_bill_this_week = 0
-            self.get_last_week_data()
+        # def start_new_week(self):
+        #     self.load_energy_this_week = 0
+        #     self.solar_energy_this_week = 0
+        #     self.grid_import_energy_this_week = 0
+        #     self.grid_export_energy_this_week = 0
+        #     self.load_bill_this_week = 0
+        #     self.solar_bill_this_week = 0
+        #     self.grid_import_bill_this_week = 0
+        #     self.grid_export_bill_this_week = 0
+        #     self.get_last_week_data()
 
         def start_new_month(self):
             self.load_energy_this_month = 0
@@ -165,11 +165,11 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.start_new_day_checking()
             self.calculate_energy_today()
             self.calculate_bill_today()
-            self.calculate_this_week_energy_and_bill()
+            # self.calculate_this_week_energy_and_bill()
             self.calculate_this_month_energy_and_bill()
             self.calculate_annual_energy_and_bill()
             self.updateDB()
-            self.publish_message()
+            # self.publish_message()
 
         # inverter
         # @matching.match_exact('/agent/ui/PVInverter/device_status_response/bemoss/999/1PV221445K1200138')
@@ -295,18 +295,18 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if(self.con.closed == False):
                 self.con.close()
             else:
-                print("postgresdb is not connected")
-
-
-        def start_new_week_checking(self):
-            this_week = datetime.datetime.now().isocalendar()[1]
-            if ((self.check_week == 53) and (self.check_week > this_week)) or (
-                (self.check_week is not 53) and (self.check_week < this_week)):
-                self.start_new_week()
-                self.check_week = this_week
-                # self.insertDB()
-            else:
                 pass
+
+
+        # def start_new_week_checking(self):
+        #     this_week = datetime.datetime.now().isocalendar()[1]
+        #     if ((self.check_week == 53) and (self.check_week > this_week)) or (
+        #         (self.check_week is not 53) and (self.check_week < this_week)):
+        #         self.start_new_week()
+        #         self.check_week = this_week
+        #         # self.insertDB()
+        #     else:
+        #         pass
 
         def start_new_month_checking(self):
             this_month = datetime.datetime.now().month
@@ -329,7 +329,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if (table == 'daily'):
                 self.connect_postgresdb()
                 self.cur.execute("INSERT INTO " + db_table_daily_consumption +
-                                 " (datetime, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
+                                 " (date, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
                                  "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
                                  "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().date())),
@@ -337,58 +337,58 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                   self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
                                   self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
                                   self.get_variable('solarBill'), self.get_variable('loadBill'),
-                                  datetime.datetime.now(), self.gateway_id))
+                                  datetime.datetime.now(), '8'))
                 self.con.commit()
                 self.disconnect_postgresdb()
 
-            elif (table == 'weekly'):
-                self.connect_postgresdb()
-                self.cur.execute("INSERT INTO " + db_table_weekly_consumption +
-                                 " (datetime, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
-                                 "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
-                                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                                 ((str((datetime.datetime.now() - relativedelta(weekday=MO(-1))).date())),
-                                  self.grid_import_energy_this_week, self.grid_export_energy_this_week,
-                                  self.solar_energy_this_week, self.load_energy_this_week,
-                                  self.grid_import_bill_this_week, self.grid_export_bill_this_week,
-                                  self.solar_bill_this_week, self.load_bill_this_week, datetime.datetime.now(), self.gateway_id))
-                self.con.commit()
-                self.disconnect_postgresdb()
+            # elif (table == 'weekly'):
+            #     self.connect_postgresdb()
+            #     self.cur.execute("INSERT INTO " + db_table_weekly_consumption +
+            #                      " (date, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
+            #                      "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
+            #                      "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            #                      ((str((datetime.datetime.now() - relativedelta(weekday=MO(-1))).date())),
+            #                       self.grid_import_energy_this_week, self.grid_export_energy_this_week,
+            #                       self.solar_energy_this_week, self.load_energy_this_week,
+            #                       self.grid_import_bill_this_week, self.grid_export_bill_this_week,
+            #                       self.solar_bill_this_week, self.load_bill_this_week, datetime.datetime.now(), '8'))
+            #     self.con.commit()
+            #     self.disconnect_postgresdb()
 
             elif (table == 'monthly'):
                 self.connect_postgresdb()
                 self.cur.execute("INSERT INTO " + db_table_monthly_consumption +
-                                 " (datetime, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
+                                 " (date, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
                                  "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
                                  "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().date() + relativedelta(day=31))),
                                   self.grid_import_energy_this_month, self.grid_export_energy_this_month,
                                   self.solar_energy_this_month, self.load_energy_this_month,
                                   self.grid_import_bill_this_month, self.grid_export_bill_this_month,
-                                  self.solar_bill_this_month, self.load_bill_this_month, datetime.datetime.now(), self.gateway_id))
+                                  self.solar_bill_this_month, self.load_bill_this_month, datetime.datetime.now(), '8'))
                 self.con.commit()
                 self.disconnect_postgresdb()
 
             elif (table == 'annual'):
                 self.connect_postgresdb()
                 self.cur.execute("INSERT INTO " + db_table_annual_consumption +
-                                 " (datetime, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
-                                 "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
-                                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                                 " (date, gridimportenergy, gridexportenergy, solarenergy, loadenergy, "
+                                 "gridimportbill, gridexportbill, solarbill, loadbill, gateway_id) "
+                                 "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().replace(month=12).date() + relativedelta(day=31))),
                                   self.grid_import_energy_annual, self.grid_export_energy_annual,
                                   self.solar_energy_annual, self.load_energy_annual,
                                   self.grid_import_bill_annual, self.grid_export_bill_annual,
-                                  self.solar_bill_annual, self.load_bill_annual, datetime.datetime.now(), self.gateway_id))
+                                  self.solar_bill_annual, self.load_bill_annual, '8'))
                 self.con.commit()
                 self.disconnect_postgresdb()
 
             elif (table == 'cumulative'):
                 self.connect_postgresdb()
                 self.cur.execute("INSERT INTO " + db_table_cumulative_energy +
-                                 " (datetime, grid_consumption, load_consumption, solar_consumption, gateway_id) "
-                                 "VALUES(%s, %s, %s, %s, %s)",
-                                 (datetime.datetime.now(), self.energy_from_grid_import, self.energy_from_load, self.energy_from_solar, self.gateway_id))
+                                 " (date_add, energyconsumption, solargeneration, gateway_id) "
+                                 "VALUES(%s, %s, %s, %s)",
+                                 (datetime.datetime.now(), self.energy_from_grid_import, self.energy_from_solar, '8'))
 
                 self.con.commit()
                 self.disconnect_postgresdb()
@@ -408,18 +408,18 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
             # Update table "daily_consumption"
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime = '" + today + "'")
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 try:
                     self.cur.execute(
                         "UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
                                                                  "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s, updated_at=%s, gateway_id=%s"
-                                                                 " WHERE datetime = '" + today + "'",
+                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s, updated_at=%s"
+                                                                 " WHERE date = '" + today + "'" + " AND gateway_id = 8",
                         (self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
                          self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
                          self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                         self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now(), self.gateway_id))
+                         self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
                     self.con.commit()
                     self.disconnect_postgresdb()
                     print"update daily db:Success"
@@ -428,45 +428,45 @@ def EnergyBillAppAgent(config_path, **kwargs):
             else:
                 self.insertDB('daily')
 
-            # Update table "weekly consumption"
-            self.connect_postgresdb()
-            self.cur.execute(
-                "SELECT * FROM " + db_table_weekly_consumption + " WHERE datetime = '" + this_week + "'")
-            if bool(self.cur.rowcount):
-                try:
-                    self.cur.execute(
-                        "UPDATE " + db_table_weekly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
-                                                                  "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                  "gridexportbill=%s, solarbill=%s, loadbill=%s, gateway_id=%s"
-                                                                  " WHERE datetime = '" + this_week + "'",
-                        (self.grid_import_energy_this_week, self.grid_export_energy_this_week,
-                         self.solar_energy_this_week, self.load_energy_this_week,
-                         self.grid_import_bill_this_week, self.grid_export_bill_this_week,
-                         self.solar_bill_this_week, self.load_bill_this_week, self.gateway_id))
-
-                    self.con.commit()
-                    self.disconnect_postgresdb()
-                    print"update weekly db:Success"
-                except Exception as er:
-                    print "update data base error: {}".format(er)
-            else:
-                self.insertDB('weekly')
+            # # Update table "weekly consumption"
+            # self.connect_postgresdb()
+            # self.cur.execute(
+            #     "SELECT * FROM " + db_table_weekly_consumption + " WHERE date = '" + this_week + "'")
+            # if bool(self.cur.rowcount):
+            #     try:
+            #         self.cur.execute(
+            #             "UPDATE " + db_table_weekly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+            #                                                       "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+            #                                                       "gridexportbill=%s, solarbill=%s, loadbill=%s, gateway_id=%s"
+            #                                                       " WHERE date = '" + this_week + "'",
+            #             (self.grid_import_energy_this_week, self.grid_export_energy_this_week,
+            #              self.solar_energy_this_week, self.load_energy_this_week,
+            #              self.grid_import_bill_this_week, self.grid_export_bill_this_week,
+            #              self.solar_bill_this_week, self.load_bill_this_week, self.gateway_id))
+            #
+            #         self.con.commit()
+            #         self.disconnect_postgresdb()
+            #         print"update weekly db:Success"
+            #     except Exception as er:
+            #         print "update data base error: {}".format(er)
+            # else:
+            #     self.insertDB('weekly')
 
             # Update table "monthly consumption"
             self.connect_postgresdb()
             self.cur.execute(
-                "SELECT * FROM " + db_table_monthly_consumption + " WHERE datetime = '" + last_day_of_this_month + "'")
+                "SELECT * FROM " + db_table_monthly_consumption + " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 try:
                     self.cur.execute(
                         "UPDATE " + db_table_monthly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
                                                                    "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                   "gridexportbill=%s, solarbill=%s, loadbill=%s, gateway_id=%s"
-                                                                   " WHERE datetime = '" + last_day_of_this_month + "'",
+                                                                   "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                   " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = 8",
                         (self.grid_import_energy_this_month, self.grid_export_energy_this_month,
                          self.solar_energy_this_month, self.load_energy_this_month,
                          self.grid_import_bill_this_month, self.grid_export_bill_this_month,
-                         self.solar_bill_this_month, self.load_bill_this_month, self.gateway_id))
+                         self.solar_bill_this_month, self.load_bill_this_month))
 
                     self.con.commit()
                     self.disconnect_postgresdb()
@@ -479,18 +479,18 @@ def EnergyBillAppAgent(config_path, **kwargs):
             # Update table "annual consumption"
             self.connect_postgresdb()
             self.cur.execute(
-                "SELECT * FROM " + db_table_annual_consumption + " WHERE datetime = '" + last_day_of_end_month + "'")
+                "SELECT * FROM " + db_table_annual_consumption + " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 try:
                     self.cur.execute(
                         "UPDATE " + db_table_annual_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
                                                                   "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                  "gridexportbill=%s, solarbill=%s, loadbill=%s, gateway_id=%s"
-                                                                  " WHERE datetime = '" + last_day_of_end_month + "'",
+                                                                  "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                  " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = 8",
                         (self.grid_import_energy_annual, self.grid_export_energy_annual,
                          self.solar_energy_annual, self.load_energy_annual,
                          self.grid_import_bill_annual, self.grid_export_bill_annual,
-                         self.solar_bill_annual, self.load_bill_annual, self.gateway_id))
+                         self.solar_bill_annual, self.load_bill_annual))
 
                     self.con.commit()
                     self.disconnect_postgresdb()
@@ -504,17 +504,17 @@ def EnergyBillAppAgent(config_path, **kwargs):
             time_now = datetime.datetime.now()
             last_day = str((time_now - datetime.timedelta(days=1)).date())
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime = '" + last_day + "'")
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + last_day + "'" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()[0]
-                self.grid_import_energy_last_day = float(data[1])
-                self.grid_export_energy_last_day = float(data[2])
-                self.solar_energy_last_day = float(data[3])
-                self.load_energy_last_day = float(data[4])
-                self.grid_import_bill_last_day = float(data[5])
-                self.grid_export_bill_last_day = float(data[6])
-                self.solar_bill_last_day = float(data[7])
-                self.load_bill_last_day = float(data[8])
+                self.grid_import_energy_last_day = float(data[2])
+                self.grid_export_energy_last_day = float(data[3])
+                self.solar_energy_last_day = float(data[4])
+                self.load_energy_last_day = float(data[5])
+                self.grid_import_bill_last_day = float(data[6])
+                self.grid_export_bill_last_day = float(data[7])
+                self.solar_bill_last_day = float(data[8])
+                self.load_bill_last_day = float(data[9])
             else:
                 self.grid_import_energy_last_day = 0
                 self.grid_export_energy_last_day = 0
@@ -527,38 +527,38 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
             self.disconnect_postgresdb()
 
-        def get_last_week_data(self):
-            self.grid_import_energy_last_week = 0
-            self.grid_export_energy_last_week = 0
-            self.solar_energy_last_week = 0
-            self.load_energy_last_week = 0
-            self.grid_import_bill_last_week = 0
-            self.grid_export_bill_last_week = 0
-            self.solar_bill_last_week = 0
-            self.load_bill_last_week = 0
-
-            first_date = (datetime.datetime.now()-relativedelta(weeks=1, weekday=MO(-1))).date()
-            end_date = first_date + relativedelta(days=+6)
-            first_date_str = str(first_date)
-            end_date_str = str(end_date)
-            self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime BETWEEN '" +
-                             first_date_str + "' AND '" + end_date_str + "'")
-            if bool(self.cur.rowcount):
-                data = self.cur.fetchall()
-                for i in range(len(data)):
-                    self.grid_import_energy_last_week += float(data[i][1])
-                    self.grid_export_energy_last_week += float(data[i][2])
-                    self.solar_energy_last_week += float(data[i][3])
-                    self.load_energy_last_week += float(data[i][4])
-                    self.grid_import_bill_last_week += float(data[i][5])
-                    self.grid_export_bill_last_week += float(data[i][6])
-                    self.solar_bill_last_week += float(data[i][7])
-                    self.load_bill_last_week += float(data[i][8])
-            else:
-                pass
-
-            self.disconnect_postgresdb()
+        # def get_last_week_data(self):
+        #     self.grid_import_energy_last_week = 0
+        #     self.grid_export_energy_last_week = 0
+        #     self.solar_energy_last_week = 0
+        #     self.load_energy_last_week = 0
+        #     self.grid_import_bill_last_week = 0
+        #     self.grid_export_bill_last_week = 0
+        #     self.solar_bill_last_week = 0
+        #     self.load_bill_last_week = 0
+        #
+        #     first_date = (datetime.datetime.now()-relativedelta(weeks=1, weekday=MO(-1))).date()
+        #     end_date = first_date + relativedelta(days=+6)
+        #     first_date_str = str(first_date)
+        #     end_date_str = str(end_date)
+        #     self.connect_postgresdb()
+        #     self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date BETWEEN '" +
+        #                      first_date_str + "' AND '" + end_date_str + "'")
+        #     if bool(self.cur.rowcount):
+        #         data = self.cur.fetchall()
+        #         for i in range(len(data)):
+        #             self.grid_import_energy_last_week += float(data[i][2])
+        #             self.grid_export_energy_last_week += float(data[i][3])
+        #             self.solar_energy_last_week += float(data[i][4])
+        #             self.load_energy_last_week += float(data[i][5])
+        #             self.grid_import_bill_last_week += float(data[i][6])
+        #             self.grid_export_bill_last_week += float(data[i][7])
+        #             self.solar_bill_last_week += float(data[i][8])
+        #             self.load_bill_last_week += float(data[i][9])
+        #     else:
+        #         pass
+        #
+        #     self.disconnect_postgresdb()
 
         def get_last_month_data(self):
             self.grid_import_energy_last_month = 0
@@ -575,19 +575,19 @@ def EnergyBillAppAgent(config_path, **kwargs):
             first_date_str = str(first_date)
             end_date_str = str(end_date)
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime BETWEEN '" +
-                             first_date_str + "' AND '" + end_date_str + "'")
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE (date BETWEEN '" +
+                             first_date_str + "' AND '" + end_date_str + "')" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_last_month += float(data[i][1])
-                    self.grid_export_energy_last_month += float(data[i][2])
-                    self.solar_energy_last_month += float(data[i][3])
-                    self.load_energy_last_month += float(data[i][4])
-                    self.grid_import_bill_last_month += float(data[i][5])
-                    self.grid_export_bill_last_month += float(data[i][6])
-                    self.solar_bill_last_month += float(data[i][7])
-                    self.load_bill_last_month += float(data[i][8])
+                    self.grid_import_energy_last_month += float(data[i][2])
+                    self.grid_export_energy_last_month += float(data[i][3])
+                    self.solar_energy_last_month += float(data[i][4])
+                    self.load_energy_last_month += float(data[i][5])
+                    self.grid_import_bill_last_month += float(data[i][6])
+                    self.grid_export_bill_last_month += float(data[i][7])
+                    self.solar_bill_last_month += float(data[i][8])
+                    self.load_bill_last_month += float(data[i][9])
             else:
                 pass
 
@@ -596,54 +596,54 @@ def EnergyBillAppAgent(config_path, **kwargs):
         def get_today_data(self):
             today = str(datetime.datetime.now().date())
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime = '" + today + "'")
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()[0]
-                self.grid_import_energy_today = float(data[1])
-                self.grid_export_energy_today = float(data[2])
-                self.solar_energy_today = float(data[3])
-                self.load_energy_today = float(data[4])
-                self.grid_import_bill_today = float(data[5])
-                self.grid_export_bill_today = float(data[6])
-                self.solar_bill_today = float(data[7])
-                self.load_bill_today = float(data[8])
+                self.grid_import_energy_today = float(data[2])
+                self.grid_export_energy_today = float(data[3])
+                self.solar_energy_today = float(data[4])
+                self.load_energy_today = float(data[5])
+                self.grid_import_bill_today = float(data[6])
+                self.grid_export_bill_today = float(data[7])
+                self.solar_bill_today = float(data[8])
+                self.load_bill_today = float(data[9])
             else:
                 self.start_new_day()
 
             self.disconnect_postgresdb()
 
-        def get_this_week_data(self):
-            self.grid_import_energy_this_week_until_last_day = 0
-            self.grid_export_energy_this_week_until_last_day = 0
-            self.solar_energy_this_week_until_last_day = 0
-            self.load_energy_this_week_until_last_day = 0
-            self.grid_import_bill_this_week_until_last_day = 0
-            self.grid_export_bill_this_week_until_last_day = 0
-            self.solar_bill_this_week_until_last_day = 0
-            self.load_bill_this_week_until_last_day = 0
-
-            first_date = (datetime.datetime.now() - relativedelta(weekday=MO(-1))).date()
-            end_date = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
-            first_date_str = str(first_date)
-            end_date_str = str(end_date)
-            self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime BETWEEN '" +
-                             first_date_str + "' AND '" + end_date_str + "'")
-            if bool(self.cur.rowcount):
-                data = self.cur.fetchall()
-                for i in range(len(data)):
-                    self.grid_import_energy_this_week_until_last_day += float(data[i][1])
-                    self.grid_export_energy_this_week_until_last_day += float(data[i][2])
-                    self.solar_energy_this_week_until_last_day += float(data[i][3])
-                    self.load_energy_this_week_until_last_day += float(data[i][4])
-                    self.grid_import_bill_this_week_until_last_day += float(data[i][5])
-                    self.grid_export_bill_this_week_until_last_day += float(data[i][6])
-                    self.solar_bill_this_week_until_last_day += float(data[i][7])
-                    self.load_bill_this_week_until_last_day += float(data[i][8])
-            else:
-                self.start_new_week()
-
-            self.disconnect_postgresdb()
+        # def get_this_week_data(self):
+        #     self.grid_import_energy_this_week_until_last_day = 0
+        #     self.grid_export_energy_this_week_until_last_day = 0
+        #     self.solar_energy_this_week_until_last_day = 0
+        #     self.load_energy_this_week_until_last_day = 0
+        #     self.grid_import_bill_this_week_until_last_day = 0
+        #     self.grid_export_bill_this_week_until_last_day = 0
+        #     self.solar_bill_this_week_until_last_day = 0
+        #     self.load_bill_this_week_until_last_day = 0
+        #
+        #     first_date = (datetime.datetime.now() - relativedelta(weekday=MO(-1))).date()
+        #     end_date = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
+        #     first_date_str = str(first_date)
+        #     end_date_str = str(end_date)
+        #     self.connect_postgresdb()
+        #     self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date BETWEEN '" +
+        #                      first_date_str + "' AND '" + end_date_str + "'")
+        #     if bool(self.cur.rowcount):
+        #         data = self.cur.fetchall()
+        #         for i in range(len(data)):
+        #             self.grid_import_energy_this_week_until_last_day += float(data[i][2])
+        #             self.grid_export_energy_this_week_until_last_day += float(data[i][3])
+        #             self.solar_energy_this_week_until_last_day += float(data[i][4])
+        #             self.load_energy_this_week_until_last_day += float(data[i][5])
+        #             self.grid_import_bill_this_week_until_last_day += float(data[i][6])
+        #             self.grid_export_bill_this_week_until_last_day += float(data[i][7])
+        #             self.solar_bill_this_week_until_last_day += float(data[i][8])
+        #             self.load_bill_this_week_until_last_day += float(data[i][9])
+        #     else:
+        #         self.start_new_week()
+        #
+        #     self.disconnect_postgresdb()
 
         def get_this_month_data(self):
             self.grid_import_energy_this_month_until_last_day = 0
@@ -656,23 +656,23 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.load_bill_this_month_until_last_day = 0
 
             first_date = datetime.datetime.now().replace(day=1).date()
-            end_date = datetime.datetime.now() - datetime.timedelta(days=1)
+            end_date = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
             first_date_str = str(first_date)
             end_date_str = str(end_date)
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE datetime BETWEEN '" +
-                             first_date_str + "' AND '" + end_date_str + "'")
+            self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE (date BETWEEN '" +
+                             first_date_str + "' AND '" + end_date_str + "')" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-                    self.grid_import_energy_this_month_until_last_day += float(data[i][1])
-                    self.grid_export_energy_this_month_until_last_day += float(data[i][2])
-                    self.solar_energy_this_month_until_last_day += float(data[i][3])
-                    self.load_energy_this_month_until_last_day += float(data[i][4])
-                    self.grid_import_bill_this_month_until_last_day += float(data[i][5])
-                    self.grid_export_bill_this_month_until_last_day += float(data[i][6])
-                    self.solar_bill_this_month_until_last_day += float(data[i][7])
-                    self.load_bill_this_month_until_last_day += float(data[i][8])
+                    self.grid_import_energy_this_month_until_last_day += float(data[i][2])
+                    self.grid_export_energy_this_month_until_last_day += float(data[i][3])
+                    self.solar_energy_this_month_until_last_day += float(data[i][4])
+                    self.load_energy_this_month_until_last_day += float(data[i][5])
+                    self.grid_import_bill_this_month_until_last_day += float(data[i][6])
+                    self.grid_export_bill_this_month_until_last_day += float(data[i][7])
+                    self.solar_bill_this_month_until_last_day += float(data[i][8])
+                    self.load_bill_this_month_until_last_day += float(data[i][9])
             else:
                 self.start_new_month()
 
@@ -692,34 +692,37 @@ def EnergyBillAppAgent(config_path, **kwargs):
             this_month = (datetime.datetime.now() - datetime.timedelta(days=31) + relativedelta(day=31)).date()
             first_month_str = str(first_month)
             this_month_str = str(this_month)
+
+
             self.connect_postgresdb()
-            self.cur.execute("SELECT * FROM " + db_table_monthly_consumption + " WHERE datetime BETWEEN '" +
-                             first_month_str + "' AND '" + this_month_str + "'")
-            if bool(self.cur.rowcount):
-                data = self.cur.fetchall()
-                for i in range(len(data)):
-                    self.grid_import_energy_annual_until_last_month += float(data[i][1])
-                    self.grid_export_energy_annual_until_last_month += float(data[i][2])
-                    self.solar_energy_annual_until_last_month += float(data[i][3])
-                    self.load_energy_annual_until_last_month += float(data[i][4])
-                    self.grid_import_bill_annual_until_last_month += float(data[i][5])
-                    self.grid_export_bill_annual_until_last_month += float(data[i][6])
-                    self.solar_bill_annual_until_last_month += float(data[i][7])
-                    self.load_bill_annual_until_last_month += float(data[i][8])
+            self.cur.execute("SELECT * FROM " + db_table_monthly_consumption + " WHERE (date BETWEEN '" +
+                             first_month_str + "' AND '" + this_month_str + "')" + " AND gateway_id = 8")
+
+            if bool(self.cur.rowcount) and (first_month < this_month):
+                    data = self.cur.fetchall()
+                    for i in range(len(data)):
+                        self.grid_import_energy_annual_until_last_month += float(data[i][2])
+                        self.grid_export_energy_annual_until_last_month += float(data[i][3])
+                        self.solar_energy_annual_until_last_month += float(data[i][4])
+                        self.load_energy_annual_until_last_month += float(data[i][5])
+                        self.grid_import_bill_annual_until_last_month += float(data[i][6])
+                        self.grid_export_bill_annual_until_last_month += float(data[i][7])
+                        self.solar_bill_annual_until_last_month += float(data[i][8])
+                        self.load_bill_annual_until_last_month += float(data[i][9])
             else:
                 self.start_new_year()
 
             self.disconnect_postgresdb()
 
-        def calculate_this_week_energy_and_bill(self):
-            self.grid_import_energy_this_week = self.grid_import_energy_this_week_until_last_day + self.grid_import_energy_today
-            self.grid_export_energy_this_week = self.grid_export_energy_this_week_until_last_day + self.grid_export_energy_today
-            self.solar_energy_this_week = self.solar_energy_this_week_until_last_day + self.solar_energy_today
-            self.load_energy_this_week = self.load_energy_this_week_until_last_day + self.load_energy_today
-            self.grid_import_bill_this_week = self.grid_import_bill_this_week_until_last_day + self.grid_import_bill_today
-            self.grid_export_bill_this_week = self.grid_export_bill_this_week_until_last_day + self.grid_export_bill_today
-            self.solar_bill_this_week = self.solar_bill_this_week_until_last_day + self.solar_bill_today
-            self.load_bill_this_week = self.load_bill_this_week_until_last_day + self.load_bill_today
+        # def calculate_this_week_energy_and_bill(self):
+        #     self.grid_import_energy_this_week = self.grid_import_energy_this_week_until_last_day + self.grid_import_energy_today
+        #     self.grid_export_energy_this_week = self.grid_export_energy_this_week_until_last_day + self.grid_export_energy_today
+        #     self.solar_energy_this_week = self.solar_energy_this_week_until_last_day + self.solar_energy_today
+        #     self.load_energy_this_week = self.load_energy_this_week_until_last_day + self.load_energy_today
+        #     self.grid_import_bill_this_week = self.grid_import_bill_this_week_until_last_day + self.grid_import_bill_today
+        #     self.grid_export_bill_this_week = self.grid_export_bill_this_week_until_last_day + self.grid_export_bill_today
+        #     self.solar_bill_this_week = self.solar_bill_this_week_until_last_day + self.solar_bill_today
+        #     self.load_bill_this_week = self.load_bill_this_week_until_last_day + self.load_bill_today
 
         def calculate_this_month_energy_and_bill(self):
             self.grid_import_energy_this_month = self.grid_import_energy_this_month_until_last_day + self.grid_import_energy_today
