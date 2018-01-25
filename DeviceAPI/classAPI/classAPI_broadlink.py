@@ -117,38 +117,45 @@ class API:
             # _data = _data.encode(encoding='utf_8')
 
             _data = postmsg
-
             try:
+                tempchange = False
+                for k, v in _data.items():
+                    if k == 'tempDir':
+                        tempchange = True
+                        if (_data['tempDir']) == "UP":
+                            command ='acmitsuup'
+                            print 'acmitsu temp up'
+                        elif (_data['tempDir']) == "DOWN":
+                            command = 'acmitsudown'
+                            print 'acmitsu temp down'
+                    else:
+                        print ""
+            except Exception as er:
+                print er
+
+            if tempchange == False:
                 status = str(_data['status']).upper()
                 if status == 'ON':
-                    try:
-                        response = requests.get(
-                            url="http://localhost:8080/sendCommand/acmitsuon",
-                        )
-                        print('Response HTTP Status Code: {status_code}'.format(
-                            status_code=response.status_code))
-                        print('Response HTTP Response Body: {content}'.format(
-                            content=response.content))
-                    except requests.exceptions.RequestException:
-                        print('HTTP Request failed')
-                    print 'status to ON'
+                    command = 'acmitsuon'
+                    print'acmitsu turn on'
                 elif status == 'OFF':
-                    print 'status to OFF'
-                    try:
-                        response = requests.get(
-                            url="http://localhost:8080/sendCommand/acmitsuoff",
-                        )
-                        print('Response HTTP Status Code: {status_code}'.format(
-                            status_code=response.status_code))
-                        print('Response HTTP Response Body: {content}'.format(
-                            content=response.content))
-                    except requests.exceptions.RequestException:
-                        print('HTTP Request failed')
-                    print 'status to ON'
-                else:
-                    print "Wrong command"
-            except:
-                print ""
+                    command = 'acmitsuoff'
+                    print'acmitsu turn off'
+
+
+            url = "http://localhost:8080/sendCommand/"+str(command)
+            try:
+                response = requests.get(
+                    url=url,
+                )
+                print('Response HTTP Status Code: {status_code}'.format(
+                    status_code=response.status_code))
+                print('Response HTTP Response Body: {content}'.format(
+                    content=response.content))
+            except requests.exceptions.RequestException:
+                print('HTTP Request failed')
+            print 'status to ON'
+
 
 
         else:
@@ -177,12 +184,12 @@ def main():
 
 
     import time
-    broadlink.setDeviceStatus({"status": "OFF"})
-    broadlink.getDeviceStatus()
+    # broadlink.setDeviceStatus({"status": "OFF", "device": "1DAIK", "tempDir": "UP", "mode": "3"})
+    # broadlink.getDeviceStatus()
     #
     # time.sleep(10)
     #
-    # broadlink.setDeviceStatus({"status": "OFF"})
+    broadlink.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #
