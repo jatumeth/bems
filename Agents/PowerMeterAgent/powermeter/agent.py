@@ -27,22 +27,22 @@ import settings
 import datetime
 import time
 import math
-import pyrebase
+# import pyrebase
 import os
 import random
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
-config = {
-  "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-  "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-  "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-  "storageBucket": "bucket.appspot.com",
-  "serviceAccount": os.getcwd()+"/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
-}
-firebase = pyrebase.initialize_app(config)
-db = firebase.database()
+# config = {
+#   "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+#   "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+#   "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+#   "storageBucket": "bucket.appspot.com",
+#   "serviceAccount": os.getcwd()+"/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
+# }
+# firebase = pyrebase.initialize_app(config)
+# db = firebase.database()
 
 # Step1: Agent Initialization
 def powermeteragent(config_path, **kwargs):
@@ -141,7 +141,7 @@ def powermeteragent(config_path, **kwargs):
                                                                         PowerMeter.get_variable('api'),
                                                                         PowerMeter.get_variable('address')))
 
-    iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
+    # iotmodul = importlib.import_module("azure-iot-sdk-python.device.samples.iothub_client_sample2")
 
     # 5. @params notification_info
     send_notification = False
@@ -247,21 +247,21 @@ def powermeteragent(config_path, **kwargs):
             self.postgresAPI()
 
 
-            data = PowerMeter.variables['grid_activePower']
-            db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+            # data = PowerMeter.variables['grid_activePower']
+            # db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
 
-            x = {}
-            x["agent_id"] = PowerMeter.variables['agent_id']
-            x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
-            x["gridvoltage"] = PowerMeter.variables['grid_voltage']
-            x["gridcurrent"] = PowerMeter.variables['grid_current']
-            x["gridactivePower"] = PowerMeter.variables['grid_activePower']
-            x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
-            x["device_type"] = 'powermeter'
-
-            discovered_address = iotmodul.iothub_client_sample_run(x)
-
-            print x
+            # x = {}
+            # x["agent_id"] = PowerMeter.variables['agent_id']
+            # x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            # x["gridvoltage"] = PowerMeter.variables['grid_voltage']
+            # x["gridcurrent"] = PowerMeter.variables['grid_current']
+            # x["gridactivePower"] = PowerMeter.variables['grid_activePower']
+            # x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
+            # x["device_type"] = 'powermeter'
+            #
+            # discovered_address = iotmodul.iothub_client_sample_run(x)
+            #
+            # print x
 
         def postgresAPI(self):
 
