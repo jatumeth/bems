@@ -27,22 +27,28 @@ import settings
 import datetime
 import time
 import math
-# import pyrebase
+import pyrebase
 import os
 import random
+import time
+from ISStreamer.Streamer import Streamer
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
-# config = {
-#   "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-#   "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-#   "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-#   "storageBucket": "bucket.appspot.com",
-#   "serviceAccount": os.getcwd()+"/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
-# }
-# firebase = pyrebase.initialize_app(config)
-# db = firebase.database()
+try:
+    config = {
+      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+      "storageBucket": "bucket.appspot.com",
+      "serviceAccount": os.getcwd()+"/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+except Exception as er:
+    print er
 
 # Step1: Agent Initialization
 def powermeteragent(config_path, **kwargs):
@@ -246,9 +252,26 @@ def powermeteragent(config_path, **kwargs):
                 self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
             self.postgresAPI()
 
+            #firebase
+            try:
+                data = PowerMeter.variables['grid_activePower']
+                db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+            except Exception as er:
+                print er
 
-            # data = PowerMeter.variables['grid_activePower']
-            # db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+            try:
+                streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
+                                    access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
+                streamer.log(str(PowerMeter.variables['agent_id'] + '_grid_voltage'),
+                             float(PowerMeter.variables['grid_voltage']))
+                streamer.log(str(PowerMeter.variables['agent_id'] + '_grid_current'),
+                             float(PowerMeter.variables['grid_current']))
+                streamer.log(str(PowerMeter.variables['agent_id'] + '_grid_activePower'),
+                             float(PowerMeter.variables['grid_activePower']))
+                streamer.log(str(PowerMeter.variables['agent_id'] + '_grid_reactivePower'),
+                             float(PowerMeter.variables['grid_reactivePower']))
+            except Exception as er:
+                print "update data base error: {}".format(er)
 
             # x = {}
             # x["agent_id"] = PowerMeter.variables['agent_id']

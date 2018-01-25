@@ -17,10 +17,22 @@ import sys
 import numpy as np
 import calendar
 import time
-
+import pyrebase
+import time
+import os
+from ISStreamer.Streamer import Streamer
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 
+config = {
+    "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+    "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+    "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+    "storageBucket": "bucket.appspot.com",
+    # "serviceAccount": os.getcwd() + "/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
+}
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
 
 def EnergyBillAppAgent(config_path, **kwargs):
     config = utils.load_config(config_path)
@@ -33,6 +45,9 @@ def EnergyBillAppAgent(config_path, **kwargs):
 
     # 1. @params agent
     agent_id = get_config('agent_id')
+    device_id = get_config('device_id')
+    installpoint = get_config('installpoint')
+
 
     # 2. @param DB interfaces
     db_host = settings.DATABASES['default']['HOST']
@@ -45,6 +60,8 @@ def EnergyBillAppAgent(config_path, **kwargs):
     db_table_monthly_consumption = settings.DATABASES['default']['TABLE_monthly_consumption']
     db_table_annual_consumption = settings.DATABASES['default']['TABLE_annual_consumption']
     db_table_cumulative_energy = settings.DATABASES['default']['TABLE_cumulative_energy']
+    gateway_id = settings.gateway_id
+
 
     class Agent(PublishMixin, BaseAgent):
         '''Calculate energy and bill from evergy power sources'''
@@ -58,7 +75,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             # self.check_week = datetime.datetime.now().isocalendar()[1]
             self.check_month = datetime.datetime.now().month
             self.check_year = datetime.datetime.now().year
-            self.current_electricity_price = 0
+            self.current_electricity_price = 3.5
             self.gateway_id = settings.gateway_id
             print('++++++++++++++++++++++++++++++++')
             print('gateway_id : {}'.format(self.gateway_id))
@@ -144,7 +161,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             print "Current electricity price : {}".format(self.current_electricity_price)
 
         # etrix
-        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/5PMCP009')
+        @matching.match_exact('/agent/ui/power_meter/device_status_response/bemoss/999/'+device_id)
         def on_match_etrix(self, topic, headers, message, match):
             print "Hello from E-trix"
             message_from_power_meter = json.loads(message[0])
@@ -169,7 +186,10 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.calculate_this_month_energy_and_bill()
             self.calculate_annual_energy_and_bill()
             self.updateDB()
-            # self.publish_message()
+            self.publish_message()
+            print 'publish firebase'
+            self.publish_firebase()
+
 
         # inverter
         # @matching.match_exact('/agent/ui/PVInverter/device_status_response/bemoss/999/1PV221445K1200138')
@@ -772,6 +792,68 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 print ("{} published topic: {}, message: {}").format(self._agent_id, topic, message)
             except:
                 pass
+
+
+
+
+
+        def publish_firebase(self):
+            gridenergy = float(self.get_variable('loadEnergy'))/float(self.current_electricity_price)
+
+
+
+
+            if installpoint == 'solar':
+                print 'data sent to solar firebase'
+                try:
+
+                    gridimportbill = round(self.grid_import_bill_this_month, 4)
+                    db.child(gateway_id).child('monthly_energy').child("solarbill").set(gridimportbill)
+                    gridimportenergy = round(self.grid_import_energy_this_month, 4)
+                    db.child(gateway_id).child('monthly_energy').child("solarenergy").set(gridimportenergy)
+
+                    gridimportbill = round(self.grid_import_bill_annual, 4)
+                    db.child(gateway_id).child('annual_energy').child("solarbill").set(gridimportbill)
+                    gridimportenergy = round(self.grid_import_energy_annual, 4)
+                    db.child(gateway_id).child('annual_energy').child("solarenergy").set(gridimportenergy)
+
+                except Exception as er:
+                    print "cannot read data: {}".format(er)
+
+
+            if installpoint == 'load':
+
+                try:
+                    print 'data sent to load firebase'
+                    gridimportbill = round(self.get_variable('gridImportBill'), 4)
+                    db.child(gateway_id).child('daily_energy').child("loadbill").set(gridimportbill)
+                    gridimportenergy = round(gridenergy, 4)
+                    db.child(gateway_id).child('daily_energy').child("loadenergy").set(gridimportenergy)
+
+                except Exception as er:
+                    print "cannot read data: {}".format(er)
+
+            if installpoint == 'grid':
+                print 'data sent to grid firebase'
+                try:
+                    gridimportbill = round(self.grid_import_bill_this_month, 4)
+                    db.child(gateway_id).child('monthly_energy').child("gridimportbill").set(gridimportbill)
+                    gridimportenergy = round(self.grid_import_energy_this_month, 4)
+                    db.child(gateway_id).child('monthly_energy').child("gridimportenergy").set(gridimportenergy)
+
+                    gridimportbill = round(self.get_variable('gridImportBill'), 4)
+                    db.child(gateway_id).child('daily_energy').child("gridimportbill").set(gridimportbill)
+                    gridimportenergy = round(gridenergy, 4)
+                    db.child(gateway_id).child('daily_energy').child("gridimportenergy").set(gridimportenergy)
+
+                    gridimportbill = round(self.grid_import_bill_annual, 4)
+                    db.child(gateway_id).child('annual_energy').child("gridimportbill").set(gridimportbill)
+                    gridimportenergy = round(self.grid_import_energy_annual, 4)
+                    db.child(gateway_id).child('annual_energy').child("gridimportenergy").set(gridimportenergy)
+
+                except Exception as er:
+                    print "cannot read data: {}".format(er)
+
 
     Agent.__name__ = 'EnergyBillAppAgent'
     return Agent(**kwargs)

@@ -3,7 +3,7 @@
         "exec": "energybillappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "EnergyBillApp",
-    "device_id": "270121594",
+    "device_id": "5PMCP270121594",
     "installpoint": "load",
     "message": "hello my name is EnergyBillAppAgent"
 }

@@ -81,6 +81,7 @@ except:
         print(gateway_id)
     except:
         print "no eth0"
+gateway_id='hivec83a35cdbeab'
 
 PLATFORM = {
     'node': {
@@ -109,7 +110,7 @@ DATABASES = {
         'HOST': 'peahivedev2.postgres.database.azure.com',
         'PORT': '5432',                    # Set to empty string for default. Not used with sqlite3.
         'firebase': True,
-        'azureiot': True,
+        'azureiot': False,
         'TABLE_dashboard_device_info': 'dashboard_device_info',
         'TABLE_dashboard_current_status': 'dashboard_current_status',
         'TABLE_building_zone': 'building_zone',
@@ -148,7 +149,7 @@ DATABASES = {
         'TABLE_Weather': 'Weather',
         'TABLE_Sonos': 'Sonos',
         'TABLE_NETPIESensor': 'NETPIE',
-        'TABLE_daily_consumption': 'dailyenergyconsumption',
+        'TABLE_daily_consumption': 'daily_consumption',
         'TABLE_PVInverter': 'PVInverter',
         'TABLE_monthly_consumption': 'monthly_consumption',
         'TABLE_annual_consumption': 'annual_consumption',

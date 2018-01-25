@@ -6,7 +6,7 @@
     "agent_id": "03WSP060BFEA2",
     "api": "classAPI_TPlinkPlug",
     "building_name": "bemoss", 
-    "device_monitor_time": 20,
+    "device_monitor_time": 2,
     "macaddress": "221445K1200321", 
     "model": "Insight", 
     "type": "03WSP",
