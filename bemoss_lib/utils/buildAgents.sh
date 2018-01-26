@@ -278,6 +278,10 @@ volttron-pkg package ~/workspace/bemoss_os/Agents/CurtainAgent/
 volttron-pkg configure /tmp/volttron_wheels/curtainagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/CurtainAgent/03MRB221445K1200328.launch.json
 volttron-ctl install curtain=/tmp/volttron_wheels/curtainagent-0.1-py2-none-any.whl
 
+# Run EnergyReportScheduler Agent
+volttron-pkg package ~/workspace/bemoss_os/Applications/code/EnergyReportScheduler/
+volttron-pkg configure /tmp/volttron_wheels/energy_report_scheduleragent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Applications/code/EnergyReportScheduler/energy_report_scheduler.launch.json
+volttron-ctl install EnergyReportSchedulerApp=/tmp/volttron_wheels/energy_report_scheduleragent-0.1-py2-none-any.whl
 
 sudo chmod 777 -R /tmp/volttron_wheels/
 #Install Apps
