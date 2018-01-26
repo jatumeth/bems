@@ -51,7 +51,7 @@ under Contract DE-EE0006352
 import smtplib  # simple mail transfer protocol library
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
-
+import datetime
 
 class EmailService:
     # method1: GET a model number of a device by XML read
@@ -80,3 +80,34 @@ class EmailService:
             EmailService
             print('Error: Connection with SMTP server failed')
 
+# This main method will not be executed when this class is used as a module
+def main():
+    # create an object with initialized data from DeviceDiscovery Agent
+    # requirements for instantiation1. model, 2.type, 3.api, 4. address
+    params = {"grid_energy_import": 10, "grid_electricity_bill": 40, "grid_avg_power":300, "solar_energy_generation": 20,
+              "solar_electricity_bill": 80, "solar_avg_power": 1200, "load_energy_consumption": 30,
+              "load_electricity_bill": 120, "load_avg_power": 1300}
+    sendText = "Dear Sisaengtham School,\n " \
+               "\n" \
+               "\tHere is your energy report for {date},\n" \
+               "\n" \
+               "\t1. Grid: Energy Imported={grid_energy_import} kWh, Electricity Bill={grid_electricity_bill} Baht, Average Power={grid_avg_power} W\n" \
+               "\t2. Solar: Energy Generated={solar_energy_generation} kWh, Bill Saving from Solar={solar_electricity_bill} Baht, Average Power={solar_avg_power} W\n"\
+               "\t3. Load: Energy Consumed={load_energy_consumption} kWh, Actual Bill if Without Solar={load_electricity_bill} Baht, Average Power={load_avg_power} W\n"\
+               "\n" \
+               "Best Regard,\n" \
+               "PEA HiVE Development Team,\n" \
+               "email: peahive@gmail.com,\n" \
+               "FB: facebook.som/peahiveplatform,\n" \
+               "Line: @peahive" \
+        .format(date=datetime.datetime.now().date(), grid_energy_import=params['grid_energy_import'], grid_electricity_bill=params['grid_electricity_bill'],
+                grid_avg_power=params['grid_avg_power'], solar_energy_generation=params['solar_energy_generation'],
+                solar_electricity_bill=params['solar_electricity_bill'], solar_avg_power=params['solar_avg_power'],
+                load_energy_consumption=params['load_energy_consumption'],
+                load_electricity_bill=params['load_electricity_bill'], load_avg_power=params['load_avg_power'],)
+    print(sendText)
+    email = EmailService()
+    email.sendEmail(fromaddr='peahive@gmail.com', recipients=['kwarodom@vt.edu', 'peahive@gmail.com', 'smarthome.pea@gmail.com'], username='peahive@gmail.com', password='nbumnmwtqbeqcocc',
+                    subject='HiVE Report', text=sendText, mailServer='smtp.gmail.com:587')
+
+if __name__ == "__main__": main()

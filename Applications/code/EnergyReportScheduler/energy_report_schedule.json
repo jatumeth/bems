@@ -1,0 +1,55 @@
+{
+    "energy_scheduler": {
+        "ERP001": {
+            "active": [
+                "everyday",
+                "holiday"
+            ],
+            "inactive": [],
+            "schedulers": {
+                "everyday": {
+                    "monday": [
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ],
+                    "tuesday": [
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ],
+                    "thursday": [
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ],
+                    "friday": [
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ],
+                    "saturday": [
+                        {
+                            "at": 8,
+                            "status": "ON"
+                        },
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ],
+                    "sunday": [
+                        {
+                            "at": 1200,
+                            "status": "ON"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

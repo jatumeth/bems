@@ -137,6 +137,9 @@ volttron-ctl start --tag openclose
 sleep 2
 volttron-ctl start --tag openclosedoor
 
+sleep 2
+volttron-ctl start --tag EnergyReportSchedulerApp
+
 volttron-ctl status
 deactivate
 sudo chmod 777 ~/.volttron/run/publish
