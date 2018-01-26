@@ -29,6 +29,8 @@ import socket
 import pyrebase
 import os
 import random
+import time
+from ISStreamer.Streamer import Streamer
 
 firebase = settings.DATABASES['default']['firebase']
 azureiot = settings.DATABASES['default']['azureiot']
@@ -240,6 +242,22 @@ def TplinkAgent(config_path, **kwargs):
                     iotcall = iotmodul.iothub_client_sample_run(x)
                 except Exception as er:
                     print er
+
+            try:
+                streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
+                                    access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
+                print Tplink.variables['status']
+                streamer.log(str(Tplink.variables['agent_id'] + '_status'),
+                             Tplink.variables['status'])
+                streamer.log(str(Tplink.variables['agent_id'] + '_current'),
+                             float(Tplink.variables['current']))
+                streamer.log(str(Tplink.variables['agent_id'] + '_volt'),
+                             float(Tplink.variables['volt']))
+                streamer.log(str(Tplink.variables['agent_id'] + '_power'),
+                             float(Tplink.variables['power']))
+            except Exception as er:
+                print "update data base error: {}".format(er)
+
 
         def postgresAPI(self):
 

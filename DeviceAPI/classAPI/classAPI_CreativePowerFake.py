@@ -93,10 +93,12 @@ class API:
     def getDeviceStatus(self):
 
         device_id = str(self.get_variable("device_id"))
+        device_id_grid = '124930529'
+        device_id_load = '270121594'
 
         try:
 
-            url = 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,'+device_id+'&order=trans_id,desc&page=1'
+            url = 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,'+device_id_grid+'&order=trans_id,desc&page=1'
             print url
             http = urllib3.PoolManager()
             # r = http.request('GET','https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1')
@@ -105,24 +107,64 @@ class API:
             conve_json = json.loads(r.data)
             # print r.data
 
-            self.set_variable('grid_voltage', float(conve_json['cpletrix']['records'][0][5]))
-            self.set_variable('grid_current', float(conve_json['cpletrix']['records'][0][6]))
+            self.set_variable('g_grid_voltage', float(conve_json['cpletrix']['records'][0][5]))
+            self.set_variable('g_grid_current', float(conve_json['cpletrix']['records'][0][6]))
 
-            self.set_variable('grid_reactivePower', float(conve_json['cpletrix']['records'][0][10]))
-            self.set_variable('grid_powerfactor', float(conve_json['cpletrix']['records'][0][8]))
-            self.set_variable('grid_accumulated_energy', float(conve_json['cpletrix']['records'][0][11]))
 
-            gridactive0 = float(conve_json['cpletrix']['records'][0][9])
-            if (gridactive0 > (-30) and gridactive0 < (0)) :
+            gridactive0 = (float(conve_json['cpletrix']['records'][0][9]))
+
+            if (gridactive0 > (-20) and gridactive0 < (0)):
                 gridactive = 0
             else:
                 gridactive = gridactive0
-            self.set_variable('grid_activePower', gridactive)
+
+            self.set_variable('g_grid_activePower',gridactive )
+            self.set_variable('g_grid_reactivePower', float(conve_json['cpletrix']['records'][0][10]))
+            self.set_variable('g_grid_powerfactor', float(conve_json['cpletrix']['records'][0][8]))
+            self.set_variable('g_grid_accumulated_energy', float(conve_json['cpletrix']['records'][0][11]))
+
+        except Exception as er:
+            print er
+
+        try:
+
+            url = 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,'+device_id_load+'&order=trans_id,desc&page=1'
+            print url
+            http = urllib3.PoolManager()
+            # r = http.request('GET','https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1')
+            # r = http.request('GET', 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,300346794&order=trans_id,desc&page=1')
+            r = http.request('GET', url)
+            conve_json = json.loads(r.data)
+            # print r.data
+            print
+            self.set_variable('l_grid_voltage', float(conve_json['cpletrix']['records'][0][5]))
+            self.set_variable('l_grid_current', float(conve_json['cpletrix']['records'][0][6]))
+            self.set_variable('l_grid_activePower', float(conve_json['cpletrix']['records'][0][9]))
+            self.set_variable('l_grid_reactivePower', float(conve_json['cpletrix']['records'][0][10]))
+            self.set_variable('l_grid_powerfactor', float(conve_json['cpletrix']['records'][0][8]))
+            self.set_variable('l_grid_accumulated_energy', float(conve_json['cpletrix']['records'][0][11]))
 
         except Exception as er:
             print er
 
 
+        try:
+            self.set_variable('grid_voltage', float(self.get_variable('g_grid_voltage')))
+            self.set_variable('grid_current',
+                              float(self.get_variable('g_grid_current') - self.get_variable('l_grid_current')))
+            gridactive0 = float(self.get_variable('g_grid_activePower') - self.get_variable('l_grid_activePower'))
+            self.set_variable('grid_activePower',gridactive0)
+            self.set_variable('grid_reactivePower', float(
+                self.get_variable('g_grid_reactivePower') - self.get_variable('l_grid_reactivePower')))
+            self.set_variable('grid_powerfactor', float(self.get_variable('g_grid_powerfactor')))
+            self.set_variable('grid_accumulated_energy', float(
+                self.get_variable('g_grid_accumulated_energy') - self.get_variable('l_grid_accumulated_energy')))
+
+
+
+
+        except Exception as er:
+            print er
 
     def printDeviceStatus(self):
 
