@@ -26,6 +26,23 @@ from bemoss_lib.communication.sms import SMSService
 import psycopg2.extras
 import settings
 import socket
+import pyrebase
+import os
+import random
+import time
+from ISStreamer.Streamer import Streamer
+
+try:
+    config = {
+      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+      "storageBucket": "bucket.appspot.com",
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+except Exception as er:
+    print er
 
 def PlugloadAgent(config_path, **kwargs):
 
@@ -66,6 +83,11 @@ def PlugloadAgent(config_path, **kwargs):
     _address = address
     _address = _address.replace('http://', '')
     _address = _address.replace('https://', '')
+
+    url = get_config('url')
+    device = get_config('device')
+    bearer = get_config('bearer')
+
     try:  # validate whether or not address is an ip address
         socket.inet_aton(_address)
         ip_address = _address
@@ -93,24 +115,26 @@ def PlugloadAgent(config_path, **kwargs):
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     api = get_config('api')
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
+    gateway_id = settings.gateway_id
 
     #4.1 initialize tplink device object
     if vendor == 'Digi':
         gateway_id = get_config('gateway_id')
         Plugload = apiLib.API(gateway_id=gateway_id, model=model, device_type=device_type, api=api, address=address,
-                              macaddress = macaddress, agent_id=agent_id,  db_host=db_host, db_port=db_port,
-                              db_user=db_user, db_password=db_password, db_database=db_database)
+                              macaddress=macaddress, agent_id=agent_id,  db_host=db_host, db_port=db_port,
+                              db_user=db_user, db_password=db_password, db_database=db_database,
+                              config_path=config_path, bearer=bearer, device=device, url=url
+                              )
     else:
         Plugload = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress = macaddress,
                               agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user,
-                              db_password=db_password, db_database=db_database, config_path=config_path)
+                              db_password=db_password, db_database=db_database, config_path=config_path,
+                              bearer=bearer, device=device, url=url)
 
     print("{0}agent is initialized for {1} using API={2} at {3}".format(agent_id,
                                                                         Plugload.get_variable('model'),
                                                                         Plugload.get_variable('api'),
                                                                Plugload.get_variable('address')))
-
-    connection_renew_interval = Plugload.variables['connection_renew_interval']
 
     #params notification_info
     send_notification = False
@@ -141,13 +165,13 @@ def PlugloadAgent(config_path, **kwargs):
             self.subscriptionTime = datetime.datetime.now()
             self.already_offline = False
             #2. setup connection with db -> Connect to bemossdb database
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            # except:
-            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except:
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             #3. send notification to notify building admin
             self.send_notification = send_notification
             self.subject = 'Message from ' + agent_id
@@ -175,43 +199,99 @@ def PlugloadAgent(config_path, **kwargs):
             try:
                 Plugload.getDeviceStatus()
                 self.variables['status'] = Plugload.variables['status']
+                self.variables['power'] = Plugload.variables['power']
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
+            self.updateFirebase()
+            self.updateInitialState()
             self.postgresAPI()
+
+        def updateFirebase(self):
+            # firebase
+            try:
+                data = Plugload.variables['status']
+                db.child(gateway_id).child(agent_id).child("status").set(data)
+                print("{} DONE PUSHED STATUS TO FIREBASE".format(agent_id))
+            except Exception as er:
+                print er
+
+            try:
+                data =Plugload.variables['power']
+                db.child(gateway_id).child(agent_id).child("power").set(data)
+                print("{} DONE PUSHED POWER TO FIREBASE".format(agent_id))
+            except Exception as er:
+                print er
+
+        def updateInitialState(self):
+            try:
+                streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
+                                    access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
+                streamer.log(str(Plugload.variables['agent_id'] + '_' + 'status'),
+                             float(Plugload.variables['status'] == "ON"))
+                streamer.log(str(Plugload.variables['agent_id'] + '_' + 'power'),
+                             float(Plugload.variables['power']))
+                print("{} DONE UPDATING DATA TO INITIALSTATE".format(agent_id))
+            except Exception as er:
+                print "update data base error: {}".format(er)
 
         def postgresAPI(self):
 
-            self.connect_postgresdb()
+            try:
+                self.cur.execute("SELECT * from plugload WHERE plugload_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO plugload (plugload_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    print("DONE ADDING DATA TO POSTGRES")
+            except Exception as er:
+                print er
 
             try:
                 self.cur.execute("""
-                    UPDATE tplink
+                    UPDATE plugload
                     SET status=%s, power=%s, last_scanned_time=%s
                     WHERE plugload_id=%s
-                 """, (Plugload.variables['status'], Plugload.variables['power'],
-                       datetime.datetime.now(), agent_id))
+                 """, (Plugload.variables['status'], Plugload.variables['power'], datetime.datetime.now(), agent_id))
                 self.con.commit()
-
-                self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
-                                 (Plugload.variables['status'], agent_id))
-                self.con.commit()
-                print "Update database: success"
+                print("{} DONE UPDATING DATA TO POSTGRES".format(agent_id))
             except Exception as er:
-                print "Update database error: {}".format(er)
+                print er
 
-            try:
-                self.cur.execute("""
-                    INSERT INTO ts_plugload
-                    (datetime, status, power, plugload_id, gateway_id)
-                    VALUES (%s, %s, %s, %s, %s);""",
-                    (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id, '1'))
-                self.con.commit()
-                print 'Insert database: success'
-            except Exception as er:
-                print "Insert database error: {}".format(er)
-
-            self.disconnect_postgresdb()
+        # def postgresAPI(self):
+        #
+        #     self.connect_postgresdb()
+        #
+        #     try:
+        #         self.cur.execute("""
+        #             UPDATE tplink
+        #             SET status=%s, power=%s, last_scanned_time=%s
+        #             WHERE plugload_id=%s
+        #          """, (Plugload.variables['status'], Plugload.variables['power'],
+        #                datetime.datetime.now(), agent_id))
+        #         self.con.commit()
+        #
+        #         self.cur.execute('UPDATE device_info SET status=%s WHERE device_id=%s',
+        #                          (Plugload.variables['status'], agent_id))
+        #         self.con.commit()
+        #         print "Update database: success"
+        #     except Exception as er:
+        #         print "Update database error: {}".format(er)
+        #
+        #     try:
+        #         self.cur.execute("""
+        #             INSERT INTO ts_plugload
+        #             (datetime, status, power, plugload_id, gateway_id)
+        #             VALUES (%s, %s, %s, %s, %s);""",
+        #             (datetime.datetime.now(), Plugload.variables['status'], Plugload.variables['power'], agent_id, '1'))
+        #         self.con.commit()
+        #         print 'Insert database: success'
+        #     except Exception as er:
+        #         print "Insert database error: {}".format(er)
+        #
+        #     self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_plugload + " WHERE plugload_id=%s",
