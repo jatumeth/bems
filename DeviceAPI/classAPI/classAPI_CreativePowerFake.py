@@ -149,19 +149,16 @@ class API:
 
 
         try:
-            self.set_variable('grid_voltage', float(self.get_variable('g_grid_voltage')))
+            self.set_variable('grid_voltage', float(self.get_variable('l_grid_voltage')))
             self.set_variable('grid_current',
-                              float(self.get_variable('g_grid_current') - self.get_variable('l_grid_current')))
-            gridactive0 = float(self.get_variable('g_grid_activePower') - self.get_variable('l_grid_activePower'))
-            self.set_variable('grid_activePower',gridactive0)
+                              float(self.get_variable('l_grid_current') - self.get_variable('g_grid_current')))
+            self.set_variable('grid_activePower', float(self.get_variable('l_grid_activePower') -
+                                                        self.get_variable('g_grid_activePower')))
             self.set_variable('grid_reactivePower', float(
-                self.get_variable('g_grid_reactivePower') - self.get_variable('l_grid_reactivePower')))
-            self.set_variable('grid_powerfactor', float(self.get_variable('g_grid_powerfactor')))
+                self.get_variable('l_grid_reactivePower') - self.get_variable('g_grid_reactivePower')))
+            self.set_variable('grid_powerfactor', float(self.get_variable('l_grid_powerfactor')))
             self.set_variable('grid_accumulated_energy', float(
-                self.get_variable('g_grid_accumulated_energy') - self.get_variable('l_grid_accumulated_energy')))
-
-
-
+                self.get_variable('l_grid_accumulated_energy') - self.get_variable('g_grid_accumulated_energy')))
 
         except Exception as er:
             print er

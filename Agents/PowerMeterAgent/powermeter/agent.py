@@ -34,8 +34,8 @@ import time
 from ISStreamer.Streamer import Streamer
 
 
-utils.setup_logging()
-_log = logging.getLogger(__name__)
+# utils.setup_logging()
+# _log = logging.getLogger(__name__)
 
 try:
     config = {
@@ -208,28 +208,22 @@ def powermeteragent(config_path, **kwargs):
             try:
                 print ("starting device monitor")
                 PowerMeter.getDeviceStatus()
-
-            except Exception as er:
-                print er
-                print "device connection for {} is not successful {}".format(agent_id, er)
-
-            if (self.start_first_time):
-                self.grid_energy = 0
-                self.start_first_time = False
-                self.last_energy = PowerMeter.variables['grid_accumulated_energy']
-                print("grid accu = {}".format(self.last_energy))
-            else:
-                try:
+                if (self.start_first_time):
+                    self.grid_energy = 0
+                    self.start_first_time = False
+                    self.last_energy = PowerMeter.variables['grid_accumulated_energy']
+                    print("grid accu = {}".format(self.last_energy))
+                else:
                     self.energy_now = PowerMeter.variables['grid_accumulated_energy']
                     print("grid accu = {}".format(self.energy_now))
                     self.grid_energy = (float(self.energy_now) - float(self.last_energy))/1000
                     print "Energy Now = {}".format(self.grid_energy)
                     self.last_energy = self.energy_now
-                except Exception as er:
-                    self.grid_energy = 0
-                    print "cannot read data: {}".format(er)
-
-            print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+                    print("Grid Power = {}".format(PowerMeter.variables['grid_activePower']))
+            except Exception as er:
+                self.grid_energy = 0
+                print "cannot read data: {}".format(er)
+                print "device connection for {} is not successful {}".format(agent_id, er)
             self.updateUI()
 
             # self.changed_variables = dict()
@@ -255,6 +249,11 @@ def powermeteragent(config_path, **kwargs):
             try:
                 data = PowerMeter.variables['grid_activePower']
                 db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+                if (agent_id == "5PMCP270121595"):
+                    db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
+                else:
+                    print("not solar no need to update to firebase")
+
             except Exception as er:
                 print er
 
