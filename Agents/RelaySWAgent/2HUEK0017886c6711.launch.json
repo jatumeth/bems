@@ -1,0 +1,18 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "relayswagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "2HUEK0017886c6711",
+    "api": "classAPI_orvibo2gang",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/6e7197d2-42d1-47fa-9572-54213a47a778/switches/",
+    "device": "42e51bbb-7412-4979-b45b-96b3a1fcb58f",
+    "bearer": "Bearer fe132119-a2f7-4078-82c3-586a3aa5ce87",
+    "building_name": "bemoss",
+    "device_monitor_time": 10,
+    "macaddress": "0017886c6711",
+    "model": "one",
+    "type": "2HUEK",
+    "vendor": "phillip",
+    "zone_id": 999
+}
