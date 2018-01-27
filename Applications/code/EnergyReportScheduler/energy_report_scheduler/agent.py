@@ -423,7 +423,7 @@ def scheduleragent(config_path, **kwargs):
                     print(sendText)
                     email = EmailService()
                     email.sendEmail(fromaddr='peahive@gmail.com',
-                                    recipients=['kwarodom@vt.edu', 'peahive@gmail.com', 'smarthome.pea@gmail.com'],
+                                    recipients=['kwarodom@vt.edu', 'peahive@gmail.com', 'smarthome.pea@gmail.com, sisaengtham.hive@gmail.com'],
                                     username='peahive@gmail.com', password='nbumnmwtqbeqcocc',
                                     subject='HiVE Report', text=sendText, mailServer='smtp.gmail.com:587')
                 except Exception as er:

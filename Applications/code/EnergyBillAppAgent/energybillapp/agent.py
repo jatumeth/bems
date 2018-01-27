@@ -29,7 +29,6 @@ config = {
     "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
     "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
     "storageBucket": "bucket.appspot.com",
-    # "serviceAccount": os.getcwd() + "/Firebase/hive-rt-mobile-backend-firebase-adminsdk-zk9mz-12e98d22ca.json"
 }
 firebase = pyrebase.initialize_app(config)
 db = firebase.database()
