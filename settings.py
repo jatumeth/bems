@@ -82,6 +82,7 @@ except:
     except:
         print "no eth0"
 gateway_id='hivec83a35cdbeab'
+print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {
     'node': {

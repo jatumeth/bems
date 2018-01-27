@@ -27,6 +27,23 @@ import psycopg2.extras
 import settings
 import socket
 import threading
+import pyrebase
+import os
+import random
+import time
+from ISStreamer.Streamer import Streamer
+
+try:
+    config = {
+      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+      "storageBucket": "bucket.appspot.com",
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+except Exception as er:
+    print er
 
 def RelaySWAgent(config_path, **kwargs):
     
@@ -108,6 +125,8 @@ def RelaySWAgent(config_path, **kwargs):
 
     apiLib = importlib.import_module("DeviceAPI.classAPI."+api)
 
+    gateway_id = settings.gateway_id
+
     #4.1 initialize RelaySW device object
     RelaySW = apiLib.API(model=model, device_type=device_type, api=api, address=address, macaddress=macaddress, 
                     agent_id=agent_id, db_host=db_host, db_port=db_port, db_user=db_user, db_password=db_password, 
@@ -187,41 +206,60 @@ def RelaySWAgent(config_path, **kwargs):
 
             try:
                 RelaySW.getDeviceStatus()
-                # _data = RelaySW.variables
-                # message = json.dumps(_data)
-                # RelaySWMQTT = importlib.import_module("DeviceAPI.classAPI.device.samples." + "iothub_client_sample")
-                # RelaySWMQTT.iothub_client_sample_run(message)
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
+            self.updateFirebase()
+            self.updateInitialState()
             self.postgresAPI()
+
+        def updateFirebase(self):
+            # firebase
+            try:
+                data = RelaySW.variables['status']
+                print(data)
+                print(gateway_id)
+                db.child(gateway_id).child(agent_id).child("status").set(data)
+                print("{} DONE PUSHED DATA TO FIREBASE".format(agent_id))
+            except Exception as er:
+                print er
+
+        def updateInitialState(self):
+            try:
+                streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
+                                    access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
+                streamer.log(str(RelaySW.variables['agent_id'] + '_'+'status'),
+                             float(RelaySW.variables['status']=="ON"))
+                print("{} DONE UPDATING DATA TO INITIALSTATE".format(agent_id))
+            except Exception as er:
+                print "update data base error: {}".format(er)
 
         def postgresAPI(self):
 
-            print "non postgres"
-            # try:
-            #     self.cur.execute("SELECT * from RelaySW WHERE RelaySW_id=%s", (agent_id,))
-            #     if bool(self.cur.rowcount):
-            #         pass
-            #     else:
-            #         self.cur.execute(
-            #             """INSERT INTO RelaySW (RelaySW_id, last_scanned_time) VALUES (%s, %s);""",
-            #             (agent_id, datetime.datetime.now()))
-            # except Exception as er:
-            #     print er
-            #
-            # try:
-            #     self.cur.execute("""
-            #         UPDATE RelaySW
-            #         SET status=%s, last_scanned_time=%s
-            #         WHERE RelaySW_id=%s
-            #      """, (RelaySW.variables['status'], datetime.datetime.now(), agent_id))
-            #     self.con.commit()
-            #
-            # except Exception as er:
-            #     print er
+            try:
+                self.cur.execute("SELECT * from lighting WHERE lighting_id=%s", (agent_id,))
+                if bool(self.cur.rowcount):
+                    pass
+                else:
+                    self.cur.execute(
+                        """INSERT INTO lighting (lighting_id, last_scanned_time) VALUES (%s, %s);""",
+                        (agent_id, datetime.datetime.now()))
+                    print("DONE ADDING DATA TO POSTGRES")
+            except Exception as er:
+                print er
+
+            try:
+                self.cur.execute("""
+                    UPDATE lighting
+                    SET status=%s, last_scanned_time=%s
+                    WHERE lighting_id=%s
+                 """, (RelaySW.variables['status'], datetime.datetime.now(), agent_id))
+                self.con.commit()
+                print("{} DONE UPDATING DATA TO POSTGRES".format(agent_id))
+            except Exception as er:
+                print er
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_RelaySW + " WHERE RelaySW_id=%s",
@@ -325,7 +363,6 @@ def RelaySWAgent(config_path, **kwargs):
             print _active_alert_phone_number_misoperation
             smsService = SMSService()
             smsService.sendSMS(email_fromaddr, _active_alert_phone_number_misoperation, email_username, email_password, _sms_subject, email_mailServer)
-
 
         def priority_counter(self, _active_alert_id, _tampering_device_msg_1):
             # Find the priority counter limit then compare it with priority_counter in priority table
@@ -439,7 +476,6 @@ def RelaySWAgent(config_path, **kwargs):
             self.publish(topic, headers, message)
             self.deviceMonitorBehavior() #Get device status, and get updated data
 
-
         def isPostmsgValid(self, postmsg):  # check validity of postmsg
             dataValidity = False
             try:
@@ -476,7 +512,6 @@ def RelaySWAgent(config_path, **kwargs):
             else:
                 message = 'failure'
             self.publish(topic, headers, message)
-
 
     Agent.__name__ = 'RelaySWAgent'
     return Agent(**kwargs)
