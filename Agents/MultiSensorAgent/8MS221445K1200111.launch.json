@@ -1,0 +1,24 @@
+{
+    "address": "http://192.168.1.30:49153", 
+    "agent": {
+        "exec": "multisensoragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "8MS221445K1200111",
+    "api": "classAPI_Fibaro",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/6e7197d2-42d1-47fa-9572-54213a47a778/illuminances/",
+    "device": "02d25f11-256a-41a7-8b61-837798ac0a54",
+    "bearer": "Bearer fe132119-a2f7-4078-82c3-586a3aa5ce87",
+    "building_name": "bemoss",
+    "db_database": "bemossdb", 
+    "db_host": "localhost", 
+    "db_password": "admin", 
+    "db_port": "5432", 
+    "db_user": "admin", 
+    "device_monitor_time": 5,
+    "macaddress": "221445K1200132",
+    "model": "ACB123",
+    "type": "MultiSensor",
+    "vendor": "Aeotec",
+    "zone_id": 999
+}
+
