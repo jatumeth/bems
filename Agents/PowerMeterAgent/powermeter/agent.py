@@ -179,14 +179,14 @@ def powermeteragent(config_path, **kwargs):
             self.start_first_time = True
 
             # 2. setup connection with db -> Connect to bemossdb database
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            # except Exception as er:
-            #     print er
-            #     print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
+            try:
+                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                            password=db_password)
+                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
+                print("{} connects to the database name {} successfully".format(agent_id, db_database))
+            except Exception as er:
+                print er
+                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
 
         def set_variable(self, k, v):  # k=key, v=value
             self.variables[k] = v
@@ -285,8 +285,6 @@ def powermeteragent(config_path, **kwargs):
             # print x
 
         def postgresAPI(self):
-
-            self.connect_postgresdb()
             try:
                 self.cur.execute("SELECT * from power_meter WHERE power_meter_id=%s", (agent_id,))
                 if bool(self.cur.rowcount):
@@ -298,7 +296,7 @@ def powermeteragent(config_path, **kwargs):
                     self.con.commit()
             except:
                 print "Data base error"
-            #
+
             try:
                 self.cur.execute("""
                     UPDATE power_meter
@@ -351,9 +349,6 @@ def powermeteragent(config_path, **kwargs):
                 print "insert database: success"
             except Exception as er:
                 print "insert data base error: {}".format(er)
-
-
-            self.disconnect_postgresdb()
 
         def device_offline_detection(self):
             self.cur.execute("SELECT nickname FROM " + db_table_power_meter + " WHERE power_meter_id=%s",
@@ -829,22 +824,6 @@ def powermeteragent(config_path, **kwargs):
                             "{} >> this event_id {} is not for this device".format(agent_id, event_id)
                 else:
                     pass
-
-        def connect_postgresdb(self):
-            try:
-                self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                            password=db_password)
-                self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-                print("{} connects to the database name {} successfully".format(agent_id, db_database))
-            except Exception as er:
-                print er
-                print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-
-        def disconnect_postgresdb(self):
-            if(self.con.closed == False):
-                self.con.close()
-            else:
-                print("postgresdb is not connected")
 
     Agent.__name__ = 'PowerMeterAgent'
     return Agent(**kwargs)

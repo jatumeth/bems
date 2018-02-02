@@ -81,7 +81,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                             user=db_user, password=db_password)
                 self.cur = self.con.cursor()
                 print ("{} connects to the database name {} successfully".format(agent_id, db_database))
-
             except:
                 print("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             self.start_new_day()
@@ -213,7 +212,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.calculate_grid_bill_this_month()
             self.calculate_grid_energy_annual()
             self.calculate_grid_bill_annual()
-            self.updateDB()
+            # self.updateDB()
             self.publish_message()
             print 'publish firebase grid'
             self.publish_firebase_grid()
@@ -265,29 +264,12 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_export_energy_today += self.energy_from_grid_export
 
         def calculate_grid_bill_today(self):
-            # solar_bill_current_time = self.energy_from_solar * self.current_electricity_price
-            # load_bill_current_time = self.energy_from_load * self.current_electricity_price
-
             self.grid_import_bill_today += self.energy_from_grid_import * self.current_electricity_price
             self.grid_export_bill_today += self.energy_from_grid_export * self.current_electricity_price
-
-            # self.solar_bill_today += solar_bill_current_time
-            # self.load_bill_today += load_bill_current_time
-
-            # self.set_variable('gridImportBill', self.grid_import_bill_today)
-            # self.set_variable('gridExportBill', self.grid_export_bill_today)
-            # self.set_variable('solarBill', self.solar_bill_today)
-            # self.set_variable('loadBill', self.load_bill_today)
 
         def calculate_grid_energy_this_month(self):
             self.grid_import_energy_this_month = self.grid_import_energy_this_month_until_last_day + self.grid_import_energy_today
             self.grid_export_energy_this_month = self.grid_export_energy_this_month_until_last_day + self.grid_export_energy_today
-            # self.solar_energy_this_month = self.solar_energy_this_month_until_last_day + self.solar_energy_today
-            # self.load_energy_this_month = self.load_energy_this_month_until_last_day + self.load_energy_today
-            # self.grid_import_bill_this_month = self.grid_import_bill_this_month_until_last_day + self.grid_import_bill_today
-            # self.grid_export_bill_this_month = self.grid_export_bill_this_month_until_last_day + self.grid_export_bill_today
-            # self.solar_bill_this_month = self.solar_bill_this_month_until_last_day + self.solar_bill_today
-            # self.load_bill_this_month = self.load_bill_this_month_until_last_day + self.load_bill_today
 
         def calculate_grid_bill_this_month(self):
             self.grid_import_bill_this_month = self.grid_import_bill_this_month_until_last_day + self.grid_import_bill_today
@@ -361,10 +343,10 @@ def EnergyBillAppAgent(config_path, **kwargs):
                                  "gridimportbill, gridexportbill, solarbill, loadbill, updated_at, gateway_id) "
                                  "VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                                  ((str(datetime.datetime.now().date())),
-                                  self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
-                                  self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
-                                  self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                                  self.get_variable('solarBill'), self.get_variable('loadBill'),
+                                  self.grid_import_energy_today, self.grid_export_energy_today,
+                                  self.solar_energy_today, self.load_energy_today,
+                                  self.grid_import_bill_today, self.grid_export_bill_today,
+                                  self.solar_bill_today, self.load_bill_today,
                                   datetime.datetime.now(), gateway_id))
                 self.con.commit()
 
@@ -424,86 +406,104 @@ def EnergyBillAppAgent(config_path, **kwargs):
             last_day_of_end_month = str(datetime.datetime.now().replace(month=12).date() + relativedelta(day=31))
 
             # Update table "daily_consumption"
-            # self.connect_postgresdb()
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + today + "'" + " AND gateway_id = " + gateway_id)
-            if bool(self.cur.rowcount):
-                try:
-                    self.cur.execute(
-                        "UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
-                                                                 "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                 "gridexportbill=%s, solarbill=%s, loadbill=%s, updated_at=%s"
-                                                                 " WHERE date = '" + today + "'" + " AND gateway_id = " + gateway_id,
-                        (self.get_variable('gridImportEnergy'), self.get_variable('gridExportEnergy'),
-                         self.get_variable('solarEnergy'), self.get_variable('loadEnergy'),
-                         self.get_variable('gridImportBill'), self.get_variable('gridExportBill'),
-                         self.get_variable('solarBill'), self.get_variable('loadBill'), datetime.datetime.now()))
-                    self.con.commit()
-                    print"update daily db:Success"
-                except Exception as er:
-                    print "update data base error: {}".format(er)
-            else:
-                self.insertDB('daily')
+            try:
+                if bool(self.cur.rowcount):
+                    try:
+                        self.cur.execute(
+                            "UPDATE " + db_table_daily_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+                                                                     "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+                                                                     "gridexportbill=%s, solarbill=%s, loadbill=%s, updated_at=%s"
+                                                                     " WHERE date = '" + today + "'" + " AND gateway_id = " + gateway_id,
+                            (self.grid_import_energy_today, self.grid_export_energy_today,
+                            self.solar_energy_today, self.load_energy_today,
+                            self.grid_import_bill_today, self.grid_export_bill_today,
+                                  self.solar_bill_today, self.load_bill_today, datetime.datetime.now()))
+                        self.con.commit()
+                        print"update daily db:Success"
+                    except Exception as er:
+                        print "update data base error: {}".format(er)
+                else:
+                    self.insertDB('daily')
+            except Exception as er:
+                print("{} failed to updateDB daily_energy with error: {}".format(agent_id, er))
 
             # Update table "monthly consumption"
-            self.cur.execute(
-                "SELECT * FROM " + db_table_monthly_consumption + " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = " + gateway_id)
-            if bool(self.cur.rowcount):
-                try:
-                    self.cur.execute(
-                        "UPDATE " + db_table_monthly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
-                                                                   "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                   "gridexportbill=%s, solarbill=%s, loadbill=%s"
-                                                                   " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = " + gateway_id,
-                        (self.grid_import_energy_this_month, self.grid_export_energy_this_month,
-                         self.solar_energy_this_month, self.load_energy_this_month,
-                         self.grid_import_bill_this_month, self.grid_export_bill_this_month,
-                         self.solar_bill_this_month, self.load_bill_this_month))
+            try:
+                self.cur.execute(
+                    "SELECT * FROM " + db_table_monthly_consumption + " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = " + gateway_id)
+                if bool(self.cur.rowcount):
+                    try:
+                        self.cur.execute(
+                            "UPDATE " + db_table_monthly_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+                                                                       "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+                                                                       "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                       " WHERE date = '" + last_day_of_this_month + "'" + " AND gateway_id = " + gateway_id,
+                            (self.grid_import_energy_this_month, self.grid_export_energy_this_month,
+                             self.solar_energy_this_month, self.load_energy_this_month,
+                             self.grid_import_bill_this_month, self.grid_export_bill_this_month,
+                             self.solar_bill_this_month, self.load_bill_this_month))
 
-                    self.con.commit()
-                    print"update monthly db:Success"
-                except Exception as er:
-                    print "update data base error: {}".format(er)
-            else:
-                self.insertDB('monthly')
+                        self.con.commit()
+                        print"update monthly db:Success"
+                    except Exception as er:
+                        print "update data base error: {}".format(er)
+                else:
+                    self.insertDB('monthly')
+            except Exception as er:
+                print("{} failed to updateDB monthly_energy with error: {}".format(agent_id, er))
 
             # Update table "annual consumption"
-            self.cur.execute(
-                "SELECT * FROM " + db_table_annual_consumption + " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = " + gateway_id)
-            if bool(self.cur.rowcount):
-                try:
-                    self.cur.execute(
-                        "UPDATE " + db_table_annual_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
-                                                                  "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
-                                                                  "gridexportbill=%s, solarbill=%s, loadbill=%s"
-                                                                  " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = " + gateway_id,
-                        (self.grid_import_energy_annual, self.grid_export_energy_annual,
-                         self.solar_energy_annual, self.load_energy_annual,
-                         self.grid_import_bill_annual, self.grid_export_bill_annual,
-                         self.solar_bill_annual, self.load_bill_annual))
+            try:
+                self.cur.execute(
+                    "SELECT * FROM " + db_table_annual_consumption + " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = " + gateway_id)
+                if bool(self.cur.rowcount):
+                    try:
+                        self.cur.execute(
+                            "UPDATE " + db_table_annual_consumption + " SET gridimportenergy=%s, gridexportenergy=%s, "
+                                                                      "solarenergy=%s, loadenergy=%s, gridimportbill=%s,"
+                                                                      "gridexportbill=%s, solarbill=%s, loadbill=%s"
+                                                                      " WHERE date = '" + last_day_of_end_month + "'" + " AND gateway_id = " + gateway_id,
+                            (self.grid_import_energy_annual, self.grid_export_energy_annual,
+                             self.solar_energy_annual, self.load_energy_annual,
+                             self.grid_import_bill_annual, self.grid_export_bill_annual,
+                             self.solar_bill_annual, self.load_bill_annual))
 
-                    self.con.commit()
-                    print"update annual db:Success"
-                except Exception as er:
-                    print "update data base error: {}".format(er)
-            else:
-                self.insertDB('annual')
+                        self.con.commit()
+                        print"update annual db:Success"
+                    except Exception as er:
+                        print "update data base error: {}".format(er)
+                else:
+                    self.insertDB('annual')
+            except Exception as er:
+                print("{} failed to updateDB annual_energy with error: {}".format(agent_id, er))
 
         def get_yesterday_data(self):
             print("getting yesterday data")
             time_now = datetime.datetime.now()
             last_day = str((time_now - datetime.timedelta(days=1)).date())
-            # self.connect_postgresdb()
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE date = '" + last_day + "'" + " AND gateway_id = " + gateway_id)
             if bool(self.cur.rowcount):
-                data = self.cur.fetchall()[0]
-                self.grid_import_energy_last_day = float(data[2])
-                self.grid_export_energy_last_day = float(data[3])
-                self.solar_energy_last_day = float(data[4])
-                self.load_energy_last_day = float(data[5])
-                self.grid_import_bill_last_day = float(data[6])
-                self.grid_export_bill_last_day = float(data[7])
-                self.solar_bill_last_day = float(data[8])
-                self.load_bill_last_day = float(data[9])
+                try:
+                    data = self.cur.fetchall()[0]
+                    self.grid_import_energy_last_day = float(data[2])
+                    self.grid_export_energy_last_day = float(data[3])
+                    self.solar_energy_last_day = float(data[4])
+                    self.load_energy_last_day = float(data[5])
+                    self.grid_import_bill_last_day = float(data[6])
+                    self.grid_export_bill_last_day = float(data[7])
+                    self.solar_bill_last_day = float(data[8])
+                    self.load_bill_last_day = float(data[9])
+                except Exception as er:
+                    self.grid_import_energy_last_day = 0
+                    self.grid_export_energy_last_day = 0
+                    self.solar_energy_last_day = 0
+                    self.load_energy_last_day = 0
+                    self.grid_import_bill_last_day = 0
+                    self.grid_export_bill_last_day = 0
+                    self.solar_bill_last_day = 0
+                    self.load_bill_last_day = 0
+                    print("There is no yesterday data: {}".format(er))
             else:
                 self.grid_import_energy_last_day = 0
                 self.grid_export_energy_last_day = 0
@@ -514,8 +514,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 self.solar_bill_last_day = 0
                 self.load_bill_last_day = 0
 
-            # self.disconnect_postgresdb()
-
         def get_last_month_data(self):
             self.grid_import_energy_last_month = 0
             self.grid_export_energy_last_month = 0
@@ -525,12 +523,10 @@ def EnergyBillAppAgent(config_path, **kwargs):
             self.grid_export_bill_last_month = 0
             self.solar_bill_last_month = 0
             self.load_bill_last_month = 0
-
             first_date = (datetime.datetime.now() - relativedelta(months=1)).replace(day=1).date()
             end_date = first_date + relativedelta(day=31)
             first_date_str = str(first_date)
             end_date_str = str(end_date)
-            # self.connect_postgresdb()
             self.cur.execute("SELECT * FROM " + db_table_daily_consumption + " WHERE (date BETWEEN '" +
                              first_date_str + "' AND '" + end_date_str + "')" + " AND gateway_id = 8")
             if bool(self.cur.rowcount):
@@ -546,8 +542,6 @@ def EnergyBillAppAgent(config_path, **kwargs):
                     self.load_bill_last_month += float(data[i][9])
             else:
                 pass
-
-            # self.disconnect_postgresdb()
 
         def get_this_month_data(self):
             print('getting this month data')
@@ -570,6 +564,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
+
                     self.grid_import_energy_this_month_until_last_day += float(data[i][2])
                     self.grid_export_energy_this_month_until_last_day += float(data[i][3])
                     self.solar_energy_this_month_until_last_day += float(data[i][4])
@@ -609,7 +604,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                         self.grid_import_bill_annual_until_last_month += float(data[i][6])
                         self.grid_export_bill_annual_until_last_month += float(data[i][7])
                         self.solar_bill_annual_until_last_month += float(data[i][8])
-                        self.load_bill_annual_until_last_month += float(data[i][9])
+                        self.load_bill_annual_until_last_month += float(dataf[i][9])
             else:
                 self.start_new_year()
 
