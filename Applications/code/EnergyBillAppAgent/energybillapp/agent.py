@@ -564,15 +564,17 @@ def EnergyBillAppAgent(config_path, **kwargs):
             if bool(self.cur.rowcount):
                 data = self.cur.fetchall()
                 for i in range(len(data)):
-
-                    self.grid_import_energy_this_month_until_last_day += float(data[i][2])
-                    self.grid_export_energy_this_month_until_last_day += float(data[i][3])
-                    self.solar_energy_this_month_until_last_day += float(data[i][4])
-                    self.load_energy_this_month_until_last_day += float(data[i][5])
-                    self.grid_import_bill_this_month_until_last_day += float(data[i][6])
-                    self.grid_export_bill_this_month_until_last_day += float(data[i][7])
-                    self.solar_bill_this_month_until_last_day += float(data[i][8])
-                    self.load_bill_this_month_until_last_day += float(data[i][9])
+                    try:
+                        self.grid_import_energy_this_month_until_last_day += float(data[i][2])
+                        self.grid_export_energy_this_month_until_last_day += float(data[i][3])
+                        self.solar_energy_this_month_until_last_day += float(data[i][4])
+                        self.load_energy_this_month_until_last_day += float(data[i][5])
+                        self.grid_import_bill_this_month_until_last_day += float(data[i][6])
+                        self.grid_export_bill_this_month_until_last_day += float(data[i][7])
+                        self.solar_bill_this_month_until_last_day += float(data[i][8])
+                        self.load_bill_this_month_until_last_day += float(data[i][9])
+                    except Exception as er:
+                        print("no data {}".format(er))
             else:
                 self.start_new_month()
 
@@ -722,7 +724,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
                                     access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
                 streamer.log(self._agent_id + '_daily_energy' + '_gridimportbill', round(self.grid_import_bill_today, 4))
-                streamer.log(self._agent_id + '_daily_energy' + '_gridimportenergy', round(self.grid_import_bill_today, 4))
+                streamer.log(self._agent_id + '_daily_energy' + '_gridimportenergy', round(self.grid_import_energy_today, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_gridimportbill', round(self.grid_import_bill_this_month, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_gridimportenergy', round(self.grid_import_energy_this_month, 4))
                 streamer.log(self._agent_id + '_annual_energy' + '_gridimportbill', round(self.grid_import_bill_annual, 4))
@@ -738,7 +740,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 streamer.log(self._agent_id + '_daily_energy' + '_loadimportbill',
                              round(self.load_bill_today, 4))
                 streamer.log(self._agent_id + '_daily_energy' + '_loadimportenergy',
-                             round(self.load_bill_today, 4))
+                             round(self.load_energy_today, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_loadimportbill',
                              round(self.load_bill_this_month, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_loadimportenergy',
@@ -757,7 +759,7 @@ def EnergyBillAppAgent(config_path, **kwargs):
                 streamer.log(self._agent_id + '_daily_energy' + '_solarimportbill',
                              round(self.solar_bill_today, 4))
                 streamer.log(self._agent_id + '_daily_energy' + '_solarimportenergy',
-                             round(self.solar_bill_today, 4))
+                             round(self.solar_energy_today, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_solarimportbill',
                              round(self.solar_bill_this_month, 4))
                 streamer.log(self._agent_id + '_monthly_energy' + '_solarimportenergy',
