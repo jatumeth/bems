@@ -224,8 +224,11 @@ def powermeteragent(config_path, **kwargs):
                 self.grid_energy = 0
                 print "cannot read data: {}".format(er)
                 print "device connection for {} is not successful {}".format(agent_id, er)
-            self.updateUI()
 
+            # TODO REMOVE!!! update web UI by publishing zmq message to tornado server
+            # self.updateUI()
+
+            # TODO detect change variables
             # self.changed_variables = dict()
             # for v in log_variables:
             #     if v in PowerMeter.variables:
@@ -237,26 +240,27 @@ def powermeteragent(config_path, **kwargs):
             #             self.changed_variables[v] = log_variables[v]
             #             self.variables[v] = None
 
-            if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
-                self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
-            if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:
-                self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
-            if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
-                self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
-            self.postgresAPI()
+            # TODO REMOVE!!! remove update Postgres method
+            # self.postgresAPI()
 
-            #firebase
-            try:
-                data = PowerMeter.variables['grid_activePower']
-                db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
-                if (agent_id == "5PMCP270121595"):
-                    db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
-                else:
-                    print("not solar no need to update to firebase")
+            # Firebase
+            self.pushFirebase()
 
-            except Exception as er:
-                print er
+            # InitialState
+            self.pushInitialState()
 
+            # x = {}
+            # x["agent_id"] = PowerMeter.variables['agent_id']
+            # x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            # x["gridvoltage"] = PowerMeter.variables['grid_voltage']
+            # x["gridcurrent"] = PowerMeter.variables['grid_current']
+            # x["gridactivePower"] = PowerMeter.variables['grid_activePower']
+            # x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
+            # x["device_type"] = 'powermeter'
+            # discovered_address = iotmodul.iothub_client_sample_run(x)
+            # print x
+
+        def pushInitialState(self):
             try:
                 streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
                                     access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
@@ -271,18 +275,17 @@ def powermeteragent(config_path, **kwargs):
             except Exception as er:
                 print "update data base error: {}".format(er)
 
-            # x = {}
-            # x["agent_id"] = PowerMeter.variables['agent_id']
-            # x["dt"] = datetime.datetime.now().replace(microsecond=0).isoformat()
-            # x["gridvoltage"] = PowerMeter.variables['grid_voltage']
-            # x["gridcurrent"] = PowerMeter.variables['grid_current']
-            # x["gridactivePower"] = PowerMeter.variables['grid_activePower']
-            # x["gridreactivePower"] = PowerMeter.variables['grid_reactivePower']
-            # x["device_type"] = 'powermeter'
-            #
-            # discovered_address = iotmodul.iothub_client_sample_run(x)
-            #
-            # print x
+        def pushFirebase(self):
+            try:
+                data = PowerMeter.variables['grid_activePower']
+                db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+                # TODO remove this specific case for sisaengtham
+                if (agent_id == "5PMCP270121595"):
+                    db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
+                else:
+                    print("not solar no need to update to firebase")
+            except Exception as er:
+                print er
 
         def postgresAPI(self):
             try:
@@ -307,7 +310,7 @@ def powermeteragent(config_path, **kwargs):
                 print "update database: success"
             except Exception as er:
                 print "update data base error: {}".format(er)
-            #
+
             # try:
             #     self.cur.execute(
             #         """INSERT INTO ts_power_meter (datetime,grid_current, grid_activepower, grid_reactivepower,
@@ -520,35 +523,35 @@ def powermeteragent(config_path, **kwargs):
                     "UPDATE " + db_table_temp_time_counter + " SET priority_counter=%s WHERE alert_id=%s AND device_id=%s",
                     (str(self.priority_count), str(_active_alert_id), agent_id,))
 
-        def updateUI(self):
-            topic = '/agent/ui/' + device_type + '/device_status_response/' + _topic_Agent_UI_tail
-            # now = datetime.utcnow().isoformat(' ') + 'Z'
-            headers = {
-                'AgentID': agent_id,
-                headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
-                # headers_mod.DATE: now,
-                headers_mod.FROM: agent_id,
-                headers_mod.TO: 'ui'
-            }
-            _data = PowerMeter.variables
+        # def updateUI(self):
+        #     topic = '/agent/ui/' + device_type + '/device_status_response/' + _topic_Agent_UI_tail
+        #     # now = datetime.utcnow().isoformat(' ') + 'Z'
+        #     headers = {
+        #         'AgentID': agent_id,
+        #         headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.JSON,
+        #         # headers_mod.DATE: now,
+        #         headers_mod.FROM: agent_id,
+        #         headers_mod.TO: 'ui'
+        #     }
+        #     _data = PowerMeter.variables
+        #
+        #     try:
+        #         _data['grid_energy'] = self.grid_energy
+        #     except Exception as er:
+        #         print "add data error: {}".format(er)
+        #
+        #     message = json.dumps(_data)
+        #     # message = message.encode(encoding='utf_8')
+        #     print("{} published topic: {} and message {}".format(agent_id, topic, message))
+        #     self.publish(topic, headers, message)
 
-            try:
-                _data['grid_energy'] = self.grid_energy
-            except Exception as er:
-                print "add data error: {}".format(er)
-
-            message = json.dumps(_data)
-            # message = message.encode(encoding='utf_8')
-            print("{} published topic: {} and message {}".format(agent_id, topic, message))
-            self.publish(topic, headers, message)
-
-        # 4. updateUIBehavior (generic behavior)
-        @matching.match_exact('/ui/agent/' + device_type + '/device_status/' + _topic_Agent_UI_tail)
-        def updateUIBehavior(self, topic, headers, message, match):
-            print agent_id + " got\nTopic: {topic}".format(topic=topic)
-            print "Headers: {headers}".format(headers=headers)
-            print "Message: {message}\n".format(message=message)
-            self.updateUI()
+        # # 4. updateUIBehavior (generic behavior)
+        # @matching.match_exact('/ui/agent/' + device_type + '/device_status/' + _topic_Agent_UI_tail)
+        # def updateUIBehavior(self, topic, headers, message, match):
+        #     print agent_id + " got\nTopic: {topic}".format(topic=topic)
+        #     print "Headers: {headers}".format(headers=headers)
+        #     print "Message: {message}\n".format(message=message)
+        #     self.updateUI()
 
         # 5. deviceControlBehavior (generic behavior)
         @matching.match_exact('/ui/agent/' + device_type + '/update/' + _topic_Agent_UI_tail)
@@ -605,12 +608,12 @@ def powermeteragent(config_path, **kwargs):
                 message = 'failure'
             self.publish(topic, headers, message)
 
-        # 9. update Postgres database
-        def updateDB(self, table, column, column_ref, column_data, column_ref_data):
-            self.cur.execute("UPDATE " + table + " SET " + column + "=%s "
-                                                                    "WHERE " + column_ref + "=%s",
-                             (column_data, column_ref_data))
-            self.con.commit()
+        # # 9. update Postgres database
+        # def updateDB(self, table, column, column_ref, column_data, column_ref_data):
+        #     self.cur.execute("UPDATE " + table + " SET " + column + "=%s "
+        #                                                             "WHERE " + column_ref + "=%s",
+        #                      (column_data, column_ref_data))
+        #     self.con.commit()
 
         @matching.match_exact('/ui/agent/' + device_type + '/add_notification_event/' + _topic_Agent_UI_tail)
         def add_notification_event(self, topic, headers, message, match):
