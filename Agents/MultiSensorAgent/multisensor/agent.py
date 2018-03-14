@@ -201,42 +201,47 @@ def MultiSensorAgent(config_path, **kwargs):
             print gateway_id
             print agent_id
             #firebase
-        try:
-            data = MultiSensor.variables['temperature']
-            db.child(gateway_id).child(agent_id).child("temperature").set(data)
+            try:
+                data = MultiSensor.variables['temperature']
+                db.child(gateway_id).child(agent_id).child("temperature").set(data)
 
-            data = MultiSensor.variables['illuminance']
-            db.child(gateway_id).child(agent_id).child("illuminance").set(data)
+                data = MultiSensor.variables['illuminance']
+                db.child(gateway_id).child(agent_id).child("illuminance").set(data)
 
-            data = MultiSensor.variables['motion']
-            db.child(gateway_id).child(agent_id).child("motion").set(data)
+                data = MultiSensor.variables['motion']
+                db.child(gateway_id).child(agent_id).child("motion").set(data)
 
-            data = MultiSensor.variables['battery']
-            db.child(gateway_id).child(agent_id).child("battery").set(data)
+                data = MultiSensor.variables['battery']
+                db.child(gateway_id).child(agent_id).child("battery").set(data)
 
-            data = MultiSensor.variables['tamper']
-            db.child(gateway_id).child(agent_id).child("tamper").set(data)
-        except Exception as er:
-            print er
-            print "device connection for {} is not successful".format(agent_id)
+                data = MultiSensor.variables['tamper']
+                db.child(gateway_id).child(agent_id).child("tamper").set(data)
 
-        try:
-            streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
-                                access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
-            streamer.log(str(MultiSensor.variables['agent_id'] + '_illuminance'),
-                         (MultiSensor.variables['illuminance']))
+                data = MultiSensor.variables['humidity']
+                db.child(gateway_id).child(agent_id).child("humidity").set(data)
+                print "fire base"
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
 
-            streamer.log(str(MultiSensor.variables['agent_id'] + '_temperature'),
-                         (MultiSensor.variables['temperature']))
+            try:
+                streamer = Streamer(bucket_name="srisaengtham", bucket_key="WSARH9FBXEBX",
+                                    access_key="4YM0GM6ZNUAZtHT8LYWxQSAdrqaxTipw")
+                streamer.log(str(MultiSensor.variables['agent_id'] + '_illuminance'),
+                             (MultiSensor.variables['illuminance']))
 
-            streamer.log(str(MultiSensor.variables['agent_id'] + '_motion'),
-                         (MultiSensor.variables['motion']))
+                streamer.log(str(MultiSensor.variables['agent_id'] + '_temperature'),
+                             (MultiSensor.variables['temperature']))
 
-            streamer.log(str(MultiSensor.variables['agent_id'] + '_tamper'),
-                         (MultiSensor.variables['tamper']))
-        except Exception as er:
-            print er
-            print "device connection for {} is not successful".format(agent_id)
+                streamer.log(str(MultiSensor.variables['agent_id'] + '_motion'),
+                             (MultiSensor.variables['motion']))
+
+                streamer.log(str(MultiSensor.variables['agent_id'] + '_tamper'),
+                             (MultiSensor.variables['tamper']))
+                print "innitialState"
+            except Exception as er:
+                print er
+                print "device connection for {} is not successful".format(agent_id)
 
 
         def postgresAPI(self):

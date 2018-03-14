@@ -157,8 +157,7 @@ class API:
                 r = requests.put(
                     url,
                     headers=headers, data= _data, timeout=20);
-                # print "15456"
-                # print r.text
+
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))

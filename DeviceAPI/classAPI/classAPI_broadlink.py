@@ -136,10 +136,10 @@ class API:
             if tempchange == False:
                 status = str(_data['status']).upper()
                 if status == 'ON':
-                    command = 'acmitsuon'
+                    command = 'saijoon'
                     print'acmitsu turn on'
                 elif status == 'OFF':
-                    command = 'acmitsuoff'
+                    command = 'saijooff'
                     print'acmitsu turn off'
 
 
@@ -189,7 +189,7 @@ def main():
     #
     # time.sleep(10)
     #
-    broadlink.setDeviceStatus({"status": "OFF"})
+    broadlink.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
