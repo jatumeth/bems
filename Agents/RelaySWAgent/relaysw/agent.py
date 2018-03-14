@@ -211,8 +211,8 @@ def RelaySWAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
-            self.updateFirebase()
-            self.updateInitialState()
+            # self.updateFirebase()
+            # self.updateInitialState()
             # self.postgresAPI()
 
         def updateFirebase(self):

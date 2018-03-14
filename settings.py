@@ -173,6 +173,7 @@ DATABASES = {
         'TABLE_Curtain': 'Curtain',
         'TABLE_Doorlock': 'Doorlock',
         'TABLE_Tplink': 'Tplink',
+        'TABLE_Smartmeter': 'Smartmeter',
     }
 }
 

@@ -132,6 +132,7 @@ class API:
         self.set_variable('battery', float(conve_json["battery"]))
         self.set_variable('motion', str(conve_json["motion"]))
         self.set_variable('tamper', str(conve_json["tamper"]))
+        self.set_variable('humidity', float(0.0))
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('type', str(conve_json["type"]))
 
@@ -146,6 +147,7 @@ class API:
         print(" battery = {}".format(self.get_variable('battery')))
         print(" motion = {}".format(self.get_variable('motion')))
         print(" tamper = {}".format(self.get_variable('tamper')))
+        print(" humidity = {}".format(self.get_variable('humidity')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")

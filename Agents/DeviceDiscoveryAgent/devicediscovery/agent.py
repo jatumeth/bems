@@ -353,10 +353,10 @@ def DeviceDiscoveryAgent(config_path, **kwargs):
                 if (checkmac == False):
                     print "start insert 1"
                     print str(macaddress)
-                    self.cur.execute(
-                        """INSERT INTO device_info (device_id, device_type, date_added, device_model_id,image, device_name,is_enable) VALUES (%s,%s,%s,%s,%s,%s,%s);""",
-                        (str(deviceID), controller_type, '2017-09-02 05:07:41.402+00', model,pic,devicename,True))
-                    self.con.commit()
+                    # self.cur.execute(
+                    #     """INSERT INTO device_info (device_id, device_type, date_added, device_model_id,image, device_name,is_enable) VALUES (%s,%s,%s,%s,%s,%s,%s);""",
+                    #     (str(deviceID), controller_type, '2017-09-02 05:07:41.402+00', model,pic,devicename,True))
+                    # self.con.commit()
 
                 else:
                     check =1

@@ -235,12 +235,12 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/switches/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'e75fb1ac-aebe-427d-a4e4-5d50f0572c18')
+    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer d22c9f96-0b5c-4100-96dc-19879e653822',device = 'a9ad0e06-def3-4323-8934-2601735e83f3')
     Somfy.getDeviceStatus()
 
 
     #
-    Somfy.setDeviceStatus({"status": "ON"})
+    Somfy.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(10)
     #

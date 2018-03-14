@@ -1,9 +1,9 @@
 {
-    "address": "http://192.168.1.6:80",
+    "address": "http://192.168.1.103:80",
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agent_id": "2HUE0017881cab4b",
+    "agent_id": "2HUEH0017881cab4b",
     "api": "classAPI_PhilipsHue",
     "building_name": "bemoss",
     "db_database": "bemossdb",
@@ -14,8 +14,8 @@
     "device_monitor_time": 20,
     "macaddress": "0017881cab4b",
     "model": "Philips hue bridge",
-    "type": "lighting",
-    "username": "ySPuFtnKskt8UbR95yCqEhGZefcBjaUhaHojUMzj",
+    "type": "2HUEH",
+    "username": "lNlVpUbHzs5m-XHYwu03QE7nlFsJpxpvYJRkppII",
     "vendor": "Royal Philips Electronics", 
     "zone_id": 999
 }

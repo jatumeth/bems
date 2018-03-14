@@ -5,9 +5,9 @@
     }, 
     "agent_id": "8MS221445K1200132",
     "api": "classAPI_Fibaro",
-    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/illuminances/",
-    "device": "fdb84473-69f9-42c8-ba8b-6bcb0663b65b",
-    "bearer": "Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/illuminances/",
+    "device": "f65209ce-43a6-4c40-b8e7-851ea96e1908",
+    "bearer": "Bearer d22c9f96-0b5c-4100-96dc-19879e653822",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
     "db_host": "localhost", 
@@ -17,7 +17,7 @@
     "device_monitor_time": 20, 
     "macaddress": "221445K1200132",
     "model": "ACB123",
-    "type": "MultiSensor",
+    "type": "8FIB",
     "vendor": "Fibaro",
     "zone_id": 999
 }

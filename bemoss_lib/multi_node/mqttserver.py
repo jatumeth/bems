@@ -20,8 +20,8 @@ import fcntl, socket, struct
 utils.setup_logging()  # setup logger for debugging
 _log = logging.getLogger(__name__)
 
-PUSH_SOCKET = "ipc:///home/tpponmat/.volttron/run/publish"
-SUB_SOCKET = "ipc:///home/tpponmat/.volttron/run/subscribe"
+PUSH_SOCKET = "ipc:///home/dell-hive01/.volttron/run/publish"
+SUB_SOCKET = "ipc:///home/dell-hive01/.volttron/run/subscribe"
 
 kwargs = {'subscribe_address': SUB_SOCKET, 'publish_address': PUSH_SOCKET}
 zmq_pub = ZMQ_PUB(**kwargs)
@@ -274,7 +274,7 @@ except:
         print "no eth0"
 topic = gateway_id
 
-topic = 'hivec83a35cdbeab'
+topic = 'hiveac7ba18fe1c0'
 print topic
 
 while True:
@@ -286,7 +286,12 @@ while True:
         print("message MQTT received")
         for k, v in commsg.items():
             if k == 'device':
+
+                if commsg['device'] == '--':
+                    commsg['device'] = '2HUEH0017881cab4b'
+
                 pub(commsg)
+
             elif k == 'scene':
                 HC(commsg)
             else:
