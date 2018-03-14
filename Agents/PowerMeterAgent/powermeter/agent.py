@@ -237,22 +237,22 @@ def powermeteragent(config_path, **kwargs):
             #             self.changed_variables[v] = log_variables[v]
             #             self.variables[v] = None
 
-            if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
-                self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
-            if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:
-                self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
-            if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
-                self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
-            self.postgresAPI()
+            # if self.get_variable('realpower') is not None and self.get_variable('realpower') < 0:
+            #     self.set_variable('realpower', -1 * float(self.get_variable('realpower')))
+            # if self.get_variable('reactivepower') is not None and self.get_variable('reactivepower') < 0:
+            #     self.set_variable('reactivepower', -1 * float(self.get_variable('reactivepower')))
+            # if self.get_variable('apparentpower') is not None and self.get_variable('apparentpower') < 0:
+            #     self.set_variable('apparentpower', -1 * float(self.get_variable('apparentpower')))
+            # self.postgresAPI()
 
             #firebase
             try:
                 data = PowerMeter.variables['grid_activePower']
                 db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
-                if (agent_id == "5PMCP270121595"):
-                    db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
-                else:
-                    print("not solar no need to update to firebase")
+                # if (agent_id == "5PMCP270121595"):
+                #     db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
+                # else:
+                #     print("not solar no need to update to firebase")
 
             except Exception as er:
                 print er

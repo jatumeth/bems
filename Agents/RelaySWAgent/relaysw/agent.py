@@ -213,7 +213,7 @@ def RelaySWAgent(config_path, **kwargs):
             self.updateStatus()
             self.updateFirebase()
             self.updateInitialState()
-            self.postgresAPI()
+            # self.postgresAPI()
 
         def updateFirebase(self):
             # firebase
