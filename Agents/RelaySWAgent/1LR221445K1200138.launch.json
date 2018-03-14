@@ -4,7 +4,7 @@
         "exec": "fanagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "2HUEL1445K1200138",
-    "api": "classAPI_swrelaylight",
+    "api": "classAPI_orvibo2gang",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",
     "device": "4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8",
     "bearer": "Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7",
@@ -16,7 +16,7 @@
     "db_user": "admin", 
     "device_monitor_time": 10,
     "macaddress": "221445K1200138",
-    "model": "lighting",
+    "model": "two",
     "type": "2HUEL",
     "vendor": "Obivo",
     "zone_id": 999

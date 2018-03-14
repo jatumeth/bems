@@ -46,7 +46,6 @@ under Contract DE-EE0006352
 #__lastUpdated__ = "2016-03-14 11:23:33"
 '''
 
-import time
 import json
 import requests
 
@@ -189,12 +188,12 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
 
-    # RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',
-    #               url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
-    #               bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
+    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',
+                  url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
+                  bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='b51760e0-35b2-4b69-ab67-a36621f12f08')
 
     # -------------Kittchen----------------
-    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = 'b51760e0-35b2-4b69-ab67-a36621f12f08')
+    # RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7',device = '4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
     RelaySW.getDeviceStatus()
 
 

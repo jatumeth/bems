@@ -3,7 +3,7 @@
     "agent": {
         "exec": "lgtvagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1LG221445K1200137",
+    "agent_id": "11LG2001",
     "api": "classAPI_LGTV",
     "building_name": "bemoss",
     "db_database": "bemossdb", 
@@ -13,8 +13,8 @@
     "db_user": "admin", 
     "device_monitor_time": 10,
     "macaddress": "221445K1200137",
-    "model": "LG123",
-    "type": "tv",
+    "model": "11LG1",
+    "type": "11LG1",
     "vendor": "LG",
     "zone_id": 999
 }

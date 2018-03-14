@@ -69,19 +69,19 @@ Autostart_Agents_DIR = os.path.expanduser("~/.config/volttron/lite/autostart/")
 Communications_DIR = os.path.join(PROJECT_DIR, 'bemoss_lib/communication/')
 Custom_eggs_DIR = os.path.join(PROJECT_DIR, 'bemoss_lib/custom-eggs/')
 
-try:
-    gateway_mac = getHwAddr('wlan0').replace(':','')
-    gateway_id = 'hive'+ getHwAddr('wlan0').replace(':','')
-    print(gateway_id)
-except:
-    print "no wlan0"
-    try:
-        gateway_mac = getHwAddr('eth0').replace(':','')
-        gateway_id = 'hive'+ getHwAddr('eth0').replace(':','')
-        print(gateway_id)
-    except:
-        print "no eth0"
-gateway_id='hivec83a35cdbeab'
+# try:
+#     gateway_mac = getHwAddr('wlan0').replace(':','')
+#     gateway_id = 'hive'+ getHwAddr('wlan0').replace(':','')
+#     print(gateway_id)
+# except:
+#     print "no wlan0"
+#     try:
+#         gateway_mac = getHwAddr('eth0').replace(':','')
+#         gateway_id = 'hive'+ getHwAddr('eth0').replace(':','')
+#         print(gateway_id)
+#     except:
+#         print "no eth0"
+gateway_id='hiveac7ba18fe1c0'
 print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {

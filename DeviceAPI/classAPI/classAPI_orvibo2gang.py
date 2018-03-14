@@ -146,8 +146,10 @@ def main():
     #               bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
 
     # -------------Kittchen----------------
-    RelaySW = API(model='three', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/6e7197d2-42d1-47fa-9572-54213a47a778/switches/', bearer='Bearer fe132119-a2f7-4078-82c3-586a3aa5ce87', device='42e51bbb-7412-4979-b45b-96b3a1fcb58f')
-    RelaySW.getDeviceStatus()
+
+
+    RelaySW = API(model='two', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
+    # RelaySW.getDeviceStatus()
     RelaySW.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)

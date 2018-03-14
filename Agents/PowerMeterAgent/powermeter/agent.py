@@ -225,26 +225,16 @@ def powermeteragent(config_path, **kwargs):
                 print "cannot read data: {}".format(er)
                 print "device connection for {} is not successful {}".format(agent_id, er)
 
-            # TODO REMOVE!!! update web UI by publishing zmq message to tornado server
-            # self.updateUI()
+            try:
+                data = PowerMeter.variables['grid_activePower']
+                db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
+                # if (agent_id == "5PMCP270121595"):
+                #     db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
+                # else:
+                #     print("not solar no need to update to firebase")
 
-            # TODO detect change variables
-            # self.changed_variables = dict()
-            # for v in log_variables:
-            #     if v in PowerMeter.variables:
-            #         if not v in self.variables or self.variables[v] != PowerMeter.variables[v]:
-            #             self.variables[v] = PowerMeter.variables[v]
-            #             self.changed_variables[v] = log_variables[v]
-            #     else:
-            #         if v not in self.variables:  # it won't be in self.variables either (in the first time)
-            #             self.changed_variables[v] = log_variables[v]
-            #             self.variables[v] = None
-
-            # TODO REMOVE!!! remove update Postgres method
-            # self.postgresAPI()
-
-            # Firebase
             self.pushFirebase()
+
 
             # InitialState
             self.pushInitialState()
