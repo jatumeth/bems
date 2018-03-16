@@ -93,7 +93,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         super(ListenerAgent, self).setup()
 
 
-    @matching.match_exact('/ui/agent/homescence/update/bemoss/999/HC001')
+    @matching.match_exact('/ui/agent/lighttrigger/update/bemoss/999/HC001')
     def on_777(self,topic,headers,message,match):
         '''Use match_all to receive all messages and print them out.'''
 
@@ -132,6 +132,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.AC1_on()
         self.hue_on()
         self.tv_on()
+        self.plug_on()
 
         # self.plug_off()
 
@@ -153,7 +154,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.AC1_off()
         self.hue_off()
         self.tv_off()
-        # self.plug_off()
+        self.plug_off()
 
     def Bye(self):
         '''Use match_all to receive all messages and print them out.'''
@@ -172,7 +173,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.AC1_off()
         self.hue_off()
         self.tv_off()
-        # self.plug_off()
+        self.plug_off()
 
     def Back(self):
         '''Use match_all to receive all messages and print them out.'''
@@ -191,7 +192,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.AC1_on()
         self.hue_on()
         self.tv_on()
-        # self.plug_on()
+        self.plug_on()
 
     def eco(self):
         '''Use match_all to receive all messages and print them out.'''
@@ -210,13 +211,13 @@ class ListenerAgent(PublishMixin, BaseAgent):
         self.kitchen_off()
         self.AC1_off()
         self.hue_on()
-        # self.plug_off()
+        self.plug_off()
 
     def AC1_temp20(self):
         # TODO this is example how to write an app to control AC
         # topic = '/ui/agent/airconditioner/update/bemoss/999/1TH20000000000001'
 
-        topic = '/ui/agent/1DAIK/update/bemoss/999/DAIK1200138'
+        topic = '/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -256,7 +257,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def AC1_temp27(self):
         # TODO this is example how to write an app to control AC
-        topic = '/ui/agent/AC/update/bemoss/999/1ACD1200138'
+        topic = '/ui/agent/1SAJ1/update/bemoss/999/1SAJ1000000000001'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -422,7 +423,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def plug_on(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        topic = "/ui/agent/3WSP2/update/bemoss/999/3WSP221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -435,7 +436,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
     #
     def plug_off(self):
         # TODO this is example how to write an app to control plugload EV
-        topic = "/ui/agent/plugload/update/bemoss/999/3WIS221445K1200321"
+        topic = "/ui/agent/3WSP2/update/bemoss/999/3WSP221445K1200321"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -531,7 +532,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def somfy_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/tv/update/bemoss/999/3WSP221445K1200328"
+        topic = "/ui/agent/03MRB/update/bemoss/999/03MRB221445K1200328"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -544,7 +545,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def somfy_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = "/ui/agent/tv/update/bemoss/999/3WSP221445K1200328"
+        topic = "/ui/agent/03MRB/update/bemoss/999/03MRB221445K1200328"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -559,7 +560,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def kitchen_on(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/2HUEK/update/bemoss/999/2HUEK1445K1200138'
+        topic = '/ui/agent/2HUEK/update/bemoss/999/1KR221445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -572,7 +573,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def kitchen_off(self):
         # TODO this is example how to write an app to control FAN
-        topic = '/ui/agent/2HUEK/update/bemoss/999/2HUEK1445K1200138'
+        topic = '/ui/agent/2HUEK/update/bemoss/999/1KR221445K1200138'
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

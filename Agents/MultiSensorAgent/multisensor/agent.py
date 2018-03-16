@@ -195,7 +195,7 @@ def MultiSensorAgent(config_path, **kwargs):
             except Exception as er:
                 print er
                 print "device connection for {} is not successful".format(agent_id)
-            #self.updateStatus()
+            self.updateStatus()
             #self.backupSaveData()
             # self.postgresAPI()
             print gateway_id

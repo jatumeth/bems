@@ -99,7 +99,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         illuminance = int(data_fibaro['illuminance'])
         print "illuminance: {}".format(illuminance)
 
-        if illuminance >= 700:
+        if illuminance >= 800:
             self.somfy_off()
             self.plug_off()
 

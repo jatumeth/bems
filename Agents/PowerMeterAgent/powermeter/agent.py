@@ -228,14 +228,11 @@ def powermeteragent(config_path, **kwargs):
             try:
                 data = PowerMeter.variables['grid_activePower']
                 db.child(gateway_id).child(agent_id).child("grid_activePower").set(data)
-                # if (agent_id == "5PMCP270121595"):
-                #     db.child(gateway_id).child('1PV221445K1200100').child("inverter_activePower").set(data)
-                # else:
-                #     print("not solar no need to update to firebase")
+            except Exception as er:
+                print "cannot read data: {}".format(er)
+                print "device connection for {} is not successful {}".format(agent_id, er)
 
             self.pushFirebase()
-
-
             # InitialState
             self.pushInitialState()
 

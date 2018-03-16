@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #Copyright (c) 2016, Virginia Tech
 #All rights reserved.
 #
@@ -44,28 +45,102 @@
 #__created__ = "2014-09-12 12:04:50"
 #__lastUpdated__ = "2016-03-14 11:23:33"
 
-#Step1: Find own IP
-#sudo python ~/workspace/bemoss_os/bemoss_lib/utils/find_own_ip.py
-
-#Step2: Build agents
-#source ~/workspace/bemoss_os/bemoss_lib/utils/buildAgents.sh
-
-#Step3: Run Volttron Platform and Agents
-#source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh
-
-echo 123 | sudo -S gnome-terminal --tab -t "RunAgents" -e "bash -c 'source ~/workspace/bemoss_os/bemoss_lib/utils/runPlatform.sh; bash'" --tab -t "MQTTServer" -e "bash -c 'cd ~/workspace/bemoss_os; . env/bin/activate; cd ~/workspace/bemoss_os/bemoss_lib/multi_node; python mqttserver.py; bash'" --tab -t "VNC Server" -e "bash -c 'x11vnc -forever -rfbport 5900 -passwd 28Sep1960; bash'" --tab -t "broadlink" -e "bash -c 'cd ~/workspace/bemoss_os; . env/bin/activate; cd ~/workspace/bemoss_os/broadlink-http-rest; python server.py; bash'"
 
 
+cd ~/workspace/bemoss_os/
+. env/bin/activate
+volttron -vv 2>&1 | tee ~/workspace/bemoss_os/log/volttron.log &
+echo $i > ~/workspace/bemoss_os/.temp/BEMOSS.pid
 
-#Step4: save pid of running agents
-#sudo echo $! > ~/workspace/bemoss_os/BEMOSS.pid
+#volttron-ctl start --tag devicediscoveryagent
+#sleep 2
+volttron-ctl start --tag applauncheragent
+sleep 2
+volttron-ctl start --tag approvalhelperagent
+sleep 2
 
-#Step5: MultiNode server, and Web UI
-#sudo gnome-terminal --tab -t "Multinode server" -e "bash -c 'python ~/workspace/bemoss_os/bemoss_lib/#multi_node/udpserver.py'" --tab -t "WebServer" -e "bash -c 'cd ~/workspace/bemoss_web_ui; $webcommand; bash'"
-#---------
+#volttron-ctl start --tag multibuildingagent
+#sleep 2
+#volttron-ctl start --tag networkagent
+#sleep 2
+volttron-ctl start --tag gridappagent
+sleep 2
 
+#volttron-ctl start --tag NETPIEButton
+#sleep 2
+#volttron-ctl start --tag DemandResponseAgent
+#sleep 2
 
+volttron-ctl start --tag gridappagent
+sleep 2
+volttron-ctl start --tag powermeteragent
+sleep 2
+volttron-ctl start --tag modeappagent
+sleep 2
+volttron-ctl start --tag devicestatusappagent
+sleep 2
+#volttron-ctl start --tag ACAPP
+#sleep 2
+#volttron-ctl start --tag LightingApp
+#sleep 2
+#volttron-ctl start --tag PlugloadApp
+#sleep 2
+#volttron-ctl start --tag evappagent
+#sleep 2
+volttron-ctl start --tag EnergyBillAppAgent
+sleep 2
+volttron-ctl start --tag GridAppAgent
+sleep 2
+volttron-ctl start --tag 1WE221445K1200132  #weatheragent
+sleep 2
 
+#volttron-ctl start --tag LivingroomAir1
+#sleep 2
+#volttron-ctl start --tag LivingroomAir2
+#sleep 2
+#volttron-ctl start --tag BedroomAir
+#sleep 2
+#volttron-ctl start --tag 1FR221445K1200111
+#sleep 2
+volttron-ctl start --tag 1MS221445K1200132
+sleep 2
+volttron-ctl start --tag 1LG221445K1200137
 
+sleep 2
+volttron-ctl start --tag Daikinagent
+sleep 2
+volttron-ctl start --tag Netatmoagent
+#sleep 2
+#volttron-ctl start --tag PVInverterAgent
+sleep 2
+volttron-ctl start --tag KitchenLight
+sleep 2
+volttron-ctl start --tag LivingLight
+sleep 2
+volttron-ctl start --tag PEASmartHomeHue
+sleep 2
+volttron-ctl start --tag PEASmartHomeWemo
+sleep 2
+volttron-ctl start --tag HomeSceneApp
 
+sleep 2
+volttron-ctl start --tag doorlock
+#sleep 2
 
+sleep 2
+volttron-ctl start --tag curtain
+
+sleep 2
+volttron-ctl start --tag openclose
+#volttron-ctl start --tag CreativePowerAgent
+
+sleep 2
+volttron-ctl start --tag openclosedoor
+
+sleep 2
+volttron-ctl start --tag EnergyReportSchedulerApp
+
+volttron-ctl status
+deactivate
+sudo chmod 777 ~/.volttron/run/publish
+sudo chmod 777 ~/.volttron/run/subscribe

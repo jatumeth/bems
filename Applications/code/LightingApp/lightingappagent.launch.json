@@ -2,7 +2,7 @@
     "agent": {
         "exec": "lightingappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
-    "agent_id": "LightingApp",
+    "agent_id": "LightingApp2",
     "type": "application",
     "message": "hello my name is LightingAppAgent",
     "db_database": "bemossdb",

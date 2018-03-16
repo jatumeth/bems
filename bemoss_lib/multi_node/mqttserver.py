@@ -236,7 +236,7 @@ def HC(commsg):
     print commsg
     print "testhomescence"
     # TODO this is example how to write an app to control AC
-    topic = '/ui/agent/homescence/update/bemoss/999/HC001'
+    topic = '/ui/agent/lighttrigger/update/bemoss/999/HC001'
     message = json.dumps(commsg)
     zmq_pub.requestAgent(topic, message, "text/plain", "UI")
     print ("topic{}".format(topic))

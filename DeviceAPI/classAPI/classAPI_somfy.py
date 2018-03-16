@@ -180,7 +180,7 @@ class API:
                 print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
 
-                time.sleep(15)
+                time.sleep(20)
 
 
 
@@ -240,7 +240,7 @@ def main():
 
 
     #
-    Somfy.setDeviceStatus({"status": "OFF"})
+    Somfy.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #

@@ -93,7 +93,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
         super(ListenerAgent, self).setup()
 
 
-    @matching.match_exact('/ui/agent/homescence/update/bemoss/999/HC001')
+    @matching.match_exact('/ui/agent/lighttrigger/update/bemoss/999/HC001')
     def on_777(self,topic,headers,message,match):
         '''Use match_all to receive all messages and print them out.'''
 
