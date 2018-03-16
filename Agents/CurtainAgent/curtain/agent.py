@@ -195,7 +195,7 @@ def CurtainAgent(config_path, **kwargs):
                 print "device connection for {} is not successful".format(agent_id)
 
             self.updateStatus()
-            self.postgresAPI()
+            # self.postgresAPI()
 
         def postgresAPI(self):
 

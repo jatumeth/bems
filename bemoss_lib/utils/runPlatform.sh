@@ -52,93 +52,51 @@ cd ~/workspace/bemoss_os/
 volttron -vv 2>&1 | tee ~/workspace/bemoss_os/log/volttron.log &
 echo $i > ~/workspace/bemoss_os/.temp/BEMOSS.pid
 
-#volttron-ctl start --tag devicediscoveryagent
+
 #sleep 2
-volttron-ctl start --tag applauncheragent
-sleep 2
 volttron-ctl start --tag approvalhelperagent
 sleep 2
-
-#volttron-ctl start --tag multibuildingagent
-#sleep 2
-#volttron-ctl start --tag networkagent
-#sleep 2
-volttron-ctl start --tag gridappagent
-sleep 2
-
-#volttron-ctl start --tag NETPIEButton
-#sleep 2
-#volttron-ctl start --tag DemandResponseAgent
-#sleep 2
-
-volttron-ctl start --tag gridappagent
-sleep 2
 volttron-ctl start --tag powermeteragent
+
 sleep 2
-volttron-ctl start --tag modeappagent
-sleep 2
-volttron-ctl start --tag devicestatusappagent
-sleep 2
-#volttron-ctl start --tag ACAPP
-#sleep 2
-#volttron-ctl start --tag LightingApp
-#sleep 2
-#volttron-ctl start --tag PlugloadApp
-#sleep 2
-#volttron-ctl start --tag evappagent
-#sleep 2
-volttron-ctl start --tag EnergyBillAppAgent
-sleep 2
-volttron-ctl start --tag GridAppAgent
-sleep 2
-volttron-ctl start --tag 1WE221445K1200132  #weatheragent
+volttron-ctl start --tag LivingroomAir1
 sleep 2
 
-#volttron-ctl start --tag LivingroomAir1
-#sleep 2
-#volttron-ctl start --tag LivingroomAir2
-#sleep 2
-#volttron-ctl start --tag BedroomAir
-#sleep 2
-#volttron-ctl start --tag 1FR221445K1200111
-#sleep 2
+volttron-ctl start --tag LivingroomAir2
+sleep 2
+
 volttron-ctl start --tag 1MS221445K1200132
 sleep 2
-volttron-ctl start --tag 1LG221445K1200137
-
+volttron-ctl start --tag PlugloadApp
 sleep 2
 volttron-ctl start --tag Daikinagent
-sleep 2
-volttron-ctl start --tag Netatmoagent
-#sleep 2
-#volttron-ctl start --tag PVInverterAgent
 sleep 2
 volttron-ctl start --tag KitchenLight
 sleep 2
 volttron-ctl start --tag LivingLight
 sleep 2
 volttron-ctl start --tag PEASmartHomeHue
-sleep 2
-volttron-ctl start --tag PEASmartHomeWemo
-sleep 2
-volttron-ctl start --tag HomeSceneApp
 
 sleep 2
 volttron-ctl start --tag doorlock
-#sleep 2
 
 sleep 2
 volttron-ctl start --tag curtain
 
 sleep 2
-volttron-ctl start --tag openclose
+volttron-ctl start --tag HomeSceneApp
 #volttron-ctl start --tag CreativePowerAgent
 
 sleep 2
-volttron-ctl start --tag openclosedoor
+volttron-ctl start --tag Lighttrigger
+#volttron-ctl start --tag CreativePowerAgent
 
-sleep 2
-volttron-ctl start --tag EnergyReportSchedulerApp
+
+#sleep 2
+#volttron-ctl start --tag openclosedoor
+#
+#sleep 2
+#volttron-ctl start --tag EnergyReportSchedulerApp
 
 volttron-ctl status
 deactivate

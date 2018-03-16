@@ -1,5 +1,5 @@
 {
-    "address": "http://192.168.1.103:80",
+    "address": "http://192.168.1.104:80",
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
@@ -15,7 +15,7 @@
     "macaddress": "0017881cab4b",
     "model": "Philips hue bridge",
     "type": "2HUEH",
-    "username": "lNlVpUbHzs5m-XHYwu03QE7nlFsJpxpvYJRkppII",
+    "username": "I6NLmlD6GY3PhvwQ20wxMYK5-xV1mX13MP0QXwfG",
     "vendor": "Royal Philips Electronics", 
     "zone_id": 999
 }
