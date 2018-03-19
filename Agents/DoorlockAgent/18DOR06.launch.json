@@ -4,8 +4,8 @@
         "exec": "doorlockagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "18DOR06",
-    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/locks/",
-    "device": "b5d37e25-15c2-4b70-84f8-06e13b5282b7",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/locks/",
+    "device": "a948b6fe-7fb0-4c2b-bba9-24580ef9ddaa",
     "bearer": "Bearer d22c9f96-0b5c-4100-96dc-19879e653822",
     "api": "classAPI_yale",
     "building_name": "bemoss",
