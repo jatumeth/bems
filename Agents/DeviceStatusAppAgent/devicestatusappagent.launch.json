@@ -1,7 +1,0 @@
-{
-    "agent": {
-        "exec": "devicestatusappagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
-    },
-    "agentid": "DeviceStatusAppAgent",
-    "message": "hello my name is DeviceStatusAppAgent"
-}
