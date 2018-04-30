@@ -2,7 +2,7 @@
 '''
 Copyright (c) 2016, Virginia Tech
 All rights reserved.
-
+a
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
  following conditions are met:
 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
@@ -29,7 +29,7 @@ any information, apparatus, product, software, or process disclosed, or represen
 privately owned rights.
 
 Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or
-otherwise does not necessarily constitute or imply its endorsement, recommendation, favoring by the United States
+otherwise does not necessarily constitute or imply its enfdsorsement, recommendation, favoring by the United States
 Government or any agency thereof, or Virginia Tech - Advanced Research Institute. The views and opinions of authors
 expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
 

@@ -23,8 +23,6 @@ DEFAULT_HEARTBEAT_PERIOD = 5
 DEFAULT_MONITORING_TIME = 5
 oat_point = 'devices/Building/LAB/Device/OutsideAirTemperature'
 all_topic = 'devices/Building/LAB/Device/all'
-test = 'test/1'
-test2 = 'test/2'
 
 class LightingAgent(Agent):
     """Listens to everything and publishes a heartbeat according to the
@@ -86,28 +84,28 @@ class LightingAgent(Agent):
         # self.vip.pubsub.publish(peer='pubsub', topic='test2gfdgdgd', headers={'a':1},
         #                         message={'b':2}).get(timeout=5)
 
-    @PubSub.subscribe('pubsub', test)
-    def on_match_test(self, peer, sender, bus,  topic, headers, message):
+    @PubSub.subscribe('pubsub', 'test')
+    def on_match(self, peer, sender, bus,  topic, headers, message):
         """Use match_all to receive all messages and print them out."""
         print('on_match')
-        # print(sender)
-        # print(topic)
-        # print(headers)
-        # print(message)
+        print(sender)
+        print(topic)
+        print(headers)
+        print(message)
         # if sender == 'pubsub.compat':
         #     message = compat.unpack_legacy_message(headers, message)
         # self._logfn(
         #     "Peer: %r, Sender: %r:, Bus: %r, Topic: %r, Headers: %r, "
         #     "Message: \n%s", peer, sender, bus, topic, headers,  pformat(message))
 
-    @PubSub.subscribe('pubsub', test2)
-    def on_match_test2(self, peer, sender, bus,  topic, headers, message):
+    @PubSub.subscribe('pubsub', 'test2')
+    def on_match2(self, peer, sender, bus,  topic, headers, message):
         """Use match_all to receive all messages and print them out."""
         print('on_match2')
-        # print(sender)
-        # print(topic)
-        # print(headers)
-        # print(message)
+        print(sender)
+        print(topic)
+        print(headers)
+        print(message)
         # if sender == 'pubsub.compat':
         #     message = compat.unpack_legacy_message(headers, message)
         # self._logfn(
@@ -123,6 +121,11 @@ class LightingAgent(Agent):
         under the device. The second element is a dictionary of metadata for points.
         '''
         print("device_all")
+        print "{} agent got\nTopic: {topic}".format(self.get_variable("agent_id"), topic=topic)
+        print "Headers: {headers}".format(headers=headers)
+        print "Message: {message}\n".format(message=message)
+
+
         # print("Whole message", message)
         #
         # # The time stamp is in the headers
@@ -156,8 +159,8 @@ class LightingAgent(Agent):
         # try:
             self.Light.getDeviceStatus()
 
-            # self.vip.pubsub.publish(peer='pubsub', topic='test2gfdgdgd', headers={'a': 1},
-            #                         message={'b': 2}).get(timeout=5)
+            self.vip.pubsub.publish(peer='pubsub', topic='test2gfdgdgd', headers={'a': 1},
+                                    message={'b': 2}).get(timeout=5)
         # except Exception as er:
         #     print("device connection is not successful {}".format(er))
 
@@ -194,11 +197,11 @@ class LightingAgent(Agent):
         }
 
         # # Publish messages
-        # self.vip.pubsub.publish(
-        #     'pubsub', all_topic, headers, all_message)
+        self.vip.pubsub.publish(
+            'pubsub', all_topic, headers, all_message)
 
         self.vip.pubsub.publish(
-            'pubsub', test2, headers, oat_message)
+            'pubsub', oat_point, headers, oat_message)
 
         # self.vip.pubsub.publish(
         #     'pubsub', mixed_point, headers, mixed_message)
