@@ -81,7 +81,7 @@ Custom_eggs_DIR = os.path.join(PROJECT_DIR, 'bemoss_lib/custom-eggs/')
 #         print(gateway_id)
 #     except:
 #         print "no eth0"
-gateway_id='hiveac7ba18fe1c0'
+gateway_id='hivecdf12345'
 print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {

@@ -78,18 +78,18 @@ class API:
 
         conve_json = json.loads(data)
         self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]).upper())
+        self.set_variable('device_status', str(conve_json["status"]).upper())
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('device_type', str(conve_json["type"]))
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
         print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('status')))
+        print(" status = {}".format(self.get_variable('device_status')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
@@ -138,13 +138,13 @@ def main():
 
     # -------------Kittchen----------------
 
-    RelaySW = API(model='two', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/switches/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035', device='dc53a370-ed35-4228-9dc2-b0b022f28624')
+    RelaySW = API(model='one', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/switches/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035', device='dc53a370-ed35-4228-9dc2-b0b022f28624')
     RelaySW.getDeviceStatus()
     RelaySW.setDeviceStatus({"status": "ON"})
 
-    time.sleep(10)
+    # time.sleep(10)
 
-    RelaySW.setDeviceStatus({"status": "OFF"})
+    # RelaySW.setDeviceStatus({"status": "OFF"})
 
 
 if __name__ == "__main__": main()

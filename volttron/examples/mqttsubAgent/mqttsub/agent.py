@@ -37,9 +37,7 @@ import os
 from volttron.platform.agent import utils, matching
 from uuid import getnode as get_mac
 import fcntl, socket, struct
-
-
-
+import settings
 
 class mqttsubAgent(Agent):
     """Listens to everything and publishes a heartbeat according to the
@@ -68,7 +66,7 @@ class mqttsubAgent(Agent):
             service_namespace='peahiveservicebus',
             shared_access_key_name='RootManageSharedAccessKey',
             shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
-        topic = 'hiveac7ba18fe1c0'
+        topic = settings.gateway_id
 
         while True:
             try:
@@ -91,10 +89,10 @@ class mqttsubAgent(Agent):
 
     def VIPPublish(self,commsg):
         # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/' + str(commsg['device'][0:5]) + '/update/bemoss/999/' + str(commsg['device']))
+        topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
         message = json.dumps(commsg)
-        print ("topic{}".format(topic))
-        print ("message{}".format(message))
+        print ("topic {}".format(topic))
+        print ("message {}".format(message))
 
         self.vip.pubsub.publish(
             'pubsub', topic,

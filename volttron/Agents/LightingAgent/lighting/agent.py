@@ -15,6 +15,7 @@ import json
 import socket
 import psycopg2
 import psycopg2.extras
+import pyrebase
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -22,6 +23,18 @@ __version__ = '3.2'
 DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
+
+try:
+    config = {
+      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
+      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+      "storageBucket": "bucket.appspot.com",
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+except Exception as er:
+    print er
 
 # Step1: Agent Initialization
 def lighting_agent(config_path, **kwargs):
@@ -77,6 +90,9 @@ def lighting_agent(config_path, **kwargs):
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
+    topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
+    print(topic_device_control)
+    gateway_id = settings.gateway_id
 
     # 5. @params notification_info
     send_notification = True
@@ -130,11 +146,31 @@ def lighting_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             self.Light.getDeviceStatus()
+
             # TODO update local postgres
+            # self.publish_local_postgres()
 
-            # TODO update firebase
+            # update firebase
+            self.publish_firebase()
 
-            # TODO publish to Azure IoT Hub
+            # update Azure IoT Hub
+            self.publish_azure_iot_hub()
+
+        def publish_firebase(self):
+            try:
+                db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['device_status'])
+                db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+            except Exception as er:
+                print er
+
+        def publish_azure_iot_hub(self):
+            # TODO publish to Azure IoT Hub u
+            '''
+            here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
+            hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
+            def iothub_client_telemetry_sample_run():
+            '''
             print(self.Light.variables)
             x = {}
             x["agent_id"] = self.Light.variables['agent_id']
@@ -142,31 +178,14 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['device_status']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-            print x
 
 
-        @PubSub.subscribe('pubsub', '/ui/agent/2HUEK/update/bemoss/999/2HUEK1445K1200138')
-        def match_device_all2(self, peer, sender, bus, topic, headers, message):
-            # print "Headers: {topic}".format(headers=topic)
-            print
+        @PubSub.subscribe('pubsub', topic_device_control)
+        def match_device_control(self, peer, sender, bus, topic, headers, message):
+            print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            print message
-            print type(message)
-            # print json.loads(message[0])
-            print json.loads(message)
-            setDeviceStatusResult = self.Light.setDeviceStatus(json.loads(message))
-            # self.vip.pubsub.publish('pubsub', topic, headers, message)
-
-        @PubSub.subscribe('pubsub', 'heartbeat/listeneragent')
-        def match_device_all(self, peer, sender, bus, topic, headers, message):
-            '''
-            This method subscribes to all points under a device then pulls out
-            the specific point it needs.
-            The first element of the list in message is a dictionairy of points
-            under the device. The second element is a dictionary of metadata for points.
-            '''
-            _log.info("listen: {}".format(message))
+            self.Light.setDeviceStatus(json.loads(message))
 
     Agent.__name__ = 'LightingAgent'
     return LightingAgent(config_path, **kwargs)
