@@ -118,10 +118,10 @@ class API:
 
         conve_json = json.loads(data)
 
-        self.set_variable('contact', str(conve_json["contact"]))
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('device_contact', str(conve_json["contact"]))
+        self.set_variable('device_type', str(conve_json["type"]))
         self.set_variable('unitTime', str(conve_json["unitTime"]))
-        self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('device_label', str(conve_json["label"]))
 
         if self.get_variable('contact') == 'closed':
             print "close"
@@ -132,10 +132,10 @@ class API:
 
 
         print(" the current status is as follows:")
-        print(" contact = {}".format(self.get_variable('contact')))
+        print(" device_contact = {}".format(self.get_variable('device_contact')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
-        print(" label= {}".format(self.get_variable('label')))
+        print(" device_type= {}".format(self.get_variable('device_type')))
+        print(" device_label= {}".format(self.get_variable('device_label')))
         print("---------------------------------------------")
 
 

@@ -161,7 +161,7 @@ def lighting_agent(config_path, **kwargs):
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['device_status'])
+                db.child(gateway_id).child(agent_id).child("device_contact").set(self.Light.variables['device_contact'])
                 db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['device_type'])
             except Exception as er:
                 print er
@@ -177,7 +177,7 @@ def lighting_agent(config_path, **kwargs):
             x = {}
             x["agent_id"] = self.Light.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Light.variables['device_status']
+            x["device_contact"] = self.Light.variables['device_contact']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
