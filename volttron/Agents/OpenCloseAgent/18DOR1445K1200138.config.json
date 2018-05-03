@@ -6,7 +6,7 @@
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
     "heartbeat_period": 20,
-    "api": "classAPI_Smartthings_Door",
+    "api": "classAPI_Smartthings_openclose",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/contactSensors/",
     "device": "46867502-f4d9-4962-88b3-e97b952e82a6",
     "bearer": "Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035",

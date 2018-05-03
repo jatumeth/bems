@@ -44,14 +44,13 @@ __created__ = "2014-6-26 09:12:00"
 __lastUpdated__ = "2015-02-11 22:29:53"
 '''
 
-import urllib2 
+
 import json
 import requests
 import datetime
 
 class API:
-    # 1. constructor : gets call every time when create a new class
-    # requirements for instantiation1. model, 2.type, 3.api, 4. address
+
     def __init__(self,**kwargs):  # default color is wh     ite
         # Initialized common attributes
         self.variables = kwargs
@@ -63,7 +62,7 @@ class API:
     def get_variable(self,k):
         return self.variables.get(k, None)  # default of get_variable is none
 
-    # 2. Attributes from Attributes table
+
     '''
     Device Attributes:
     GET: AbsolutePressure (mbar), time_utc (Linux time), Noise (dB), Temperature (C), Humidity (%), Pressure (mbar),
@@ -71,9 +70,30 @@ class API:
     Module Attributes:
     GET: time_utc (Linux time), Temperature (C), Humidity (%),
          date_max_temp (Linux time), date_min_temp (Linux time), min_temp (C), max_temp (C)
-    ''' 
+    '''
+    '''
+    Attributes:
+    indoor device
+        noise
+        temperature
+        humidity
+        pressure
+        co2
+        date_max_temp
+        date_min_temp
+        max_temp
+        min_temp
+    
+    outdoor module
+        outdoor_temperature
+        outdoor_humidity
+        outdoor_date_max_temp
+        date_min_temp
+        outdoor_max_temp
+        outdoor_min_temp
 
-    # 3. Capabilites (methods) from Capabilities table
+    '''
+
     '''
     API available methods:
     1. getDeviceModel(url) GET
@@ -82,28 +102,39 @@ class API:
     4. identifyDevice(url, idenmsg) POST
     '''
 
-    # method1: GET Open the URL and read the data
+
     def getDeviceStatus(self):
-        # Step1: Get access token
-        # My API (POST https://api.netatmo.net/oauth2/token)
+
         try:
+
+            self.get_variable('url')
+            self.get_variable('content')
+            self.get_variable('client_id')
+            self.get_variable('username')
+
+            self.get_variable('password')
+            self.get_variable('scope')
+            self.get_variable('client_secret')
+            self.get_variable('grant_type')
+
             r = requests.post(
-                url="https://api.netatmo.net/oauth2/token",
+                url= self.get_variable('url'),
                 headers = {
-                    "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8 ",
+                    "Content-Type":self.get_variable('content'),
                 },
                 data = {
-                    "client_id":"592fc89f743c360b3a8b53e9",
-                    "username":"smarthome.pea@gmail.com",
-                    "password":"28Sep1960",
-                    "scope":"read_station",
-                    "client_secret":"nPoa7wZfyq7VbCbF7Gqzo5bI1V5",
-                    "grant_type":"password",
+                    "client_id":self.get_variable('client_id'),
+                    "username":self.get_variable('username'),
+                    "password":self.get_variable('password'),
+                    "scope":self.get_variable('scope'),
+                    "client_secret":self.get_variable('client_secret'),
+                    "grant_type":self.get_variable('grant_type'),
+
                 },
                 verify = False
             )
-            # print('Response HTTP Status Code : {status_code}'.format(status_code=r.status_code))
-            # print('Response HTTP Response Body : {content}'.format(content=r.content))
+
+
             print "{0} Agent is querying its current status (status:{1}) at {2} please wait ...".format(self.variables.get('agent_id',None),
                                                                                                        r.status_code,
                                                                                                        datetime.datetime.now())
@@ -118,8 +149,7 @@ class API:
                         },
                         verify = False
                     )
-                    # print('Response HTTP Status Code : {status_code}'.format(status_code=r.status_code))
-                    # print('Response HTTP Response Body : {content}'.format(content=r.content))
+
                     self.getDeviceStatusJson(r.content)
                     self.printDeviceStatus()
                 except requests.exceptions.RequestException as e:
@@ -130,7 +160,7 @@ class API:
             print('HTTP Request failed')
 
     def getAccessTokenJson(self, data):
-        # Use the json module to load the string data into a dictionary
+
         _theJSON = json.loads(data)
         try:
             self.set_variable("access_token", _theJSON["access_token"])
@@ -141,9 +171,10 @@ class API:
             print "Error! Netatmo @getAccessTokenJson"
 
     def getDeviceStatusJson(self, data):
-        # Use the json module to load the string data into a dictionary
+
         _theJSON = json.loads(data)
         try:
+            # print data
             print _theJSON["body"]["devices"][0]["_id"]
             self.set_variable("noise", _theJSON["body"]["devices"][0]["dashboard_data"]["Noise"])  # dB
             _temperature = float(_theJSON["body"]["devices"][0]["dashboard_data"]["Temperature"])
@@ -167,38 +198,50 @@ class API:
             self.set_variable("outdoor_max_temp", _outdoor_max_temperature)  # C
             _outdoor_min_temperature = float(_theJSON["body"]["modules"][0]["dashboard_data"]["min_temp"])
             self.set_variable("outdoor_min_temp", _outdoor_min_temperature)  # C
+            self.set_variable("device_type", 'weather station')  # C
+
         except:
             print "Error! Netatmo @getDeviceStatusJson"
 
     def printDeviceStatus(self):
-        print "Netatmo indoor device"
-        print(" noise = {} dB".format(self.get_variable('noise')))
-        print(" temperature = {} C".format(self.get_variable('temperature')))
-        print(" humidity = {} %".format(self.get_variable('humidity')))
-        print(" pressure = {} inHg".format(self.get_variable('pressure')))
-        print(" co2 = {} ppm".format(self.get_variable('co2')))
-        print(" date_max_temp = {} unix timestamp".format(self.get_variable('date_max_temp')))
-        print(" date_min_temp = {} unix timestamp".format(self.get_variable('date_min_temp')))
-        print(" max_temp = {} C".format(self.get_variable('max_temp')))
-        print(" min_temp = {} C".format(self.get_variable('min_temp')))
-        print "Netatmo outdoor module"
-        print(" outdoor_temperature = {} C".format(self.get_variable('outdoor_temperature')))
-        print(" outdoor_humidity = {} %".format(self.get_variable('outdoor_humidity')))
-        print(" outdoor_date_max_temp = {} unix timestamp".format(self.get_variable('outdoor_date_max_temp')))
-        print(" date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')))
-        print(" outdoor_max_temp = {} C".format(self.get_variable('outdoor_max_temp')))
-        print(" outdoor_min_temp = {} C".format(self.get_variable('outdoor_min_temp')))
+        print " Netatmo indoor device"
+        print("     noise = {} dB".format(self.get_variable('noise')))
+        print("     temperature = {} C".format(self.get_variable('temperature')))
+        print("     humidity = {} %".format(self.get_variable('humidity')))
+        print("     pressure = {} inHg".format(self.get_variable('pressure')))
+        print("     co2 = {} ppm".format(self.get_variable('co2')))
+        print("     date_max_temp = {} unix timestamp".format(self.get_variable('date_max_temp')))
+        print("     date_min_temp = {} unix timestamp".format(self.get_variable('date_min_temp')))
+        print("     max_temp = {} C".format(self.get_variable('max_temp')))
+        print("     min_temp = {} C".format(self.get_variable('min_temp')))
+        print " Netatmo outdoor module"
+        print("     outdoor_temperature = {} C".format(self.get_variable('outdoor_temperature')))
+        print("     outdoor_humidity = {} %".format(self.get_variable('outdoor_humidity')))
+        print("     outdoor_date_max_temp = {} unix timestamp".format(self.get_variable('outdoor_date_max_temp')))
+        print("     outdoor_date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')))
+        print("     outdoor_max_temp = {} C".format(self.get_variable('outdoor_max_temp')))
+        print("     outdoor_min_temp = {} C".format(self.get_variable('outdoor_min_temp')))
 
-# This main method will not be executed when this class is used as a module
+        print("     device_type = {} ".format(self.get_variable('device_type')))
+
 def main():
-    # Step1: create an object with initialized data from DeviceDiscovery Agent
-    # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    Netatmo = API(model='Weather Station',agent_id='netatmo1', api='API1', address='https://api.netatmo.net/api/devicelist')
+
+    Netatmo = API(model='Weather Station',agent_id='netatmo1', api='API1', address='https://api.netatmo.net/api/devicelist',device_type="weather station",
+                  url="https://api.netatmo.net/oauth2/token",client_id="592fc89f743c360b3a8b53e9",username='smarthome.pea@gmail.com',password = '28Sep1960',
+                  scope ='read_station',client_secret = 'nPoa7wZfyq7VbCbF7Gqzo5bI1V5',grant_type = 'password',content = 'application/x-www-form-urlencoded;charset=UTF-8')
     print("{0} agent is initialzed for {1} using API={2} at {3}".format(Netatmo.get_variable('agent_id'),
                                                                         Netatmo.get_variable('model'),
                                                                         Netatmo.get_variable('api'),
-                                                                        Netatmo.get_variable('address')))
-    # Step2: read current thermostat status
+                                                                        Netatmo.get_variable('address'),
+                                                                        Netatmo.get_variable('url'),
+                                                                        Netatmo.get_variable('client_id'),
+                                                                        Netatmo.get_variable('username'),
+                                                                        Netatmo.get_variable('scope'),
+                                                                        Netatmo.get_variable('client_secret'),
+                                                                        Netatmo.get_variable('grant_type'),
+                                                                        Netatmo.get_variable('content')))
+
+
     Netatmo.getDeviceStatus()
 
 if __name__ == "__main__": main()
