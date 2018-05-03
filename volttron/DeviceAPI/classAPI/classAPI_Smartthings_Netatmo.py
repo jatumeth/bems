@@ -106,6 +106,17 @@ class API:
     def getDeviceStatus(self):
 
         try:
+
+            self.get_variable('url')
+            self.get_variable('content')
+            self.get_variable('client_id')
+            self.get_variable('username')
+
+            self.get_variable('password')
+            self.get_variable('scope')
+            self.get_variable('client_secret')
+            self.get_variable('grant_type')
+
             r = requests.post(
                 url= self.get_variable('url'),
                 headers = {
@@ -118,9 +129,11 @@ class API:
                     "scope":self.get_variable('scope'),
                     "client_secret":self.get_variable('client_secret'),
                     "grant_type":self.get_variable('grant_type'),
+
                 },
                 verify = False
             )
+
 
             print "{0} Agent is querying its current status (status:{1}) at {2} please wait ...".format(self.variables.get('agent_id',None),
                                                                                                        r.status_code,
@@ -185,6 +198,8 @@ class API:
             self.set_variable("outdoor_max_temp", _outdoor_max_temperature)  # C
             _outdoor_min_temperature = float(_theJSON["body"]["modules"][0]["dashboard_data"]["min_temp"])
             self.set_variable("outdoor_min_temp", _outdoor_min_temperature)  # C
+            self.set_variable("device_type", 'weather station')  # C
+
         except:
             print "Error! Netatmo @getDeviceStatusJson"
 
@@ -203,16 +218,17 @@ class API:
         print("     outdoor_temperature = {} C".format(self.get_variable('outdoor_temperature')))
         print("     outdoor_humidity = {} %".format(self.get_variable('outdoor_humidity')))
         print("     outdoor_date_max_temp = {} unix timestamp".format(self.get_variable('outdoor_date_max_temp')))
-        print("     date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')))
+        print("     outdoor_date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')))
         print("     outdoor_max_temp = {} C".format(self.get_variable('outdoor_max_temp')))
         print("     outdoor_min_temp = {} C".format(self.get_variable('outdoor_min_temp')))
 
+        print("     device_type = {} ".format(self.get_variable('device_type')))
 
 def main():
 
-    Netatmo = API(model='Weather Station',agent_id='netatmo1', api='API1', address='https://api.netatmo.net/api/devicelist',
+    Netatmo = API(model='Weather Station',agent_id='netatmo1', api='API1', address='https://api.netatmo.net/api/devicelist',device_type="weather station",
                   url="https://api.netatmo.net/oauth2/token",client_id="592fc89f743c360b3a8b53e9",username='smarthome.pea@gmail.com',password = '28Sep1960',
-                  scope ='read_station',client_secret = 'nPoa7wZfyq7VbCbF7Gqzo5bI1V5',grant_type = 'password' ,content = 'application/x-www-form-urlencoded;charset=UTF-8')
+                  scope ='read_station',client_secret = 'nPoa7wZfyq7VbCbF7Gqzo5bI1V5',grant_type = 'password',content = 'application/x-www-form-urlencoded;charset=UTF-8')
     print("{0} agent is initialzed for {1} using API={2} at {3}".format(Netatmo.get_variable('agent_id'),
                                                                         Netatmo.get_variable('model'),
                                                                         Netatmo.get_variable('api'),

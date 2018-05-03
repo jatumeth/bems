@@ -37,7 +37,7 @@ except Exception as er:
     print er
 
 # Step1: Agent Initialization
-def opencloseing_agent(config_path, **kwargs):
+def fibaroing_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -45,7 +45,7 @@ def opencloseing_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a opencloseing agent
+    # List of all keywords for a fibaroing agent
     agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
@@ -82,7 +82,7 @@ def opencloseing_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_opencloseing = settings.DATABASES['default']['TABLE_opencloseing']
+    # db_table_fibaroing = settings.DATABASES['default']['TABLE_fibaroing']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -103,13 +103,13 @@ def opencloseing_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class opencloseingAgent(Agent):
+    class fibaroingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(opencloseingAgent, self).__init__(**kwargs)
+            super(fibaroingAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
@@ -121,7 +121,7 @@ def opencloseing_agent(config_path, **kwargs):
             self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.openclose = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
+            self.fibaro = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
                                          bearer=self.bearer, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
@@ -147,7 +147,7 @@ def opencloseing_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            self.openclose.getDeviceStatus()
+            self.fibaro.getDeviceStatus()
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -156,13 +156,19 @@ def opencloseing_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_contact").set(self.openclose.variables['device_contact'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.openclose.variables['device_type'])
+                # db.child(gateway_id).child(agent_id).child("device_status").set(self.fibaro.variables['device_status'])
+                db.child(gateway_id).child(agent_id).child("device_type").set(self.fibaro.variables['device_type'])
+                db.child(gateway_id).child(agent_id).child("temperature").set(self.fibaro.variables['temperature'])
+                db.child(gateway_id).child(agent_id).child("tamper").set(self.fibaro.variables['tamper'])
+                db.child(gateway_id).child(agent_id).child("battery").set(self.fibaro.variables['battery'])
+                db.child(gateway_id).child(agent_id).child("illuminance").set(self.fibaro.variables['illuminance'])
+                db.child(gateway_id).child(agent_id).child("humidity").set(self.fibaro.variables['humidity'])
+                db.child(gateway_id).child(agent_id).child("motion").set(self.fibaro.variables['motion'])
             except Exception as er:
                 print er
 
@@ -173,12 +179,12 @@ def opencloseing_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.openclose.variables)
+            print(self.fibaro.variables)
             x = {}
-            x["agent_id"] = self.openclose.variables['agent_id']
+            x["agent_id"] = self.fibaro.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_contact"] = self.openclose.variables['device_contact']
-            x["device_type"] = self.openclose.variables['device_type']
+            x["device_status"] = self.fibaro.variables['device_status']
+            x["device_type"] = self.fibaro.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
@@ -187,15 +193,15 @@ def opencloseing_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.openclose.setDeviceStatus(json.loads(message))
+            self.fibaro.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = 'opencloseingAgent'
-    return opencloseingAgent(config_path, **kwargs)
+    Agent.__name__ = 'fibaroingAgent'
+    return fibaroingAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(opencloseing_agent, version=__version__)
+        utils.vip_main(fibaroing_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 

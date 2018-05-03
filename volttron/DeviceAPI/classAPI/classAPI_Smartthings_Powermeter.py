@@ -48,6 +48,7 @@ under Contract DE-EE0006352
 
 import json
 import urllib3
+urllib3.disable_warnings()
 
 class API:
 
@@ -109,14 +110,9 @@ class API:
     # ----------------------------------------------------------------------
     def getDeviceStatus(self):
 
-        device_id = str(self.get_variable("device_id"))
 
-
-
-        url = 'http://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,'+device_id+'&order=trans_id,desc&page=1'
-
+        url = str(self.get_variable("url"))
         http = urllib3.PoolManager()
-
         r = http.request('GET', url)
         conve_json = json.loads(r.data)
 
@@ -152,7 +148,7 @@ class API:
         else:
             gridactive = gridactive0
         self.set_variable('grid_activePower', gridactive)
-
+        self.printDeviceStatus()
 
 
 
@@ -186,9 +182,8 @@ class API:
 
 
 def main():
-    Creative_Power = API(model='e-Trix@Larm', type='powermeter', api='classAPI_CreativePower', agent_id='Creative_Power',device_id='250883398')
+    Creative_Power = API(model='e-Trix@Larm', type='powermeter', api='classAPI_CreativePower', agent_id='Creative_Power',device_id='250883398',url = 'https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1')
     Creative_Power.getDeviceStatus()
-    Creative_Power.printDeviceStatus()
 
 
 if __name__ == "__main__": main()
