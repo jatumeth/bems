@@ -16,6 +16,8 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
+import urllib3
+urllib3.disable_warnings()
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ except Exception as er:
     print er
 
 # Step1: Agent Initialization
-def opencloseing_agent(config_path, **kwargs):
+def Powermetering_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -45,7 +47,7 @@ def opencloseing_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a opencloseing agent
+    # List of all keywords for a Powermetering agent
     agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
@@ -62,17 +64,17 @@ def opencloseing_agent(config_path, **kwargs):
         hue_username = ''
     device_type = get_config('type')
     device = get_config('device')
-    bearer = get_config('bearer')
+    # bearer = get_config('bearer')
     url = get_config('url')
     api = get_config('api')
     address = get_config('ipaddress')
-    _address = address.replace('http://', '')
-    _address = address.replace('https://', '')
-    try:  # validate whether or not address is an ip address
-        socket.inet_aton(_address)
-        ip_address = _address
-    except socket.error:
-        ip_address = None
+    device_id = get_config('device_id')
+
+    # try:  # validate whether or not address is an ip address
+    #     socket.inet_aton(_address)
+    #     ip_address = _address
+    # except socket.error:
+    #     ip_address = None
     identifiable = get_config('identifiable')
 
     # DATABASES
@@ -82,7 +84,7 @@ def opencloseing_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_opencloseing = settings.DATABASES['default']['TABLE_opencloseing']
+    # db_table_Powermetering = settings.DATABASES['default']['TABLE_Powermetering']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -103,13 +105,13 @@ def opencloseing_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class opencloseingAgent(Agent):
+    class PowermeteringAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(opencloseingAgent, self).__init__(**kwargs)
+            super(PowermeteringAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
@@ -117,12 +119,12 @@ def opencloseing_agent(config_path, **kwargs):
             self.model = model
             self.device_type = device_type
             self.url = url
-            self.device = device
-            self.bearer = bearer
+            # self.device = device
+            self.device_id = device_id
+            # self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.openclose = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url)
+            self.Powermeter = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,url=self.url ,device_id=self.device_id)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -147,7 +149,8 @@ def opencloseing_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            self.openclose.getDeviceStatus()
+            self.Powermeter.getDeviceStatus()
+
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -156,13 +159,35 @@ def opencloseing_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_contact").set(self.openclose.variables['device_contact'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.openclose.variables['device_type'])
+                # db.child(gateway_id).child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
+                db.child(gateway_id).child(agent_id).child("TransID(ID)").set(self.Powermeter.variables['grid_transid'])
+                db.child(gateway_id).child(agent_id).child("Date(D)").set(self.Powermeter.variables['grid_date'])
+                db.child(gateway_id).child(agent_id).child("Time(T)").set(self.Powermeter.variables['grid_time'])
+                db.child(gateway_id).child(agent_id).child("UxTime(UT)").set(self.Powermeter.variables['grid_uxtime'])
+                db.child(gateway_id).child(agent_id).child("DeviceID(DID)").set(self.Powermeter.variables['grid_device_id'])
+                db.child(gateway_id).child(agent_id).child("Voltage(V)").set(self.Powermeter.variables['grid_voltage'])
+                db.child(gateway_id).child(agent_id).child("Current(A)").set(self.Powermeter.variables['grid_current'])
+                db.child(gateway_id).child(agent_id).child("EarthLeak(EL)").set(self.Powermeter.variables['grid_earth_leak'])
+                db.child(gateway_id).child(agent_id).child("ActivePower(W)").set(self.Powermeter.variables['grid_activePower'])
+                db.child(gateway_id).child(agent_id).child("ReactivePower(Var)").set(self.Powermeter.variables['grid_reactivePower'])
+                db.child(gateway_id).child(agent_id).child("Powerfactor").set(self.Powermeter.variables['grid_powerfactor'])
+                db.child(gateway_id).child(agent_id).child("AccumulatedEnergy(Wh)").set(self.Powermeter.variables['grid_accumulated_energy'])
+                db.child(gateway_id).child(agent_id).child("Kvarh").set(self.Powermeter.variables['grid_kvarh'])
+                db.child(gateway_id).child(agent_id).child("Show").set(self.Powermeter.variables['grid_cp_afci_arc_count_show'])
+                db.child(gateway_id).child(agent_id).child("A0magOut").set(self.Powermeter.variables['grid_cp_a0_magoutput'])
+                db.child(gateway_id).child(agent_id).child("A0rmsOut").set(self.Powermeter.variables['grid_cp_a0_rmsoutput'])
+                db.child(gateway_id).child(agent_id).child("IrmsRate").set(self.Powermeter.variables['grid_cp_Irms_rate'])
+                db.child(gateway_id).child(agent_id).child("DcRate").set(self.Powermeter.variables['grid_cp_dc_rate'])
+                db.child(gateway_id).child(agent_id).child("B1RmsOut").set(self.Powermeter.variables['grid_cp_b1_rmsoutput'])
+                db.child(gateway_id).child(agent_id).child("Afeia").set(self.Powermeter.variables['grid_afe_i_a'])
+                db.child(gateway_id).child(agent_id).child("Afev").set(self.Powermeter.variables['grid_afe_v'])
+                db.child(gateway_id).child(agent_id).child("PfcHigh").set(self.Powermeter.variables['grid_cp_pfci_t_high'])
+                db.child(gateway_id).child(agent_id).child("OperationStatus").set(self.Powermeter.variables['grid_cp_operation_status'])
             except Exception as er:
                 print er
 
@@ -173,12 +198,12 @@ def opencloseing_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.openclose.variables)
+            print(self.Powermeter.variables)
             x = {}
-            x["agent_id"] = self.openclose.variables['agent_id']
+            x["agent_id"] = self.Powermeter.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_contact"] = self.openclose.variables['device_contact']
-            x["device_type"] = self.openclose.variables['device_type']
+            x["device_status"] = self.Powermeter.variables['device_status']
+            x["device_type"] = self.Powermeter.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
@@ -187,15 +212,15 @@ def opencloseing_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.openclose.setDeviceStatus(json.loads(message))
+            self.Powermeter.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = 'opencloseingAgent'
-    return opencloseingAgent(config_path, **kwargs)
+    Agent.__name__ = 'PowermeteringAgent'
+    return PowermeteringAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(opencloseing_agent, version=__version__)
+        utils.vip_main(Powermetering_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 

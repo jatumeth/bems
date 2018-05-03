@@ -130,7 +130,7 @@ class API:
         self.set_variable('tamper', str(conve_json["tamper"]))
         self.set_variable('humidity', float(0.0))
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('device_type', str(conve_json["type"]))
 
 
     def printDeviceStatus(self):
@@ -145,7 +145,7 @@ class API:
         print(" tamper = {}".format(self.get_variable('tamper')))
         print(" humidity = {}".format(self.get_variable('humidity')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" device_type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
 
     # ----------------------------------------------------------------------
