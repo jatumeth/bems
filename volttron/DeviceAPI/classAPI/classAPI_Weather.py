@@ -99,7 +99,7 @@ class API:
     def getDeviceStatus(self):
 
         getDeviceStatusResult = True
-        url = self.get_variable("address")
+        url = self.get_variable("url")
         try:
             r = requests.get(url, timeout=20);
             print(" {0}Agent is querying its current status (status:{1}) please wait ...")
@@ -178,7 +178,7 @@ class API:
         print(" wind_speed = {}".format(self.get_variable('wind_speed')))
         print(" city = {}".format(self.get_variable('city')))
         print(" country = {}".format(self.get_variable('country')))
-        print(" temp_c = {}".format(self.get_variable('temp_c')))
+        print(" temperature = {}".format(self.get_variable('temp_c')))
         print(" humidity = {}".format(self.get_variable('humidity')))
         print(" observ_time' = {}".format(self.get_variable('observ_time')))
         print(" weather'= {}".format(self.get_variable('weather')))
@@ -192,8 +192,8 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    url = 'http://api.wunderground.com/api/380538e19b591277/geolookup/conditions/q/Thailand/Bangkok.json'
-    Weather = API(model='Weather',type='Weather',api='API3',address=url,username='Teerapong', agent_id='WeatherAgent')
+
+    Weather = API(model='Weather',type='Weather',api='API3',url = 'http://api.wunderground.com/api/380538e19b591277/geolookup/conditions/q/Thailand/Bangkok.json',username='Teerapong', agent_id='WeatherAgent')
     Weather.getDeviceStatus()
 
 

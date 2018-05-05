@@ -69,7 +69,7 @@ class API:
         body = 'https://graph.api.smartthings.com/api/hubs'
         _request = urllib2.Request(body)
         print "123"
-        print _request.
+        print _request.data
         # _request.add_header("Content-Type","application/json;charset=UTF-8")
         # username = 'kwarodom@hotmail.com'
         # password = 'w3300136'

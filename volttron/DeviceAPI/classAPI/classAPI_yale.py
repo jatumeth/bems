@@ -98,50 +98,54 @@ class API:
 
         getDeviceStatusResult = True
 
-        try:
+        # try:
 
-            headers = {"Authorization": self.get_variable("bearer")}
-            url = str(self.get_variable("url") + self.get_variable("device"))
-            r = requests.get(url,
-                             headers=headers, timeout=20);
-            format(self.variables.get('agent_id', None), str(r.status_code))
+        headers = {"Authorization": self.get_variable("bearer")}
+        url = str(self.get_variable("url") + self.get_variable("device"))
 
-            if r.status_code == 200:
-                getDeviceStatusResult = False
+        print self.get_variable("bearer")
+        print url
 
-                self.getDeviceStatusJson(r.text)
-                if self.debug is True:
-                    self.printDeviceStatus()
-            else:
-                print (" Received an error from server, cannot retrieve results")
-                getDeviceStatusResult = False
-            # Check the connectivity
-            if getDeviceStatusResult==True:
-                self.set_variable('offline_count', 0)
-            else:
-                self.set_variable('offline_count', self.get_variable('offline_count')+1)
-        except Exception as er:
-            print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
-            self.set_variable('offline_count',self.get_variable('offline_count')+1)
+        r = requests.get(url,
+                         headers=headers, timeout=20);
+        format(self.variables.get('agent_id', None), str(r.status_code))
+
+        if r.status_code == 200:
+            getDeviceStatusResult = False
+
+            self.getDeviceStatusJson(r.text)
+            if self.debug is True:
+                self.printDeviceStatus()
+        else:
+            print (" Received an error from server, cannot retrieve results")
+            getDeviceStatusResult = False
+        # Check the connectivity
+        if getDeviceStatusResult==True:
+            self.set_variable('offline_count', 0)
+        else:
+            self.set_variable('offline_count', self.get_variable('offline_count')+1)
+        # except Exception as er:
+        #     print er
+        #     print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+        #     self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
         print conve_json
-        # self.set_variable('label', str(conve_json["label"]))
-        # self.set_variable('status', str(conve_json["status"]))
-        # self.set_variable('unitTime', conve_json["unitTime"])
-        # self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('status', str(conve_json["status"]))
+        self.set_variable('unitTime', conve_json["unitTime"])
+        self.set_variable('type', str(conve_json["type"]))
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        # print(" the current status is as follows:")
-        # print(" label = {}".format(self.get_variable('label')))
-        # print(" status = {}".format(self.get_variable('status')))
-        # print(" unitTime = {}".format(self.get_variable('unitTime')))
-        # print(" type= {}".format(self.get_variable('type')))
+        print(" the current status is as follows:")
+        print(" label = {}".format(self.get_variable('label')))
+        print(" status = {}".format(self.get_variable('status')))
+        print(" unitTime = {}".format(self.get_variable('unitTime')))
+        print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
@@ -193,7 +197,7 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/locks/', bearer = 'Bearer d22c9f96-0b5c-4100-96dc-19879e653822',device = 'a3270d83-90a7-4960-a292-18dd71454ae5')
+    Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/locks/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = '893f8352-d1ca-4363-b9ee-e71708caa713')
     Yale.getDeviceStatus()
 
     # Yale.setDeviceStatus({"command": "unlock"})

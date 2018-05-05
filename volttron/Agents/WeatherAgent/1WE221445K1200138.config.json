@@ -1,0 +1,19 @@
+{
+    "agent": {
+        "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "1WE221445K1200138",
+    "username":"Teerapong",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a weather agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_Weather",
+    "url": "http://api.wunderground.com/api/380538e19b591277/geolookup/conditions/q/Thailand/Bangkok.json",
+    "building_name": "hive",
+    "device_monitor_time": 20,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "1WE22",
+    "vendor": "phillip",
+    "zone_id": 999
+}
