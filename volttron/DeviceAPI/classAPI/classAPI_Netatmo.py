@@ -129,6 +129,7 @@ class API:
                     "scope":self.get_variable('scope'),
                     "client_secret":self.get_variable('client_secret'),
                     "grant_type":self.get_variable('grant_type'),
+                    "device_type":self.get_variable('device_type')
 
                 },
                 verify = False

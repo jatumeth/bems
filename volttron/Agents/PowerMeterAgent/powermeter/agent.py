@@ -62,7 +62,9 @@ def Powermetering_agent(config_path, **kwargs):
         hue_username = get_config('username')
     else:
         hue_username = ''
-    device_type = get_config('type')
+    device_type = get_config('device_type')
+    print device_type
+
     device = get_config('device')
     # bearer = get_config('bearer')
     url = get_config('url')
@@ -124,7 +126,7 @@ def Powermetering_agent(config_path, **kwargs):
             # self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.Powermeter = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,url=self.url ,device_id=self.device_id)
+            self.Powermeter = self.apiLib.API(model=self.model, type=self.device_type, agent_id=self._agent_id,url=self.url ,device_id=self.device_id)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -188,6 +190,7 @@ def Powermetering_agent(config_path, **kwargs):
                 db.child(gateway_id).child(agent_id).child("Afev").set(self.Powermeter.variables['grid_afe_v'])
                 db.child(gateway_id).child(agent_id).child("PfcHigh").set(self.Powermeter.variables['grid_cp_pfci_t_high'])
                 db.child(gateway_id).child(agent_id).child("OperationStatus").set(self.Powermeter.variables['grid_cp_operation_status'])
+                db.child(gateway_id).child(agent_id).child("device_type").set(self.Powermeter.variables['device_type'])
             except Exception as er:
                 print er
 

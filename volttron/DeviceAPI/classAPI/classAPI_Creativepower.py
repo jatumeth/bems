@@ -115,7 +115,6 @@ class API:
         http = urllib3.PoolManager()
         r = http.request('GET', url)
         conve_json = json.loads(r.data)
-
         self.set_variable('grid_transid', float(conve_json['cpletrix']['records'][0][0]))
         self.set_variable('grid_date', str(conve_json['cpletrix']['records'][0][1]))
         self.set_variable('grid_time', str(conve_json['cpletrix']['records'][0][2]))
@@ -140,7 +139,9 @@ class API:
         self.set_variable('grid_cp_pfci_t_high', str(conve_json['cpletrix']['records'][0][21]))
         self.set_variable('grid_cp_operation_status', str(conve_json['cpletrix']['records'][0][22]))
 
+        print self.get_variable("type")
 
+        self.set_variable('device_type', self.get_variable("type"))
 
         gridactive0 = float(conve_json['cpletrix']['records'][0][9])
         if (gridactive0 > (-30) and gridactive0 < (0)) :
@@ -178,6 +179,7 @@ class API:
         print(" Afev = {}".format(self.get_variable('grid_afe_v')))
         print(" PfcHigh = {}".format(self.get_variable('grid_cp_pfci_t_high')))
         print(" OperationStatus = {}".format(self.get_variable('grid_cp_operation_status')))
+        print(" device_type = {}".format(self.get_variable('device_type')))
         print("--------------------------------------------------------------------------------------")
 
 
