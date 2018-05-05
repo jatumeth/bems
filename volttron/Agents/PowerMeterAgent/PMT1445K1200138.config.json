@@ -10,6 +10,7 @@
     "url": "https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1",
     "device_id": "250883398",
     "building_name": "hive",
+    "device_type":"powermeter",
     "device_monitor_time": 20,
     "macaddress": "221445K1200138",
     "model": "one",

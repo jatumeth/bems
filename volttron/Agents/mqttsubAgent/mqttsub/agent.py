@@ -66,7 +66,7 @@ class mqttsubAgent(Agent):
             service_namespace='peahiveservicebus',
             shared_access_key_name='RootManageSharedAccessKey',
             shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
-        topic = "hiveac7ba18fe1c0"
+        topic = "hivecdf12345"
 
         while True:
             try:
