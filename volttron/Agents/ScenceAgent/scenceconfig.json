@@ -1,0 +1,9 @@
+{
+    "agent": {
+        "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "scence",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a lighting agent"
+
+}
