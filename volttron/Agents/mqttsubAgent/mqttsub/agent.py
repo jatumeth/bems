@@ -78,10 +78,15 @@ class mqttsubAgent(Agent):
                     if k == 'device':
                         print ""
                         self.VIPPublish(commsg)
-
                     elif k == 'scene':
-                        Scene(commsg)
+                        # Scene(commsg)
                         print "Scene Agent"
+                    elif k == 'tasks':
+                        print "task agent"
+                        self.scencesetup(commsg)
+                    elif k == 'scene_name':
+                        print "scence agent"
+                        self.scenceagent(commsg)
                     else:
                         print ""
             except Exception as er:
@@ -90,6 +95,28 @@ class mqttsubAgent(Agent):
     def VIPPublish(self,commsg):
         # TODO this is example how to write an app to control AC
         topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
+        message = json.dumps(commsg)
+        print ("topic {}".format(topic))
+        print ("message {}".format(message))
+
+        self.vip.pubsub.publish(
+            'pubsub', topic,
+            {'Type': 'HiVE App to Gateway'},message)
+
+    def scencesetup(self,commsg):
+        # TODO this is example how to write an app to control AC
+        topic = str('/ui/agent/update/hive/999/scencesetup')
+        message = json.dumps(commsg)
+        print ("topic {}".format(topic))
+        print ("message {}".format(message))
+
+        self.vip.pubsub.publish(
+            'pubsub', topic,
+            {'Type': 'HiVE App to Gateway'},message)
+
+    def scenceagent(self,commsg):
+        # TODO this is example how to write an app to control AC
+        topic = str('/ui/agent/update/hive/999/scenceagent')
         message = json.dumps(commsg)
         print ("topic {}".format(topic))
         print ("message {}".format(message))

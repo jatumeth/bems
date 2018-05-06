@@ -205,7 +205,7 @@ def main():
     # {"command":"unlock"}
     # time.sleep(10)
     #
-    # Yale.setDeviceStatus({"status": "ON"})
+    Yale.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #
