@@ -2,7 +2,7 @@
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1WE221445K1200138",
+    "agent_id": "12NET1234510",
     "device_type":"weather station",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
@@ -23,7 +23,7 @@
     "device_monitor_time": 20,
     "macaddress": "221445K1200138",
     "model": "one",
-    "type": "1WE22",
+    "type": "12NET",
     "vendor": "phillip",
     "zone_id": 999
 }

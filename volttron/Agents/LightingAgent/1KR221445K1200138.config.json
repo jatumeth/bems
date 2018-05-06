@@ -2,7 +2,7 @@
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "2HUEK1445K1200138",
+    "agent_id": "02ORV0017886",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
     "heartbeat_period": 20,
@@ -14,7 +14,7 @@
     "device_monitor_time": 20,
     "macaddress": "221445K1200138",
     "model": "one",
-    "type": "2HUEK",
+    "type": "02ORV",
     "vendor": "phillip",
     "zone_id": 999
 }
