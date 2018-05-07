@@ -398,4 +398,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     except subprocess.CalledProcessError as exc:
-sys.exit(exc.returncode)
+        sys.exit(exc.returncode)
