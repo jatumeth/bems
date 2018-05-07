@@ -49,7 +49,7 @@ under Contract DE-EE0006352
 import time
 import requests
 import json
-from bemoss_lib.utils import rgb_cie
+from hive_lib import rgb_cie
 
 
 class API:
@@ -96,10 +96,15 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
+
+        print self.get_variable("username")
+        print self.get_variable("address")
         getDeviceStatusResult = True
         _hue_username = self.get_variable("username")
         _url_append = '/api/' + _hue_username + '/groups/0/'
         _urlData = self.get_variable("address").replace(':80', _url_append)
+
+
         try:
             request = requests.get(_urlData)
             checkconnect = request.status_code
@@ -291,8 +296,8 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.104:80',
-                     username='I6NLmlD6GY3PhvwQ20wxMYK5-xV1mX13MP0QXwfG', agent_id='LightingAgent')
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.105:80',
+                     username='pOjyl6nmQyPqM3wGTYkmpCzhP9qZkuGLuwZSNEX5', agent_id='LightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
                                                                        PhilipsHue.get_variable('model'),
                                                                        PhilipsHue.get_variable('api'),
