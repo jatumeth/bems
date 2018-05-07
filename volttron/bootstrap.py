@@ -37,7 +37,6 @@
 # }}}
 
 '''bootstrap - Prepare a VOLTTRON virtual environment.
-
 Bootstrapping is broken into two stages. The first stage should only be
 invoked once per virtual environment. It downloads virtualenv and
 creates a virtual Python environment in the virtual environment
@@ -45,27 +44,20 @@ directory (defaults to a subdirectory named env in the same directory as
 this script). It then executes stage two using the newly installed
 virtual environment. Stage two uses the new virtual Python environment
 to install VOLTTRON and its dependencies.
-
 If a new dependency is added, this script may be run again using the
 Python executable in the virtual environment to re-run stage two:
-
   env/bin/python bootstrap.py
-
 To speed up bootstrapping in a test environment, use the --wheel
 feature, which might look something like this:
-
   $ export PIP_WHEEL_DIR=/path/to/cache/wheelhouse
   $ export PIP_FIND_LINKS=file://$PIP_WHEEL_DIR
   $ mkdir -p $PIP_WHEEL_DIR
   $ python2.7 bootstrap.py -o
   $ env/bin/python bootstrap.py --wheel
   $ env/bin/python bootstrap.py
-
 Instead of setting the environment variables, a pip configuration file
 may be used. Look here for more information on configuring pip:
-
   https://pip.pypa.io/en/latest/user_guide.html#configuration
-
 '''
 
 
@@ -94,7 +86,6 @@ def shescape(args):
 
 def bootstrap(dest, prompt='(volttron)', version=None, verbose=None):
     '''Download latest virtualenv and create a virtual environment.
-
     The virtual environment will be created in the given directory. The
     shell prompt in the virtual environment can be overridden by setting
     prompt and a specific version of virtualenv can be used by passing
@@ -109,7 +100,6 @@ def bootstrap(dest, prompt='(volttron)', version=None, verbose=None):
 
     class EnvBuilder(object):
         '''Virtual environment builder.
-
         The resulting python executable will be set in the env_exe
         attribute.
         '''
@@ -166,7 +156,7 @@ def bootstrap(dest, prompt='(volttron)', version=None, verbose=None):
             '''Download the virtualenv tarball into directory.'''
             if self.version is None:
                 self.version = self.get_version()
-            url = ('http://pypi.python.org/packages/source/v/virtualenv/'
+            url = ('https://pypi.python.org/packages/source/v/virtualenv/'
                    'virtualenv-{}.tar.gz'.format(self.version))
             _log.info('Downloading virtualenv %s', self.version)
             tarball = os.path.join(directory, 'virtualenv.tar.gz')
@@ -408,4 +398,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     except subprocess.CalledProcessError as exc:
-        sys.exit(exc.returncode)
+sys.exit(exc.returncode)
