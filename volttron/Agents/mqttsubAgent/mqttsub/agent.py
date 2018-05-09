@@ -8,6 +8,7 @@ import settings
 from pprint import pformat
 
 from volttron.platform.messaging.health import STATUS_GOOD
+from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
@@ -71,24 +72,28 @@ class mqttsubAgent(Agent):
         while True:
             try:
                 msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)
-                commsg = eval(msg.body)
-                print commsg
-                print("message MQTT received")
-                for k, v in commsg.items():
-                    if k == 'device':
-                        print ""
+                if msg.body is not None :
+                    commsg = eval(msg.body)
+                    print commsg
+                    print("message MQTT received")
+                    type_msg = commsg.get('type')
+                    if type_msg == 'scenecontrol' :
+                        if commsg.has_key('sceneconfig'):
+                            # Execute Scene Config Function
+                            print("Scene Config Event")
+                            self.sceneagent(commsg)
+
+                        elif commsg.has_key('sceneid'):
+                            # Executue Scene Control Function
+                            print("Sence Execute Event")
+                            self.scenesetup(commsg)
+
+                    elif type_msg == 'devicecontrol' :
+                        # Execute Device Control Function
+                        print("Device Cintrol Event")
                         self.VIPPublish(commsg)
-                    elif k == 'scene':
-                        # Scene(commsg)
-                        print "Scene Agent"
-                    elif k == 'tasks':
-                        print "task agent"
-                        self.scencesetup(commsg)
-                    elif k == 'scene_name':
-                        print "scence agent"
-                        self.scenceagent(commsg)
-                    else:
-                        print ""
+
+
             except Exception as er:
                 print er
 
@@ -103,9 +108,9 @@ class mqttsubAgent(Agent):
             'pubsub', topic,
             {'Type': 'HiVE App to Gateway'},message)
 
-    def scencesetup(self,commsg):
+    def scenesetup(self,commsg):
         # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/update/hive/999/scencesetup')
+        topic = str('/ui/agent/update/hive/999/scenesetup')
         message = json.dumps(commsg)
         print ("topic {}".format(topic))
         print ("message {}".format(message))
@@ -114,9 +119,9 @@ class mqttsubAgent(Agent):
             'pubsub', topic,
             {'Type': 'HiVE App to Gateway'},message)
 
-    def scenceagent(self,commsg):
+    def sceneagent(self,commsg):
         # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/update/hive/999/scenceagent')
+        topic = str('/ui/agent/update/hive/999/sceneagent')
         message = json.dumps(commsg)
         print ("topic {}".format(topic))
         print ("message {}".format(message))
