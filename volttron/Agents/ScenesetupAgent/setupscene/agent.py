@@ -82,6 +82,7 @@ def scencesetup_agent(config_path, **kwargs):
     # db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
     # construct _topic_Agent_UI based on data obtained from DB
+
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/hive/999/scencesetup'
     print(topic_device_control)

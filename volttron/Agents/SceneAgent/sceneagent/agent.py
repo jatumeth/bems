@@ -43,7 +43,7 @@ def scenesetup_agent(config_path, **kwargs):
 
     agent_id = get_config('agent_id')
 
-    topic_device_control = '/ui/agent/update/hive/999/scenceagent'
+    topic_device_control = '/ui/agent/update/hive/999/sceneagent'
     print(topic_device_control)
 
     class scenesetupAgent(Agent):
@@ -84,8 +84,8 @@ def scenesetup_agent(config_path, **kwargs):
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             cur = conn.cursor()
-            cur.execute("SELECT * FROM scenceappagent WHERE scence = %s", (scene,))
-            # cur.execute("""SELECT * from sceneappagent WHERE scence = scene""")
+            cur.execute("SELECT * FROM sceneappagent WHERE scene = %s", (scene,))
+            # cur.execute("""SELECT * from sceneappagent WHERE scene = scene""")
             scene = cur.fetchone()[2]
             scene_conve = list(scene)
 
@@ -116,6 +116,7 @@ def main(argv=sys.argv):
         utils.vip_main(scenesetup_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
+
 
 if __name__ == '__main__':
     # Entry point for script
