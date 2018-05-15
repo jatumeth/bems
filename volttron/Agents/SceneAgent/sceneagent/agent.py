@@ -28,13 +28,6 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
-db_database = 'hivedb'
-db_host = '127.0.0.1'
-db_port = '5432'
-db_user = 'admin'
-db_password = 'admin'
-
-
 # Step1: Agent Initialization
 def scenecontrol_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
@@ -45,24 +38,21 @@ def scenecontrol_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a scenesetup agent
-    agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
-    log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
-
     agent_id = get_config('agent_id')
-    topic_device_control = '/ui/agent/update/hive/999/sceneagent'
+    topic_scenecontrol = '/ui/agent/update/hive/999/scenecontrol'
     topic_agent_reload = '/agent/update/hive/999/reload'
 
-    # print(topic_device_control)
+    # DATABASES
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
 
     class SceneControlAgent(Agent):
-        """Listens to everything and publishes a heartbeat according to the
-        heartbeat period specified in the settings module.
-        """
 
         def __init__(self, config_path, **kwargs):
             super(SceneControlAgent, self).__init__(**kwargs)
-            # print("Config Path = "+str(config_path))
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self.conn = None
@@ -86,9 +76,9 @@ def scenecontrol_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             print('Debug')
-            self.resync_scene()
+            # self.resync_scene()
 
-        @PubSub.subscribe('pubsub', topic_device_control)
+        @PubSub.subscribe('pubsub', topic_scenecontrol)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
 
             print "Topic: {topic}".format(topic=topic)
@@ -97,12 +87,13 @@ def scenecontrol_agent(config_path, **kwargs):
 
             msg = json.loads(message)
             try:
-                tasks = self.sceneconf.get(str(msg.get('scene_id')))
-                task_list = tasks.get('tasks')
-                for task in task_list:
+                tasks = self.sceneconf[str(msg['scene_id'])]
 
-                    topic = str('/ui/agent/update/hive/999/' + str(task.get('device_id')))
-                    message = json.dumps(task.get('command'))
+                task_list = tasks['tasks']
+                print('task_list: {}'.format(task_list))
+                for task in task_list:
+                    topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])
+                    message = json.dumps(task['command'])
                     print ("topic {}".format(topic))
                     print ("message {} \n".format(message))
                     self.vip.pubsub.publish(
@@ -110,7 +101,7 @@ def scenecontrol_agent(config_path, **kwargs):
                         {'Type': 'HiVE Scene Control'}, message)
 
             except Exception as Error:
-                print("Error get Scene_id")
+                print("Error get Scene_id: {}".format(Error))
                 print('Reload Scene Config to Agent')
                 self.reload_config()
 
@@ -125,7 +116,7 @@ def scenecontrol_agent(config_path, **kwargs):
                                     password=db_password)
             self.conn = conn
             self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT scene_id, scene_task FROM scene""")
+            self.cur.execute("""SELECT scene_id, scene_tasks FROM scenes""")
             rows = self.cur.fetchall()
             conf = {}
             for row in rows:
@@ -138,56 +129,56 @@ def scenecontrol_agent(config_path, **kwargs):
             self.conn.close()
             print(" >>> Reload Config Success")
 
-        def resync_scene(self):
-            # This function is executed by scene_id from request not exist on Local Database
-            try:
-                print(">>> Request GET:Scene for resync loacal database")
-                response = requests.get(self.url,
-                                        headers={"Authorization": "Token {token}".format(token=self.token),
-                                                "Content-Type": "application/json; charset=utf-8"
-                                                },
-                                        data=json.dumps({}))
+        # def resync_scene(self):
+        #     # This function is executed by scene_id from request not exist on Local Database
+        #     try:
+        #         print(">>> Request GET:Scene for resync loacal database")
+        #         response = requests.get(self.url,
+        #                                 headers={"Authorization": "Token {token}".format(token=self.token),
+        #                                         "Content-Type": "application/json; charset=utf-8"
+        #                                         },
+        #                                 data=json.dumps({}))
+        #
+        #         if str(response.status_code) == '200':
+        #             print('Request Return 200')
+        #             data = json.loads(response.content)
+        #             scenes = data.get('scenes')
+        #             self.truncatedb()
+        #             for scene in scenes:
+        #                 self.insertdb(scene_id=scene.get('scene_id'),
+        #                               scene_name=scene.get('scene_name'),
+        #                               scene_task=scene.get('scene_tasks'))
+        #
+        #             self.reload_config()
+        #
+        #         elif json.loads(response.content).get('detail').__contains__('Invalid token'):
+        #             print("Token is Expired")
+        #
+        #     except Exception as err:
+        #         print(">>> Error Occur : {}".format(err))
+        #
+        # def truncatedb(self):
+        #     self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+        #                                  user=db_user, password=db_password)
+        #
+        #     self.cur = self.conn.cursor()
+        #     self.cur.execute("""TRUNCATE TABLE scenes;""")
+        #     self.conn.commit()
+        #     self.conn.close()
+        #     print(' >>> truncate table scene Complete')
 
-                if str(response.status_code) == '200':
-                    print('Request Return 200')
-                    data = json.loads(response.content)
-                    scenes = data.get('scenes')
-                    self.truncatedb()
-                    for scene in scenes:
-                        self.insertdb(scene_id=scene.get('scene_id'),
-                                      scene_name=scene.get('scene_name'),
-                                      scene_task=scene.get('scene_tasks'))
-
-                    self.reload_config()
-
-                elif json.loads(response.content).get('detail').__contains__('Invalid token'):
-                    print("Token is Expired")
-
-            except Exception as err:
-                print(">>> Error Occur : {}".format(err))
-
-        def truncatedb(self):
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-
-            self.cur = self.conn.cursor()
-            self.cur.execute("""TRUNCATE TABLE scene;""")
-            self.conn.commit()
-            self.conn.close()
-            print(' >>> truncate table scene Complete')
-
-        def insertdb(self, scene_id, scene_name, scene_task):
-            print 'insert'
-            tasks = json.dumps(scene_task)
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-
-            self.cur = self.conn.cursor()
-            self.cur.execute(
-                """INSERT INTO scene (scene_id, scene_name, scene_task) VALUES (%s, %s, %s);""",
-                (scene_id, scene_name, tasks))
-            self.conn.commit()
-            self.conn.close()
+        # def insertdb(self, scene_id, scene_name, scene_task):
+        #     print 'insert'
+        #     tasks = json.dumps(scene_task)
+        #     self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+        #                                  user=db_user, password=db_password)
+        #
+        #     self.cur = self.conn.cursor()
+        #     self.cur.execute(
+        #         """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
+        #         (scene_id, scene_name, tasks))
+        #     self.conn.commit()
+        #     self.conn.close()
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)

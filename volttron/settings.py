@@ -105,10 +105,10 @@ DEVICES = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'postgres',                      # Or path to database file if using sqlite3.
-        'USER': 'peahive@peahivedev2',                      # Not used with sqlite3.
-        'PASSWORD': '28Sep1960',                  # Not used with sqlite3.
-        'HOST': 'peahivedev2.postgres.database.azure.com',
+        'NAME': 'hiveosdb',                      # Or path to database file if using sqlite3.
+        'USER': 'admin',                      # Not used with sqlite3.
+        'PASSWORD': 'admin',                  # Not used with sqlite3.
+        'HOST': 'localhost',
         'PORT': '5432',                    # Set to empty string for default. Not used with sqlite3.
         'firebase': True,
         'azureiot': False,
@@ -217,4 +217,13 @@ FIND_DEVICE_SETTINGS = {
     'findBACnet': True,
     'findModbus': True,
 	
+}
+
+AZURE = {
+    'servicebus': {
+        'topic': 'hivecdf12345',
+        'service_namespace': 'peahiveservicebus',
+        'shared_access_key_name': 'RootManageSharedAccessKey',
+        'shared_access_key_value': 'vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ='
+    }
 }

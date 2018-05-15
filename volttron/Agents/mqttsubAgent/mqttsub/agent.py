@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-
 from datetime import datetime
 import logging
 import sys
 import settings
 from pprint import pformat
-
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
@@ -14,20 +12,6 @@ from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
-
-utils.setup_logging()
-_log = logging.getLogger(__name__)
-__version__ = '3.2'
-DEFAULT_MESSAGE = 'Listener Message'
-DEFAULT_AGENTID = "listener"
-DEFAULT_HEARTBEAT_PERIOD = 5
-DEFAULT_MONITORING_TIME = 5
-oat_point = 'devices/Building/LAB/Device/OutsideAirTemperature'
-all_topic = 'devices/Building/LAB/Device/all'
-test = 'test/1'
-test2 = 'test/2'
-
-
 from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
 # from zmqhelper.ZMQHelper.zmq_pub import ZMQ_PUB
 import requests
@@ -40,132 +24,103 @@ from uuid import getnode as get_mac
 import fcntl, socket, struct
 import settings
 
-class mqttsubAgent(Agent):
-    """Listens to everything and publishes a heartbeat according to the
-    heartbeat period specified in the settings module.
-    """
+utils.setup_logging()
+_log = logging.getLogger(__name__)
+__version__ = '3.2'
+DEFAULT_MESSAGE = 'HELLO'
 
-    def __init__(self, config_path, **kwargs):
-        super(mqttsubAgent, self).__init__(**kwargs)
-        self.config = utils.load_config(config_path)
+# Step1: Agent Initialization
+def mqttsub_agent(config_path, **kwargs):
+    config = utils.load_config(config_path)
+    def get_config(name):
+        try:
+            kwargs.pop(name)
+        except KeyError:
+            return config.get(name, '')
 
-        # TODO get database parameters from settings.py, add db_table for specific table
+    service_namespace = settings.AZURE['servicebus']['service_namespace']
+    shared_access_key_name = settings.AZURE['servicebus']['shared_access_key_name']
+    shared_access_key_value = settings.AZURE['servicebus']['shared_access_key_value']
+    servicebus_topic = settings.AZURE['servicebus']['topic']
+    sbs = ServiceBusService(
+        service_namespace=service_namespace,
+        shared_access_key_name=shared_access_key_name,
+        shared_access_key_value=shared_access_key_value)
 
-    @Core.receiver('onsetup')
-    def onsetup(self, sender, **kwargs):
-        # Demonstrate accessing a value from the config file
-        _log.info(self.config.get('message', DEFAULT_MESSAGE))
-        self._agent_id = self.config.get('agentid')
+    class mqttsubAgent(Agent):
+        """Listens to everything and publishes a heartbeat according to the
+        heartbeat period specified in the settings module.
+        """
 
-    @Core.receiver('onstart')
-    def onstart(self, sender, **kwargs):
-        _log.debug("VERSION IS: {}".format(self.core.version()))
+        def __init__(self, config_path, **kwargs):
+            super(mqttsubAgent, self).__init__(**kwargs)
+            self.config = utils.load_config(config_path)
 
+        @Core.receiver('onsetup')
+        def onsetup(self, sender, **kwargs):
+            # Demonstrate accessing a value from the config file
+            _log.info(self.config.get('message', DEFAULT_MESSAGE))
+            self._agent_id = self.config.get('agentid')
 
-        print "start"
-        sbs = ServiceBusService(
-            service_namespace='peahiveservicebus',
-            shared_access_key_name='RootManageSharedAccessKey',
-            shared_access_key_value='vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ=')
-        topic = "hivecdf12345"
+        @Core.receiver('onstart')
+        def onstart(self, sender, **kwargs):
+            _log.debug("VERSION IS: {}".format(self.core.version()))
 
-        while True:
-            try:
-                msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)
-                if msg.body is not None:
-                    commsg = eval(msg.body)
-                    print("message MQTT received")
-                    type_msg = commsg.get('type',None)
-                    if type_msg == 'scenecontrol':
-                        if commsg.has_key('sceneconfig'):
-                            # Execute Scene Config Function
-                            print("Scene Config Event")
-                            self.scenesetup(commsg)
+            while True:
+                try:
+                    msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
+                    if msg.body is not None:
+                        commsg = eval(msg.body)
+                        print("message MQTT received dsads")
+                        type_msg = commsg.get('type',None)
+                        if type_msg.startswith('scene'):
+                            print('found scene')
+                            self.VIPPublishScene(commsg, type_msg)
+                        elif type_msg == 'devicecontrol':
+                            # Execute Device Control Function
+                            print("Device Cintrol Event")
+                            self.VIPPublish(commsg)
+                        else:
+                            print "---------------------------------------"
+                            print('Any Topic :')
+                            print servicebus_topic
+                            print commsg
+                            print "---------------------------------------"
+                    else :
+                        print servicebus_topic
+                        print "No body message"
 
-                        elif commsg.has_key('scene_id'):
-                            # Executue Scene Control Function
-                            print("Sence Execute Event")
-                            self.sceneagent(commsg)
+                except Exception as er:
+                    print er
 
-                    elif type_msg == 'scenecreate':
-                        self.scenesetup(commsg)
+        def VIPPublish(self,commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
-                    elif type_msg == 'devicecontrol' :
-                        # Execute Device Control Function
-                        print("Device Cintrol Event")
-                        self.VIPPublish(commsg)
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'HiVE App to Gateway'},message)
 
-                    elif type_msg == 'sceneupdate':
-                        # Execute Update Scene Function
-                        print("Update Existing Scene")
-                        self.scenesetup(commsg)
+        def VIPPublishScene(self, commsg, type_msg):
+            topic = str('/ui/agent/update/hive/999/') + str(type_msg)
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
-                    elif type_msg == 'scenedelete':
-                        # Execute Delete Scene Function
-                        print("Delete Scene")
-                        self.scenesetup(commsg)
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'HiVE App to Gateway'}, message)
 
-                    else:
-                        print "---------------------------------------"
-                        print('Any Topic :')
-                        print topic
-                        print commsg
-                        print "---------------------------------------"
-                else :
-                    print topic
-                    print "No body message"
-
-            except Exception as er:
-                print er
-
-    def VIPPublish(self,commsg):
-        # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
-        message = json.dumps(commsg)
-        print ("topic {}".format(topic))
-        print ("message {}".format(message))
-
-        self.vip.pubsub.publish(
-            'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'},message)
-
-    def scenesetup(self,commsg):
-        # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/update/hive/999/scenesetup')
-        message = json.dumps(commsg)
-        print ("topic {}".format(topic))
-        print ("message {}".format(message))
-
-        self.vip.pubsub.publish(
-            'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'}, message)
-
-    def sceneagent(self,commsg):
-        # TODO this is example how to write an app to control AC
-        topic = str('/ui/agent/update/hive/999/sceneagent')
-        message = json.dumps(commsg)
-        print ("topic {}".format(topic))
-        print ("message {}".format(message))
-
-        self.vip.pubsub.publish(
-            'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'}, message)
-
-    def sceneupdate(self, commsg):
-        topic = str('/ui/agent/update/hive/999/sceneupdate')
-        message = json.dumps(commsg)
-        print ("topic {}".format(topic))
-        print ("message {}".format(message))
-
-        self.vip.pubsub.publish(
-            'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'}, message)
-
+    Agent.__name__ = 'mqttsubAgent'
+    return mqttsubAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(mqttsubAgent, version=__version__)
+        utils.vip_main(mqttsub_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 
