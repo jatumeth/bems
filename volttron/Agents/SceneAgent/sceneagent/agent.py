@@ -12,6 +12,7 @@ from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
 import json
+import requests
 import socket
 import psycopg2
 import psycopg2.extras
@@ -27,10 +28,17 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+db_database = 'hivedb'
+db_host = '127.0.0.1'
+db_port = '5432'
+db_user = 'admin'
+db_password = 'admin'
+
 
 # Step1: Agent Initialization
-def scenesetup_agent(config_path, **kwargs):
+def scenecontrol_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
+
     def get_config(name):
         try:
             kwargs.pop(name)
@@ -42,28 +50,43 @@ def scenesetup_agent(config_path, **kwargs):
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
     agent_id = get_config('agent_id')
-
     topic_device_control = '/ui/agent/update/hive/999/sceneagent'
-    print(topic_device_control)
+    topic_agent_reload = '/agent/update/hive/999/reload'
 
-    class scenesetupAgent(Agent):
+    # print(topic_device_control)
+
+    class SceneControlAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(scenesetupAgent, self).__init__(**kwargs)
+            super(SceneControlAgent, self).__init__(**kwargs)
+            # print("Config Path = "+str(config_path))
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
+            self.conn = None
+            self.cur = None
+            self.sceneconf = None
+            self.num_of_scene = None
+            self.token = None
+            self.url = None
+            self.reload_config() # Reload Scene when Agent Start
+            _log.info("init attribute to Agent")
 
-            # initialize device object
+        @Core.receiver('onsetup')
+        def onsetup(self, sender, **kwargs):
+            # Demonstrate accessing a value from the config file
+            _log.info(self.config.get('message', DEFAULT_MESSAGE))
+            self._agent_id = self.config.get('agentid')
+            self.url = self.config.get('backend_url') + self.config.get('scene_api')
+            self.token = self.config.get('token')
+
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-
-        @Core.periodic(10)
-        def deviceMonitorBehavior(self):
-            print "scene setup agent is running."
+            print('Debug')
+            self.resync_scene()
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -73,47 +96,108 @@ def scenesetup_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
 
             msg = json.loads(message)
-            scene = str(msg['scene_name'])
-            
-            db_database = 'hivedb'
-            db_host = 'localhost'
-            db_port = '5432'
-            db_user = 'hiveadmin'
-            db_password = 'hiveadmin'
-            
+            try:
+                tasks = self.sceneconf.get(str(msg.get('scene_id')))
+                task_list = tasks.get('tasks')
+                for task in task_list:
+
+                    topic = str('/ui/agent/update/hive/999/' + str(task.get('device_id')))
+                    message = json.dumps(task.get('command'))
+                    print ("topic {}".format(topic))
+                    print ("message {} \n".format(message))
+                    self.vip.pubsub.publish(
+                        'pubsub', topic,
+                        {'Type': 'HiVE Scene Control'}, message)
+
+            except Exception as Error:
+                print("Error get Scene_id")
+                print('Reload Scene Config to Agent')
+                self.reload_config()
+
+        @PubSub.subscribe('pubsub', topic_agent_reload)
+        def match_agent_reload(self, peer, sender, bus, topic, headers, message):
+            print('Message Recived')
+            self.reload_config()
+
+        def reload_config(self): # reload scene configuration to Agent Variable
+
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM sceneappagent WHERE scene = %s", (scene,))
-            # cur.execute("""SELECT * from sceneappagent WHERE scene = scene""")
-            scene = cur.fetchone()[2]
-            scene_conve = list(scene)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT scene_id, scene_task FROM scene""")
+            rows = self.cur.fetchall()
+            conf = {}
+            for row in rows:
+                id = row[0]
+                tasks = json.loads(row[1])
+                conf.update({str(id): {'tasks': tasks}})
 
-            for i in range(len(scene_conve)):
-                print(scene_conve[i])
-                device = str(scene_conve[i]['device_id'])
-                command = scene_conve[i]['command']
-                print device
-                print command
+            self.num_of_scene = str(len(conf))
+            self.sceneconf = conf
+            self.conn.close()
+            print(" >>> Reload Config Success")
 
-                topic = str('/ui/agent/update/hive/999/'+device)
-                message = json.dumps(command)
-                # message = json.dumps({"status": "OFF", "device": "2HUEK1445K1200138"})
-                print ("topic {}".format(topic))
-                print ("message {}".format(message))
+        def resync_scene(self):
+            # This function is executed by scene_id from request not exist on Local Database
+            try:
+                print(">>> Request GET:Scene for resync loacal database")
+                response = requests.get(self.url,
+                                        headers={"Authorization": "Token {token}".format(token=self.token),
+                                                "Content-Type": "application/json; charset=utf-8"
+                                                },
+                                        data=json.dumps({}))
 
-                self.vip.pubsub.publish(
-                    'pubsub', topic,
-                    {'Type': 'HiVE App to Gateway'}, message)
+                if str(response.status_code) == '200':
+                    print('Request Return 200')
+                    data = json.loads(response.content)
+                    scenes = data.get('scenes')
+                    self.truncatedb()
+                    for scene in scenes:
+                        self.insertdb(scene_id=scene.get('scene_id'),
+                                      scene_name=scene.get('scene_name'),
+                                      scene_task=scene.get('scene_tasks'))
 
+                    self.reload_config()
 
-    Agent.__name__ = 'scenesetupAgent'
-    return scenesetupAgent(config_path, **kwargs)
+                elif json.loads(response.content).get('detail').__contains__('Invalid token'):
+                    print("Token is Expired")
+
+            except Exception as err:
+                print(">>> Error Occur : {}".format(err))
+
+        def truncatedb(self):
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+
+            self.cur = self.conn.cursor()
+            self.cur.execute("""TRUNCATE TABLE scene;""")
+            self.conn.commit()
+            self.conn.close()
+            print(' >>> truncate table scene Complete')
+
+        def insertdb(self, scene_id, scene_name, scene_task):
+            print 'insert'
+            tasks = json.dumps(scene_task)
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+
+            self.cur = self.conn.cursor()
+            self.cur.execute(
+                """INSERT INTO scene (scene_id, scene_name, scene_task) VALUES (%s, %s, %s);""",
+                (scene_id, scene_name, tasks))
+            self.conn.commit()
+            self.conn.close()
+
+    Agent.__name__ = 'scenecontrolAgent'
+    return SceneControlAgent(config_path, **kwargs)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(scenesetup_agent, version=__version__)
+        utils.vip_main(scenecontrol_agent, version=__version__)
+
     except Exception as e:
         _log.exception('unhandled exception')
 

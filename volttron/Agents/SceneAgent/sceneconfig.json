@@ -1,9 +1,12 @@
 {
     "agent": {
-        "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+        "exec": "sceneagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "scence",
+    "agent_id": "scene",
     "ipaddress": "http://192.168.1.30:49153",
-    "message": "this is a lighting agent"
+    "message": "this is a lighting agent",
+    "backend_url" :"http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/",
+    "scene_api" : "api/v2.0/scenes",
+    "token":"af0d409b1835c7ab9fc2c6df804f20be1c195b82"
 
 }

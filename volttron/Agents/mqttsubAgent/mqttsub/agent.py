@@ -72,27 +72,48 @@ class mqttsubAgent(Agent):
         while True:
             try:
                 msg = sbs.receive_subscription_message(topic, 'client1', peek_lock=False)
-                if msg.body is not None :
+                if msg.body is not None:
                     commsg = eval(msg.body)
-                    print commsg
                     print("message MQTT received")
-                    type_msg = commsg.get('type')
-                    if type_msg == 'scenecontrol' :
+                    type_msg = commsg.get('type',None)
+                    if type_msg == 'scenecontrol':
                         if commsg.has_key('sceneconfig'):
                             # Execute Scene Config Function
                             print("Scene Config Event")
-                            self.sceneagent(commsg)
+                            self.scenesetup(commsg)
 
-                        elif commsg.has_key('sceneid'):
+                        elif commsg.has_key('scene_id'):
                             # Executue Scene Control Function
                             print("Sence Execute Event")
-                            self.scenesetup(commsg)
+                            self.sceneagent(commsg)
+
+                    elif type_msg == 'scenecreate':
+                        self.scenesetup(commsg)
 
                     elif type_msg == 'devicecontrol' :
                         # Execute Device Control Function
                         print("Device Cintrol Event")
                         self.VIPPublish(commsg)
 
+                    elif type_msg == 'sceneupdate':
+                        # Execute Update Scene Function
+                        print("Update Existing Scene")
+                        self.scenesetup(commsg)
+
+                    elif type_msg == 'scenedelete':
+                        # Execute Delete Scene Function
+                        print("Delete Scene")
+                        self.scenesetup(commsg)
+
+                    else:
+                        print "---------------------------------------"
+                        print('Any Topic :')
+                        print topic
+                        print commsg
+                        print "---------------------------------------"
+                else :
+                    print topic
+                    print "No body message"
 
             except Exception as er:
                 print er
@@ -117,7 +138,7 @@ class mqttsubAgent(Agent):
 
         self.vip.pubsub.publish(
             'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'},message)
+            {'Type': 'HiVE App to Gateway'}, message)
 
     def sceneagent(self,commsg):
         # TODO this is example how to write an app to control AC
@@ -128,7 +149,18 @@ class mqttsubAgent(Agent):
 
         self.vip.pubsub.publish(
             'pubsub', topic,
-            {'Type': 'HiVE App to Gateway'},message)
+            {'Type': 'HiVE App to Gateway'}, message)
+
+    def sceneupdate(self, commsg):
+        topic = str('/ui/agent/update/hive/999/sceneupdate')
+        message = json.dumps(commsg)
+        print ("topic {}".format(topic))
+        print ("message {}".format(message))
+
+        self.vip.pubsub.publish(
+            'pubsub', topic,
+            {'Type': 'HiVE App to Gateway'}, message)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
