@@ -67,34 +67,15 @@ def scencesetup_agent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
 
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_scencesetup = settings.DATABASES['default']['TABLE_scencesetup']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
-    # construct _topic_Agent_UI based on data obtained from DB
-
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-    topic_device_control = '/ui/agent/update/hive/999/scencesetup'
+
+    topic_device_control = '/ui/agent/update/hive/999/scenesetup'
+    topic_agent_reload = '/agent/update/hive/999/reload'
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
 
     # 5. @params notification_info
     send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class scencesetupAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -107,6 +88,8 @@ def scencesetup_agent(config_path, **kwargs):
             self._agent_id = agent_id
             self._message = message
             self._heartbeat_period = heartbeat_period
+            self.conn = None
+            self.cur = None
 
             # initialize device object
         @Core.receiver('onstart')
@@ -119,60 +102,94 @@ def scencesetup_agent(config_path, **kwargs):
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
+            print('Message incoming')
+            # if topic == topic_device_control:
+
             db_database = 'hivedb'
-            db_host = 'localhost'
+            db_host = '127.0.0.1'
             db_port = '5432'
-            db_user = 'hiveadmin'
-            db_password = 'hiveadmin'
+            db_user = 'admin'
+            db_password = 'admin'
             message_load = json.loads(message)
-            name = message_load['name']
-            msg = message_load['tasks']
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.cursor = self.conn.cursor()
+            sceneconfig = message_load.get('sceneconfig')
+            type_msg = message_load.get('type', None)
+            scene_name = sceneconfig.get('scene_name')
+            msg = sceneconfig.get('scene_tasks')
+            scene_id = sceneconfig.get('scene_id')
+            print(type_msg)
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+
             self.cur = self.conn.cursor()
+            if type_msg == 'sceneupdate':
+                self.cur.execute("""SELECT * from scene""")
+                rows = self.cur.fetchall()
+                scene_id_set = set()
 
-            self.cur.execute("""SELECT * from scenceappagent""")
-            rows = self.cur.fetchall()
-            checkinsert = True
-            for row in rows:
-                if (str(row[1]).replace(" ", "")) == (str(name).replace(" ", "")):
-                    self.updatedb(name,msg)
-                    checkinsert = False
+                for row in rows:
+                    scene_id_set.add(str(row[0]))
+
+                if set({str(scene_id)}).issubset(scene_id_set):
+                    self.updatedb(scene_id, scene_name, scene_task=msg)
+
                 else:
-                    a = True
-            if checkinsert == True:
-                self.insertdb(name,msg)
+                    self.insertdb(scene_id, scene_name, scene_task=msg)
 
-        def updatedb(self,name,msg):
-            print 'update'
-            jsoninfo = json.dumps(msg)
-            name = name
-            self.cur.execute("UPDATE scenceappagent SET info=%s WHERE scence=%s", (jsoninfo,name))
+            elif type_msg == 'scenecreate':
+                self.insertdb(scene_id, scene_name, scene_task=msg)
+
+            elif type_msg == 'scenedelete':
+                print(" >>> Delete Scene Function Executed")
+                self.deletedb(scene_id)
+
+        def deletedb(self, scene_id):
+            print 'Delete Scene id : {}'.format(scene_id)
+            scene_id = str(scene_id)
+            self.cur.execute("DELETE FROM scene WHERE scene_id ='{}'".format(scene_id))
+
             self.conn.commit()
             self.conn.close()
 
-        def insertdb(self,name,msg):
-            print 'insert'
-            jsoninfo = json.dumps(msg)
-            namescence = name
+            self.vip.pubsub.publish('pubsub', topic_agent_reload,
+                                    {'Type': 'HiVE Scene Control'}, None)
 
+        def updatedb(self, scene_id, scene_name, scene_task):
+            print 'Update Scene id : {}'.format(scene_id)
+            task = json.dumps(scene_task)
+            self.cur.execute("""UPDATE scene SET scene_name=%s, scene_task=%s WHERE scene_id=%s""",
+                            (scene_name, task, str(scene_id)))
+
+            self.conn.commit()
+            self.conn.close()
+
+            self.vip.pubsub.publish('pubsub', topic_agent_reload,
+                    {'Type': 'HiVE Scene Control'}, None)
+
+        def insertdb(self, scene_id, scene_name, scene_task):
+            print 'Insert Scene id : {}'.format(scene_id)
+            tasks = json.dumps(scene_task)
+            self.cur = self.conn.cursor()
             self.cur.execute(
-                """INSERT INTO scenceappagent (scence, info) VALUES (%s,%s);""",
-                (str(namescence), jsoninfo))
+                """INSERT INTO scene (scene_id, scene_name, scene_task) VALUES (%s, %s, %s);""",
+                (scene_id, scene_name, tasks))
             self.conn.commit()
             self.conn.close()
-
+            self.vip.pubsub.publish('pubsub', topic_agent_reload,
+                    {'Type': 'HiVE Scene Control'}, None)
 
     Agent.__name__ = 'scencesetupAgent'
     return scencesetupAgent(config_path, **kwargs)
 
+
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
+
     try:
         utils.vip_main(scencesetup_agent, version=__version__)
+
     except Exception as e:
         _log.exception('unhandled exception')
+
 
 if __name__ == '__main__':
     # Entry point for script
