@@ -156,7 +156,7 @@ def lighting_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
