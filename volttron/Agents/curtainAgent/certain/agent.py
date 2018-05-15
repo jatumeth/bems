@@ -61,6 +61,7 @@ def lighting_agent(config_path, **kwargs):
     else:
         hue_username = ''
     device_type = get_config('type')
+    device_status = get_config('device_status')
     device = get_config('device')
     bearer = get_config('bearer')
     url = get_config('url')
@@ -159,12 +160,12 @@ def lighting_agent(config_path, **kwargs):
             # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
-            try:
+            # try:
                 db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['status'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['type'])
-            except Exception as er:
-                print er
+                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['device_status'])
+                db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+            # except Exception as er:
+            #     print er
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u

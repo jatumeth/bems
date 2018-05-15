@@ -128,19 +128,19 @@ class API:
 
         conve_json = json.loads(data)
         print conve_json
-        # self.set_variable('label', str(conve_json["label"]))
-        # self.set_variable('status', str(conve_json["status"]))
-        # self.set_variable('unitTime', conve_json["unitTime"])
-        # self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('device_status', str(conve_json["status"]))
+        self.set_variable('unitTime', conve_json["unitTime"])
+        self.set_variable('device_type', str(conve_json["type"]))
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        # print(" the current status is as follows:")
-        # print(" label = {}".format(self.get_variable('label')))
-        # print(" status = {}".format(self.get_variable('status')))
-        # print(" unitTime = {}".format(self.get_variable('unitTime')))
-        # print(" type= {}".format(self.get_variable('type')))
+        print(" the current status is as follows:")
+        print(" label = {}".format(self.get_variable('label')))
+        print(" status = {}".format(self.get_variable('device_status')))
+        print(" unitTime = {}".format(self.get_variable('unitTime')))
+        print(" type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
@@ -240,8 +240,8 @@ def main():
 
 
     #
-    Somfy.setDeviceStatus({"status": "OFF"})
-    #
+    # Somfy.setDeviceStatus({"status": "OFF"})
+
     # time.sleep(10)
     #
     # Somfy.setDeviceStatus({"status": "ON"})

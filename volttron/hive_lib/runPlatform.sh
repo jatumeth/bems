@@ -32,3 +32,4 @@ volttron-ctl start --tag yale
 sleep 2
 volttron-ctl start --tag openclose
 sleep 2
+vokttron-ctl start --tag curtain

@@ -83,6 +83,13 @@ volttron-pkg configure ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl 
 volttron-ctl install ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl --tag openclose
 
 
+#Curtain Agent
+
+volttron-pkg package Agents/curtainAgent
+
+volttron-pkg configure ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/curtainAgent/08SOM221445K.config.json
+
+volttron-ctl install ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl --tag curtain
 
 
 ## RUN Lighting Agent
