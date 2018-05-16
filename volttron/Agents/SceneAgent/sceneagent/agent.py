@@ -76,7 +76,7 @@ def scenecontrol_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             print('Debug')
-            # self.resync_scene()
+            self.resync_scene()
 
         @PubSub.subscribe('pubsub', topic_scenecontrol)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -129,56 +129,56 @@ def scenecontrol_agent(config_path, **kwargs):
             self.conn.close()
             print(" >>> Reload Config Success")
 
-        # def resync_scene(self):
-        #     # This function is executed by scene_id from request not exist on Local Database
-        #     try:
-        #         print(">>> Request GET:Scene for resync loacal database")
-        #         response = requests.get(self.url,
-        #                                 headers={"Authorization": "Token {token}".format(token=self.token),
-        #                                         "Content-Type": "application/json; charset=utf-8"
-        #                                         },
-        #                                 data=json.dumps({}))
-        #
-        #         if str(response.status_code) == '200':
-        #             print('Request Return 200')
-        #             data = json.loads(response.content)
-        #             scenes = data.get('scenes')
-        #             self.truncatedb()
-        #             for scene in scenes:
-        #                 self.insertdb(scene_id=scene.get('scene_id'),
-        #                               scene_name=scene.get('scene_name'),
-        #                               scene_task=scene.get('scene_tasks'))
-        #
-        #             self.reload_config()
-        #
-        #         elif json.loads(response.content).get('detail').__contains__('Invalid token'):
-        #             print("Token is Expired")
-        #
-        #     except Exception as err:
-        #         print(">>> Error Occur : {}".format(err))
-        #
-        # def truncatedb(self):
-        #     self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-        #                                  user=db_user, password=db_password)
-        #
-        #     self.cur = self.conn.cursor()
-        #     self.cur.execute("""TRUNCATE TABLE scenes;""")
-        #     self.conn.commit()
-        #     self.conn.close()
-        #     print(' >>> truncate table scene Complete')
+        def resync_scene(self):
+            # This function is executed by scene_id from request not exist on Local Database
+            try:
+                print(">>> Request GET:Scene for resync loacal database")
+                response = requests.get(self.url,
+                                        headers={"Authorization": "Token {token}".format(token=self.token),
+                                                "Content-Type": "application/json; charset=utf-8"
+                                                },
+                                        data=json.dumps({}))
 
-        # def insertdb(self, scene_id, scene_name, scene_task):
-        #     print 'insert'
-        #     tasks = json.dumps(scene_task)
-        #     self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-        #                                  user=db_user, password=db_password)
-        #
-        #     self.cur = self.conn.cursor()
-        #     self.cur.execute(
-        #         """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
-        #         (scene_id, scene_name, tasks))
-        #     self.conn.commit()
-        #     self.conn.close()
+                if str(response.status_code) == '200':
+                    print('Request Return 200')
+                    data = json.loads(response.content)
+                    scenes = data.get('scenes')
+                    self.truncatedb()
+                    for scene in scenes:
+                        self.insertdb(scene_id=scene.get('scene_id'),
+                                      scene_name=scene.get('scene_name'),
+                                      scene_task=scene.get('scene_tasks'))
+
+                    self.reload_config()
+
+                elif json.loads(response.content).get('detail').__contains__('Invalid token'):
+                    print("Token is Expired")
+
+            except Exception as err:
+                print(">>> Error Occur : {}".format(err))
+
+        def truncatedb(self):
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+
+            self.cur = self.conn.cursor()
+            self.cur.execute("""TRUNCATE TABLE scenes;""")
+            self.conn.commit()
+            self.conn.close()
+            print(' >>> truncate table scene Complete')
+
+        def insertdb(self, scene_id, scene_name, scene_task):
+            print 'insert'
+            # tasks = json.dumps(scene_task)
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+
+            self.cur = self.conn.cursor()
+            self.cur.execute(
+                """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
+                (scene_id, scene_name, scene_task))
+            self.conn.commit()
+            self.conn.close()
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)
