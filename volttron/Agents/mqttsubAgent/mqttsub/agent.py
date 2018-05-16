@@ -72,7 +72,7 @@ def mqttsub_agent(config_path, **kwargs):
                     if msg.body is not None:
                         commsg = eval(msg.body)
                         print("message MQTT received dsads")
-                        type_msg = commsg.get('type',None)
+                        type_msg = commsg.get('type', None)
                         if type_msg.startswith('scene'):
                             print('found scene')
                             self.VIPPublishScene(commsg, type_msg)

@@ -94,6 +94,8 @@ def scencesetup_agent(config_path, **kwargs):
             print(type_msg)
             self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
                                          user=db_user, password=db_password)
+
+            self.cur = self.conn.cursor()
             self.cur.execute("""SELECT * from scenes""")
             rows = self.cur.fetchall()
             scene_id_set = set()
@@ -136,7 +138,8 @@ def scencesetup_agent(config_path, **kwargs):
         def updatedb(self, scene_id, scene_name, scene_task):
             print 'Update Scene id : {}'.format(scene_id)
             task = json.dumps(scene_task)
-            self.cur.execute("""UPDATE scene SET scene_name=%s, scene_task=%s WHERE scene_id=%s""",
+            self.cur = self.conn.cursor()
+            self.cur.execute("""UPDATE scenes SET scene_name=%s, scene_tasks=%s WHERE scene_id=%s""",
                             (scene_name, task, str(scene_id)))
 
             self.conn.commit()
@@ -147,7 +150,7 @@ def scencesetup_agent(config_path, **kwargs):
 
         def insertdb(self, scene_id, scene_name, scene_tasks):
             print 'Insert Scene id : {}'.format(scene_id)
-            tasks = json.dumps(scene_tasks)
+            # tasks = json.dumps(scene_tasks)
             self.cur = self.conn.cursor()
             self.cur.execute(
                 """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
