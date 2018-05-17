@@ -3,18 +3,11 @@ from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
-import settings
-from pprint import pformat
-from volttron.platform.messaging.health import STATUS_GOOD
-from volttron.platform.vip.agent import Agent, Core, PubSub, compat
+from volttron.platform.vip.agent import Agent, Core, PubSub
 from volttron.platform.agent import utils
-from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 
 utils.setup_logging()

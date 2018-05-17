@@ -128,10 +128,10 @@ class API:
 
         conve_json = json.loads(data)
         print conve_json
-        self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('device_status', str(conve_json["status"]))
+        self.set_variable('label', str(conve_json["label"]).upper())
+        self.set_variable('device_status', str(conve_json["status"]).upper())
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('device_type', str(conve_json["type"]))
+        self.set_variable('device_type', str(conve_json["type"]).upper())
 
     def printDeviceStatus(self):
 

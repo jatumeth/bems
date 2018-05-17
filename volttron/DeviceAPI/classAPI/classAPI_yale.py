@@ -133,10 +133,12 @@ class API:
 
         conve_json = json.loads(data)
         print conve_json
-        self.set_variable('label', str(conve_json["label"]))
-        self.set_variable('status', str(conve_json["status"]))
+        self.set_variable('label', str(conve_json["label"]).upper())
+        self.set_variable('status', str(conve_json["status"]).upper())
+        a = conve_json["unitTime"]
+        print a
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('type', str(conve_json["type"]).upper())
 
     def printDeviceStatus(self):
 
@@ -184,9 +186,13 @@ class API:
         msgToDevice = {}
         print
 
-        if postmsg['status'] == 'ON':
+        if postmsg['status'] == 'LOCKED':
             msgToDevice['command'] = "lock"
-        elif postmsg['status'] == 'OFF':
+        elif postmsg['status'] == 'UNLOCKED':
+            msgToDevice['command'] = "unlock"
+        elif postmsg['status'] == 'LOCK':
+            msgToDevice['command'] = "lock"
+        elif postmsg['status'] == 'UNLOCK':
             msgToDevice['command'] = "unlock"
         return msgToDevice
 
@@ -198,14 +204,18 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/locks/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = '893f8352-d1ca-4363-b9ee-e71708caa713')
-    Yale.getDeviceStatus()
+
 
     # Yale.setDeviceStatus({"command": "unlock"})
     #{"command":"lock"}
     # {"command":"unlock"}
     # time.sleep(10)
     #
-    Yale.setDeviceStatus({"status": "ON"})
+    Yale.setDeviceStatus({"status": "LOCKED"})
+
+    time.sleep(10)
+
+    Yale.getDeviceStatus()
     #
     # time.sleep(10)
     #
