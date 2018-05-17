@@ -73,17 +73,25 @@ def mqttsub_agent(config_path, **kwargs):
                         commsg = eval(msg.body)
                         print("message MQTT received dsads")
                         type_msg = commsg.get('type', None)
-                        if type_msg.startswith('scene'):
+                        if type_msg.startswith('scene'): # TODO : Recheck condition again
                             print('Found scene')
-                            self.VIPPublishScene(commsg, type_msg)
+                            self.VIPPublishApplication(commsg, type_msg)
+
                         elif type_msg == 'devicecontrol':
                             # Execute Device Control Function
                             print("Device Cintrol Event")
-                            self.VIPPublish(commsg)
+                            self.VIPPublishDevice(commsg)
+
                         elif type_msg == 'login':
                             # Execute Token Stored Function
                             print("Renew Token Event")
-                            self.VIPPublishToken(commsg, type_msg)
+                            self.VIPPublishApplication(commsg, type_msg)
+
+                        elif type_msg == 'automationcreate':
+                            # Execute Create Automation Function
+                            print("Create Automation Event")
+                            self.VIPPublishApplication(commsg, type_msg)
+
                         else:
                             print "---------------------------------------"
                             print('Any Topic :')
@@ -97,7 +105,7 @@ def mqttsub_agent(config_path, **kwargs):
                 except Exception as er:
                     print er
 
-        def VIPPublish(self,commsg):
+        def VIPPublishDevice(self,commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
             message = json.dumps(commsg)
@@ -106,9 +114,9 @@ def mqttsub_agent(config_path, **kwargs):
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
-                {'Type': 'HiVE App to Gateway'},message)
+                {'Type': 'HiVE Device to Gateway'}, message)
 
-        def VIPPublishScene(self, commsg, type_msg):
+        def VIPPublishApplication(self, commsg, type_msg):
             topic = str('/ui/agent/update/hive/999/') + str(type_msg)
             message = json.dumps(commsg)
             print ("topic {}".format(topic))
@@ -116,17 +124,8 @@ def mqttsub_agent(config_path, **kwargs):
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
-                {'Type': 'HiVE App to Gateway'}, message)
+                {'Type': 'HiVE Application to Gateway'}, message)
 
-        def VIPPublishToken(self, commsg, type_msg):
-            topic = str('/ui/agent/update/hive/999/') + str(type_msg)
-            message = json.dumps(commsg)
-            print ("topic {}".format(topic))
-            print ("message {}".format(message))
-
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'HiVE App to Gateway'}, message)
 
     Agent.__name__ = 'mqttsubAgent'
     return mqttsubAgent(config_path, **kwargs)

@@ -43,12 +43,16 @@ import logging
 import sys
 import settings
 import os
+import json
 from pprint import pformat
 import subprocess as sp
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
+import psycopg2
+from os.path import expanduser
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -58,92 +62,123 @@ DEFAULT_AGENTID = "automation_control"
 DEFAULT_HEARTBEAT_PERIOD = 5
 
 
-# def automation_manager_agent(config_path, **kwargs):
-#     config = utils.load_config(config_path)
-#
-#     def get_config(name):
-#         try:
-#             kwargs.pop(name)
-#         except KeyError:
-#             return config.get(name, '')
-#
-#     agent_id = get_config('agent_id')
-#     message = get_config('message')
-#     heartbeat_period = get_config('heartbeat_period')
-#     topic_automation_create = '/ui/agent/update/hive/999/automation_control'
+def automation_manager_agent(config_path, **kwargs):
+    config = utils.load_config(config_path)
 
-
-    # # DATABASES
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-
-class AutomationAgent(Agent):
-
-    def __init__(self, config_path, **kwargs):
-        super(AutomationAgent, self).__init__(**kwargs)
-        self.config = utils.load_config(config_path)
-        self._agent_id = self.config.get('agentid', DEFAULT_AGENTID)
-        self._message = self.config.get('message', DEFAULT_MESSAGE)
-        self._heartbeat_period = self.config.get('heartbeat_period',
-                                                 DEFAULT_HEARTBEAT_PERIOD)
+    def get_config(name):
         try:
-            self._heartbeat_period = int(self._heartbeat_period)
+            kwargs.pop(name)
+        except KeyError:
+            return config.get(name, '')
 
-        except:
-            _log.warn('Invalid heartbeat period specified setting to default')
-            self._heartbeat_period = DEFAULT_HEARTBEAT_PERIOD
-        log_level = self.config.get('log-level', 'INFO')
-        if log_level == 'ERROR':
-            self._logfn = _log.error
-        elif log_level == 'WARN':
-            self._logfn = _log.warn
-        elif log_level == 'DEBUG':
-            self._logfn = _log.debug
-        else:
-            self._logfn = _log.info
+    agent_id = get_config('agent_id')
+    message = get_config('message')
+    heartbeat_period = get_config('heartbeat_period')
+    topic_automation_create = '/ui/agent/update/hive/999/automationcreate'
 
-    @Core.receiver('onsetup')
-    def onsetup(self, sender, **kwargs):
-        # Demonstrate accessing a value from the config file
-        print('on-setup event occur')
 
-    @Core.receiver('onstart')
-    def onstart(self, sender, **kwargs):
-        print("On Start Event")
-        self.build_automation_agent(config_param=None)
+    # DATABASES
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
 
-    # @PubSub.subscribe('pubsub', topic_automation_create)
-    # def on_match(self, peer, sender, bus,  topic, headers, message):
-    #     print("Match Topic")
-    #     # Fake message for new born agent
-    #     message = {'automation_id': '1',
-    #                'automation_name': 'rule_1',
-    #                'conditon': [{'multisensor': {'status': 'active'}},
-    #                             {'scene':{'scene_name': 'Good Morning'}}],
-    #                'trigger': [{'doorlock': {'status': 'unlock'}}]
-    #                }
-    #     # newborn_agent_id = self.build_automation_agent(message)  # Compatible with argument dict format
+    class AutomationAgent(Agent):
 
-    def build_automation_agent(self, config_param):
-        print(' >>> Build Agent Process')
-        os.system("volttron-pkg package Agents/AutomationControlAgent;" +
-                  "volttron-pkg configure ~/.volttron/packaged/automationagent-3.2-py2-none-any.whl" +
-                  "~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
-                  ";volttron-ctl install " +
-                  "~/.volttron/packaged/automationagent-3.2-py2-none-any.whl --tag automation_01")
+        def __init__(self, config_path, **kwargs):
+            super(AutomationAgent, self).__init__(**kwargs)
+            self.config = utils.load_config(config_path)
+            self._agent_id = self.config.get('agentid', DEFAULT_AGENTID)
+            self._message = self.config.get('message', DEFAULT_MESSAGE)
+            self._heartbeat_period = self.config.get('heartbeat_period',
+                                                     DEFAULT_HEARTBEAT_PERIOD)
+            self.conn = None
+            self.cur = None
+            self.automation_control_path = config_path
+        @Core.receiver('onsetup')
+        def onsetup(self, sender, **kwargs):
+            # Demonstrate accessing a value from the config file
+            print('on-setup event occur')
 
-    # Agent.__name__ = 'automation_manager_agent'
-    # return automation_manager_agent(config_path, **kwargs)
+        @Core.receiver('onstart')
+        def onstart(self, sender, **kwargs):
+            print("On Start Event")
+            # self.build_automation_agent(agent_id='44')
+
+        @PubSub.subscribe('pubsub', topic_automation_create)
+        def on_match(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic")
+            msg = json.loads(message)
+            conf = msg.get('automationconfig',None)
+            self.insertdb(conf)
+            self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
+        def insertdb(self, conf):
+
+            if conf is not None :
+                # 1.Unpack Message from Backend
+                automation_id = str(conf.get('automation_id'))
+                automation_name = conf.get('automation_name')
+                condition_event = conf.get('condition_event')
+                condition_value = conf.get('condition_value')
+                trigger_device = conf.get('trigger_device')
+                trigger_event = conf.get('trigger_event')
+                trigger_value = conf.get('trigger_value')
+                action_tasks = conf.get('action_tasks')
+
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+
+                self.cur = self.conn.cursor()
+                self.cur.execute(
+                    """INSERT INTO automation (automation_id, automation_name, condition_event, 
+                                                condition_value, trigger_device, trigger_event, 
+                                                trigger_value, action_tasks) 
+                                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                    (automation_id, automation_name, condition_event, condition_value,
+                     trigger_device, trigger_event, trigger_value, action_tasks))
+
+                self.conn.commit()
+                self.conn.close()
+
+            else:
+                pass
+
+        def build_automation_agent(self, automation_id):
+            print(' >>> Build Agent Process')
+            # 1. Go to path .lanuch.json file of AutomationControlAgent and store in
+            #    self.automation_control_path
+            # self.automation_control_path = self.automation_control_path.replace('Manager', 'Control')
+            # self.automation_control_path = self.automation_control_path.replace('manager', 'control')
+            # 2. Load Template of AutomationControlAgent to variable
+
+            home_path = expanduser("~")
+            json_path = '/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json'
+
+            launcher = json.load(open(home_path + json_path, 'r'))
+            # 3. Update new agentID to variable (agentID is relate to automation_id)
+            launcher.update({'agentid': 'automation_' + automation_id})
+            # 4. dump new config to file
+            json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
+            print(" >>> Change config file successful")
+
+            os.system("volttron-pkg package Agents/AutomationControlAgent;" +
+                      "volttron-pkg configure ~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
+                      " ~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
+                      ";volttron-ctl install " +
+                      "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
+                      "--tag automation_{}".format(automation_id))  # TODO : Add command auto start agent
+
+    Agent.__name__ = 'automationmanager'
+    return AutomationAgent(config_path, **kwargs)
 
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
 
     try:
-        utils.vip_main(AutomationAgent, version=__version__)
+        utils.vip_main(automation_manager_agent, version=__version__)
 
     except Exception as e:
         _log.exception('unhandled exception')

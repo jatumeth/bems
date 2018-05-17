@@ -66,7 +66,30 @@ else:
     pass
 
 
-cur.execute('''CREATE TABLE automation_control
+cur.execute("select * from information_schema.tables where table_name=%s", ('automation',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE automation")
+    conn.commit()
+else:
+    pass
+
+cur.execute("select * from information_schema.tables where table_name=%s", ('active_scene',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE active_scene")
+    conn.commit()
+else:
+    pass
+
+cur.execute('''CREATE TABLE scenes
+       (SCENE_ID SERIAL   PRIMARY KEY   NOT NULL,
+       SCENE_NAME   VARCHAR(30)   NOT NULL,
+       SCENE_TASKS     TEXT);''')
+print "Table scenes created successfully"
+conn.commit()
+
+cur.execute('''CREATE TABLE automation
             (AUTOMATION_ID SERIAL PRIMARY KEY   NOT NULL,
             AUTOMATION_NAME VARCHAR(30) NOT NULL,
             TRIGGER_DEVICE  TEXT NOT NULL,
@@ -75,7 +98,7 @@ cur.execute('''CREATE TABLE automation_control
             CONDITION_EVENT VARCHAR(30) NOT NULL,
             CONDITION_VALUE TEXT NOT NULL,
             ACTION_TASKS TEXT);''')
-print("Table automation_control created successfully")
+print("Table automation created successfully")
 conn.commit()
 
 cur.execute('''CREATE TABLE active_scene
@@ -83,10 +106,6 @@ cur.execute('''CREATE TABLE active_scene
              SCENE_NAME VARCHAR(30) NOT NULL);''')
 print("Table active scene created successfully")
 conn.commit()
-
-
-
-
 
 # #2. clean tables
 # cur.execute("DELETE FROM "+db_table_thermostat)
