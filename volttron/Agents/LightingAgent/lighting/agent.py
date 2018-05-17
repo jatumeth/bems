@@ -9,6 +9,7 @@ import importlib
 import json
 import socket
 import pyrebase
+import settings
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -17,12 +18,17 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -71,6 +77,9 @@ def lighting_agent(config_path, **kwargs):
     # DATABASES
     # print settings.DEBUG
     # db_host = settings.DATABASES['default']['HOST']
+
+
+
     # db_port = settings.DATABASES['default']['PORT']
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']

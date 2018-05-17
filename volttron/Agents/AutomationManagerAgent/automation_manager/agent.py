@@ -54,7 +54,7 @@ utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
 DEFAULT_MESSAGE = 'Automation Message'
-DEFAULT_AGENTID = "automation"
+DEFAULT_AGENTID = "automation_control"
 DEFAULT_HEARTBEAT_PERIOD = 5
 
 
@@ -70,7 +70,7 @@ DEFAULT_HEARTBEAT_PERIOD = 5
 #     agent_id = get_config('agent_id')
 #     message = get_config('message')
 #     heartbeat_period = get_config('heartbeat_period')
-#     topic_automation_create = '/ui/agent/update/hive/999/automation'
+#     topic_automation_create = '/ui/agent/update/hive/999/automation_control'
 
 
     # # DATABASES
@@ -131,7 +131,7 @@ class AutomationAgent(Agent):
         print(' >>> Build Agent Process')
         os.system("volttron-pkg package Agents/AutomationControlAgent;" +
                   "volttron-pkg configure ~/.volttron/packaged/automationagent-3.2-py2-none-any.whl" +
-                  "~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationagent.launch.json" +
+                  "~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                   ";volttron-ctl install " +
                   "~/.volttron/packaged/automationagent-3.2-py2-none-any.whl --tag automation_01")
 

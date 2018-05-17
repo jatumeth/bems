@@ -102,6 +102,15 @@ DEVICES = {
     'cassandra_update_time': 10
 }
 
+CHANGE = {
+    'change':{
+        'apiKeyLight':'AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ',
+        'authLight':'hive-rt-mobile-backend.firebaseapp.com',
+        'databaseLight': 'https://hive-rt-mobile-backend.firebaseio.com',
+        'storageLight':'bucket.appspot.com'
+    }
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.

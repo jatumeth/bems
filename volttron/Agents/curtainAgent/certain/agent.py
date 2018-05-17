@@ -3,19 +3,13 @@ from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
-import settings
-from pprint import pformat
-from volttron.platform.messaging.health import STATUS_GOOD
-from volttron.platform.vip.agent import Agent, Core, PubSub, compat
+from volttron.platform.vip.agent import Agent, Core, PubSub
 from volttron.platform.agent import utils
-from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
+import settings
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -24,12 +18,17 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -37,7 +36,7 @@ except Exception as er:
     print er
 
 # Step1: Agent Initialization
-def lighting_agent(config_path, **kwargs):
+def curtain_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -207,7 +206,7 @@ def lighting_agent(config_path, **kwargs):
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(lighting_agent, version=__version__)
+        utils.vip_main(curtain_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 
