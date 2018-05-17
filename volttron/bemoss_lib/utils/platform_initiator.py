@@ -65,12 +65,28 @@ if bool(cur.rowcount):
 else:
     pass
 
-cur.execute('''CREATE TABLE scenes
-       (SCENE_ID SERIAL   PRIMARY KEY   NOT NULL,
-       SCENE_NAME   VARCHAR(30)   NOT NULL,
-       SCENE_TASKS     TEXT);''')
-print "Table scenes created successfully"
+
+cur.execute('''CREATE TABLE automation_control
+            (AUTOMATION_ID SERIAL PRIMARY KEY   NOT NULL,
+            AUTOMATION_NAME VARCHAR(30) NOT NULL,
+            TRIGGER_DEVICE  TEXT NOT NULL,
+            TRIGGER_EVENT VARCHAR(30) NOT NULL,
+            TRIGGER_VALUE VARCHAR(30) NOT NULL,
+            CONDITION_EVENT VARCHAR(30) NOT NULL,
+            CONDITION_VALUE TEXT NOT NULL,
+            ACTION_TASKS TEXT);''')
+print("Table automation_control created successfully")
 conn.commit()
+
+cur.execute('''CREATE TABLE active_scene
+            (SCENE_ID VARCHAR(30),
+             SCENE_NAME VARCHAR(30) NOT NULL);''')
+print("Table active scene created successfully")
+conn.commit()
+
+
+
+
 
 # #2. clean tables
 # cur.execute("DELETE FROM "+db_table_thermostat)
