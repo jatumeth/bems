@@ -206,24 +206,24 @@ class API:
 
     def printDeviceStatus(self):
         print " Netatmo indoor device"
-        print("     noise = {} dB".format(self.get_variable('noise')))
-        print("     temperature = {} C".format(self.get_variable('temperature')))
-        print("     humidity = {} %".format(self.get_variable('humidity')))
-        print("     pressure = {} inHg".format(self.get_variable('pressure')))
-        print("     co2 = {} ppm".format(self.get_variable('co2')))
-        print("     date_max_temp = {} unix timestamp".format(self.get_variable('date_max_temp')))
-        print("     date_min_temp = {} unix timestamp".format(self.get_variable('date_min_temp')))
-        print("     max_temp = {} C".format(self.get_variable('max_temp')))
-        print("     min_temp = {} C".format(self.get_variable('min_temp')))
+        print("     noise = {} dB".format(self.get_variable('noise')).upper())
+        print("     temperature = {} C".format(self.get_variable('temperature')).upper())
+        print("     humidity = {} %".format(self.get_variable('humidity')).upper())
+        print("     pressure = {} inHg".format(self.get_variable('pressure')).upper())
+        print("     co2 = {} ppm".format(self.get_variable('co2')).upper())
+        print("     date_max_temp = {} unix timestamp".format(self.get_variable('date_max_temp')).upper())
+        print("     date_min_temp = {} unix timestamp".format(self.get_variable('date_min_temp')).upper())
+        print("     max_temp = {} C".format(self.get_variable('max_temp')).upper())
+        print("     min_temp = {} C".format(self.get_variable('min_temp')).upper())
         print " Netatmo outdoor module"
-        print("     outdoor_temperature = {} C".format(self.get_variable('outdoor_temperature')))
-        print("     outdoor_humidity = {} %".format(self.get_variable('outdoor_humidity')))
-        print("     outdoor_date_max_temp = {} unix timestamp".format(self.get_variable('outdoor_date_max_temp')))
-        print("     outdoor_date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')))
-        print("     outdoor_max_temp = {} C".format(self.get_variable('outdoor_max_temp')))
-        print("     outdoor_min_temp = {} C".format(self.get_variable('outdoor_min_temp')))
+        print("     outdoor_temperature = {} C".format(self.get_variable('outdoor_temperature')).upper())
+        print("     outdoor_humidity = {} %".format(self.get_variable('outdoor_humidity')).upper())
+        print("     outdoor_date_max_temp = {} unix timestamp".format(self.get_variable('outdoor_date_max_temp')).upper())
+        print("     outdoor_date_min_temp = {} unix timestamp".format(self.get_variable('outdoor_date_min_temp')).upper())
+        print("     outdoor_max_temp = {} C".format(self.get_variable('outdoor_max_temp')).upper())
+        print("     outdoor_min_temp = {} C".format(self.get_variable('outdoor_min_temp')).upper())
 
-        print("     device_type = {} ".format(self.get_variable('device_type')))
+        print("     device_type = {} ".format(self.get_variable('device_type')).upper())
 
 def main():
 

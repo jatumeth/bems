@@ -126,30 +126,30 @@ class API:
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
-        self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('label', str(conve_json["label"]).upper())
         self.set_variable('illuminance', float(conve_json["illuminance"]))
         self.set_variable('temperature', float(conve_json["temperature"]))
         self.set_variable('battery', float(conve_json["battery"]))
-        self.set_variable('motion', str(conve_json["motion"]))
-        self.set_variable('tamper', str(conve_json["tamper"]))
+        self.set_variable('motion', str(conve_json["motion"]).upper())
+        self.set_variable('tamper', str(conve_json["tamper"]).upper())
         self.set_variable('humidity', float(0.0))
         self.set_variable('unitTime', conve_json["unitTime"])
-        self.set_variable('type', str(conve_json["type"]))
+        self.set_variable('type', str(conve_json["type"]).upper())
 
 
     def printDeviceStatus(self):
 
         # now we can access the contents of the JSON like any other Python object
-        print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')))
-        print(" illuminance = {}".format(self.get_variable('illuminance')))
-        print(" temperature = {}".format(self.get_variable('temperature')))
-        print(" battery = {}".format(self.get_variable('battery')))
-        print(" motion = {}".format(self.get_variable('motion')))
-        print(" tamper = {}".format(self.get_variable('tamper')))
-        print(" humidity = {}".format(self.get_variable('humidity')))
-        print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" The current status is as follows:")
+        print(" Label = {}".format(self.get_variable('label')))
+        print(" Illuminance = {}".format(self.get_variable('illuminance')))
+        print(" Temperature = {}".format(self.get_variable('temperature')))
+        print(" Battery = {}".format(self.get_variable('battery')))
+        print(" Motion = {}".format(self.get_variable('motion')))
+        print(" Tamper = {}".format(self.get_variable('tamper')))
+        print(" Humidity = {}".format(self.get_variable('humidity')))
+        print(" UnitTime = {}".format(self.get_variable('unitTime')))
+        print(" Type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
     # ----------------------------------------------------------------------
@@ -160,8 +160,8 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/202124fc-478e-4fdf-9e67-a81bb5ae1213/illuminances/', bearer = 'Bearer 0291cb9f-168e-490e-b337-2d1a31abdbf4',device = 'fdb84473-69f9-42c8-ba8b-6bcb0663b65b')
+    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/illuminances/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'cb26f6a2-dd75-4c54-b3c1-21991c00bde5')
     Fibaro.getDeviceStatus()
-    #Fibaro.printDeviceStatus()
+    # Fibaro.printDeviceStatus()
 
 if __name__ == "__main__": main()

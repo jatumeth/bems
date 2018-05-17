@@ -4,7 +4,7 @@
     }, 
     "agent_id": "08SOM221445K",
     "ipaddress": "http://192.168.1.30:49153",
-    "message": "this is a doorlock agent",
+    "message": "this is a curtain agent",
     "heartbeat_period": 20,
     "api": "classAPI_somfy",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",

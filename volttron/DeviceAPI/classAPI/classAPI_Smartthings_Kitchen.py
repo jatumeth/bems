@@ -128,7 +128,7 @@ class API:
 
         conve_json = json.loads(data)
         self.set_variable('device_label', str(conve_json["label"]))
-        self.set_variable('device_status', str(conve_json["status"]).upper())
+        self.set_variable('device_status', str(conve_json["status"]))
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('device_type', str(conve_json["type"]))
 
@@ -136,10 +136,10 @@ class API:
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('status')))
+        print(" label = {}".format(self.get_variable('label')).upper())
+        print(" status = {}".format(self.get_variable('status')).upper())
         print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
+        print(" type= {}".format(self.get_variable('type')).upper())
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
