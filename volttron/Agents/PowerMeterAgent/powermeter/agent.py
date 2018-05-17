@@ -153,7 +153,7 @@ def Powermetering_agent(config_path, **kwargs):
 
             self.Powermeter.getDeviceStatus()
 
-
+            self.StatusPublish(self.Powermeter.variables)
             # TODO update local postgres
             # self.publish_local_postgres()
 
@@ -208,7 +208,17 @@ def Powermetering_agent(config_path, **kwargs):
             x["device_status"] = self.Powermeter.variables['device_status']
             x["device_type"] = self.Powermeter.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+        
+        def StatusPublish(self,commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Powermeter.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

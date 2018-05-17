@@ -148,6 +148,8 @@ def opencloseing_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.openclose.getDeviceStatus()
+            
+            self.StatusPublish(self.openclose.variables)
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -156,7 +158,7 @@ def opencloseing_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -165,6 +167,17 @@ def opencloseing_agent(config_path, **kwargs):
                 db.child(gateway_id).child(agent_id).child("device_type").set(self.openclose.variables['device_type'])
             except Exception as er:
                 print er
+
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.openclose.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u

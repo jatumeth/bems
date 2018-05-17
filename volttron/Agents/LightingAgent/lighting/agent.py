@@ -149,6 +149,8 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
 
+            self.StatusPublish(self.Light.variables)
+
             # TODO update local postgres
             # self.publish_local_postgres()
 
@@ -180,6 +182,17 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['device_status']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
 
         @PubSub.subscribe('pubsub', topic_device_control)

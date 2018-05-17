@@ -163,6 +163,8 @@ def netatmoing_agent(config_path, **kwargs):
 
             self.netatmo.getDeviceStatus()
 
+            self.StatusPublish(self.netatmo.variables)
+
             # TODO update local postgres
             # self.publish_local_postgres()
 
@@ -212,7 +214,17 @@ def netatmoing_agent(config_path, **kwargs):
             x["device_type"] = self.netatmo.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.netatmo.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
+        
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
             print "Topic: {topic}".format(topic=topic)

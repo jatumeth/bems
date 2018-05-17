@@ -104,13 +104,13 @@ def lighting_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class LightingAgent(Agent):
+    class curtain(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(LightingAgent, self).__init__(**kwargs)
+            super(curtain, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
@@ -149,6 +149,7 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Light.getDeviceStatus()
+            self.StatusPublish(self.Light.variables)
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -181,7 +182,17 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['device_status']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+        
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -190,8 +201,8 @@ def lighting_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             self.Light.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = 'LightingAgent'
-    return LightingAgent(config_path, **kwargs)
+    Agent.__name__ = 'curtain'
+    return curtain(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
