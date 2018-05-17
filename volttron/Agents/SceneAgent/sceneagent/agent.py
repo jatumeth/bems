@@ -41,6 +41,7 @@ def scenecontrol_agent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     topic_scenecontrol = '/ui/agent/update/hive/999/scenecontrol'
     topic_agent_reload = '/agent/update/hive/999/reload'
+    topic_token_reload = '/ui/agent/update/hive/999/login'
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -61,7 +62,7 @@ def scenecontrol_agent(config_path, **kwargs):
             self.num_of_scene = None
             self.token = None
             self.url = None
-            self.reload_config() # Reload Scene when Agent Start
+            self.reload_config()  # Reload Scene when Agent Start
             _log.info("init attribute to Agent")
 
         @Core.receiver('onsetup')
@@ -110,6 +111,16 @@ def scenecontrol_agent(config_path, **kwargs):
             print('Message Recived')
             self.reload_config()
 
+        @PubSub.subscribe('pubsub', topic_token_reload)
+        def match_token_reload(self, peer, sender, bus, topic, headers, message):
+            print('Message Recived')
+            print(' >>> Reload Token')
+            msg = json.loads(message)
+            new_token = msg.get('token', None)
+            self.config.update({'token': new_token})
+            config_dict = self.config
+            json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
+
         def reload_config(self): # reload scene configuration to Agent Variable
 
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
@@ -121,7 +132,8 @@ def scenecontrol_agent(config_path, **kwargs):
             conf = {}
             for row in rows:
                 id = row[0]
-                tasks = json.loads(row[1])
+                # tasks = json.loads(row[1])
+                tasks = row[1]
                 conf.update({str(id): {'tasks': tasks}})
 
             self.num_of_scene = str(len(conf))
@@ -170,15 +182,18 @@ def scenecontrol_agent(config_path, **kwargs):
         def insertdb(self, scene_id, scene_name, scene_task):
             print 'insert'
             # tasks = json.dumps(scene_task)
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
+            try:
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
 
-            self.cur = self.conn.cursor()
-            self.cur.execute(
-                """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
-                (scene_id, scene_name, scene_task))
-            self.conn.commit()
-            self.conn.close()
+                self.cur = self.conn.cursor()
+                self.cur.execute(
+                    """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
+                    (scene_id, scene_name, scene_task))
+                self.conn.commit()
+                self.conn.close()
+            except Exception as er:
+                print("Error in insertdb : {}".format(er))
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)

@@ -2,11 +2,10 @@
     "agent": {
         "exec": "sceneagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "scene",
-    "ipaddress": "http://192.168.1.30:49153",
-    "message": "this is a lighting agent",
-    "backend_url" :"http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/",
-    "scene_api" : "api/v2.0/scenes",
-    "token":"56d6fba1af6a0b71d61f94b865189315c4c34948"
-
+    "agent_id": "scene", 
+    "backend_url": "http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/", 
+    "ipaddress": "http://192.168.1.30:49153", 
+    "message": "this is a lighting agent", 
+    "scene_api": "api/v2.0/scenes", 
+    "token": "ea6764e6c7fd448909f968d3fcca9cfce47edae3"
 }
