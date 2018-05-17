@@ -65,11 +65,45 @@ if bool(cur.rowcount):
 else:
     pass
 
+cur.execute("select * from information_schema.tables where table_name=%s", ('automation',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE automation")
+    conn.commit()
+else:
+    pass
+
+cur.execute("select * from information_schema.tables where table_name=%s", ('active_scene',))
+print bool(cur.rowcount)
+if bool(cur.rowcount):
+    cur.execute("DROP TABLE active_scene")
+    conn.commit()
+else:
+    pass
+
 cur.execute('''CREATE TABLE scenes
        (SCENE_ID SERIAL   PRIMARY KEY   NOT NULL,
        SCENE_NAME   VARCHAR(30)   NOT NULL,
        SCENE_TASKS     TEXT);''')
 print "Table scenes created successfully"
+conn.commit()
+
+cur.execute('''CREATE TABLE automation
+            (AUTOMATION_ID SERIAL PRIMARY KEY   NOT NULL,
+            AUTOMATION_NAME VARCHAR(30) NOT NULL,
+            TRIGGER_DEVICE  TEXT NOT NULL,
+            TRIGGER_EVENT VARCHAR(30) NOT NULL,
+            TRIGGER_VALUE VARCHAR(30) NOT NULL,
+            CONDITION_EVENT VARCHAR(30) NOT NULL,
+            CONDITION_VALUE TEXT NOT NULL,
+            ACTION_TASKS TEXT);''')
+print("Table automation created successfully")
+conn.commit()
+
+cur.execute('''CREATE TABLE active_scene
+            (SCENE_ID VARCHAR(30),
+             SCENE_NAME VARCHAR(30) NOT NULL);''')
+print("Table active scene created successfully")
 conn.commit()
 
 # #2. clean tables
