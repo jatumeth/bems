@@ -93,6 +93,8 @@ def scenecontrol_agent(config_path, **kwargs):
 
         @PubSub.subscribe('pubsub', topic_tricker)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
+            print ">>"
+            print ">>"
             print "<<<<<<step 1 subscribe triger>>>>>>>>"
             print "--------------------"
             print(" Automation set device = {}".format(self.triger_device))
@@ -136,6 +138,8 @@ def scenecontrol_agent(config_path, **kwargs):
             self.conn.close()
 
         def conditionevent(self):
+            print ">>"
+            print ">>"
             print "<<<<<<step 2 check condition event>>>>>>>>"
 
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
@@ -166,7 +170,8 @@ def scenecontrol_agent(config_path, **kwargs):
 
 
         def devicecontrol(self):
-
+            print ">>"
+            print ">>"
             print "<<<<<<step 3 device control >>>>>>>>"
             try:
                 for task in self.devicecontrols:
@@ -180,45 +185,6 @@ def scenecontrol_agent(config_path, **kwargs):
                         {'Type': 'HiVE Scene Control'}, message)
             except Exception as Error:
                 print('Reload Config to Agent')
-
-
-        # def resync_automation(self):
-        #     # This function is executed by scene_id from request not exist on Local Database
-        #     try:
-        #         print(">>> Request GET:Scene for resync loacal database")
-        #         response = requests.get(self.url,
-        #                                 headers={"Authorization": "Token {token}".format(token=self.token),
-        #                                         "Content-Type": "application/json; charset=utf-8"
-        #                                         },
-        #                                 data=json.dumps({}))
-        #
-        #         if str(response.status_code) == '200':
-        #             print('Request Return 200')
-        #             data = json.loads(response.content)
-        #             scenes = data.get('scenes')
-        #             self.truncatedb()
-        #             for scene in scenes:
-        #                 self.insertdb(scene_id=scene.get('scene_id'),
-        #                               scene_name=scene.get('scene_name'),
-        #                               scene_task=scene.get('scene_tasks'))
-        #
-        #             self.reload_config()
-        #
-        #         elif json.loads(response.content).get('detail').__contains__('Invalid token'):
-        #             print("Token is Expired")
-        #
-        #     except Exception as err:
-        #         print(">>> Error Occur : {}".format(err))
-
-        # def truncatedb(self):
-        #     self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-        #                                  user=db_user, password=db_password)
-        #
-        #     self.cur = self.conn.cursor()
-        #     self.cur.execute("""TRUNCATE TABLE scenes;""")
-        #     self.conn.commit()
-        #     self.conn.close()
-        #     print(' >>> truncate table scene Complete')
 
 
     Agent.__name__ = 'scenecontrolAgent'
