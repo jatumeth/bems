@@ -77,6 +77,7 @@ def automation_manager_agent(config_path, **kwargs):
     topic_automation_delete = '/ui/agent/update/hive/999/automationdelete'
     topic_automation_update = '/ui/agent/update/hive/999/automationupdate'
 
+
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
     db_port = settings.DATABASES['default']['PORT']
@@ -105,6 +106,7 @@ def automation_manager_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             print("On Start Event")
+
 
         @PubSub.subscribe('pubsub', topic_automation_create)  # On Automation create
         def match_topic_create(self, peer, sender, bus,  topic, headers, message):
@@ -171,6 +173,14 @@ def automation_manager_agent(config_path, **kwargs):
             else:
                 pass
 
+        @PubSub.subscribe('pubsub', topic_automation_create)
+        def on_match(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic")
+            msg = json.loads(message)
+            conf = msg.get('automationconfig',None)
+            self.insertdb(conf)
+            self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
         def insertdb(self, conf):
 
             if conf is not None :
@@ -212,6 +222,14 @@ def automation_manager_agent(config_path, **kwargs):
             #  Update new agentID to variable (agentID is relate to automation_id)
             launcher.update({'agentid': 'automation_' + automation_id})
             #  dump new config to file
+
+            home_path = expanduser("~")
+            json_path = '/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json'
+
+            launcher = json.load(open(home_path + json_path, 'r'))
+            # 3. Update new agentID to variable (agentID is relate to automation_id)
+            launcher.update({'agentid': 'automation_' + automation_id})
+            # 4. dump new config to file
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
@@ -222,6 +240,8 @@ def automation_manager_agent(config_path, **kwargs):
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
                       "--tag automation_{}"+
                       ";volttron-ctl start --tag automation_{}".format(automation_id, automation_id))
+                       # TODO : Add command auto start agent
+
 
     Agent.__name__ = 'automationmanager'
     return AutomationAgent(config_path, **kwargs)
