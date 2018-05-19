@@ -26,12 +26,17 @@ DEFAULT_MESSAGE = 'HELLO'
 
 
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -172,7 +177,7 @@ def fibaroing_agent(config_path, **kwargs):
                 db.child(gateway_id).child(agent_id).child("battery").set(self.fibaro.variables['battery'])
                 db.child(gateway_id).child(agent_id).child("illuminance").set(self.fibaro.variables['illuminance'])
                 db.child(gateway_id).child(agent_id).child("humidity").set(self.fibaro.variables['humidity'])
-                db.child(gateway_id).child(agent_id).child("motion").set(self.fibaro.variables['motion'])
+                db.child(gateway_id).child(agent_id).child("STATUS").set(self.fibaro.variables['STATUS'])
             except Exception as er:
                 print er
 

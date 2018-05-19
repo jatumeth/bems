@@ -77,8 +77,27 @@ def automation_control_agent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
+<<<<<<< HEAD
 
     class AutomationAgent(Agent):
+=======
+    topic_tricker = ''
+    conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                            password=db_password)
+    cur = conn.cursor()
+    cur.execute("""SELECT * FROM automation """)
+    rows = cur.fetchall()
+    for row in rows:
+        if int(automation_id) == int(row[0]):
+            triger_device = row[2]
+            triger_device_str = ((triger_device).replace("['", '', 1)).replace("']", '', 1)
+            topic_tricker = '/agent/zmq/update/hive/999/' + triger_device_str
+            print "<<<< subscribe topic >>>>>"
+            print topic_tricker
+
+    conn.close()
+
+>>>>>>> ce9e0991d1a8fa92903eaac10eca3e6dba269cc9
 
         def __init__(self, config_path, **kwargs):
             super(AutomationAgent, self).__init__(**kwargs)
@@ -110,7 +129,107 @@ def automation_control_agent(config_path, **kwargs):
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
+<<<<<<< HEAD
             print("On Start Event")
+=======
+            _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.load_config()
+
+        @PubSub.subscribe('pubsub', topic_tricker)
+        def match_agent_reload(self, peer, sender, bus, topic, headers, message):
+            print ">>"
+            print ">>"
+            print "<<<<<< step 1 subscribe triger >>>>>>>>"
+            print "--------------------"
+            print(" Automation set device = {}".format(self.triger_device))
+            print(" Automation set event = {}".format(self.triger_event))
+            print(" Automation set value = {}".format(self.triger_value))
+            convert_msg = json.loads(message)
+            triger_event_now = convert_msg[self.triger_event]
+            print(" value reading now is value = {}".format(convert_msg[self.triger_event]))
+
+            if triger_event_now == self.triger_value:
+                print(" Automation set value == value reading now ")
+                print(" go to step [[[  2  ]]] check condition event ")
+                self.conditionevent()
+
+
+
+        def load_config(self): # reload scene configuration to Agent Variable
+
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM automation """)
+            rows = self.cur.fetchall()
+
+            for row in rows :
+                if int(self.automation_id) == int(row[0]):
+                    self.triger_device = row[2]
+                    self.triger_event = row[3]
+                    self.triger_value = row[4]
+                    self.condition_event = row[5]
+                    self.condition_value = row[6]
+                    self.devicecontrols = (json.loads((row[7])))
+                    print(" triger_device = {}".format(self.triger_device))
+                    print(" triger_event = {}".format(self.triger_event))
+                    print(" triger_value = {}".format(self.triger_value))
+                    print(" condition_event  = {}".format(self.condition_event))
+                    print(" condition_value = {}".format(self.condition_value))
+                    print(" devicecontrols = {}".format(self.devicecontrols))
+
+            self.conn.close()
+
+        def conditionevent(self):
+            print ">>"
+            print ">>"
+            print "<<<<<< step 2 check condition event>>>>>>>>"
+
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+
+            if self.condition_event == 'SCENE':
+                self.conn = conn
+                self.cur = self.conn.cursor()
+                self.cur.execute("""SELECT * FROM active_scene """)
+                rows = self.cur.fetchall()
+                for row in rows :
+                    self.scene_id_now = row[0]
+                    self.scene_name_now = row[1]
+                    print(" condition now = {}".format(self.scene_name_now))
+                    print(" condition in automation seting  = {}".format(self.scene_name_now))
+
+                    if str(self.condition_value) == str(self.scene_name_now):
+                        print '>> condition value == condition now'
+                        print(" go to step [[[  3  ]]] device control ")
+                        self.devicecontrol()
+                    else:
+                        print '>> condition value != condition now'
+                        print ""
+                        print(" go to step [[[  1  ]]] for subscribe triger")
+                        print ""
+
+            self.conn.close()
+
+
+        def devicecontrol(self):
+            print ">>"
+            print ">>"
+            print "<<<<<<step 3 device control >>>>>>>>"
+            try:
+                for task in self.devicecontrols:
+                    topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])
+                    print topic
+                    message = json.dumps(task['command'])
+                    print ("topic {}".format(topic))
+                    print ("message {} \n".format(message))
+                    self.vip.pubsub.publish(
+                        'pubsub', topic,
+                        {'Type': 'HiVE Scene Control'}, message)
+            except Exception as Error:
+                print('Reload Config to Agent')
+>>>>>>> ce9e0991d1a8fa92903eaac10eca3e6dba269cc9
 
         @Core.periodic(5)
         def alive_agent(self):

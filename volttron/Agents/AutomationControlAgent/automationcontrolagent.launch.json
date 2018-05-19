@@ -2,7 +2,12 @@
     "agent": {
         "exec": "automationagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
+<<<<<<< HEAD
     "agentid": "automation_75", 
     "automation_id": "30", 
+=======
+    "agentid": "automation_66", 
+    "automation_id": "66", 
+>>>>>>> ce9e0991d1a8fa92903eaac10eca3e6dba269cc9
     "message": "hello from automation agent"
 }
