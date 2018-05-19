@@ -172,7 +172,7 @@ def fibaroing_agent(config_path, **kwargs):
                 db.child(gateway_id).child(agent_id).child("battery").set(self.fibaro.variables['battery'])
                 db.child(gateway_id).child(agent_id).child("illuminance").set(self.fibaro.variables['illuminance'])
                 db.child(gateway_id).child(agent_id).child("humidity").set(self.fibaro.variables['humidity'])
-                db.child(gateway_id).child(agent_id).child("motion").set(self.fibaro.variables['motion'])
+                db.child(gateway_id).child(agent_id).child("STATUS").set(self.fibaro.variables['STATUS'])
             except Exception as er:
                 print er
 
