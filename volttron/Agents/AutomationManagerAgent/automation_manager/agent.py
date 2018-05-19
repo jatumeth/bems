@@ -37,7 +37,6 @@
 # }}}
 
 from __future__ import absolute_import
-
 from datetime import datetime
 import logging
 import sys
@@ -75,7 +74,8 @@ def automation_manager_agent(config_path, **kwargs):
     message = get_config('message')
     heartbeat_period = get_config('heartbeat_period')
     topic_automation_create = '/ui/agent/update/hive/999/automationcreate'
-
+    topic_automation_delete = '/ui/agent/update/hive/999/automationdelete'
+    topic_automation_update = '/ui/agent/update/hive/999/automationupdate'
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -95,7 +95,8 @@ def automation_manager_agent(config_path, **kwargs):
                                                      DEFAULT_HEARTBEAT_PERIOD)
             self.conn = None
             self.cur = None
-            self.automation_control_path = config_path
+            self.automation_control_path = None
+
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
@@ -104,15 +105,71 @@ def automation_manager_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             print("On Start Event")
-            # self.build_automation_agent(agent_id='44')
 
-        @PubSub.subscribe('pubsub', topic_automation_create)
-        def on_match(self, peer, sender, bus,  topic, headers, message):
-            print("Match Topic")
+        @PubSub.subscribe('pubsub', topic_automation_create)  # On Automation create
+        def match_topic_create(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic Create Automation")
             msg = json.loads(message)
-            conf = msg.get('automationconfig',None)
+            conf = msg.get('automationconfig', None)
             self.insertdb(conf)
             self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
+        @PubSub.subscribe('pubsub', topic_automation_delete)  # On Automation delete
+        def match_topic_delete(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic Delete Automation")
+            msg = json.loads(message)
+            conf = msg.get('automationconfig', None)
+            self.deletedb(conf)
+            # TODO : Agent Development here (Remove Agent)
+
+        @PubSub.subscribe('pubsub', topic_automation_update)
+        def match_topic_update(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic Update Automation")
+            msg = json.loads(message)
+            conf = msg.get('automationconfig', None)
+            self.updatedb(conf)
+            # TODO : remove existing Agent and build again
+
+        def updatedb(self, conf):
+            if conf is not None:
+                # Update Record Attibute where match automation ID
+                automation_id = str(conf.get('automation_id'))
+                automation_name = conf.get('automation_name')
+                condition_event = conf.get('condition_event')
+                condition_value = conf.get('condition_value')
+                trigger_device = conf.get('trigger_device')
+                trigger_event = conf.get('trigger_event')
+                trigger_value = conf.get('trigger_value')
+                action_tasks = conf.get('action_tasks')
+
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+                self.cur = self.conn.cursor()
+                self.cur.execute("""UPDATE automation SET automation_name=%s,
+                                    condition_event=%s, condition_value=%s,
+                                    trigger_device=%s, trigger_event=%s,
+                                    trigger_value=%s, action_tasks=%s
+                                    WHERE automation_id=%s;""", (automation_name, condition_event,
+                                                                 condition_value, trigger_device,
+                                                                 trigger_event, trigger_value,
+                                                                 action_tasks, automation_id))
+
+                self.conn.commit()
+                self.conn.close()
+
+        def deletedb(self, conf):
+            if conf is not None:
+                # Delete Record where match automation ID
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+                self.cur = self.conn.cursor()
+                self.cur.execute("""DELETE FROM automation 
+                                    WHERE automation_id ={};""".format(conf.get('automation_id')))
+                self.conn.commit()
+                self.conn.close()
+
+            else:
+                pass
 
         def insertdb(self, conf):
 
@@ -147,19 +204,14 @@ def automation_manager_agent(config_path, **kwargs):
 
         def build_automation_agent(self, automation_id):
             print(' >>> Build Agent Process')
-            # 1. Go to path .lanuch.json file of AutomationControlAgent and store in
-            #    self.automation_control_path
-            # self.automation_control_path = self.automation_control_path.replace('Manager', 'Control')
-            # self.automation_control_path = self.automation_control_path.replace('manager', 'control')
-            # 2. Load Template of AutomationControlAgent to variable
-
+            #  get PATH Environment
             home_path = expanduser("~")
             json_path = '/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json'
-
-            launcher = json.load(open(home_path + json_path, 'r'))
-            # 3. Update new agentID to variable (agentID is relate to automation_id)
+            self.automation_control_path = home_path+json_path
+            launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
+            #  Update new agentID to variable (agentID is relate to automation_id)
             launcher.update({'agentid': 'automation_' + automation_id})
-            # 4. dump new config to file
+            #  dump new config to file
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
@@ -168,7 +220,8 @@ def automation_manager_agent(config_path, **kwargs):
                       " ~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                       ";volttron-ctl install " +
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
-                      "--tag automation_{}".format(automation_id))  # TODO : Add command auto start agent
+                      "--tag automation_{}"+
+                      ";volttron-ctl start --tag automation_{}".format(automation_id, automation_id))
 
     Agent.__name__ = 'automationmanager'
     return AutomationAgent(config_path, **kwargs)
