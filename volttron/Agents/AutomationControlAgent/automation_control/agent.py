@@ -48,7 +48,7 @@ def scenecontrol_agent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-
+    topic_tricker = ''
     conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                             password=db_password)
     cur = conn.cursor()
@@ -59,6 +59,9 @@ def scenecontrol_agent(config_path, **kwargs):
             triger_device = row[2]
             triger_device_str = ((triger_device).replace("['", '', 1)).replace("']", '', 1)
             topic_tricker = '/agent/zmq/update/hive/999/' + triger_device_str
+            print "<<<< subscribe topic >>>>>"
+            print topic_tricker
+
     conn.close()
 
 
@@ -95,7 +98,7 @@ def scenecontrol_agent(config_path, **kwargs):
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
             print ">>"
             print ">>"
-            print "<<<<<<step 1 subscribe triger>>>>>>>>"
+            print "<<<<<< step 1 subscribe triger >>>>>>>>"
             print "--------------------"
             print(" Automation set device = {}".format(self.triger_device))
             print(" Automation set event = {}".format(self.triger_event))
@@ -140,7 +143,7 @@ def scenecontrol_agent(config_path, **kwargs):
         def conditionevent(self):
             print ">>"
             print ">>"
-            print "<<<<<<step 2 check condition event>>>>>>>>"
+            print "<<<<<< step 2 check condition event>>>>>>>>"
 
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
