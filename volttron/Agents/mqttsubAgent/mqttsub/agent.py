@@ -92,7 +92,6 @@ def mqttsub_agent(config_path, **kwargs):
                             print("Create Automation Event")
                             self.VIPPublishApplication(commsg, type_msg)
 
-<<<<<<< HEAD
                         elif type_msg == 'automationdelete':
                             # Execute Delete Automation Function
                             print("Delete Automation Event")
@@ -103,8 +102,6 @@ def mqttsub_agent(config_path, **kwargs):
                             print("Update Automation Event")
                             self.VIPPublishApplication(commsg, type_msg)
 
-=======
->>>>>>> 23ea9cff35df0195f0f76e43c91faa3bbffec749
                         else:
                             print "---------------------------------------"
                             print('Any Topic :')

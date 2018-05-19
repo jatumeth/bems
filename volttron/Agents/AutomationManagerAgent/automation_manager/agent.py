@@ -107,7 +107,6 @@ def automation_manager_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             print("On Start Event")
 
-
         @PubSub.subscribe('pubsub', topic_automation_create)  # On Automation create
         def match_topic_create(self, peer, sender, bus,  topic, headers, message):
             print("Match Topic Create Automation")
@@ -122,15 +121,17 @@ def automation_manager_agent(config_path, **kwargs):
             msg = json.loads(message)
             conf = msg.get('automationconfig', None)
             self.deletedb(conf)
-            # TODO : Agent Development here (Remove Agent)
+            self.remove_automation_agent(conf.get('automation_id'))
 
         @PubSub.subscribe('pubsub', topic_automation_update)
         def match_topic_update(self, peer, sender, bus,  topic, headers, message):
             print("Match Topic Update Automation")
             msg = json.loads(message)
             conf = msg.get('automationconfig', None)
+            automation_id = conf.get('automation_id')
             self.updatedb(conf)
-            # TODO : remove existing Agent and build again
+            self.remove_automation_agent(automation_id)
+            self.build_automation_agent(automation_id)
 
         def updatedb(self, conf):
             if conf is not None:
@@ -240,8 +241,12 @@ def automation_manager_agent(config_path, **kwargs):
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
                       "--tag automation_{}"+
                       ";volttron-ctl start --tag automation_{}".format(automation_id, automation_id))
-                       # TODO : Add command auto start agent
 
+        def remove_automation_agent(self, automation_id):
+            print("check status automation agent")
+            os.system("volttron-ctl stop --tag automation_{}".format(automation_id))
+            os.system("volttron-ctl remove --tag automation_{}".format(automation_id))
+            self.automation_control_path = None
 
     Agent.__name__ = 'automationmanager'
     return AutomationAgent(config_path, **kwargs)
