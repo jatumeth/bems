@@ -77,6 +77,7 @@ def automation_manager_agent(config_path, **kwargs):
     topic_automation_delete = '/ui/agent/update/hive/999/automationdelete'
     topic_automation_update = '/ui/agent/update/hive/999/automationupdate'
 
+
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
     db_port = settings.DATABASES['default']['PORT']
@@ -120,15 +121,17 @@ def automation_manager_agent(config_path, **kwargs):
             msg = json.loads(message)
             conf = msg.get('automationconfig', None)
             self.deletedb(conf)
-            # TODO : Agent Development here (Remove Agent)
+            self.remove_automation_agent(conf.get('automation_id'))
 
         @PubSub.subscribe('pubsub', topic_automation_update)
         def match_topic_update(self, peer, sender, bus,  topic, headers, message):
             print("Match Topic Update Automation")
             msg = json.loads(message)
             conf = msg.get('automationconfig', None)
+            automation_id = conf.get('automation_id')
             self.updatedb(conf)
-            # TODO : remove existing Agent and build again
+            self.remove_automation_agent(automation_id)
+            self.build_automation_agent(automation_id)
 
         def updatedb(self, conf):
             if conf is not None:
@@ -171,6 +174,14 @@ def automation_manager_agent(config_path, **kwargs):
             else:
                 pass
 
+        @PubSub.subscribe('pubsub', topic_automation_create)
+        def on_match(self, peer, sender, bus,  topic, headers, message):
+            print("Match Topic")
+            msg = json.loads(message)
+            conf = msg.get('automationconfig',None)
+            self.insertdb(conf)
+            self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
         def insertdb(self, conf):
 
             if conf is not None :
@@ -212,6 +223,14 @@ def automation_manager_agent(config_path, **kwargs):
             #  Update new agentID to variable (agentID is relate to automation_id)
             launcher.update({'agentid': 'automation_' + automation_id})
             #  dump new config to file
+
+            home_path = expanduser("~")
+            json_path = '/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json'
+
+            launcher = json.load(open(home_path + json_path, 'r'))
+            # 3. Update new agentID to variable (agentID is relate to automation_id)
+            launcher.update({'agentid': 'automation_' + automation_id})
+            # 4. dump new config to file
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
@@ -222,6 +241,12 @@ def automation_manager_agent(config_path, **kwargs):
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
                       "--tag automation_{}"+
                       ";volttron-ctl start --tag automation_{}".format(automation_id, automation_id))
+
+        def remove_automation_agent(self, automation_id):
+            print("check status automation agent")
+            os.system("volttron-ctl stop --tag automation_{}".format(automation_id))
+            os.system("volttron-ctl remove --tag automation_{}".format(automation_id))
+            self.automation_control_path = None
 
     Agent.__name__ = 'automationmanager'
     return AutomationAgent(config_path, **kwargs)

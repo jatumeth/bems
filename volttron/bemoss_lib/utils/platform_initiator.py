@@ -65,7 +65,6 @@ if bool(cur.rowcount):
 else:
     pass
 
-
 cur.execute("select * from information_schema.tables where table_name=%s", ('automation',))
 print bool(cur.rowcount)
 if bool(cur.rowcount):
