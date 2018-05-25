@@ -71,7 +71,7 @@ def mqttsub_agent(config_path, **kwargs):
                     msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
                     if msg.body is not None:
                         commsg = eval(msg.body)
-                        print("message MQTT received dsads")
+                        print("message MQTT received datas")
                         type_msg = commsg.get('type', None)
                         if type_msg.startswith('scene'): # TODO : Recheck condition again
                             print('Found scene')
