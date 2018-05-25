@@ -1,0 +1,9 @@
+{
+
+    "agentid": "hive.platform.agent",
+    "message": "hello",
+    # log-level can be DEBUG, INFO, WARN or ERROR
+    # verbosity is decreased from left to right above
+    # default: INFO
+    "log-level": "INFO"
+}

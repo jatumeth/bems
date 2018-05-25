@@ -8,6 +8,7 @@ from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
+
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
@@ -63,6 +64,9 @@ def scenecontrol_agent(config_path, **kwargs):
             self.token = None
             self.url = None
             self.reload_config()  # Reload Scene when Agent Start
+            self._message = self.config.get('message', DEFAULT_MESSAGE)
+            self._heartbeat_period = self.config.get('heartbeat_period',
+                                                     DEFAULT_HEARTBEAT_PERIOD)
             _log.info("init attribute to Agent")
 
         @Core.receiver('onsetup')
@@ -75,8 +79,9 @@ def scenecontrol_agent(config_path, **kwargs):
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
-            _log.debug("VERSION IS: {}".format(self.core.version()))
-            print('Debug')
+            if self._heartbeat_period != 0:
+                self.vip.heartbeat.start_with_period(self._heartbeat_period)
+                self.vip.health.set_status(STATUS_GOOD, self._message)
             self.resync_scene()
 
         @PubSub.subscribe('pubsub', topic_scenecontrol)
