@@ -190,12 +190,6 @@ def scenecontrol_agent(config_path, **kwargs):
             except Exception as Error:
                 print('Reload Config to Agent')
 
-        @Core.periodic(10)
-        def dead_function(self):
-            x = 'Fuck'
-            ans =x/0
-
-
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)
 
