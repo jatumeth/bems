@@ -7,13 +7,13 @@ After=network.target
 
 [Service]
 Type=simple
-User=volttron
-Group=volttron
-WorkingDirectory=/var/lib/volttron
+User=pea
+Group=pea
+WorkingDirectory=/home/pea/workspace/hive_os
 #Uncomment and change this to specify a different VOLTTRON_HOME
-#Environment="VOLTTRON_HOME=/home/volttron/.volttron"
-ExecStart=/var/lib/volttron/env/bin/volttron -vv
-ExecStop=/var/lib/volttron/env/bin/volttron-ctl shutdown --platform
+Environment="VOLTTRON_HOME=/home/pea/.volttron"
+ExecStart=/home/pea/workspace/hive_os/volttron/env/bin/volttron -vv
+ExecStop=/home/pea/workspace/hive_os/volttron/env/bin/volttron-ctl shutdown --platform
 
 [Install]
 WantedBy=multi-user.target

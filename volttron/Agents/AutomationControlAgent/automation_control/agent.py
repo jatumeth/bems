@@ -94,6 +94,7 @@ def scenecontrol_agent(config_path, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.load_config()
 
+
         @PubSub.subscribe('pubsub', topic_tricker)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
             print ">>"
@@ -188,6 +189,11 @@ def scenecontrol_agent(config_path, **kwargs):
                         {'Type': 'HiVE Scene Control'}, message)
             except Exception as Error:
                 print('Reload Config to Agent')
+
+        @Core.periodic(10)
+        def dead_function(self):
+            x = 'Fuck'
+            ans =x/0
 
 
     Agent.__name__ = 'scenecontrolAgent'
