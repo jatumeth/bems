@@ -79,8 +79,9 @@ class API:
         conve_json = json.loads(data)
         print conve_json
         self.set_variable('label', str(conve_json["label"]).upper())
-        self.set_variable('device_status', str(conve_json["status"]).upper().upper())
         self.set_variable('unitTime', conve_json["unitTime"])
+        # self.set_variable('status', str(conve_json["status"]).upper())
+        self.set_variable('battery', conve_json["battery"])
         self.set_variable('device_type', str(conve_json["type"]).upper())
 
     def printDeviceStatus(self):
@@ -88,9 +89,10 @@ class API:
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
         print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('device_status')))
+        print(" battery = {}".format(self.get_variable('battery')))
+        # print(" status = {}".format(self.get_variable('status')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('device_type')))
+        print(" type = {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
@@ -139,7 +141,7 @@ def main():
 
     # -------------Kittchen----------------
 
-    RelaySW = API(model='one', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='dc53a370-ed35-4228-9dc2-b0b022f28624')
+    RelaySW = API(model='one', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light', url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/water/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='23706e8f-af2f-4bbf-8a4e-0b060df68d5c')
     RelaySW.getDeviceStatus()
     # RelaySW.setDeviceStatus({"status": "ON"})
 
