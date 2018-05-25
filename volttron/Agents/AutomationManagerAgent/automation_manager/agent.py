@@ -107,7 +107,7 @@ def automation_manager_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             print("On Start Event")
             # self.build_automation_agent(55)
-            
+
         @PubSub.subscribe('pubsub', topic_automation_create)  # On Automation create
         def match_topic_create(self, peer, sender, bus,  topic, headers, message):
             print("Match Topic Create Automation")
