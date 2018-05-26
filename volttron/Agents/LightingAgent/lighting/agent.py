@@ -164,9 +164,9 @@ def lighting_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
             except Exception as er:
                 print er
 

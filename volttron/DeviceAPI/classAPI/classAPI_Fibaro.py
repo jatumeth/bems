@@ -160,7 +160,7 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/illuminances/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'cb26f6a2-dd75-4c54-b3c1-21991c00bde5')
+    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/illuminances/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = 'cb26f6a2-dd75-4c54-b3c1-21991c00bde5')
     Fibaro.getDeviceStatus()
     # Fibaro.printDeviceStatus()
 
