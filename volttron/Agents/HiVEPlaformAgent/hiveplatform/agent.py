@@ -9,10 +9,12 @@ import settings
 from pprint import pformat
 import subprocess as sp
 import os
+
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
+from volttron.platform.aip import AIPplatform
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -32,10 +34,7 @@ def hiveplatform_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    agent_id = get_config('agent_id')
-    topic_scenecontrol = '/ui/agent/update/hive/999/scenecontrol'
-    topic_agent_reload = '/agent/update/hive/999/reload'
-    topic_token_reload = '/ui/agent/update/hive/999/login'
+    topic_update_agent = 'agent/update/hive/999/updateagent'
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -56,6 +55,11 @@ def hiveplatform_agent(config_path, **kwargs):
             self._message = self.config.get('message', DEFAULT_MESSAGE)
             self._heartbeat_period = self.config.get('heartbeat_period',
                                                      DEFAULT_HEARTBEAT_PERIOD)
+            home = os.path.expanduser('~')
+            self.volttron_home = home+'/.volttron/'
+            self.AIP = AIPplatform(self)
+            self.agent_tags = None
+
             try:
                 self._heartbeat_period = int(self._heartbeat_period)
             except:
@@ -83,32 +87,48 @@ def hiveplatform_agent(config_path, **kwargs):
             if self._heartbeat_period != 0:  # ON Start Event enable Agent's Heartbeat
                 self.vip.heartbeat.start_with_period(self._heartbeat_period)
                 self.vip.health.set_status(STATUS_GOOD, self._message)
+            self.agent_tags = self.list__all_agent_tag()  # On Start Event Update registered Agent
+
+        @PubSub.subscribe('pubsub', topic_update_agent)
+        def match_topic_agentupdate(self, peer, sender, bus,  topic, headers, message):
+            #  On Match Topic Update Registered Agent to Self Variable
+            _log.info("New Agent Updte in platform.")
+            self.agent_tags = self.list__all_agent_tag()
+
+        def list__all_agent_tag(self):
+
+            agents_uuid = os.listdir(self.volttron_home + 'agents')
+            agent_tags = []
+            for agent_uuid in agents_uuid:
+                agent_tags.append(self.AIP.agent_tag(agent_uuid))
+            return agent_tags
 
         @Core.periodic(30)
         def check_status_agent(self):
-            out = sp.check_output('volttron-ctl status', shell=True)
-            status = out.split('\n')
-            status = status[0:-1]  # Remove '' After split('\n') at end of list
-            for row in status:
+            agent_tags = self.agent_tags
+            for tag in agent_tags:
+                row = sp.check_output('volttron-ctl status --tag {}'.format(tag), shell =True)
                 if row.find('running') == -1:  # Agent not running condition
                     if row.split(' ')[-1] != '0':
                         # Agent Dead Found Here
-                        uuid = row.split(' ')[0]
-                        os.system('volttron-ctl restart {}'.format(uuid))
-                        print('Restart Agent : {}'.format(row.split(' ')[3])) # Index 3 is a TAG of Agent
+                        # uuid = row.split(' ')[0]
+                        os.system('volttron-ctl restart --tag {}'.format(tag))
+                        # print('Restart Agent : {}'.format(row.split(' ')[3])) # Index 3 is a TAG of Agent
                         _log.info('Auto Restart Agent {}'.format(row.split(' ')[3]))
 
                     elif row.split(' ')[-1] == '0':
                         # Agent Not Start Found Here
-                        print('Agent {} not running'.format(row.split(' ')[3]))
-                        pass
+                        # print('Agent {} not running'.format(row.split(' ')[3]))
+                        _log.info("Agent tag {} is not start.".format(tag))
 
                 else:
                     # Agent run normaly Found Here
-                    print('Agent {} is Running'.format(row.split(' ')[3]))
+                    # print('Agent {} is Running'.format(row.split(' ')[3]))
+                    _log.info("Agent tag {} is running.".format(tag))
 
     Agent.__name__ = 'hiveplatformAgent'
     return HiVEPlatformAgent(config_path, **kwargs)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''

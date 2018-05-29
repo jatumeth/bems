@@ -76,7 +76,7 @@ def automation_manager_agent(config_path, **kwargs):
     topic_automation_create = '/ui/agent/update/hive/999/automationcreate'
     topic_automation_delete = '/ui/agent/update/hive/999/automationdelete'
     topic_automation_update = '/ui/agent/update/hive/999/automationupdate'
-
+    topic_update_agent = 'agent/update/hive/999/updateagent'
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -106,7 +106,8 @@ def automation_manager_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             print("On Start Event")
-            # self.build_automation_agent(55)
+            # self.build_automation_agent(55)  #  Uncomment for Test Create new agent event
+            # self.publish_agentupdate_topic()
 
         @PubSub.subscribe('pubsub', topic_automation_create)  # On Automation create
         def match_topic_create(self, peer, sender, bus,  topic, headers, message):
@@ -115,6 +116,7 @@ def automation_manager_agent(config_path, **kwargs):
             conf = msg.get('automationconfig', None)
             self.insertdb(conf)
             self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+            self.publish_agentupdate_topic()  # Pub Message to HiVEPlatfom Agent
 
         @PubSub.subscribe('pubsub', topic_automation_delete)  # On Automation delete
         def match_topic_delete(self, peer, sender, bus,  topic, headers, message):
@@ -123,6 +125,7 @@ def automation_manager_agent(config_path, **kwargs):
             conf = msg.get('automationconfig', None)
             self.deletedb(conf)
             self.remove_automation_agent(conf.get('automation_id'))
+            self.publish_agentupdate_topic()  # Pub Message to HiVEPlatfom Agent
 
         @PubSub.subscribe('pubsub', topic_automation_update)
         def match_topic_update(self, peer, sender, bus,  topic, headers, message):
@@ -133,6 +136,7 @@ def automation_manager_agent(config_path, **kwargs):
             self.updatedb(conf)
             self.remove_automation_agent(automation_id)
             self.build_automation_agent(automation_id)
+            self.publish_agentupdate_topic()  # Pub Message to HiVEPlatfom Agent
 
         def updatedb(self, conf):
             if conf is not None:
@@ -206,6 +210,11 @@ def automation_manager_agent(config_path, **kwargs):
             else:
                 pass
 
+        def publish_agentupdate_topic(self):  # Pub Message to HiVEPlatform Agent
+            msg = {}
+            print("New Agent Registered")
+            self.vip.pubsub.publish('pubsub', topic_update_agent, message=msg)
+
         def build_automation_agent(self, automation_id):
             print(' >>> Build Agent Process')
             #  get PATH Environment
@@ -223,8 +232,8 @@ def automation_manager_agent(config_path, **kwargs):
                       "volttron-pkg configure ~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
                       " ~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                       ";volttron-ctl install " +
-                      "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl "+
-                      "--tag automation_{}".format(automation_id)+
+                      "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
+                      "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))
 
         def remove_automation_agent(self, automation_id):
