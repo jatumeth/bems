@@ -66,7 +66,7 @@ def lighting_agent(config_path, **kwargs):
     url = get_config('url')
     api = get_config('api')
     username = get_config('username')
-    address = "http://192.168.1.105:80"
+    address = "http://192.168.1.102:80"
     # _address = address.replace('http://', '')
     # _address = address.replace('https://', '')
     # try:  # validate whether or not address is an ip address
@@ -166,9 +166,9 @@ def lighting_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
             except Exception as er:
                 print er
 

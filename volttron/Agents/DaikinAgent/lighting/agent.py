@@ -1,5 +1,4 @@
-
-from __future__ import absolute_import
+# -*- coding: utf-8 -*-
 from datetime import datetime
 import logging
 import sys
@@ -24,25 +23,21 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
-apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
-authDomainconfig = settings.CHANGE['change']['authLight']
-dataBaseconfig = settings.CHANGE['change']['databaseLight']
-stoRageconfig = settings.CHANGE['change']['storageLight']
-
 try:
     config = {
-      "apiKey": apiKeyconfig,
-      "authDomain": authDomainconfig,
-      "databaseURL": dataBaseconfig,
-      "storageBucket": stoRageconfig,
+      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
+      "authDomain": "hive-rt-mobile-backend.fi+rebaseapp.com",
+      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
+      "storageBucket": "bucket.appspot.com",
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
+
     print er
 
 # Step1: Agent Initialization
-def opencloseing_agent(config_path, **kwargs):
+def lighting_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -50,7 +45,7 @@ def opencloseing_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a opencloseing agent
+    # List of all keywords for a lighting agent
     agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
@@ -66,9 +61,9 @@ def opencloseing_agent(config_path, **kwargs):
     else:
         hue_username = ''
     device_type = get_config('type')
-    device = get_config('device')
-    bearer = get_config('bearer')
-    url = get_config('url')
+    # device = get_config('device')
+    # bearer = get_config('bearer')
+    # url = get_config('url')
     api = get_config('api')
     address = get_config('ipaddress')
     _address = address.replace('http://', '')
@@ -87,7 +82,7 @@ def opencloseing_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_opencloseing = settings.DATABASES['default']['TABLE_opencloseing']
+    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -108,26 +103,26 @@ def opencloseing_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class opencloseingAgent(Agent):
+    class LightingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(opencloseingAgent, self).__init__(**kwargs)
+            super(LightingAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
             self._heartbeat_period = heartbeat_period
             self.model = model
             self.device_type = device_type
-            self.url = url
-            self.device = device
-            self.bearer = bearer
+            # self.url = url
+            # self.device = device
+            # self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.openclose = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url)
+            self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id
+                                )
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -152,9 +147,7 @@ def opencloseing_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            self.openclose.getDeviceStatus()
-            
-            self.StatusPublish(self.openclose.variables)
+            self.Light.getDeviceStatus()
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -168,21 +161,13 @@ def opencloseing_agent(config_path, **kwargs):
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_contact").set(self.openclose.variables['device_contact'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.openclose.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_temp").set(self.Light.variables['current_temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_settemp").set(self.Light.variables['set_temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_sethumid").set(self.Light.variables['set_humidity'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_mode").set(self.Light.variables['mode'])
             except Exception as er:
                 print er
-
-        def StatusPublish(self, commsg):
-            # TODO this is example how to write an app to control AC
-            topic = str('/agent/zmq/update/hive/999/' + str(self.openclose.variables['agent_id']))
-            message = json.dumps(commsg)
-            print ("topic {}".format(topic))
-            print ("message {}".format(message))
-
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'pub device status to ZMQ'}, message)
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u
@@ -191,12 +176,12 @@ def opencloseing_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.openclose.variables)
+            print(self.Light.variables)
             x = {}
-            x["agent_id"] = self.openclose.variables['agent_id']
+            x["agent_id"] = self.Light.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_contact"] = self.openclose.variables['device_contact']
-            x["device_type"] = self.openclose.variables['device_type']
+            x["device_status"] = self.Light.variables['device_status']
+            x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
@@ -205,18 +190,19 @@ def opencloseing_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.openclose.setDeviceStatus(json.loads(message))
+            self.Light.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = 'opencloseingAgent'
-    return opencloseingAgent(config_path, **kwargs)
+    Agent.__name__ = 'LightingAgent'
+    return LightingAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(opencloseing_agent, version=__version__)
+        utils.vip_main(lighting_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 
 if __name__ == '__main__':
     # Entry point for script
+
     sys.exit(main())

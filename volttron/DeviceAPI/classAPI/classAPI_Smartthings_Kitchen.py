@@ -136,8 +136,8 @@ class API:
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
-        print(" label = {}".format(self.get_variable('label')).upper())
-        print(" status = {}".format(self.get_variable('status')).upper())
+        print(" label = {}".format(self.get_variable('device_label')).upper())
+        print(" status = {}".format(self.get_variable('device_status')).upper())
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('type')).upper())
         print("---------------------------------------------")

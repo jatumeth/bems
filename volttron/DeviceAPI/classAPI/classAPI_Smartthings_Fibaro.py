@@ -137,15 +137,15 @@ class API:
 
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
-        print(" LABEL = {}".format(self.get_variable('label')))
-        print(" ILLUMINANCE = {}".format(self.get_variable('illuminance')))
-        print(" TEMPERATURE = {}".format(self.get_variable('TEMPERATURE')))
-        print(" BATTERY = {}".format(self.get_variable('BATTERY')))
+        print(" label = {}".format(self.get_variable('label')))
+        print(" illuminance = {}".format(self.get_variable('illuminance')))
+        print(" temperature = {}".format(self.get_variable('temperature')))
+        print(" battery = {}".format(self.get_variable('battery')))
         print(" STATUS = {}".format(self.get_variable('STATUS')))
-        print(" TAMPER = {}".format(self.get_variable('TAMPER')))
-        print(" HUMIDITY = {}".format(self.get_variable('HUMIDITY')))
-        print(" UNITTIME = {}".format(self.get_variable('unitTime')))
-        print(" DEVICE_TYPE = {}".format(self.get_variable('device_type')))
+        print(" tamper = {}".format(self.get_variable('tamper')))
+        print(" humidity = {}".format(self.get_variable('humidity')))
+        print(" unitTime = {}".format(self.get_variable('unitTime')))
+        print(" device_type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
 
     # ----------------------------------------------------------------------
@@ -155,7 +155,7 @@ class API:
 def main():
 
 
-    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/illuminances/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'cb26f6a2-dd75-4c54-b3c1-21991c00bde5')
+    Fibaro = API(model='Fibaro',type='illuminance',api='API3',agent_id='FibaroAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/illuminances/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = 'cb26f6a2-dd75-4c54-b3c1-21991c00bde5')
 
     Fibaro.getDeviceStatus()
 

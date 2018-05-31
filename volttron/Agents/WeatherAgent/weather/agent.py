@@ -161,15 +161,15 @@ def weathering_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                # db.child(gateway_id).child(agent_id).child("device_status").set(self.weather.variables['device_status'])
-                db.child(gateway_id).child(agent_id).child("wind_speed").set(self.weather.variables['wind_speed'])
-                db.child(gateway_id).child(agent_id).child("temperature").set(self.weather.variables['temp_c'])
-                db.child(gateway_id).child(agent_id).child("city").set(self.weather.variables['city'])
-                db.child(gateway_id).child(agent_id).child("country").set(self.weather.variables['country'])
-                db.child(gateway_id).child(agent_id).child("location").set(self.weather.variables['location'])
-                db.child(gateway_id).child(agent_id).child("humidity").set(self.weather.variables['humidity'])
-                db.child(gateway_id).child(agent_id).child("icon").set(self.weather.variables['icon'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.weather.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("wind_speed").set(self.weather.variables['wind_speed'])
+                db.child(gateway_id).child('devices').child(agent_id).child("temperature").set(self.weather.variables['temp_c'])
+                db.child(gateway_id).child('devices').child(agent_id).child("city").set(self.weather.variables['city'])
+                db.child(gateway_id).child('devices').child(agent_id).child("country").set(self.weather.variables['country'])
+                db.child(gateway_id).child('devices').child(agent_id).child("location").set(self.weather.variables['location'])
+                db.child(gateway_id).child('devices').child(agent_id).child("humidity").set(self.weather.variables['humidity'])
+                db.child(gateway_id).child('devices').child(agent_id).child("icon").set(self.weather.variables['icon'])
             except Exception as er:
                    print er
 

@@ -240,11 +240,11 @@ def main():
 
 
     #
-    # Somfy.setDeviceStatus({"status": "OFF"})
+    Somfy.setDeviceStatus({"status": "OFF"})
 
-    # time.sleep(10)
+    time.sleep(10)
     #
-    # Somfy.setDeviceStatus({"status": "ON"})
+    Somfy.setDeviceStatus({"status": "ON"})
     #
     # time.sleep(10)
     #

@@ -169,15 +169,15 @@ def fibaroing_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                # db.child(gateway_id).child(agent_id).child("device_status").set(self.fibaro.variables['device_status'])
-                db.child(gateway_id).child(agent_id).child("device_type").set(self.fibaro.variables['device_type'])
-                db.child(gateway_id).child(agent_id).child("temperature").set(self.fibaro.variables['TEMPERATURE'])
-                db.child(gateway_id).child(agent_id).child("tamper").set(self.fibaro.variables['TAMPER'])
-                db.child(gateway_id).child(agent_id).child("battery").set(self.fibaro.variables['BATTERY'])
-                db.child(gateway_id).child(agent_id).child("illuminance").set(self.fibaro.variables['ILLUMINANCE'])
-                db.child(gateway_id).child(agent_id).child("humidity").set(self.fibaro.variables['HUMIDITY'])
-                db.child(gateway_id).child(agent_id).child("STATUS").set(self.fibaro.variables['STATUS'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.fibaro.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.fibaro.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("temperature").set(self.fibaro.variables['temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("tamper").set(self.fibaro.variables['tamper'])
+                db.child(gateway_id).child('devices').child(agent_id).child("battery").set(self.fibaro.variables['battery'])
+                db.child(gateway_id).child('devices').child(agent_id).child("illuminance").set(self.fibaro.variables['illuminance'])
+                db.child(gateway_id).child('devices').child(agent_id).child("humidity").set(self.fibaro.variables['humidity'])
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.fibaro.variables['STATUS'])
             except Exception as er:
                 print er
 
