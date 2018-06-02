@@ -128,8 +128,12 @@ class API:
 
         conve_json = json.loads(data)
         print conve_json
+        if str(conve_json["status"]).upper() == 'OFF':
+            dim = '0'
+        else:
+            dim = '100'
         self.set_variable('label', str(conve_json["label"]).upper())
-        self.set_variable('device_status', str(conve_json["status"]).upper())
+        self.set_variable('device_status', dim)
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('device_type', str(conve_json["type"]).upper())
 
@@ -219,11 +223,18 @@ class API:
         msgToDevice = {}
         print
 
-        if postmsg['status'] == 'ON':
+        if postmsg['DIM'] == '0':
 
             msgToDevice['command'] = "OneOn"
+        if postmsg['DIM'] == '25':
 
-        elif postmsg['status'] == 'OFF':
+            msgToDevice['command'] = "TwoOn"
+
+        if postmsg['DIM'] == '50':
+
+            msgToDevice['command'] = "TwoOn"
+
+        elif postmsg['DIM'] == '100':
             msgToDevice['command'] = "TwoOn"
 
         return msgToDevice
@@ -240,14 +251,12 @@ def main():
 
 
     #
-    Somfy.setDeviceStatus({"status": "OFF"})
-
-    time.sleep(10)
-    #
-    Somfy.setDeviceStatus({"status": "ON"})
+    # Somfy.setDeviceStatus({"DIM": "0"})
     #
     # time.sleep(10)
-    #
-    # Somfy.setDeviceStatus({"status": "OFF"})
+    # #
+    # Somfy.setDeviceStatus({"DIM": "25"})
+    # #
+    # time.sleep(10)
 
 if __name__ == "__main__": main()

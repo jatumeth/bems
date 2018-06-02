@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
-import settings
-from pprint import pformat
-from volttron.platform.messaging.health import STATUS_GOOD
-from volttron.platform.vip.agent import Agent, Core, PubSub, compat
+from volttron.platform.vip.agent import Agent, Core, PubSub
 from volttron.platform.agent import utils
-from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
+import settings
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -23,17 +18,21 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.fi+rebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
-
     print er
 
 # Step1: Agent Initialization
@@ -78,6 +77,9 @@ def lighting_agent(config_path, **kwargs):
     # DATABASES
     # print settings.DEBUG
     # db_host = settings.DATABASES['default']['HOST']
+
+
+
     # db_port = settings.DATABASES['default']['PORT']
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
@@ -149,6 +151,8 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
 
+            self.StatusPublish(self.Light.variables)
+
             # TODO update local postgres
             # self.publish_local_postgres()
 
@@ -160,9 +164,12 @@ def lighting_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
+                    datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
+                    self.Light.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
+                    self.Light.variables['device_type'])
             except Exception as er:
                 print er
 
@@ -180,6 +187,17 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['device_status']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
 
         @PubSub.subscribe('pubsub', topic_device_control)
@@ -201,5 +219,4 @@ def main(argv=sys.argv):
 
 if __name__ == '__main__':
     # Entry point for script
-
     sys.exit(main())

@@ -99,13 +99,11 @@ class API:
 
         headers = {"Authorization": self.get_variable("bearer")}
         url = str(self.get_variable("url")+self.get_variable("device"))
-        print(url)
         try:
             r = requests.get(url,
                              headers=headers, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
-            print r.text
             if r.status_code == 200:
                 getDeviceStatusResult = False
 
@@ -122,7 +120,7 @@ class API:
                 self.set_variable('offline_count', self.get_variable('offline_count')+1)
         except Exception as er:
             print er
-            print('ERROR: classAPI_PhilipsHue failed to getDeviceStatus')
+            print('ERROR: classAPI failed to getDeviceStatus')
             self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
     def getDeviceStatusJson(self, data):

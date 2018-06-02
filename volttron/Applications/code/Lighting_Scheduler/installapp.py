@@ -56,9 +56,9 @@ import datetime
 #TODO change auth_token
 auth_token = 'bemoss'
 #TODO change description
-app_description = 'Scheduling APP for lighting load controllers'
+app_description = 'Scheduling APP for ac load controllers'
 #TODO change app_user
-app_user = ["lighting"]
+app_user = ["ac"]
 #------------------------------------------------------------------------------------------------
 
 app_name = find_packages('.')

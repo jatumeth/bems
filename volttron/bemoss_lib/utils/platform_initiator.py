@@ -542,11 +542,11 @@ conn.commit()
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
 #             ("Socket","Belkin International Inc.","WiFi","plugload","WeMo","3WSP","classAPI_WeMo",True,False,4,4,True))
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-#             ("LightSwitch","Belkin International Inc.","WiFi","lighting","WeMo","2WL","classAPI_WeMo",True,False,4,4,True))
+#             ("LightSwitch","Belkin International Inc.","WiFi","ac","WeMo","2WL","classAPI_WeMo",True,False,4,4,True))
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-#             ("Philips hue bridge","Royal Philips Electronics","WiFi","lighting","Philips","2HUE","classAPI_PhilipsHue",True,False,4,4,True))
+#             ("Philips hue bridge","Royal Philips Electronics","WiFi","ac","Philips","2HUE","classAPI_PhilipsHue",True,False,4,4,True))
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-#             ("LMRC-212","WattStopper","BACnet","lighting","WattStopper","2WSL","classAPI_BACnet_WattStopper",True,False,4,4,True))
+#             ("LMRC-212","WattStopper","BACnet","ac","WattStopper","2WSL","classAPI_BACnet_WattStopper",True,False,4,4,True))
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
 #             ("LMPL-201","WattStopper","BACnet","plugload","WattStopper","3WP","classAPI_BACnet_WattStopper",True,False,4,4,True))
 # cur.execute("INSERT INTO supported_devices VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",

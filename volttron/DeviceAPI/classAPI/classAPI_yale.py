@@ -203,7 +203,7 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Yale = API(model='Yale', type='tv', api='API3', agent_id='YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/locks/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = '893f8352-d1ca-4363-b9ee-e71708caa713')
+    Yale = API(model='Yale', type='tv', api='API3', agent_id='09YAL_YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/locks/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = '893f8352-d1ca-4363-b9ee-e71708caa713')
 
 
     # Yale.setDeviceStatus({"command": "unlock"})

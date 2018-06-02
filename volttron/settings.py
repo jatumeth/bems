@@ -133,7 +133,7 @@ DATABASES = {
         'TABLE_application_registered': 'application_registered',
         'TABLE_plugload': 'tplink',
         'TABLE_thermostat': 'thermostat',
-        'TABLE_lighting': 'lighting',
+        'TABLE_lighting': 'ac',
         'TABLE_device_metadata': 'device_metadata',
         'TABLE_vav': 'vav',
         'TABLE_rtu': 'rtu',
@@ -205,7 +205,7 @@ NOTIFICATION = {
         'too_hot': 90,
         'too_cold': 60
     },
-    'lighting':{
+    'ac':{
         'too_dark': 10  # % of brightness
     }
 }

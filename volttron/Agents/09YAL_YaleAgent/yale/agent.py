@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
@@ -23,21 +24,25 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.fi+rebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
-
     print er
 
 # Step1: Agent Initialization
-def lighting_agent(config_path, **kwargs):
+def Doorlock_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -45,9 +50,6 @@ def lighting_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a ac agent
-    agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
-    log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
     agent_id = get_config('agent_id')
     message = get_config('message')
@@ -56,10 +58,7 @@ def lighting_agent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    if model == "Philips hue bridge":
-        hue_username = get_config('username')
-    else:
-        hue_username = ''
+
     device_type = get_config('type')
     device = get_config('device')
     bearer = get_config('bearer')
@@ -82,7 +81,7 @@ def lighting_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
+    # db_table_Doorlock = settings.DATABASES['default']['TABLE_Doorlock']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -103,13 +102,13 @@ def lighting_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class LightingAgent(Agent):
+    class DoorlockAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(LightingAgent, self).__init__(**kwargs)
+            super(DoorlockAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
@@ -149,6 +148,8 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
 
+            self.StatusPublish(self.Light.variables)
+
             # TODO update local postgres
             # self.publish_local_postgres()
 
@@ -161,8 +162,8 @@ def lighting_agent(config_path, **kwargs):
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.Light.variables['status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.Light.variables['type'])
             except Exception as er:
                 print er
 
@@ -181,6 +182,17 @@ def lighting_agent(config_path, **kwargs):
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
+        def StatusPublish(self,commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'},message)
+
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -189,17 +201,16 @@ def lighting_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             self.Light.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = '02ORV_InwallLightingAgent'
-    return LightingAgent(config_path, **kwargs)
+    Agent.__name__ = 'DoorlockAgent'
+    return DoorlockAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(lighting_agent, version=__version__)
+        utils.vip_main(Doorlock_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 
 if __name__ == '__main__':
     # Entry point for script
-
     sys.exit(main())
