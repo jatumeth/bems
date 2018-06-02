@@ -110,7 +110,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def HUE_ON(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/ac/update/bemoss/999/2HUE0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,
@@ -123,7 +123,7 @@ class ListenerAgent(PublishMixin, BaseAgent):
 
     def HUE_OFF(self):
         # TODO this is example how to write an app to control Lighting
-        topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+        topic = "/ui/agent/ac/update/bemoss/999/2HUE0017881cab4b"
         now = datetime.utcnow().isoformat(' ') + 'Z'
         headers = {
             'AgentID': self._agent_id,

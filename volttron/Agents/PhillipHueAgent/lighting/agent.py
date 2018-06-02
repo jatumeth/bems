@@ -45,7 +45,7 @@ def lighting_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a lighting agent
+    # List of all keywords for a ac agent
     agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
@@ -195,7 +195,7 @@ def lighting_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
             self.Light.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = 'LightingAgent'
+    Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):

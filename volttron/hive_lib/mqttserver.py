@@ -53,7 +53,7 @@ def deviceMonitorBehavior():
 
 def hue(commsg):
     # TODO this is example how to write an app to control Lighting
-    topic = "/ui/agent/lighting/update/bemoss/999/2HUE0017881cab4b"
+    topic = "/ui/agent/ac/update/bemoss/999/2HUE0017881cab4b"
     # now = datetime.utcnow().isoformat(' ') + 'Z'
     # headers = {
     #     headers_mod.CONTENT_TYPE: headers_mod.CONTENT_TYPE.PLAIN_TEXT,

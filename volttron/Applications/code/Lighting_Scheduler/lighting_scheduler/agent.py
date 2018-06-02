@@ -78,7 +78,7 @@ def scheduleragent(config_path, **kwargs):
     agent_id = get_config('agent_id')
     clock_time = 1  # schedule is updated every second
     debug_agent = False
-    device_type = 'lighting'
+    device_type = 'ac'
 
     # 3. @params DB interfaces (settings file in ~/workspace/bemoss_os/)
     # 3.1 PostgreSQL (meta-data database) connection information
@@ -128,7 +128,7 @@ def scheduleragent(config_path, **kwargs):
                     _launch_file = str(self.cur.fetchone()[0])
                     with open(_launch_file) as json_data:
                         _new_schedule_object = json.load(json_data)
-                    self.current_schedule_object = _new_schedule_object['lighting']
+                    self.current_schedule_object = _new_schedule_object['ac']
                     # 3. get currently active schedule
                     self.active_scheduler_mode = list()
                     print '{} for Agent: {} >> new active schedule are as follows:'.format(app_name, agent_id)
@@ -221,7 +221,7 @@ def scheduleragent(config_path, **kwargs):
                 # 2. load new schedule from the new launch file
                 with open(_launch_file) as json_data:
                     _new_schedule_object = json.load(json_data)
-                self.current_schedule_object = _new_schedule_object['lighting']
+                self.current_schedule_object = _new_schedule_object['ac']
 
                 # 3. get currently active schedule
                 self.active_scheduler_mode = list()
@@ -437,7 +437,7 @@ def scheduleragent(config_path, **kwargs):
             # 2.  take action based on current time
             # 2.1 case 1: time to change schedule is triggered
             if self.flag_time_to_change_status is True:
-                if debug_agent: print "{} for Agent: {} >> is changing the lighting status, brightness, and color" \
+                if debug_agent: print "{} for Agent: {} >> is changing the ac status, brightness, and color" \
                     .format(app_name, agent_id)
                 try:
                     _headers = {
@@ -452,9 +452,9 @@ def scheduleragent(config_path, **kwargs):
                     # else:
                     #     zone_id = 999  # default core id TODO this has to be changed
                     _topic_Agent_UI_tail = 'bemoss/999/' + agent_id
-                    topic_app_agent = '/ui/agent/lighting/update/' + _topic_Agent_UI_tail
+                    topic_app_agent = '/ui/agent/ac/update/' + _topic_Agent_UI_tail
                     print(topic_app_agent)
-                    # topic_app_agent = '/ui/agent/lighting/update/bemoss/999/2HUEH0017881cab4b'
+                    # topic_app_agent = '/ui/agent/ac/update/bemoss/999/2HUEH0017881cab4b'
 
                     if str(self.brightnessToChange_current) == "None" and str(self.colorToChange_current) == "None":
                         if str(self.statusToChange_current) != "None":  # send only status

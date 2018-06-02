@@ -54,7 +54,6 @@ class API:
                              headers=headers, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
-            print r.text
             if r.status_code == 200:
                 getDeviceStatusResult = False
 
@@ -77,7 +76,6 @@ class API:
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
-        print conve_json
         self.set_variable('label', str(conve_json["label"]).upper())
         self.set_variable('device_status', str(conve_json["status"]).upper().upper())
         self.set_variable('unitTime', conve_json["unitTime"])
@@ -102,14 +100,11 @@ class API:
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
             _data = json.dumps(self.convertPostMsg(postmsg))
             _data = _data.encode(encoding='utf_8')
-            print _data
             try:
                 print "sending requests put"
                 r = requests.put(
                     url,
                     headers=headers, data= _data, timeout=20);
-                # print "15456"
-                # print r.text
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
                 print(" after send a POST request: {}".format(r.status_code))
@@ -129,6 +124,7 @@ class API:
         msgToDevice = {}
         if 'status' in postmsg.keys():
             msgToDevice['command'] = self.get_variable('model').capitalize() + str(postmsg['status'].lower().capitalize())
+            print msgToDevice
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -137,7 +133,7 @@ class API:
 def main():
 
     # -------------Kittchen----------------
-    RelaySW = API(model='two', type='lighting', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
+    RelaySW = API(model='two', type='ac', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
                   bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='4b4358d4-9b91-4161-bbe0-1677aa04148f')
 
     RelaySW.getDeviceStatus()

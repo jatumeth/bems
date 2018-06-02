@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
-import settings
-from pprint import pformat
-from volttron.platform.messaging.health import STATUS_GOOD
-from volttron.platform.vip.agent import Agent, Core, PubSub, compat
+from volttron.platform.vip.agent import Agent, Core, PubSub
 from volttron.platform.agent import utils
-from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
+import settings
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -23,21 +18,26 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.fi+rebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
-
     print er
 
 # Step1: Agent Initialization
-def lighting_agent(config_path, **kwargs):
+def curtain_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -61,6 +61,7 @@ def lighting_agent(config_path, **kwargs):
     else:
         hue_username = ''
     device_type = get_config('type')
+    device_status = get_config('device_status')
     device = get_config('device')
     bearer = get_config('bearer')
     url = get_config('url')
@@ -82,7 +83,7 @@ def lighting_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
+    # db_table_Certaining = settings.DATABASES['default']['TABLE_Certaining']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -103,13 +104,13 @@ def lighting_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class LightingAgent(Agent):
+    class curtain(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(LightingAgent, self).__init__(**kwargs)
+            super(curtain, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
@@ -121,7 +122,7 @@ def lighting_agent(config_path, **kwargs):
             self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
+            self.Certain = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
                                          bearer=self.bearer, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
@@ -147,7 +148,8 @@ def lighting_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            self.Light.getDeviceStatus()
+            self.Certain.getDeviceStatus()
+            self.StatusPublish(self.Certain.variables)
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -159,12 +161,20 @@ def lighting_agent(config_path, **kwargs):
             # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
-            try:
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
-            except Exception as er:
-                print er
+            # try:
+            #     db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+            #     db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(self.Certain.variables['device_status'])
+            #     db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.Certain.variables['device_type'])
+            # except Exception as er:
+            #     print er
+
+            db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
+                datetime.now().replace(microsecond=0).isoformat())
+            db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(
+                self.Certain.variables['device_status'])
+            db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
+                self.Certain.variables['device_type'])
+
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u
@@ -173,33 +183,42 @@ def lighting_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.Light.variables)
+            print(self.Somfy.variables)
             x = {}
-            x["agent_id"] = self.Light.variables['agent_id']
+            x["agent_id"] = self.Certain.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Light.variables['device_status']
-            x["device_type"] = self.Light.variables['device_type']
+            x["device_status"] = self.Certain.variables['device_status']
+            x["device_type"] = self.Certain.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+        
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Certain.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Light.setDeviceStatus(json.loads(message))
+            self.Certain.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = '02ORV_InwallLightingAgent'
-    return LightingAgent(config_path, **kwargs)
+    Agent.__name__ = 'curtain'
+    return curtain(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(lighting_agent, version=__version__)
+        utils.vip_main(curtain_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 
 if __name__ == '__main__':
     # Entry point for script
-
     sys.exit(main())

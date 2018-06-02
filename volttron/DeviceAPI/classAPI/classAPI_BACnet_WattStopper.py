@@ -228,7 +228,7 @@ class API:
 def main():
     #Utilization: test methods
     #Step1: create an object with initialized data from DeviceDiscovery Agent
-    BACnetWattStopper = API(model='LMRC-212',type='lighting',api='API',address='830568i469810079n1')
+    BACnetWattStopper = API(model='LMRC-212',type='ac',api='API',address='830568i469810079n1')
 
     #Step2: Get data from device
     BACnetWattStopper.getDeviceStatus()
