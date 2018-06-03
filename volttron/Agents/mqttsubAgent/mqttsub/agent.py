@@ -86,6 +86,12 @@ def mqttsub_agent(config_path, **kwargs):
                             # Execute Token Stored Function
                             print("Renew Token Event")
                             self.VIPPublishApplication(commsg, type_msg)
+                            # TODO : Pub message again to Notifier agent to Store TOKEN VALUE
+                            self.vip.pubsub.publish('pubsub',
+                                                    {'Type': 'Mobile Update to Gateway'},
+                                                    topic='/ui/agent/update/notifier',
+                                                    message=json.dumps(commsg),
+                                                    )
 
                         elif type_msg == 'automationcreate':
                             # Execute Create Automation Function
@@ -136,9 +142,9 @@ def mqttsub_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'HiVE Application to Gateway'}, message)
 
-
     Agent.__name__ = 'mqttsubAgent'
     return mqttsubAgent(config_path, **kwargs)
+
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
