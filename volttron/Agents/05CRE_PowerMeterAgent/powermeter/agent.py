@@ -17,6 +17,9 @@ import psycopg2
 import psycopg2.extras
 import pyrebase
 import urllib3
+import datetime
+import time
+
 urllib3.disable_warnings()
 
 utils.setup_logging()
@@ -33,19 +36,21 @@ stoRageconfig = settings.CHANGE['change']['storageLight']
 
 try:
     config = {
-      "apiKey": apiKeyconfig,
-      "authDomain": authDomainconfig,
-      "databaseURL": dataBaseconfig,
-      "storageBucket": stoRageconfig,
+        "apiKey": apiKeyconfig,
+        "authDomain": authDomainconfig,
+        "databaseURL": dataBaseconfig,
+        "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
     print er
 
+
 # Step1: Agent Initialization
 def Powermetering_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
+
     def get_config(name):
         try:
             kwargs.pop(name)
@@ -100,12 +105,13 @@ def Powermetering_agent(config_path, **kwargs):
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-    topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
+    topic_device_control = '/ui/agent/update/' + _topic_Agent_UI_tail
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
 
     # 5. @params notification_info
     send_notification = True
+
     # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
     # email_username = settings.NOTIFICATION['email']['username']
     # email_password = settings.NOTIFICATION['email']['password']
@@ -131,7 +137,8 @@ def Powermetering_agent(config_path, **kwargs):
             # self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.Powermeter = self.apiLib.API(model=self.model, type=self.device_type, agent_id=self._agent_id,url=self.url ,device_id=self.device_id)
+            self.Powermeter = self.apiLib.API(model=self.model, type=self.device_type, agent_id=self._agent_id,
+                                              url=self.url, device_id=self.device_id)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -166,36 +173,61 @@ def Powermetering_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
+                    datetime.now().replace(microsecond=0).isoformat())
                 # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("TransID(ID)").set(self.Powermeter.variables['grid_transid'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Date(D)").set(self.Powermeter.variables['grid_date'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Time(T)").set(self.Powermeter.variables['grid_time'])
-                db.child(gateway_id).child('devices').child(agent_id).child("UxTime(UT)").set(self.Powermeter.variables['grid_uxtime'])
-                db.child(gateway_id).child('devices').child(agent_id).child("DeviceID(DID)").set(self.Powermeter.variables['grid_device_id'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Voltage(V)").set(self.Powermeter.variables['grid_voltage'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Current(A)").set(self.Powermeter.variables['grid_current'])
-                db.child(gateway_id).child('devices').child(agent_id).child("EarthLeak(EL)").set(self.Powermeter.variables['grid_earth_leak'])
-                db.child(gateway_id).child('devices').child(agent_id).child("ActivePower(W)").set(self.Powermeter.variables['grid_activePower'])
-                db.child(gateway_id).child('devices').child(agent_id).child("ReactivePower(Var)").set(self.Powermeter.variables['grid_reactivePower'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Powerfactor").set(self.Powermeter.variables['grid_powerfactor'])
-                db.child(gateway_id).child('devices').child(agent_id).child("AccumulatedEnergy(Wh)").set(self.Powermeter.variables['grid_accumulated_energy'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Kvarh").set(self.Powermeter.variables['grid_kvarh'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Show").set(self.Powermeter.variables['grid_cp_afci_arc_count_show'])
-                db.child(gateway_id).child('devices').child(agent_id).child("A0magOut").set(self.Powermeter.variables['grid_cp_a0_magoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("A0rmsOut").set(self.Powermeter.variables['grid_cp_a0_rmsoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("IrmsRate").set(self.Powermeter.variables['grid_cp_Irms_rate'])
-                db.child(gateway_id).child('devices').child(agent_id).child("DcRate").set(self.Powermeter.variables['grid_cp_dc_rate'])
-                db.child(gateway_id).child('devices').child(agent_id).child("B1RmsOut").set(self.Powermeter.variables['grid_cp_b1_rmsoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Afeia").set(self.Powermeter.variables['grid_afe_i_a'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Afev").set(self.Powermeter.variables['grid_afe_v'])
-                db.child(gateway_id).child('devices').child(agent_id).child("PfcHigh").set(self.Powermeter.variables['grid_cp_pfci_t_high'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OperationStatus").set(self.Powermeter.variables['grid_cp_operation_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Powermeter.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TransID(ID)").set(
+                    self.Powermeter.variables['grid_transid'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Date(D)").set(
+                    self.Powermeter.variables['grid_date'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Time(T)").set(
+                    self.Powermeter.variables['grid_time'])
+                db.child(gateway_id).child('devices').child(agent_id).child("UxTime(UT)").set(
+                    self.Powermeter.variables['grid_uxtime'])
+                db.child(gateway_id).child('devices').child(agent_id).child("DeviceID(DID)").set(
+                    self.Powermeter.variables['grid_device_id'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Voltage(V)").set(
+                    self.Powermeter.variables['grid_voltage'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Current(A)").set(
+                    self.Powermeter.variables['grid_current'])
+                db.child(gateway_id).child('devices').child(agent_id).child("EarthLeak(EL)").set(
+                    self.Powermeter.variables['grid_earth_leak'])
+                db.child(gateway_id).child('devices').child(agent_id).child("ActivePower(W)").set(
+                    self.Powermeter.variables['grid_activePower'])
+                db.child(gateway_id).child('devices').child(agent_id).child("ReactivePower(Var)").set(
+                    self.Powermeter.variables['grid_reactivePower'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Powerfactor").set(
+                    self.Powermeter.variables['grid_powerfactor'])
+                db.child(gateway_id).child('devices').child(agent_id).child("AccumulatedEnergy(Wh)").set(
+                    self.Powermeter.variables['grid_accumulated_energy'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Kvarh").set(
+                    self.Powermeter.variables['grid_kvarh'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Show").set(
+                    self.Powermeter.variables['grid_cp_afci_arc_count_show'])
+                db.child(gateway_id).child('devices').child(agent_id).child("A0magOut").set(
+                    self.Powermeter.variables['grid_cp_a0_magoutput'])
+                db.child(gateway_id).child('devices').child(agent_id).child("A0rmsOut").set(
+                    self.Powermeter.variables['grid_cp_a0_rmsoutput'])
+                db.child(gateway_id).child('devices').child(agent_id).child("IrmsRate").set(
+                    self.Powermeter.variables['grid_cp_Irms_rate'])
+                db.child(gateway_id).child('devices').child(agent_id).child("DcRate").set(
+                    self.Powermeter.variables['grid_cp_dc_rate'])
+                db.child(gateway_id).child('devices').child(agent_id).child("B1RmsOut").set(
+                    self.Powermeter.variables['grid_cp_b1_rmsoutput'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Afeia").set(
+                    self.Powermeter.variables['grid_afe_i_a'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Afev").set(
+                    self.Powermeter.variables['grid_afe_v'])
+                db.child(gateway_id).child('devices').child(agent_id).child("PfcHigh").set(
+                    self.Powermeter.variables['grid_cp_pfci_t_high'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OperationStatus").set(
+                    self.Powermeter.variables['grid_cp_operation_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
+                    self.Powermeter.variables['device_type'])
             except Exception as er:
                 print er
 
@@ -207,14 +239,20 @@ def Powermetering_agent(config_path, **kwargs):
             def iothub_client_telemetry_sample_run():
             '''
             print(self.Powermeter.variables)
+
             x = {}
-            x["agent_id"] = self.Powermeter.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Powermeter.variables['device_status']
-            x["device_type"] = self.Powermeter.variables['device_type']
+            x["device_id"] = self.Powermeter.variables['agent_id']
+            x["date_time"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
+            x["gridvoltage"] = self.Powermeter.variables['grid_voltage']
+            x["gridcurrent"] = self.Powermeter.variables['grid_current']
+            x["gridactivePower"] = self.Powermeter.variables['grid_activePower']
+            x["gridreactivePower"] = self.Powermeter.variables['grid_reactivePower']
+            x["device_type"] = 'powermeter'
+
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-        
-        def StatusPublish(self,commsg):
+
+        def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Powermeter.variables['agent_id']))
             message = json.dumps(commsg)
@@ -235,12 +273,14 @@ def Powermetering_agent(config_path, **kwargs):
     Agent.__name__ = 'PowermeteringAgent'
     return PowermeteringAgent(config_path, **kwargs)
 
+
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
         utils.vip_main(Powermetering_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
+
 
 if __name__ == '__main__':
     # Entry point for script
