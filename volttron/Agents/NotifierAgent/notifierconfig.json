@@ -1,0 +1,13 @@
+{
+    "agent": {
+        "exec": "notifieragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "notifier",
+    "backend_url": "http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/",
+    "message": "this is a Notifier agent",
+    "notify_api": "api/v2.0/notifications/",
+    "expo_token" : "" ,
+    "endpoint_expo" :"https://exp.host/--/api/v2/push/send",
+    "token" : ""
+
+}
