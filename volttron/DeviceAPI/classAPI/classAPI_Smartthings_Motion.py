@@ -115,22 +115,22 @@ class API:
 
         conve_json = json.loads(data)
         print conve_json
-        # self.set_variable('contact', str(conve_json["contact"]))
-        # self.set_variable('type', str(conve_json["type"]))
-        # self.set_variable('unitTime', str(conve_json["unitTime"]))
-        # self.set_variable('label', str(conve_json["label"]))
+        self.set_variable('status', str(conve_json["motion"]).upper())
+        self.set_variable('type', str(conve_json["type"]).upper())
+        self.set_variable('unitTime', str(conve_json["unitTime"]))
+        self.set_variable('label', str(conve_json["label"]).upper())
 
 
 
     def printDeviceStatus(self):
 
         print ""
-        # print(" the current status is as follows:")
-        # print(" contact = {}".format(self.get_variable('contact')))
-        # print(" unitTime = {}".format(self.get_variable('unitTime')))
-        # print(" type= {}".format(self.get_variable('type')))
-        # print(" label= {}".format(self.get_variable('label')))
-        # print("---------------------------------------------")
+        print(" the current status is as follows:")
+        print(" STATUS = {}".format(self.get_variable('status')))
+        print(" unitTime = {}".format(self.get_variable('unitTime')))
+        print(" TYPE = {}".format(self.get_variable('type')))
+        print(" LABEL = {}".format(self.get_variable('label')))
+        print("---------------------------------------------")
 
 
 

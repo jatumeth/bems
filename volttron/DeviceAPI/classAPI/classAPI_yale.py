@@ -211,11 +211,15 @@ def main():
     # {"command":"unlock"}
     # time.sleep(10)
     #
-    Yale.setDeviceStatus({"status": "LOCKED"})
-
-    time.sleep(5)
-
     Yale.getDeviceStatus()
+    for i in range (1,20):
+        Yale.setDeviceStatus({"status": "LOCKED"})
+
+        time.sleep(10)
+
+        Yale.setDeviceStatus({"status": "UNLOCKED"})
+
+        time.sleep(10)
     #
     # time.sleep(10)
     #

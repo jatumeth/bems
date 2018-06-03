@@ -24,12 +24,19 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+
+
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -37,7 +44,7 @@ except Exception as er:
     print er
 
 # Step1: Agent Initialization
-def lighting_agent(config_path, **kwargs):
+def fibaroing_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
     def get_config(name):
         try:
@@ -45,7 +52,7 @@ def lighting_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a ac agent
+    # List of all keywords for a fibaroing agent
     agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
     log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
@@ -56,25 +63,24 @@ def lighting_agent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    # if model == "Philips hue bridge":
-    #     hue_username = get_config('username')
-    # else:
-    #     hue_username = ''
+    if model == "Philips hue bridge":
+        hue_username = get_config('username')
+    else:
+        hue_username = ''
     device_type = get_config('type')
     device = get_config('device')
     bearer = get_config('bearer')
     url = get_config('url')
     api = get_config('api')
-    username = get_config('username')
-    address = "http://192.168.1.102:80"
-    # _address = address.replace('http://', '')
-    # _address = address.replace('https://', '')
-    # try:  # validate whether or not address is an ip address
-    #     socket.inet_aton(_address)
-    #     ip_address = _address
-    # except socket.error:
-    #     ip_address = None
-    # identifiable = get_config('identifiable')
+    address = get_config('ipaddress')
+    _address = address.replace('http://', '')
+    _address = address.replace('https://', '')
+    try:  # validate whether or not address is an ip address
+        socket.inet_aton(_address)
+        ip_address = _address
+    except socket.error:
+        ip_address = None
+    identifiable = get_config('identifiable')
 
     # DATABASES
     # print settings.DEBUG
@@ -83,7 +89,7 @@ def lighting_agent(config_path, **kwargs):
     # db_database = settings.DATABASES['default']['NAME']
     # db_user = settings.DATABASES['default']['USER']
     # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
+    # db_table_fibaroing = settings.DATABASES['default']['TABLE_fibaroing']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
     # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
@@ -104,31 +110,26 @@ def lighting_agent(config_path, **kwargs):
     # email_mailServer = settings.NOTIFICATION['email']['mailServer']
     # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
-    class LightingAgent(Agent):
+    class fibaroingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
 
         def __init__(self, config_path, **kwargs):
-            super(LightingAgent, self).__init__(**kwargs)
+            super(fibaroingAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
             self._agent_id = agent_id
             self._message = message
             self._heartbeat_period = heartbeat_period
             self.model = model
             self.device_type = device_type
-            self.username = username
-            self.address = address
-            print "----------------"
-            print address
-            self.user = url
             self.url = url
             self.device = device
             self.bearer = bearer
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url,username=self.username,address=self.address)
+            self.fibaro = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
+                                         bearer=self.bearer, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -153,24 +154,37 @@ def lighting_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-            self.Light.getDeviceStatus()
+            self.fibaro.getDeviceStatus()
+
+            self.StatusPublish(self.fibaro.variables)
 
             # TODO update local postgres
             # self.publish_local_postgres()
 
             # update firebase
-            # self.publish_firebase()
+            self.publish_firebase()
 
             # update Azure IoT Hub
             # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
+
             try:
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
+                    datetime.now().replace(microsecond=0).isoformat())
+                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.motion.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
+                    self.fibaro.variables['type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("unitTime").set(
+                    self.fibaro.variables['unitTime'])
+                db.child(gateway_id).child('devices').child(agent_id).child("Label").set(
+                    self.fibaro.variables['label'])
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
+                    self.fibaro.variables['status'])
             except Exception as er:
                 print er
+
+
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u
@@ -179,29 +193,39 @@ def lighting_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.Light.variables)
+            print(self.fibaro.variables)
             x = {}
-            x["agent_id"] = self.Light.variables['agent_id']
+            x["agent_id"] = self.fibaro.variables['agent_id']
             x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Light.variables['device_status']
-            x["device_type"] = self.Light.variables['device_type']
+            x["device_status"] = self.fibaro.variables['device_status']
+            x["device_type"] = self.fibaro.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
+        def StatusPublish(self,commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.fibaro.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Light.setDeviceStatus(json.loads(message))
+            self.fibaro.setDeviceStatus(json.loads(message))
 
-    Agent.__name__ = '02ORV_InwallLightingAgent'
-    return LightingAgent(config_path, **kwargs)
+    Agent.__name__ = 'fibaroingAgent'
+    return fibaroingAgent(config_path, **kwargs)
 
 def main(argv=sys.argv):
     '''Main method called by the eggsecutable.'''
     try:
-        utils.vip_main(lighting_agent, version=__version__)
+        utils.vip_main(fibaroing_agent, version=__version__)
     except Exception as e:
         _log.exception('unhandled exception')
 

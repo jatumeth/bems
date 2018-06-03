@@ -191,7 +191,8 @@ def main():
 
     RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',
                   url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
-                  bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='214ccfa0-0c41-4c5d-a0e2-6ef71214261d')
+                  bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='4b4358d4-9b91-4161-bbe0-1677aa04148f')
+
     RelaySW.getDeviceStatus()
     RelaySW.setDeviceStatus({"status": "ON"})
     #
