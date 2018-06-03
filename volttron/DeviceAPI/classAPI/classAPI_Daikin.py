@@ -123,12 +123,25 @@ class API:
         else:
             status = "ON"
         print status
+        mode = str(r.text.split(',')[2].split('=')[1])
+
+        if mode == '3':
+            strmode = 'COLD'
+        if mode == '2':
+            strmode = 'DEHUMDIFICATOR'
+        if mode == '4':
+            strmode = 'HOT'
+        if mode == '6':
+            strmode = 'FAN'
+        if mode == '1' or mode == '0' or mode == '7':
+            strmode = 'AUTO'
+
 
         self.set_variable('status', status)
         self.set_variable('current_temperature', (q.text.split(','))[1].split('=')[1])
         self.set_variable('set_temperature', (r.text.split(','))[4].split('=')[1])
         self.set_variable('set_humidity', (r.text.split(','))[5].split('=')[1])
-        self.set_variable('mode', (r.text.split(','))[2].split('=')[1])
+        self.set_variable('mode', strmode)
 
     def printDeviceStatus(self):
 
@@ -168,7 +181,16 @@ class API:
                 elif k == 'stemp':
                     stemp = str((postmsg['stemp']))
                 elif k == 'mode':
-                    mode = str((postmsg['mode']))
+                    if (postmsg['mode']) == 'COLD':
+                        mode = '3'
+                    if (postmsg['mode']) == 'DEHUMDIFICATOR':
+                        mode = '2'
+                    if (postmsg['mode']) == 'HOT':
+                        mode = '4'
+                    if (postmsg['mode']) == 'AUTO':
+                        mode = '1'
+                    if (postmsg['mode']) == 'FAN':
+                        mode = '6'
                 else:
                     m = 1
 
@@ -205,10 +227,10 @@ def main():
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
 
     #
-    AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
+    # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
     # time.sleep(5)
-    # AC.getDeviceStatus()
-    # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "3"})
+    AC.getDeviceStatus()
+    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "AUTO"})
     # AC.setDeviceStatus({'status': 'OFF', 'stemp':'24','device': '1DAIK1200138'})
     AC.getDeviceStatus()
 

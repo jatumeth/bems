@@ -147,9 +147,9 @@ def curtain_agent(config_path, **kwargs):
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
+            print ""
             self.Certain.getDeviceStatus()
-            self.StatusPublish(self.Certain.variables)
+            # self.StatusPublish(self.Certain.variables)
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -208,6 +208,8 @@ def curtain_agent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             self.Certain.setDeviceStatus(json.loads(message))
+            self.Certain.getDeviceStatus()
+            self.publish_firebase()
 
     Agent.__name__ = 'curtain'
     return curtain(config_path, **kwargs)

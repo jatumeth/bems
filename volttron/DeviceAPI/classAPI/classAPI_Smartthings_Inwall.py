@@ -137,13 +137,13 @@ def main():
                   bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='4b4358d4-9b91-4161-bbe0-1677aa04148f')
 
     RelaySW.getDeviceStatus()
-    RelaySW.setDeviceStatus({"status": "ON"})
-
-    time.sleep(5)
-
-    RelaySW.setDeviceStatus({"status": "OFF"})
-
-    time.sleep(5)
-
-    RelaySW.setDeviceStatus({"status": "ON"})
+    # RelaySW.setDeviceStatus({"status": "ON"})
+    #
+    # time.sleep(5)
+    #
+    # RelaySW.setDeviceStatus({"status": "OFF"})
+    #
+    # time.sleep(5)
+    #
+    # RelaySW.setDeviceStatus({"status": "ON"})
 if __name__ == "__main__": main()

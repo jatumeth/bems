@@ -114,25 +114,23 @@ class API:
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
-        self.set_variable('contact', str(conve_json["contact"]))
-        self.set_variable('type', str(conve_json["type"]))
-        self.set_variable('unitTime', str(conve_json["unitTime"]))
-        self.set_variable('label', str(conve_json["label"]))
+        print conve_json
+        # self.set_variable('contact', str(conve_json["contact"]))
+        # self.set_variable('type', str(conve_json["type"]))
+        # self.set_variable('unitTime', str(conve_json["unitTime"]))
+        # self.set_variable('label', str(conve_json["label"]))
 
-        if self.get_variable('contact') == 'closed':
-             print "close"
-        elif self.get_variable('contact') == 'open':
-             print "open"
+
 
     def printDeviceStatus(self):
 
-
-        print(" the current status is as follows:")
-        print(" contact = {}".format(self.get_variable('contact')))
-        print(" unitTime = {}".format(self.get_variable('unitTime')))
-        print(" type= {}".format(self.get_variable('type')))
-        print(" label= {}".format(self.get_variable('label')))
-        print("---------------------------------------------")
+        print ""
+        # print(" the current status is as follows:")
+        # print(" contact = {}".format(self.get_variable('contact')))
+        # print(" unitTime = {}".format(self.get_variable('unitTime')))
+        # print(" type= {}".format(self.get_variable('type')))
+        # print(" label= {}".format(self.get_variable('label')))
+        # print("---------------------------------------------")
 
 
 
@@ -140,7 +138,7 @@ class API:
 def main():
 
 
-   Motion = API(model='Motion',type='motionSensors',api='API3', agent_id='MotionAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8//motionSensors/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = '5f599c0a-190c-4235-9a65-fef4fce8eb39')
+   Motion = API(model='Motion',type='motionSensors',api='API3', agent_id='MotionAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/motions/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = 'd7652ff5-0c70-4adb-9b4a-adaa8e79f23c')
 
    Motion.getDeviceStatus()
 

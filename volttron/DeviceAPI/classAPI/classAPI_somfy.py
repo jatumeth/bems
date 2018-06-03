@@ -165,28 +165,23 @@ class API:
             print (_data)
 
 
-
             try:
                 _data2 =   json.dumps({"command": "TwoOff"})
                 print (_data2)
                 print "sending requests put"
                 r3 = requests.put(url, headers=headers, data=_data, timeout=20);
-                time.sleep(1)
 
                 # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 _data3 =   json.dumps({"command": "OneOff"})
                 print (_data3)
                 print "sending requests put"
                 r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-                time.sleep(1)
 
 
                 print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
 
-                time.sleep(20)
-
-
+                time.sleep(10)
 
                 _data3 =  json.dumps({"command": "OneOff"})
                 print (_data3)
@@ -197,14 +192,12 @@ class API:
                 print (_data2)
                 print "sending requests put"
                 r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
-                time.sleep(1)
 
                 # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 _data3 =   json.dumps({"command": "OneOff"})
                 print (_data3)
                 print "sending requests put"
                 r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-
 
 
             except:
@@ -223,20 +216,68 @@ class API:
         msgToDevice = {}
         print
 
-        if postmsg['DIM'] == '0':
+        try:
 
-            msgToDevice['command'] = "OneOn"
-        if postmsg['DIM'] == '25':
+            if postmsg['DIM'] == '0':
+                msgToDevice['command'] = "OneOn"
+                # msgToDevice['time'] = 10
+                self.set_variable('device_status', '0')
 
-            msgToDevice['command'] = "TwoOn"
+            elif postmsg['DIM'] == '25':
 
-        if postmsg['DIM'] == '50':
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 2
+                self.set_variable('device_status', '25')
 
-            msgToDevice['command'] = "TwoOn"
+            elif postmsg['DIM'] == '50':
 
-        elif postmsg['DIM'] == '100':
-            msgToDevice['command'] = "TwoOn"
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 5
+                self.set_variable('device_status', '50')
 
+            elif postmsg['DIM'] == '100':
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 10
+                self.set_variable('device_status', '100')
+        except:
+            print ""
+
+        try:
+            if postmsg['dim'] == '0':
+
+                msgToDevice['command'] = "OneOn"
+                # msgToDevice['time'] = 10
+                self.set_variable('device_status', '0')
+
+            elif postmsg['dim'] == '25':
+
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 2
+                self.set_variable('device_status', '25')
+
+            elif postmsg['dim'] == '50':
+
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 5
+                self.set_variable('device_status', '50')
+
+            elif postmsg['dim'] == '100':
+                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['time'] = 10
+                self.set_variable('device_status', '100')
+        except:
+            print ""
+
+        try:
+
+            if postmsg['status'] == 'ON':
+
+                msgToDevice['command'] = "TwoOn"
+
+            elif postmsg['status'] == 'OFF':
+                msgToDevice['command'] = "TwoOn"
+        except:
+            print ""
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -247,12 +288,20 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'b206da55-dfce-46c0-9471-6b22d2555da8')
-    Somfy.getDeviceStatus()
+    # Somfy.getDeviceStatus()
+
+    Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
+    # Somfy.setDeviceStatus({"DIM": "0"})
 
 
-    #
+    # time.sleep(10)
+
     # Somfy.setDeviceStatus({"DIM": "0"})
     #
+    # time.sleep(10)
+
+    # Somfy.setDeviceStatus({"status": "OFF"})
+
     # time.sleep(10)
     # #
     # Somfy.setDeviceStatus({"DIM": "25"})
