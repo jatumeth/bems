@@ -172,7 +172,7 @@ def fibaroing_agent(config_path, **kwargs):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
-                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.fibaro.variables['device_status'])
+                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.motion.variables['device_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
                     self.fibaro.variables['device_type'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TEMPERATURE").set(

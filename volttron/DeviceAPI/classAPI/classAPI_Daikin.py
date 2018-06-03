@@ -168,6 +168,18 @@ class API:
             status = format(self.get_variable('status'))
             stemp = format(self.get_variable('set_temperature'))
             mode = format(self.get_variable('mode'))
+            if mode == 'COLD':
+                mode = '3'
+            if mode == 'DEHUMDIFICATOR':
+                mode = '2'
+            if mode == 'HOT':
+                mode = '4'
+            if mode == 'AUTO':
+                mode = '1'
+            if mode == 'FAN':
+                mode = '6'
+
+
 
             if  type(postmsg)== str:
                 postmsg = eval(postmsg)
@@ -193,6 +205,13 @@ class API:
                         mode = '6'
                 else:
                     m = 1
+            print stemp
+            try:
+                stemp = dict(stemp)
+            except:
+                stemp = '25'
+
+
 
             data=str("pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3")
             print data
@@ -230,7 +249,7 @@ def main():
     # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
     # time.sleep(5)
     AC.getDeviceStatus()
-    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "stemp": "20", "mode": "AUTO"})
+    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD"})
     # AC.setDeviceStatus({'status': 'OFF', 'stemp':'24','device': '1DAIK1200138'})
     AC.getDeviceStatus()
 
