@@ -10,7 +10,7 @@ import json
 import socket
 import pyrebase
 import settings
-
+import time
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -160,7 +160,7 @@ def lighting_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -183,7 +183,8 @@ def lighting_agent(config_path, **kwargs):
             print(self.Light.variables)
             x = {}
             x["agent_id"] = self.Light.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['device_status']
             x["device_type"] = self.Light.variables['device_type']
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))

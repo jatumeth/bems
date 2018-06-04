@@ -16,6 +16,7 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
+import time
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -125,6 +126,7 @@ def lighting_agent(config_path, **kwargs):
             self.url = url
             self.device = device
             self.bearer = bearer
+
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
@@ -159,16 +161,18 @@ def lighting_agent(config_path, **kwargs):
             # self.publish_local_postgres()
 
             # update firebase
-            # self.publish_firebase()
+            self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['status'])
+
+                db.child(gateway_id).child('devices').child(agent_id).child("brightness").set(self.Light.variables['brightness'])
+                db.child(gateway_id).child('devices').child(agent_id).child("color").set(self.Light.variables['color'])
             except Exception as er:
                 print er
 
@@ -182,9 +186,12 @@ def lighting_agent(config_path, **kwargs):
             print(self.Light.variables)
             x = {}
             x["agent_id"] = self.Light.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Light.variables['device_status']
-            x["device_type"] = self.Light.variables['device_type']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
+            x["device_status"] = self.Light.variables['status']
+            x["color"] = str(self.Light.variables['color'])
+            x["brightness"] = self.Light.variables['brightness']
+            x["device_type"] = 'lighting'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
