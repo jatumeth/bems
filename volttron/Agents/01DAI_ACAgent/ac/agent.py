@@ -192,7 +192,7 @@ def ac_agent(config_path, **kwargs):
 
             
             x = {}
-            x["agent_id"] = str(self.AC.variables['agent_id'])
+            x["device_id"] = str(self.AC.variables['agent_id'])
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["device_status"] = str(self.AC.variables['status'])
             x["unixtime"] = int(time.time())
