@@ -15,6 +15,7 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
+import time
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -156,7 +157,7 @@ def ac_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
             db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
             db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.AC.variables['status'])
             db.child(gateway_id).child('devices').child(agent_id).child("TEMPERATURE").set(self.AC.variables['current_temperature'])
@@ -188,13 +189,21 @@ def ac_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.AC.variables)
+
+            
             x = {}
-            x["agent_id"] = self.AC.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.AC.variables['device_status']
-            x["device_type"] = self.AC.variables['device_type']
+            x["agent_id"] = str(self.AC.variables['agent_id'])
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["device_status"] = str(self.AC.variables['status'])
+            x["unixtime"] = int(time.time())
+            x["current_temperature"] = str(self.AC.variables['current_temperature'])
+            x["set_temperature"] = str(self.AC.variables['set_temperature'])
+            x["set_humidity"] = str(self.AC.variables['set_humidity'])
+            x["mode"] = str(self.AC.variables['mode'])
+            x["device_type"] = 'airconditioner'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+
 
 
         @PubSub.subscribe('pubsub', topic_device_control)
