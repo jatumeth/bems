@@ -304,18 +304,18 @@ def main():
                                                                        PhilipsHue.get_variable('address')))
 
     PhilipsHue.getDeviceStatus()
-    # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
-    for i in range(1, 100):
-        import random
-        # print(random.randint(0, 255))
-        x = []
-        for i in range(0, 3):
-            x.append(random.randint(0, 255))
-        # print(tuple(x))
-        random_color = str(tuple(x))
-        random_brightness = random.randint(0, 100)
-        PhilipsHue.setDeviceStatus({"status": "ON", "color": random_color, "device": "2HUEH0017881cab4b", "brightness": random_brightness})
-        time.sleep(1)
+    # # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
+    # for i in range(1, 100):
+    #     import random
+    #     # print(random.randint(0, 255))
+    #     x = []
+    #     for i in range(0, 3):
+    #         x.append(random.randint(0, 255))
+    #     # print(tuple(x))
+    #     random_color = str(tuple(x))
+    #     random_brightness = random.randint(0, 100)
+    #     PhilipsHue.setDeviceStatus({"status": "ON", "color": random_color, "device": "2HUEH0017881cab4b", "brightness": random_brightness})
+    #     time.sleep(1)
 
     # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 
