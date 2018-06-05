@@ -80,12 +80,12 @@ def notifier_agent(config_path, **kwargs):
                 self.vip.heartbeat.start_with_period(self._heartbeat_period)
                 self.vip.health.set_status(STATUS_GOOD, self._message)
 
-            # TODO : Stuff for pre config
-            if self.expo_token == '':
-                self.get_expo_token()  # First Agent Started it need Expo Token for Push NotiFy Services
-
-            else:
-                pass
+            # # TODO : Stuff for pre config
+            # if self.expo_token == '':
+            #     self.get_expo_token()  # First Agent Started it need Expo Token for Push NotiFy Services
+            #
+            # else:
+            #     pass
 
         @PubSub.subscribe('pubsub', topic_device_notify)
         def match_device_alert(self, peer, sender, bus, topic, headers, message):
@@ -99,11 +99,11 @@ def notifier_agent(config_path, **kwargs):
                         "Content-Type": "application/json",
                     },
                     data=json.dumps({
-                        "body": "Message : {}".format(msg.get('Some Key for Msg Content')), # TODO : Change Key of Msg
-                        "to": "ExponentPushToken[{}]".format(self.expo_token),
-                        "title": "{}".format(msg.get('May Be Key Title')), #  TODO : Change Key
+                        "body": "Message : {}".format(msg.get('body', None)), # TODO : Change Key of Msg
+                        "to": "{}".format(self.expo_token),
+                        "title": "{}".format(msg.get('title', None)), #  TODO : Change Key
                         "sound": "default"
-                    })  # Temp Expo Token :  "ExponentPushToken[t9ufzPGg-D_0Qx0Xgh-44-]"
+                    })  
                 )
 
             except Exception as Err :
@@ -115,36 +115,39 @@ def notifier_agent(config_path, **kwargs):
             print(' >>> Reload Token')
             msg = json.loads(message)
             new_token = msg.get('token', None)
-            self.config.update({'token': new_token})
+            expo_token = msg.get('noti_token', None)
+
+            self.config.update({'token': new_token,
+                                'noti_token': expo_token})
             config_dict = self.config
             json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
 
-        def get_expo_token(self):
-            print("Get Expo Token ...")
-            # TODO  : call get expo_token from API Here
-            try:
-                url = self.url
-                response = requests.get(url=url,
-                                        headers={"Authorization": "Token {token}".format(token=self.token),
-                                                 "Content-Type": "application/json; charset=utf-8"
-                                                 },
-                                        data=json.dumps({}))
-
-                self.expo_token = (json.loads(response.content)).get('expo_token')
-                self.config.update({'expo_token': self.expo_token,
-                                    'token': self.token})
-
-                #  Try to dumps new configuration to json config file
-                config_dict = self.config
-                json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
-
-            except response.status_code != 200 :
-                print('STATUS CODE INVALID')
-                if json.loads(response.content).get('detail').__contains__('Invalid token'):
-                    print('Token Invalid')
-
-            except Exception as err :
-                print("Exception Error : {}".format(err))
+        # def get_expo_token(self):
+        #     print("Get Expo Token ...")
+        #     # TODO  : call get expo_token from API Here
+        #     try:
+        #         url = self.url
+        #         response = requests.get(url=url,
+        #                                 headers={"Authorization": "Token {token}".format(token=self.token),
+        #                                          "Content-Type": "application/json; charset=utf-8"
+        #                                          },
+        #                                 data=json.dumps({}))
+        #
+        #         self.expo_token = (json.loads(response.content)).get('expo_token')
+        #         self.config.update({'expo_token': self.expo_token,
+        #                             'token': self.token})
+        #
+        #         #  Try to dumps new configuration to json config file
+        #         config_dict = self.config
+        #         json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
+        #
+        #     except response.status_code != 200 :
+        #         print('STATUS CODE INVALID')
+        #         if json.loads(response.content).get('detail').__contains__('Invalid token'):
+        #             print('Token Invalid')
+        #
+        #     except Exception as err :
+        #         print("Exception Error : {}".format(err))
 
     Agent.__name__ = 'notifierAgent'
     return NotifierAgent(config_path, **kwargs)

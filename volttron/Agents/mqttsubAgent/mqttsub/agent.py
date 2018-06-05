@@ -88,8 +88,7 @@ def mqttsub_agent(config_path, **kwargs):
                             self.VIPPublishApplication(commsg, type_msg)
                             # TODO : Pub message again to Notifier agent to Store TOKEN VALUE
                             self.vip.pubsub.publish('pubsub',
-                                                    {'Type': 'Mobile Update to Gateway'},
-                                                    topic='/ui/agent/update/notifier',
+                                                    '/ui/agent/update/notifier',
                                                     message=json.dumps(commsg),
                                                     )
 
