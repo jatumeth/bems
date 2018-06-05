@@ -17,8 +17,10 @@ import psycopg2
 import psycopg2.extras
 import pyrebase
 import urllib3
-import datetime
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 urllib3.disable_warnings()
 
@@ -166,8 +168,8 @@ def Powermetering_agent(config_path, **kwargs):
             self.Powermeter.getDeviceStatus()
 
             self.StatusPublish(self.Powermeter.variables)
-            # TODO update local postgres
-            # self.publish_local_postgres()
+
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -242,7 +244,7 @@ def Powermetering_agent(config_path, **kwargs):
 
             x = {}
             x["device_id"] = self.Powermeter.variables['agent_id']
-            x["date_time"] = datetime.datetime.now().replace(microsecond=0).isoformat()
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["gridvoltage"] = self.Powermeter.variables['grid_voltage']
             x["gridcurrent"] = self.Powermeter.variables['grid_current']
@@ -251,6 +253,30 @@ def Powermetering_agent(config_path, **kwargs):
             x["device_type"] = 'powermeter'
 
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "device_id": str(self.Powermeter.variables['agent_id']),
+                    "device_type": "powermeter",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                    "grid_voltage": str(self.Powermeter.variables['grid_voltage']),
+                    "grid_current": str(self.Powermeter.variables['grid_voltage']),
+                    "grid_activepower": str(self.Powermeter.variables['grid_activePower']),
+                    "grid_reactivepower": str(self.Powermeter.variables['grid_reactivePower']),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC

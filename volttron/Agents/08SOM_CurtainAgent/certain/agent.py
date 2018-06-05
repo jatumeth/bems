@@ -11,6 +11,10 @@ import socket
 import pyrebase
 import settings
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
+
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -151,8 +155,7 @@ def curtain_agent(config_path, **kwargs):
             self.Certain.getDeviceStatus()
             # self.StatusPublish(self.Certain.variables)
 
-            # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -161,20 +164,15 @@ def curtain_agent(config_path, **kwargs):
             self.publish_azure_iot_hub()
 
         def publish_firebase(self):
-            # try:
-            #     db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-            #     db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(self.Certain.variables['device_status'])
-            #     db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.Certain.variables['device_type'])
-            # except Exception as er:
-            #     print er
-
-            db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
-                datetime.now().replace(microsecond=0).isoformat())
-            db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(
-                self.Certain.variables['device_status'])
-            db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
-                self.Certain.variables['device_type'])
-
+            try:
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
+                    datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(
+                    self.Certain.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
+                    self.Certain.variables['device_type'])
+            except Exception as er:
+                print er
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u
@@ -191,6 +189,28 @@ def curtain_agent(config_path, **kwargs):
             x["device_status"] = self.Certain.variables['device_status']
             x["device_type"] = 'certain'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.Certain.variables['device_status']),
+                    "device_id": str(self.Certain.variables['agent_id']),
+                    "device_type": "curtain",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
         
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
