@@ -16,6 +16,7 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
+import time
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -157,7 +158,7 @@ def Doorlock_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -176,10 +177,11 @@ def Doorlock_agent(config_path, **kwargs):
             '''
             print(self.Light.variables)
             x = {}
-            x["agent_id"] = self.Light.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.Light.variables['device_status']
-            x["device_type"] = self.Light.variables['device_type']
+            x["device_id"] = self.Light.variables['agent_id']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
+            x["device_status"] = self.Light.variables['status']
+            x["device_type"] = 'doorlock'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def StatusPublish(self,commsg):

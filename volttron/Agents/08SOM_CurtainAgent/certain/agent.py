@@ -10,7 +10,7 @@ import json
 import socket
 import pyrebase
 import settings
-
+import time
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -158,7 +158,7 @@ def curtain_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             # try:
@@ -183,12 +183,13 @@ def curtain_agent(config_path, **kwargs):
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-            print(self.Somfy.variables)
+            print(self.Certain.variables)
             x = {}
-            x["agent_id"] = self.Certain.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
+            x["device_id"] = self.Certain.variables['agent_id']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
             x["device_status"] = self.Certain.variables['device_status']
-            x["device_type"] = self.Certain.variables['device_type']
+            x["device_type"] = 'certain'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
         
         def StatusPublish(self, commsg):

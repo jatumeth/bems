@@ -185,7 +185,7 @@ def lighting_agent(config_path, **kwargs):
             '''
             print(self.Light.variables)
             x = {}
-            x["agent_id"] = self.Light.variables['agent_id']
+            x["device_id"] = self.Light.variables['agent_id']
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']

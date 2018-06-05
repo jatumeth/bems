@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-5tg b
 from __future__ import absolute_import
 from datetime import datetime
 import logging
@@ -16,7 +16,7 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
-
+import time
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -177,7 +177,7 @@ def netatmoing_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -213,10 +213,16 @@ def netatmoing_agent(config_path, **kwargs):
             '''
             print(self.netatmo.variables)
             x = {}
-            x["agent_id"] = self.netatmo.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
-            x["device_status"] = self.netatmo.variables['device_status']
-            x["device_type"] = self.netatmo.variables['device_type']
+            x["device_id"] = self.netatmo.variables['agent_id']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
+            x["noise"] = self.netatmo.variables['noise']
+            x["humidity"] = self.netatmo.variables['humidity']
+            x["pressure"] = self.netatmo.variables['pressure']
+            x["temperature"] = self.netatmo.variables['temperature']
+            x["outdoor_temperature"] = self.netatmo.variables['outdoor_temperature']
+            x["outdoor_humidity"] = self.netatmo.variables['outdoor_humidity']
+            x["device_type"] = 'weathersensor'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def StatusPublish(self, commsg):

@@ -16,7 +16,7 @@ import socket
 import psycopg2
 import psycopg2.extras
 import pyrebase
-
+import time
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -163,7 +163,7 @@ def opencloseing_agent(config_path, **kwargs):
             self.publish_firebase()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -193,10 +193,11 @@ def opencloseing_agent(config_path, **kwargs):
             '''
             print(self.openclose.variables)
             x = {}
-            x["agent_id"] = self.openclose.variables['agent_id']
-            x["dt"] = datetime.now().replace(microsecond=0).isoformat()
+            x["device_id"] = self.openclose.variables['agent_id']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
             x["device_contact"] = self.openclose.variables['device_contact']
-            x["device_type"] = self.openclose.variables['device_type']
+            x["device_type"] = 'openclosesensor'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
