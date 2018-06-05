@@ -11,6 +11,9 @@ import socket
 import pyrebase
 import settings
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -154,8 +157,7 @@ def lighting_agent(config_path, **kwargs):
 
             self.StatusPublish(self.Light.variables)
 
-            # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -172,6 +174,30 @@ def lighting_agent(config_path, **kwargs):
                 # db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['type'])
             except Exception as er:
                 print er
+
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.Light.variables['status']),
+                    "device_id": str(self.Light.variables['agent_id']),
+                    "device_type": "plugload",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
+
+
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u

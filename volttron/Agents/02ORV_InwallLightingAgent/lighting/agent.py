@@ -11,6 +11,11 @@ import socket
 import pyrebase
 import settings
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
+
+
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -74,23 +79,6 @@ def lighting_agent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
 
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-
-
-
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
@@ -130,16 +118,6 @@ def lighting_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
@@ -150,11 +128,9 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Light.getDeviceStatus()
-
             self.StatusPublish(self.Light.variables)
 
-            # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -186,8 +162,29 @@ def lighting_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['device_status']
-            x["device_type"] = self.Light.variables['device_type']
+            x["device_type"] = "lighting"
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.Light.variables['device_status']),
+                    "device_id": str(self.Light.variables['agent_id']),
+                    "device_type": "lighting",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -199,7 +196,6 @@ def lighting_agent(config_path, **kwargs):
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
-
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

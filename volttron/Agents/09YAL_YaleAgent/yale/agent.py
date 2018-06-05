@@ -17,6 +17,9 @@ import psycopg2
 import psycopg2.extras
 import pyrebase
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -152,7 +155,7 @@ def Doorlock_agent(config_path, **kwargs):
             self.StatusPublish(self.Light.variables)
 
             # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -183,6 +186,29 @@ def Doorlock_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['status']
             x["device_type"] = 'doorlock'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.Light.variables['status']),
+                    "device_id": str(self.Light.variables['agent_id']),
+                    "device_type": "doorlock",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
+
 
         def StatusPublish(self,commsg):
             # TODO this is example how to write an app to control AC

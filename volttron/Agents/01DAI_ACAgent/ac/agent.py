@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+
 from datetime import datetime
 import logging
 import sys
@@ -16,6 +18,8 @@ import psycopg2
 import psycopg2.extras
 import pyrebase
 import time
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+import requests
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -151,36 +155,54 @@ def ac_agent(config_path, **kwargs):
             self.AC.getDeviceStatus()
 
             # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
 
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
-            db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-            db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.AC.variables['status'])
-            db.child(gateway_id).child('devices').child(agent_id).child("TEMPERATURE").set(self.AC.variables['current_temperature'])
-            db.child(gateway_id).child('devices').child(agent_id).child("SET_TEMPERATURE").set(self.AC.variables['set_temperature'])
-            db.child(gateway_id).child('devices').child(agent_id).child("SET_HUMIDITY").set(self.AC.variables['set_humidity'])
-            db.child(gateway_id).child('devices').child(agent_id).child("MODE").set(self.AC.variables['mode'])
 
 
         def publish_firebase(self):
 
-            # try:
-            #     db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-            #     db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.AC.variables['status'])
-            #     db.child(gateway_id).child('devices').child(agent_id).child("TEMPERATURE").set(self.AC.variables['current_temperature'])
-            #     db.child(gateway_id).child('devices').child(agent_id).child("SET_TEMPERATURE").set(self.AC.variables['set_temperature'])
-            #     db.child(gateway_id).child('devices').child(agent_id).child("SET_HUMIDITY").set(self.AC.variables['set_humidity'])
-            #     db.child(gateway_id).child('devices').child(agent_id).child("MODE").set(self.AC.variables['mode'])
-            # except Exception as er:
-            #     print er
+            try:
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.AC.variables['status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TEMPERATURE").set(self.AC.variables['current_temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("SET_TEMPERATURE").set(self.AC.variables['set_temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("SET_HUMIDITY").set(self.AC.variables['set_humidity'])
+                db.child(gateway_id).child('devices').child(agent_id).child("MODE").set(self.AC.variables['mode'])
+            except Exception as er:
+                print er
+
+        def publish_postgres(self):
 
 
 
-            print ""
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.AC.variables['status']),
+                    "device_id": str(self.AC.variables['agent_id']),
+                    "device_type": "airconditioner",
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                    "current_temperature": str(self.AC.variables['current_temperature']),
+                    "set_temperature": str(self.AC.variables['set_temperature']),
+                    "mode": str(self.AC.variables['mode']),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
+
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u

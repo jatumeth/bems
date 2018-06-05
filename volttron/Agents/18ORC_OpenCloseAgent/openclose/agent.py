@@ -17,6 +17,10 @@ import psycopg2
 import psycopg2.extras
 import pyrebase
 import time
+import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
+
+
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -157,7 +161,7 @@ def opencloseing_agent(config_path, **kwargs):
             self.StatusPublish(self.openclose.variables)
 
             # TODO update local postgres
-            # self.publish_local_postgres()
+            self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -199,6 +203,27 @@ def opencloseing_agent(config_path, **kwargs):
             x["device_contact"] = self.openclose.variables['device_contact']
             x["device_type"] = 'openclosesensor'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
+        def publish_postgres(self):
+
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            # m = MultipartEncoder(
+            #     fields={
+            #         "motion": str(self.openclose.variables['device_contact']),
+            #         "device_id": str(self.openclose.variables['agent_id']),
+            #         "device_type": "openclosesensor",
+            #         "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+            #     }
+            # )
+            #
+            # r = requests.put(postgres_url,
+            #                  data=m,
+            #                  headers={'Content-Type': m.content_type,
+            #                           "Authorization": postgres_Authorization,
+            #                           })
+            # print r.status_code
 
 
         @PubSub.subscribe('pubsub', topic_device_control)

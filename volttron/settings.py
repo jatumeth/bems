@@ -111,6 +111,13 @@ CHANGE = {
     }
 }
 
+POSTGRES = {
+    'postgres':{
+        'url':'http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/api/v2.0/devices/',
+        'Authorization':'Token 5aecc823567f49f3b0a2f2d8e25e439ce5fd4682',
+    }
+}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
