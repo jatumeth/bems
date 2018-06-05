@@ -249,7 +249,7 @@ def main():
     # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
     # time.sleep(5)
     AC.getDeviceStatus()
-    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD"})
+    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})
     # AC.setDeviceStatus({'status': 'OFF', 'stemp':'24','device': '1DAIK1200138'})
     AC.getDeviceStatus()
 

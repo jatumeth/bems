@@ -166,7 +166,7 @@ def Doorlock_agent(config_path, **kwargs):
             self.Light.getDeviceStatus()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
             try:
@@ -176,7 +176,7 @@ def Doorlock_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
@@ -189,9 +189,9 @@ def Doorlock_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']
-            x["activity_type"] = 'devicemonitor'
-            x["username"] = 'arm'
-            x["device_name"] = 'MY DAIKIN'
+            x["activity_type"] = activity_type
+            x["username"] = username
+            x["device_name"] = 'MY DOORLOCK'
             x["device_type"] = 'doorlock'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
@@ -235,7 +235,11 @@ def Doorlock_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Light.setDeviceStatus(json.loads(message))
+            message = json.loads(message)
+            if 'mode' in message:
+                self.Light.variables['status'] = str(message['status'])
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            self.Light.setDeviceStatus((message))
 
     Agent.__name__ = 'DoorlockAgent'
     return DoorlockAgent(config_path, **kwargs)

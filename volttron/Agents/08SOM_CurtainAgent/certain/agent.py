@@ -152,16 +152,16 @@ def curtain_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             print ""
-            self.Certain.getDeviceStatus()
+            # self.Certain.getDeviceStatus()
+            # # self.StatusPublish(self.Certain.variables)
+            #
             # self.StatusPublish(self.Certain.variables)
-
-            self.StatusPublish(self.Certain.variables)
-
-
-            self.publish_postgres()
-
-            # update firebase
-            self.publish_firebase()
+            #
+            #
+            # self.publish_postgres()
+            #
+            # # update firebase
+            # self.publish_firebase()
 
 
         @Core.periodic(60)
@@ -169,7 +169,7 @@ def curtain_agent(config_path, **kwargs):
 
             self.Certain.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -193,7 +193,7 @@ def curtain_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
@@ -206,8 +206,8 @@ def curtain_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Certain.variables['device_status']
-            x["activity_type"] = 'devicemonitor'
-            x["username"] = 'arm'
+            x["activity_type"] = activity_type
+            x["username"] = username
             x["device_name"] = 'NARAI-Certain'
             x["device_type"] = 'curtain'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
@@ -250,9 +250,14 @@ def curtain_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Certain.setDeviceStatus(json.loads(message))
-            self.Certain.getDeviceStatus()
-            self.publish_firebase()
+
+            message2 = json.loads(message)
+            if 'status' in message2:
+                self.Certain.variables['device_status'] = str(message2['status'])
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message2['username']))
+            self.Certain.setDeviceStatus((message))
+            # self.Certain.getDeviceStatus()
+            # self.publish_firebase()
 
     Agent.__name__ = 'curtain'
     return curtain(config_path, **kwargs)

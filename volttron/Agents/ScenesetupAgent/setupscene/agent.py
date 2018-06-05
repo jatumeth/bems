@@ -104,7 +104,8 @@ def scencesetup_agent(config_path, **kwargs):
                 scene_id_set.add(str(row[0]))
 
             if set({str(scene_id)}).issubset(scene_id_set):
-                self.updatedb(scene_id, scene_name, scene_task=msg)
+                convertmsg = json.loads(msg)
+                self.updatedb(scene_id, scene_name, scene_task=convertmsg)
 
             else:
                 self.insertdb(scene_id, scene_name, scene_task=msg)
