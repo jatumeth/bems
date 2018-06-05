@@ -128,6 +128,8 @@ def opencloseing_agent(config_path, **kwargs):
             self.url = url
             self.device = device
             self.bearer = bearer
+            self.flag = None
+
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.openclose = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
@@ -193,6 +195,23 @@ def opencloseing_agent(config_path, **kwargs):
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
+
+            notimsg = json.dumps({
+                        "body": "Door is opening",
+                        "title": "OpenClose Event",
+                        "sound": "default",
+                        "sender": "opencloseagent",
+                    })
+            if self.openclose.variables['device_contact'] == 'CLOSED':
+                self.flag = False
+
+            if self.openclose.variables['device_contact'] == 'OPEN' and self.flag == False:
+                self.vip.pubsub.publish('pubsub', '/agent/update/hive/999/devicealeart', message=notimsg)
+                self.flag == True
+
+        @PubSub.subscribe('pubsub','agent/update/notified/opencloseagent')
+        def onmatch_notified(self, peer, sender, bus, topic, headers, message):
+            self.flag = True
 
         def publish_azure_iot_hub(self):
             # TODO publish to Azure IoT Hub u

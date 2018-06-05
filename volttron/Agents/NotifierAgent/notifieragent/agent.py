@@ -59,7 +59,7 @@ def notifier_agent(config_path, **kwargs):
             self._agent_id = agent_id
             self.conn = None
             self.cur = None
-            self.expo_token = self.config.get('expo_token', '')
+            self.expo_token = self.config.get('noti_token', '')
             self.token = self.config.get('token')
             self.endpoint_expo = self.config.get('endpoint_expo')
             self.url = self.config.get('backend_url') + self.config.get('notify_api')
@@ -105,6 +105,9 @@ def notifier_agent(config_path, **kwargs):
                         "sound": "default"
                     })  
                 )
+
+                if response.status_code == 200:
+                    self.vip.pubsub.publish('pubsub',topic='agent/update/notified/'+msg.get('sender'))
 
             except Exception as Err :
                 print('Error : {}'.format(Err))
