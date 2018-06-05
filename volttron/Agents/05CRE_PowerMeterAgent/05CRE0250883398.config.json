@@ -11,7 +11,7 @@
     "device_id": "250883398",
     "building_name": "hive",
     "device_type":"powermeter",
-    "device_monitor_time": 5,
+    "device_monitor_time": 2,
     "macaddress": "221445K1200138",
     "model": "one",
     "type": "05CRE",

@@ -162,10 +162,18 @@ def fibaroing_agent(config_path, **kwargs):
             self.StatusPublish(self.fibaro.variables)
 
 
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
+
+            # update Azure IoT Hub
+            self.publish_azure_iot_hub()
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.fibaro.getDeviceStatus()
 
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
@@ -203,6 +211,11 @@ def fibaroing_agent(config_path, **kwargs):
             x["device_status"] = self.fibaro.variables['status']
             x["unixtime"] = int(time.time())
             x["device_type"] = 'motionsensor'
+
+            x["activity_type"] = 'motion'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY Motion'
+
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 

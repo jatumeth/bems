@@ -160,6 +160,11 @@ def Doorlock_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.Light.getDeviceStatus()
+
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -184,6 +189,9 @@ def Doorlock_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY DAIKIN'
             x["device_type"] = 'doorlock'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 

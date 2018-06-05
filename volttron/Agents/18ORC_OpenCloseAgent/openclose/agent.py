@@ -166,6 +166,12 @@ def opencloseing_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.openclose.getDeviceStatus()
+
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -202,6 +208,11 @@ def opencloseing_agent(config_path, **kwargs):
             x["unixtime"] = int(time.time())
             x["device_contact"] = self.openclose.variables['device_contact']
             x["device_type"] = 'openclosesensor'
+
+
+            x["activity_type"] = 'openclose'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY Openclose'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):

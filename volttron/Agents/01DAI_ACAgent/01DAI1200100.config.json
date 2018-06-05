@@ -6,7 +6,7 @@
     "agent_id": "01DAI1200100",
     "api": "classAPI_Daikin",
     "building_name": "hive",
-    "device_monitor_time": 5,
+    "device_monitor_time": 2,
     "macaddress": "1200138",
     "model": "AC123",
     "type": "AC",

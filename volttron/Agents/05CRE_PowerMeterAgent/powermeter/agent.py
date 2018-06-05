@@ -174,6 +174,12 @@ def Powermetering_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.Powermeter.getDeviceStatus()
+
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -230,6 +236,8 @@ def Powermetering_agent(config_path, **kwargs):
                     self.Powermeter.variables['grid_cp_operation_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
                     self.Powermeter.variables['device_type'])
+
+                print "---------------update firebase ok"
             except Exception as er:
                 print er
 
@@ -250,6 +258,9 @@ def Powermetering_agent(config_path, **kwargs):
             x["gridcurrent"] = self.Powermeter.variables['grid_current']
             x["gridactivePower"] = self.Powermeter.variables['grid_activePower']
             x["gridreactivePower"] = self.Powermeter.variables['grid_reactivePower']
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
 
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
