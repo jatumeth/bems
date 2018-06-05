@@ -254,8 +254,10 @@ def curtain_agent(config_path, **kwargs):
             message2 = json.loads(message)
             if 'status' in message2:
                 self.Certain.variables['device_status'] = str(message2['status'])
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message2['username']))
+
             self.Certain.setDeviceStatus((message))
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message2['username']))
+
             # self.Certain.getDeviceStatus()
             # self.publish_firebase()
 

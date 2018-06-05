@@ -244,8 +244,10 @@ def lighting_agent(config_path, **kwargs):
             message = json.loads(message)
             if 'status' in message:
                 self.Light.variables['status'] = str(message['status'])
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+
             self.Light.setDeviceStatus((message))
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)

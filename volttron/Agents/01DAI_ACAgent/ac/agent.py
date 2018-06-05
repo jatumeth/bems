@@ -255,8 +255,9 @@ def ac_agent(config_path, **kwargs):
                 self.AC.variables['set_humidity'] = str(message['set_humidity'])
             if 'mode' in message:
                 self.AC.variables['mode'] = str(message['mode'])
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
             self.AC.setDeviceStatus(message)
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+
 
     Agent.__name__ = '01DAI_ACAgent'
     return DaikinAgent(config_path, **kwargs)
