@@ -122,7 +122,6 @@ class API:
             status = "OFF"
         else:
             status = "ON"
-        print status
         mode = str(r.text.split(',')[2].split('=')[1])
 
         if mode == '3':
@@ -136,11 +135,19 @@ class API:
         if mode == '1' or mode == '0' or mode == '7':
             strmode = 'AUTO'
 
+        set_temperature = (r.text.split(','))[4].split('=')[1]
+        set_humidity = (r.text.split(','))[5].split('=')[1]
+
+        if set_temperature == '--':
+            set_temperature = '20'
+
+        if set_humidity == '--':
+            set_humidity = '70'
 
         self.set_variable('status', status)
         self.set_variable('current_temperature', (q.text.split(','))[1].split('=')[1])
-        self.set_variable('set_temperature', (r.text.split(','))[4].split('=')[1])
-        self.set_variable('set_humidity', (r.text.split(','))[5].split('=')[1])
+        self.set_variable('set_temperature', set_temperature)
+        self.set_variable('set_humidity', set_humidity)
         self.set_variable('mode', strmode)
 
     def printDeviceStatus(self):
@@ -179,8 +186,6 @@ class API:
             if mode == 'FAN':
                 mode = '6'
 
-
-
             if  type(postmsg)== str:
                 postmsg = eval(postmsg)
 
@@ -205,7 +210,6 @@ class API:
                         mode = '6'
                 else:
                     m = 1
-            print stemp
             try:
                 stemp = dict(stemp)
             except:
@@ -249,8 +253,7 @@ def main():
     # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
     # time.sleep(5)
     AC.getDeviceStatus()
-    AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})
+    # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})
     # AC.setDeviceStatus({'status': 'OFF', 'stemp':'24','device': '1DAIK1200138'})
-    AC.getDeviceStatus()
 
 if __name__ == "__main__": main()

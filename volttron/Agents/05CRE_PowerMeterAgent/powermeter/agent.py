@@ -185,6 +185,12 @@ def Powermetering_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
+
+                if (self.Powermeter.variables['grid_voltage'] == None or self.Powermeter.variables[
+                    'grid_current'] == None or
+                        self.Powermeter.variables['grid_activePower'] == None or self.Powermeter.variables[
+                            'grid_reactivePower'] == None):
+                    return
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
@@ -216,24 +222,6 @@ def Powermetering_agent(config_path, **kwargs):
                     self.Powermeter.variables['grid_kvarh'])
                 db.child(gateway_id).child('devices').child(agent_id).child("Show").set(
                     self.Powermeter.variables['grid_cp_afci_arc_count_show'])
-                db.child(gateway_id).child('devices').child(agent_id).child("A0magOut").set(
-                    self.Powermeter.variables['grid_cp_a0_magoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("A0rmsOut").set(
-                    self.Powermeter.variables['grid_cp_a0_rmsoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("IrmsRate").set(
-                    self.Powermeter.variables['grid_cp_Irms_rate'])
-                db.child(gateway_id).child('devices').child(agent_id).child("DcRate").set(
-                    self.Powermeter.variables['grid_cp_dc_rate'])
-                db.child(gateway_id).child('devices').child(agent_id).child("B1RmsOut").set(
-                    self.Powermeter.variables['grid_cp_b1_rmsoutput'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Afeia").set(
-                    self.Powermeter.variables['grid_afe_i_a'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Afev").set(
-                    self.Powermeter.variables['grid_afe_v'])
-                db.child(gateway_id).child('devices').child(agent_id).child("PfcHigh").set(
-                    self.Powermeter.variables['grid_cp_pfci_t_high'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OperationStatus").set(
-                    self.Powermeter.variables['grid_cp_operation_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
                     self.Powermeter.variables['device_type'])
 
@@ -262,6 +250,7 @@ def Powermetering_agent(config_path, **kwargs):
             x["username"] = 'arm'
             x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
+
             if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
                     self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
                 return
