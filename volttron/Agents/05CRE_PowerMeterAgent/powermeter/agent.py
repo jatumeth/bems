@@ -262,7 +262,9 @@ def Powermetering_agent(config_path, **kwargs):
             x["username"] = 'arm'
             x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
-
+            if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
+                    self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
+                return
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):

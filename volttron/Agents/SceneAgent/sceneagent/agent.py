@@ -95,7 +95,7 @@ def scenecontrol_agent(config_path, **kwargs):
             try:
                 tasks = self.sceneconf[str(msg['scene_id'])]
 
-                task_list = tasks['tasks']
+                task_list = json.loads(tasks['tasks'])
                 print('task_list: {}'.format(task_list))
                 for task in task_list:
                     topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])

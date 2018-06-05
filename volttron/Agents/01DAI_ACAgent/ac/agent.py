@@ -162,13 +162,13 @@ def ac_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
-            self.StatusPublish(self.AC.variables)
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-
-            self.AC.getDeviceStatus()
-            self.publish_azure_iot_hub()
+        # @Core.periodic(60)
+        # def deviceMonitorBehavior2(self):
+        #
+        #     self.AC.getDeviceStatus()
+        #     self.publish_azure_iot_hub()
 
         def publish_firebase(self):
 
@@ -219,15 +219,13 @@ def ac_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
             hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
             def iothub_client_telemetry_sample_run():
             '''
-
-            
             x = {}
             x["device_id"] = str(self.AC.variables['agent_id'])
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
@@ -237,21 +235,28 @@ def ac_agent(config_path, **kwargs):
             x["set_temperature"] = str(self.AC.variables['set_temperature'])
             x["set_humidity"] = str(self.AC.variables['set_humidity'])
             x["mode"] = str(self.AC.variables['mode'])
-            x["activity_type"] = 'devicemonitor'
-            x["username"] = 'arm'
+            x["activity_type"] = activity_type
+            x["username"] = username
             x["device_name"] = 'MY DAIKIN'
             x["device_type"] = 'airconditioner'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-
-
-
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.AC.setDeviceStatus(json.loads(message))
+            message = json.loads(message)
+            if 'status' in message:
+                self.AC.variables['status'] = str(message['status'])
+            if 'set_temperature' in message:
+                self.AC.variables['set_temperature'] = str(message['set_temperature'])
+            if 'set_humidity' in message:
+                self.AC.variables['set_humidity'] = str(message['set_humidity'])
+            if 'mode' in message:
+                self.AC.variables['mode'] = str(message['mode'])
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            self.AC.setDeviceStatus(message)
 
     Agent.__name__ = '01DAI_ACAgent'
     return DaikinAgent(config_path, **kwargs)

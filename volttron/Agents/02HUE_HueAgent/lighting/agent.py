@@ -27,12 +27,17 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.firebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
@@ -172,7 +177,7 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior2(self):
             self.Light.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
 
         def publish_firebase(self):
             try:
@@ -183,7 +188,7 @@ def lighting_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
@@ -198,8 +203,8 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['status']
             x["color"] = str(self.Light.variables['color'])
             x["brightness"] = self.Light.variables['brightness']
-            x["activity_type"] = 'devicemonitor'
-            x["username"] = 'arm'
+            x["activity_type"] = activity_type
+            x["username"] = username
             x["device_name"] = 'MY HUE'
             x["device_type"] = 'lighting'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
@@ -243,7 +248,19 @@ def lighting_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Light.setDeviceStatus(json.loads(message))
+            message = json.loads(message)
+
+            if 'status' in message:
+                self.Light.variables['status'] = str(message['status'])
+
+            if 'color' in message:
+                self.Light.variables['color'] = message['color']
+
+            if 'brightness' in message:
+                self.Light.variables['brightness'] = message['brightness']
+
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            self.Light.setDeviceStatus(message)
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)

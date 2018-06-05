@@ -142,7 +142,7 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
             try:
@@ -155,7 +155,7 @@ def lighting_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
@@ -168,9 +168,9 @@ def lighting_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['device_status']
-            x["activity_type"] = 'devicemonitor'
-            x["username"] = 'arm'
-            x["device_name"] = 'NARAI In-wall'
+            x["activity_type"] = activity_type
+            x["username"] = username
+            x["device_name"] = 'In-wall'
             x["device_type"] = "lighting"
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
@@ -211,7 +211,13 @@ def lighting_agent(config_path, **kwargs):
             print "Topic: {topic}".format(topic=topic)
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
-            self.Light.setDeviceStatus(json.loads(message))
+
+
+            message = json.loads(message)
+            if 'device_status' in message:
+                self.Light.variables['device_status'] = str(message['device_status'])
+            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            self.Light.setDeviceStatus(message)
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
