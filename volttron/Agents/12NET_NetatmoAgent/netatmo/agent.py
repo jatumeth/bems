@@ -180,6 +180,11 @@ def netatmoing_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.netatmo.getDeviceStatus()
+
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -224,14 +229,19 @@ def netatmoing_agent(config_path, **kwargs):
             x["humidity"] = self.netatmo.variables['humidity']
             x["pressure"] = self.netatmo.variables['pressure']
             x["temperature"] = self.netatmo.variables['temperature']
+            x["co2"] = self.netatmo.variables['co2']
             x["outdoor_temperature"] = self.netatmo.variables['outdoor_temperature']
             x["outdoor_humidity"] = self.netatmo.variables['outdoor_humidity']
             x["device_type"] = 'weathersensor'
+
+            x["activity_type"] = 'weather'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY NETATMO'
+
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
         def publish_postgres(self):
-
             postgres_url = settings.POSTGRES['postgres']['url']
             postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
 

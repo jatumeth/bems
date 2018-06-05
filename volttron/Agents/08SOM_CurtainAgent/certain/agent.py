@@ -155,13 +155,32 @@ def curtain_agent(config_path, **kwargs):
             self.Certain.getDeviceStatus()
             # self.StatusPublish(self.Certain.variables)
 
+            self.StatusPublish(self.Certain.variables)
+
+
             self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
 
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.Certain.getDeviceStatus()
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
+
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Certain.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         def publish_firebase(self):
             try:
@@ -187,7 +206,10 @@ def curtain_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Certain.variables['device_status']
-            x["device_type"] = 'certain'
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'NARAI-Certain'
+            x["device_type"] = 'curtain'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 

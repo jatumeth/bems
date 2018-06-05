@@ -4,7 +4,6 @@
 from datetime import datetime
 import logging
 import sys
-import settings
 from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
@@ -20,6 +19,7 @@ import pyrebase
 import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
+import settings
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -154,15 +154,21 @@ def ac_agent(config_path, **kwargs):
 
             self.AC.getDeviceStatus()
 
+            self.StatusPublish(self.AC.variables)
+
             # TODO update local postgres
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
 
-            # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.StatusPublish(self.AC.variables)
 
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.AC.getDeviceStatus()
+            self.publish_azure_iot_hub()
 
         def publish_firebase(self):
 
@@ -178,8 +184,6 @@ def ac_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-
-
             postgres_url = settings.POSTGRES['postgres']['url']
             postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
 
@@ -190,9 +194,9 @@ def ac_agent(config_path, **kwargs):
                     "device_id": str(self.AC.variables['agent_id']),
                     "device_type": "airconditioner",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-                    "current_temperature": str(self.AC.variables['current_temperature']),
-                    "set_temperature": str(self.AC.variables['set_temperature']),
-                    "mode": str(self.AC.variables['mode']),
+                    # "current_temperature": str(self.AC.variables['current_temperature']),
+                    # "set_temperature": str(self.AC.variables['set_temperature']),
+                    # "mode": str(self.AC.variables['mode']),
                 }
             )
 
@@ -202,6 +206,17 @@ def ac_agent(config_path, **kwargs):
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.AC.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
 
         def publish_azure_iot_hub(self):
@@ -222,6 +237,9 @@ def ac_agent(config_path, **kwargs):
             x["set_temperature"] = str(self.AC.variables['set_temperature'])
             x["set_humidity"] = str(self.AC.variables['set_humidity'])
             x["mode"] = str(self.AC.variables['mode'])
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY DAIKIN'
             x["device_type"] = 'airconditioner'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 

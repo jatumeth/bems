@@ -157,7 +157,10 @@ def lighting_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
+
             self.Light.getDeviceStatus()
+
+            self.StatusPublish(self.Light.variables)
 
             # TODO update local postgres
             self.publish_postgres()
@@ -165,6 +168,9 @@ def lighting_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+            self.Light.getDeviceStatus()
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -172,7 +178,6 @@ def lighting_agent(config_path, **kwargs):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['status'])
-
                 db.child(gateway_id).child('devices').child(agent_id).child("brightness").set(self.Light.variables['brightness'])
                 db.child(gateway_id).child('devices').child(agent_id).child("color").set(self.Light.variables['color'])
             except Exception as er:
@@ -193,9 +198,22 @@ def lighting_agent(config_path, **kwargs):
             x["device_status"] = self.Light.variables['status']
             x["color"] = str(self.Light.variables['color'])
             x["brightness"] = self.Light.variables['brightness']
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'MY HUE'
             x["device_type"] = 'lighting'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         def publish_postgres(self):
 

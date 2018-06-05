@@ -225,13 +225,13 @@ class API:
 
             elif postmsg['DIM'] == '25':
 
-                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 2
                 self.set_variable('device_status', '25')
 
             elif postmsg['DIM'] == '50':
 
-                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 5
                 self.set_variable('device_status', '50')
 
@@ -251,13 +251,13 @@ class API:
 
             elif postmsg['dim'] == '25':
 
-                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 2
                 self.set_variable('device_status', '25')
 
             elif postmsg['dim'] == '50':
 
-                msgToDevice['command'] = "TwoOn"
+                # msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 5
                 self.set_variable('device_status', '50')
 
@@ -275,7 +275,7 @@ class API:
                 msgToDevice['command'] = "TwoOn"
 
             elif postmsg['status'] == 'OFF':
-                msgToDevice['command'] = "TwoOn"
+                msgToDevice['command'] = "OneOn"
         except:
             print ""
         return msgToDevice
@@ -290,7 +290,7 @@ def main():
     Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'b206da55-dfce-46c0-9471-6b22d2555da8')
     # Somfy.getDeviceStatus()
 
-    Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
+    # Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
     # Somfy.setDeviceStatus({"DIM": "0"})
 
 
@@ -300,7 +300,7 @@ def main():
     #
     # time.sleep(10)
 
-    # Somfy.setDeviceStatus({"status": "OFF"})
+    Somfy.setDeviceStatus({"status": "OFF"})
 
     # time.sleep(10)
     # #

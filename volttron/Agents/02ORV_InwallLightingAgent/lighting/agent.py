@@ -135,6 +135,12 @@ def lighting_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.Light.getDeviceStatus()
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -162,6 +168,9 @@ def lighting_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['device_status']
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'NARAI In-wall'
             x["device_type"] = "lighting"
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 

@@ -162,6 +162,11 @@ def lighting_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
+
+        @Core.periodic(60)
+        def deviceMonitorBehavior2(self):
+
+            self.Light.getDeviceStatus()
             # update Azure IoT Hub
             self.publish_azure_iot_hub()
 
@@ -170,11 +175,9 @@ def lighting_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.Light.variables['label'])
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.Light.variables['status'])
-                # db.child(gateway_id).child('devices').child(agent_id).child("Power").set(self.Light.variables['power'])
-                # db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(self.Light.variables['type'])
+
             except Exception as er:
                 print er
-
 
         def publish_postgres(self):
 
@@ -212,8 +215,11 @@ def lighting_agent(config_path, **kwargs):
             x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']
-            x["device_type"] = self.Light.variables['type']
+            x["device_type"] = 'plugload'
             x["power"] = self.Light.variables['power']
+            x["activity_type"] = 'devicemonitor'
+            x["username"] = 'arm'
+            x["device_name"] = 'smartthing Plug'
 
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
