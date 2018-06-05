@@ -236,7 +236,7 @@ def Doorlock_agent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             message = json.loads(message)
-            if 'mode' in message:
+            if 'status' in message:
                 self.Light.variables['status'] = str(message['status'])
             self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
             self.Light.setDeviceStatus((message))
