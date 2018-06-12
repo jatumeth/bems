@@ -238,8 +238,10 @@ FIND_DEVICE_SETTINGS = {
 AZURE = {
     'servicebus': {
         'topic': 'hivecdf12345',
-        'service_namespace': 'peahiveservicebus',
+        'service_namespace': 'peahiveservicebusv2',
         'shared_access_key_name': 'RootManageSharedAccessKey',
-        'shared_access_key_value': 'vOjEoWzURJCJ0bAgRTo69o4BmLy8GAje4CfdXkDiwzQ='
+        'shared_access_key_value': 'F6hM22kIHgfzKmt2GF0NtGlrVZtapYHOG3gMb7doaM4=',
+        'CONNECTION_STRING' : 'HostName=peahiveiotv2.azure-devices.net;DeviceId=hivecdf12345;SharedAccessKey=u/QZgiQ+isxKXTkkn4Hc3Oys6Ski1NjT5bTRkGTHvyw='
+
     }
 }
