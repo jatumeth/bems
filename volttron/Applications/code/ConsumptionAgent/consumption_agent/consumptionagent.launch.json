@@ -1,0 +1,8 @@
+{
+    "agent": {
+        "exec": "consumptionagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agentid": "Consumption",
+    "message": "hello from consumption agent",
+    "powermeter_device_id": "05CRE999999999"
+}

@@ -156,7 +156,7 @@ def Powermetering_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -169,10 +169,15 @@ def Powermetering_agent(config_path, **kwargs):
 
             self.StatusPublish(self.Powermeter.variables)
 
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
-            self.publish_firebase()
+            if ((self.Powermeter.variables['grid_voltage'] == 'None') | (self.Powermeter.variables['grid_accumulated_energy'] == 'None')):
+                print("Data: None ")
+                # pass
+            else:
+                print("Update to firebase")
+                self.publish_firebase()
 
 
         @Core.periodic(60)
@@ -181,16 +186,22 @@ def Powermetering_agent(config_path, **kwargs):
             self.Powermeter.getDeviceStatus()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            if ((self.Powermeter.variables['grid_voltage'] == 'None') | (self.Powermeter.variables['grid_accumulated_energy'] == 'None')):
+                # print("Data: None")
+                pass
+            else:
+                print("Update to azure iot hub")
+                self.publish_azure_iot_hub()
+
 
         def publish_firebase(self):
             try:
 
-                if (self.Powermeter.variables['grid_voltage'] == None or self.Powermeter.variables[
-                    'grid_current'] == None or
-                        self.Powermeter.variables['grid_activePower'] == None or self.Powermeter.variables[
-                            'grid_reactivePower'] == None):
-                    return
+                # if (self.Powermeter.variables['grid_voltage'] == None or self.Powermeter.variables[
+                #     'grid_current'] == None or
+                #         self.Powermeter.variables['grid_activePower'] == None or self.Powermeter.variables[
+                #             'grid_reactivePower'] == None):
+                #     return
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
@@ -251,9 +262,9 @@ def Powermetering_agent(config_path, **kwargs):
             x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
 
-            if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
-                    self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
-                return
+            # if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
+            #         self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
+            #     return
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):
