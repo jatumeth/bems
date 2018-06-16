@@ -181,10 +181,17 @@ def Powermetering_agent(config_path, **kwargs):
             #     # pass
             # else:
             #     print("Update to firebase")
-            self.publish_firebase()
+            if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
+                    self.Powermeter.variables['grid_current'] == 'None') or
+                    (self.Powermeter.variables['grid_activePower'] == 'None') or
+                    (self.Powermeter.variables['grid_reactivePower'] == 'None')
+            ):
+                pass
+            else:
+                self.publish_firebase()
 
 
-        @Core.periodic(5)
+        @Core.periodic(30)
         def deviceMonitorBehavior2(self):
 
             self.Powermeter.getDeviceStatus()
@@ -204,10 +211,8 @@ def Powermetering_agent(config_path, **kwargs):
                     (self.Powermeter.variables['grid_activePower'] == 'None') or
                     (self.Powermeter.variables['grid_reactivePower'] == 'None')
             ):
-                print('5555555555555555555555555555555555')
                 pass
             else:
-                print('4564565456454654')
                 self.publish_azure_iot_hub()
 
 
@@ -248,8 +253,6 @@ def Powermetering_agent(config_path, **kwargs):
                     self.Powermeter.variables['grid_accumulated_energy'])
                 db.child(gateway_id).child('devices').child(agent_id).child("Kvarh").set(
                     self.Powermeter.variables['grid_kvarh'])
-                db.child(gateway_id).child('devices').child(agent_id).child("Show").set(
-                    self.Powermeter.variables['grid_cp_afci_arc_count_show'])
                 db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
                     self.Powermeter.variables['device_type'])
 
