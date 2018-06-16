@@ -137,7 +137,7 @@ def lighting_agent(config_path, **kwargs):
 
 
 
-        @Core.periodic(60)
+        @Core.periodic(30)
         def deviceMonitorBehavior2(self):
 
             self.Light.getDeviceStatus()

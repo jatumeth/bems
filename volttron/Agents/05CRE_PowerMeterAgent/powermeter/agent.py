@@ -175,7 +175,7 @@ def Powermetering_agent(config_path, **kwargs):
             self.publish_firebase()
 
 
-        @Core.periodic(60)
+        @Core.periodic(5)
         def deviceMonitorBehavior2(self):
 
             self.Powermeter.getDeviceStatus()
