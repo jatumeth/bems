@@ -156,7 +156,7 @@ def Powermetering_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -172,25 +172,42 @@ def Powermetering_agent(config_path, **kwargs):
             # self.publish_postgres()
 
             # update firebase
-            if ((self.Powermeter.variables['grid_voltage'] == 'None') | (self.Powermeter.variables['grid_accumulated_energy'] == 'None')):
-                print("Data: None ")
-                # pass
-            else:
-                print("Update to firebase")
-                self.publish_firebase()
+            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
+            #         self.Powermeter.variables['grid_current'] == 'None') or
+            #         (self.Powermeter.variables['grid_activePower'] == 'None') or
+            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
+            #         ):
+            #     print("Data: None ")
+            #     # pass
+            # else:
+            #     print("Update to firebase")
+            self.publish_firebase()
 
 
-        @Core.periodic(60)
+        @Core.periodic(5)
         def deviceMonitorBehavior2(self):
 
             self.Powermeter.getDeviceStatus()
 
             # update Azure IoT Hub
-            if ((self.Powermeter.variables['grid_voltage'] == 'None') | (self.Powermeter.variables['grid_accumulated_energy'] == 'None')):
-                # print("Data: None")
+            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (self.Powermeter.variables['grid_current'] == 'None') or
+            #
+            #         (self.Powermeter.variables['grid_activePower'] == 'None')or
+            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
+            #     ):
+            #     # print("Data: None")
+            #     pass
+            # else:
+            #     print("Update to azure iot hub")
+            if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
+                    self.Powermeter.variables['grid_current'] == 'None') or
+                    (self.Powermeter.variables['grid_activePower'] == 'None') or
+                    (self.Powermeter.variables['grid_reactivePower'] == 'None')
+            ):
+                print('5555555555555555555555555555555555')
                 pass
             else:
-                print("Update to azure iot hub")
+                print('4564565456454654')
                 self.publish_azure_iot_hub()
 
 
@@ -236,6 +253,7 @@ def Powermetering_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
                     self.Powermeter.variables['device_type'])
 
+
                 print "---------------update firebase ok"
             except Exception as er:
                 print er
@@ -262,10 +280,20 @@ def Powermetering_agent(config_path, **kwargs):
             x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
 
+            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (self.Powermeter.variables['grid_current'] == 'None') or
+            #         (self.Powermeter.variables['grid_activePower'] == 'None')or
+            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
+            #     ):
+            #     print('5555555555555555555555555555555555')
+            #     pass
+            # else:
+            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+                # print("Update to azure iot hub")
+
             # if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
             #         self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
             #     return
-            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
 
         def publish_postgres(self):
 

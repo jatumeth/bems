@@ -157,6 +157,7 @@ def fibaroing_agent(config_path, **kwargs):
 
             self.fibaro.getDeviceStatus()
 
+
             self.StatusPublish(self.fibaro.variables)
 
             # TODO update local postgres

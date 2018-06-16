@@ -5,7 +5,7 @@
     "agent_id": "05CRE250883398",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
-    "heartbeat_period": 20,
+    "heartbeat_period": 5,
     "api": "classAPI_Creativepower",
     "url": "https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,250883398&order=trans_id,desc&page=1",
     "device_id": "250883398",

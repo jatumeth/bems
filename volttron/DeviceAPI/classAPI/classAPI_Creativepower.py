@@ -115,6 +115,7 @@ class API:
         http = urllib3.PoolManager()
         r = http.request('GET', url)
         conve_json = json.loads(r.data)
+        # print conve_json
         self.set_variable('grid_transid', str(conve_json['cpletrix']['records'][0][0]))
         self.set_variable('grid_date', str(conve_json['cpletrix']['records'][0][1]))
         self.set_variable('grid_time', str(conve_json['cpletrix']['records'][0][2]))
