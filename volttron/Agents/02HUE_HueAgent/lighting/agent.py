@@ -74,7 +74,7 @@ def lighting_agent(config_path, **kwargs):
     url = get_config('url')
     api = get_config('api')
     username = get_config('username')
-    address = "http://192.168.1.101:80"
+    address = "http://192.168.1.139:80"
     # _address = address.replace('http://', '')
     # _address = address.replace('https://', '')
     # try:  # validate whether or not address is an ip address
