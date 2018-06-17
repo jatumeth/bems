@@ -2,10 +2,10 @@
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "05CRE699639095",
+    "agent_id": "1PV221445K1200200",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
-    "heartbeat_period": 20,
+    "heartbeat_period": 5,
     "api": "classAPI_Creativepower",
     "url": "https://cplservice.com/apixmobile.php/cpletrix?filter=device_id,eq,699639095&order=trans_id,desc&page=1",
     "device_id": "699639095",
