@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
 from datetime import datetime
 import logging
 import sys
@@ -12,7 +13,7 @@ from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
-from azure.servicebus import ServiceBusService, Message, Topic, Rule, DEFAULT_RULE_NAME
+
 # from zmqhelper.ZMQHelper.zmq_pub import ZMQ_PUB
 import requests
 import json

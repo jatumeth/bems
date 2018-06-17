@@ -74,7 +74,7 @@ def lighting_agent(config_path, **kwargs):
     url = get_config('url')
     api = get_config('api')
     username = get_config('username')
-    address = "http://192.168.1.101:80"
+    address = "http://192.168.1.105:80"
     # _address = address.replace('http://', '')
     # _address = address.replace('https://', '')
     # try:  # validate whether or not address is an ip address
@@ -153,7 +153,7 @@ def lighting_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -168,7 +168,7 @@ def lighting_agent(config_path, **kwargs):
             self.StatusPublish(self.Light.variables)
 
             # TODO update local postgres
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -177,7 +177,7 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior2(self):
             self.Light.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
 
         def publish_firebase(self):
             try:
@@ -220,28 +220,28 @@ def lighting_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
 
-        def publish_postgres(self):
+        # def publish_postgres(self):
+        #
+        #     postgres_url = settings.POSTGRES['postgres']['url']
+        #     postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+        #
+        #     m = MultipartEncoder(
+        #         fields={
+        #             "status": str(self.Light.variables['status']),
+        #             "device_id": str(self.Light.variables['agent_id']),
+        #             "device_type": "lighting",
+        #             "brightness": str(self.Light.variables['brightness']),
+        #             "color": str(self.Light.variables['color']),
+        #             "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+        #         }
+        #     )
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-
-            m = MultipartEncoder(
-                fields={
-                    "status": str(self.Light.variables['status']),
-                    "device_id": str(self.Light.variables['agent_id']),
-                    "device_type": "lighting",
-                    "brightness": str(self.Light.variables['brightness']),
-                    "color": str(self.Light.variables['color']),
-                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-                }
-            )
-
-            r = requests.put(postgres_url,
-                             data=m,
-                             headers={'Content-Type': m.content_type,
-                                      "Authorization": postgres_Authorization,
-                                      })
-            print r.status_code
+            # r = requests.put(postgres_url,
+            #                  data=m,
+            #                  headers={'Content-Type': m.content_type,
+            #                           "Authorization": postgres_Authorization,
+            #                           })
+            # print r.status_code
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

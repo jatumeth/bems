@@ -132,6 +132,7 @@ class API:
     def getDeviceStatusJson(self, data):
         # Use the json module to load the string data into a dictionary
         _theJSON = json.loads(data)
+        print(_theJSON)
         # 1. status
         if _theJSON["action"]["on"] == True:
             self.set_variable('status', "ON")
@@ -296,8 +297,8 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.101:80',
-                     username='pOjyl6nmQyPqM3wGTYkmpCzhP9qZkuGLuwZSNEX5', agent_id='02ORV_InwallLightingAgent')
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.105:80',
+                     username='MeLy1hlAtk3w8QwEw9n6Tho3jSaEUyBnrLKDtCdO', agent_id='02ORV_InwallLightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
                                                                        PhilipsHue.get_variable('model'),
                                                                        PhilipsHue.get_variable('api'),
@@ -305,17 +306,17 @@ def main():
 
     PhilipsHue.getDeviceStatus()
     # # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
-    for i in range(1, 100):
-        import random
-        print(random.randint(0, 255))
-        x = []
-        for i in range(0, 3):
-            x.append(random.randint(0, 255))
-        # print(tuple(x))
-        random_color = str(tuple(x))
-        random_brightness = random.randint(0, 100)
-        PhilipsHue.setDeviceStatus({"status": "ON", "color": random_color, "device": "2HUEH0017881cab4b", "brightness": random_brightness})
-        time.sleep(1)
+    # for i in range(1, 100):
+    #     import random
+    #     print(random.randint(0, 255))
+    #     x = []
+    #     for i in range(0, 3):
+    #         x.append(random.randint(0, 255))
+    #     # print(tuple(x))
+    #     random_color = str(tuple(x))
+    #     random_brightness = random.randint(0, 100)
+    #     PhilipsHue.setDeviceStatus({"status": "ON", "color": random_color, "device": "2HUEH0017881cab4b", "brightness": random_brightness})
+    #     time.sleep(1)
 
     # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 

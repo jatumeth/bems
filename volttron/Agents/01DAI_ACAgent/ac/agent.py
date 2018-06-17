@@ -4,6 +4,8 @@
 from datetime import datetime
 import logging
 import sys
+import os
+import subprocess as sp
 from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
@@ -20,6 +22,7 @@ import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
 import settings
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -143,12 +146,13 @@ def ac_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-
+            #os.system("python '/home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py';")
+            sp.Popen('python /home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py', shell=True)
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
@@ -162,7 +166,7 @@ def ac_agent(config_path, **kwargs):
             # update firebase
             self.publish_firebase()
 
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         # @Core.periodic(60)
         # def deviceMonitorBehavior2(self):

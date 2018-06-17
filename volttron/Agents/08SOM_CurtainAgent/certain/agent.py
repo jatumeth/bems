@@ -143,7 +143,7 @@ def curtain_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -152,8 +152,8 @@ def curtain_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             print ""
-            # self.Certain.getDeviceStatus()
-            # # self.StatusPublish(self.Certain.variables)
+            self.Certain.getDeviceStatus()
+            self.StatusPublish(self.Certain.variables)
             #
             # self.StatusPublish(self.Certain.variables)
             #
@@ -161,7 +161,7 @@ def curtain_agent(config_path, **kwargs):
             # self.publish_postgres()
             #
             # # update firebase
-            # self.publish_firebase()
+            self.publish_firebase()
 
 
         @Core.periodic(60)
@@ -169,7 +169,7 @@ def curtain_agent(config_path, **kwargs):
 
             self.Certain.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -193,24 +193,24 @@ def curtain_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self, activity_type, username):
-            # TODO publish to Azure IoT Hub u
-            '''
-            here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
-            hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
-            def iothub_client_telemetry_sample_run():
-            '''
-            print(self.Certain.variables)
-            x = {}
-            x["device_id"] = self.Certain.variables['agent_id']
-            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-            x["unixtime"] = int(time.time())
-            x["device_status"] = self.Certain.variables['device_status']
-            x["activity_type"] = activity_type
-            x["username"] = username
-            x["device_name"] = 'NARAI-Certain'
-            x["device_type"] = 'curtain'
-            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+        # def publish_azure_iot_hub(self, activity_type, username):
+        #     # TODO publish to Azure IoT Hub u
+        #     '''
+        #     here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
+        #     hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
+        #     def iothub_client_telemetry_sample_run():
+        #     '''
+        #     print(self.Certain.variables)
+        #     x = {}
+        #     x["device_id"] = self.Certain.variables['agent_id']
+        #     x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+        #     x["unixtime"] = int(time.time())
+        #     x["device_status"] = self.Certain.variables['device_status']
+        #     x["activity_type"] = activity_type
+        #     x["username"] = username
+        #     x["device_name"] = 'NARAI-Certain'
+        #     x["device_type"] = 'curtain'
+        #     discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
         def publish_postgres(self):
