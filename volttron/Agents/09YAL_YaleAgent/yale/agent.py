@@ -141,7 +141,7 @@ def Doorlock_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -193,7 +193,7 @@ def Doorlock_agent(config_path, **kwargs):
             x["username"] = username
             x["device_name"] = 'MY DOORLOCK'
             x["device_type"] = 'doorlock'
-            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+            # discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
         def publish_postgres(self):

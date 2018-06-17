@@ -133,17 +133,26 @@ class API:
             except Exception as er:
                 print er
 
+
             if tempchange == False:
                 status = str(_data['status']).upper()
                 if status == 'ON':
-                    command = 'saijoon'
+                    command = 'ACON'
                     print'acmitsu turn on'
                 elif status == 'OFF':
-                    command = 'saijooff'
+                    command = 'ACOFF'
                     print'acmitsu turn off'
+                elif status == 'TEMP25':
+                    command = 'ACHITEMP'
+                    print'acmitsu turn 25'
+                elif status == 'TEMP20':
+                    command = 'ACLOWTEMP'
+                    print'acmitsu turn 20'
+
 
 
             url = "http://localhost:8080/sendCommand/"+str(command)
+
             try:
                 response = requests.get(
                     url=url,
@@ -152,6 +161,8 @@ class API:
                     status_code=response.status_code))
                 print('Response HTTP Response Body: {content}'.format(
                     content=response.content))
+                print response.text
+
             except requests.exceptions.RequestException:
                 print('HTTP Request failed')
             print 'status to ON'
@@ -190,6 +201,9 @@ def main():
     # time.sleep(10)
     #
     broadlink.setDeviceStatus({"status": "ON"})
+
+    # broadlink.setDeviceStatus({"status": "TEMP25"})
+    # broadlink.setDeviceStatus({"status": "TEMP20"})
     #
     # time.sleep(10)
     #

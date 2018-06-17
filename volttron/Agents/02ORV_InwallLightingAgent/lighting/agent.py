@@ -118,7 +118,7 @@ def lighting_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -142,7 +142,7 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
             try:
@@ -155,24 +155,24 @@ def lighting_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-        def publish_azure_iot_hub(self, activity_type, username):
-            # TODO publish to Azure IoT Hub u
-            '''
-            here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
-            hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
-            def iothub_client_telemetry_sample_run():
-            '''
-            print(self.Light.variables)
-            x = {}
-            x["device_id"] = self.Light.variables['agent_id']
-            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-            x["unixtime"] = int(time.time())
-            x["device_status"] = self.Light.variables['device_status']
-            x["activity_type"] = activity_type
-            x["username"] = username
-            x["device_name"] = 'In-wall'
-            x["device_type"] = "lighting"
-            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+        # def publish_azure_iot_hub(self, activity_type, username):
+        #     # TODO publish to Azure IoT Hub u
+        #     '''
+        #     here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
+        #     hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
+        #     def iothub_client_telemetry_sample_run():
+        #     '''
+        #     print(self.Light.variables)
+        #     x = {}
+        #     x["device_id"] = self.Light.variables['agent_id']
+        #     x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+        #     x["unixtime"] = int(time.time())
+        #     x["device_status"] = self.Light.variables['device_status']
+        #     x["activity_type"] = activity_type
+        #     x["username"] = username
+        #     x["device_name"] = 'In-wall'
+        #     x["device_type"] = "lighting"
+        #     discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):
 

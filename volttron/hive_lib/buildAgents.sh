@@ -114,6 +114,38 @@ volttron-pkg configure ~/.volttron/packaged/lightingagent-0.1-py2-none-any.whl ~
 
 volttron-ctl install ~/.volttron/packaged/lightingagent-0.1-py2-none-any.whl --tag Hue
 
+#mqtt
+volttron-pkg package Agents/mqttsubAgent
+
+volttron-pkg configure ~/.volttron/packaged/mqttsubagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/mqttsubAgent/mqttsub.config
+
+
+volttron-ctl install ~/.volttron/packaged/mqttsubagent-0.1-py2-none-any.whl --tag mqtt
+
+
+#powermeter1
+volttron-pkg package Agents/05CRE_PowerMeterAgent
+
+volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0250883398.config.json
+
+volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter1
+
+
+#air
+volttron-pkg package Agents/01DAI_ACAgent
+
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200101.config.json
+
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
+
+
+
+#powermeter2
+volttron-pkg package Agents/05CRE_PowerMeterAgent
+
+volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0699639095.config.json
+
+volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter2
 ## RUN Lighting Agent
 #volttron-pkg package ~/workspace/bemoss_os/Agents/MultiBuilding/
 #volttron-pkg configure /tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiBuilding/multibuildingagent.launch.json

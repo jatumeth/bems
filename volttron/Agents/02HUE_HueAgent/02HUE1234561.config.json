@@ -6,7 +6,7 @@
     "message": "this is a lighting agent",
     "heartbeat_period": 20,
     "api": "classAPI_PhilipsHue",
-    "username": "pOjyl6nmQyPqM3wGTYkmpCzhP9qZkuGLuwZSNEX5",
+    "username": "MeLy1hlAtk3w8QwEw9n6Tho3jSaEUyBnrLKDtCdO",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",
     "device": "4b4358d4-9b91-4161-bbe0-1677aa04148f",
     "bearer": "Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035",
@@ -16,6 +16,6 @@
     "model": "two",
     "type": "02HUE",
     "vendor": "phillip",
-    "address": "http://192.168.1.101:80",
+    "address": "http://192.168.1.105:80",
     "zone_id": 999
 }
