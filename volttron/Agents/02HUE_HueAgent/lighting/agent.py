@@ -74,7 +74,7 @@ def lighting_agent(config_path, **kwargs):
     url = get_config('url')
     api = get_config('api')
     username = get_config('username')
-    address = "http://192.168.1.105:80"
+    address = "http://192.168.1.101:80"
     # _address = address.replace('http://', '')
     # _address = address.replace('https://', '')
     # try:  # validate whether or not address is an ip address
@@ -153,10 +153,13 @@ def lighting_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
+            self.status_old = ""
+            self.status_old2 = ""
+            self.status_old3 = ""
             _log.debug("VERSION IS: {}".format(self.core.version()))
 
         @Core.periodic(device_monitor_time)
@@ -170,14 +173,28 @@ def lighting_agent(config_path, **kwargs):
             # TODO update local postgres
             # self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            # update firebase , posgres , azure
+            if (self.Light.variables['status'] != self.status_old or
+                    self.Light.variables['brightness'] != self.status_old2 or
+                    self.Light.variables['color'] != self.status_old3):
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-            self.Light.getDeviceStatus()
-            # update Azure IoT Hub
-            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
+            else:
+                pass
+
+            self.status_old = self.Light.variables['status']
+            self.status_old2 = self.Light.variables['brightness']
+            self.status_old3 = self.Light.variables['color']
+            print(self.status_old)
+            print(self.status_old2)
+            print(self.status_old3)
+        # @Core.periodic(60)
+        # def deviceMonitorBehavior2(self):
+        #     self.Light.getDeviceStatus()
+        #     # update Azure IoT Hub
+        #     # self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
 
         def publish_firebase(self):
             try:
@@ -185,6 +202,7 @@ def lighting_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Light.variables['status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("brightness").set(self.Light.variables['brightness'])
                 db.child(gateway_id).child('devices').child(agent_id).child("color").set(self.Light.variables['color'])
+                print('--------------firebase_update-----------------')
             except Exception as er:
                 print er
 
@@ -208,7 +226,7 @@ def lighting_agent(config_path, **kwargs):
             x["device_name"] = 'MY HUE'
             x["device_type"] = 'lighting'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-
+            print('-----------------Azure_update---------------')
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
@@ -220,28 +238,28 @@ def lighting_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
 
-        # def publish_postgres(self):
-        #
-        #     postgres_url = settings.POSTGRES['postgres']['url']
-        #     postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-        #
-        #     m = MultipartEncoder(
-        #         fields={
-        #             "status": str(self.Light.variables['status']),
-        #             "device_id": str(self.Light.variables['agent_id']),
-        #             "device_type": "lighting",
-        #             "brightness": str(self.Light.variables['brightness']),
-        #             "color": str(self.Light.variables['color']),
-        #             "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-        #         }
-        #     )
+        def publish_postgres(self):
 
-            # r = requests.put(postgres_url,
-            #                  data=m,
-            #                  headers={'Content-Type': m.content_type,
-            #                           "Authorization": postgres_Authorization,
-            #                           })
-            # print r.status_code
+            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+
+            m = MultipartEncoder(
+                fields={
+                    "status": str(self.Light.variables['status']),
+                    "device_id": str(self.Light.variables['agent_id']),
+                    "device_type": "lighting",
+                    "brightness": str(self.Light.variables['brightness']),
+                    "color": str(self.Light.variables['color']),
+                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+                }
+            )
+
+            r = requests.put(postgres_url,
+                             data=m,
+                             headers={'Content-Type': m.content_type,
+                                      "Authorization": postgres_Authorization,
+                                      })
+            print r.status_code
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

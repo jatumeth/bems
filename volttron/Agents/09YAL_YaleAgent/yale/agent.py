@@ -141,11 +141,12 @@ def Doorlock_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.status_old = ""
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -155,18 +156,23 @@ def Doorlock_agent(config_path, **kwargs):
             self.StatusPublish(self.Light.variables)
 
             # TODO update local postgres
-            self.publish_postgres()
+            # self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            #update
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
+            if(self.Light.variables['status'] == self.status_old):
 
-            self.Light.getDeviceStatus()
+                pass
+            else:
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
-            # update Azure IoT Hub
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            self.status_old = self.Light.variables['status']
+
+            print(self.status_old)
+
+
 
         def publish_firebase(self):
             try:
@@ -193,7 +199,7 @@ def Doorlock_agent(config_path, **kwargs):
             x["username"] = username
             x["device_name"] = 'MY DOORLOCK'
             x["device_type"] = 'doorlock'
-            # discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
 
         def publish_postgres(self):

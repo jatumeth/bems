@@ -118,11 +118,12 @@ def lighting_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.status_old = ""
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -130,50 +131,62 @@ def lighting_agent(config_path, **kwargs):
             self.Light.getDeviceStatus()
             self.StatusPublish(self.Light.variables)
 
-            self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            # update firebase , posgres , azure
+            if(self.Light.variables['device_status'] ==  self.status_old):
+                pass
+            else:
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
+            self.status_old = self.Light.variables['device_status']
+            print(self.status_old)
+                # self.publish_postgres()
+                # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
+        # @Core.periodic(60)
+        # def deviceMonitorBehavior2(self):
+        #
+        #     self.Light.getDeviceStatus()
+        #     # update Azure IoT Hub
+        #     # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-
-            self.Light.getDeviceStatus()
-            # update Azure IoT Hub
-            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
+
             try:
+
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
                     self.Light.variables['device_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
                     self.Light.variables['device_type'])
+                print('------------------update firebase--------------------')
             except Exception as er:
                 print er
 
-        # def publish_azure_iot_hub(self, activity_type, username):
-        #     # TODO publish to Azure IoT Hub u
-        #     '''
-        #     here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
-        #     hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
-        #     def iothub_client_telemetry_sample_run():
-        #     '''
-        #     print(self.Light.variables)
-        #     x = {}
-        #     x["device_id"] = self.Light.variables['agent_id']
-        #     x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-        #     x["unixtime"] = int(time.time())
-        #     x["device_status"] = self.Light.variables['device_status']
-        #     x["activity_type"] = activity_type
-        #     x["username"] = username
-        #     x["device_name"] = 'In-wall'
-        #     x["device_type"] = "lighting"
-        #     discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-
+        def publish_azure_iot_hub(self, activity_type, username):
+            # TODO publish to Azure IoT Hub u
+            '''
+            here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
+            hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
+            def iothub_client_telemetry_sample_run():
+            '''
+            print(self.Light.variables)
+            x = {}
+            x["device_id"] = self.Light.variables['agent_id']
+            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["unixtime"] = int(time.time())
+            x["device_status"] = self.Light.variables['device_status']
+            x["activity_type"] = activity_type
+            x["username"] = username
+            x["device_name"] = 'In-wall'
+            x["device_type"] = "lighting"
+            print x
+            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+            print('--------------update azure--------------')
         def publish_postgres(self):
 
             postgres_url = settings.POSTGRES['postgres']['url']
@@ -194,7 +207,7 @@ def lighting_agent(config_path, **kwargs):
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
-
+            print('-------------------update postgres---------------')
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
