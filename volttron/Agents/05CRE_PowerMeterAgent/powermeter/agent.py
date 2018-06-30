@@ -213,6 +213,8 @@ def Powermetering_agent(config_path, **kwargs):
             ):
                 pass
             else:
+                self.publish_firebase()
+                self.publish_postgres()
                 self.publish_azure_iot_hub()
 
 

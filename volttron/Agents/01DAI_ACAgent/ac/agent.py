@@ -146,7 +146,7 @@ def ac_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -164,7 +164,25 @@ def ac_agent(config_path, **kwargs):
             # self.publish_postgres()
 
             # update firebase
-            self.publish_firebase()
+            # update firebase , posgres , azure
+            if (self.AC.variables['status'] != self.status_old or
+                    self.AC.variables['current_temperature'] != self.status_old2 or
+                    self.AC.variables['set_temperature'] != self.status_old3 or
+                    self.AC.variables['set_humidity'] != self.status_old4 or
+                    self.AC.variables['mode'] != self.status_old5):
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+
+            else:
+                pass
+
+            self.status_old = self.AC.variables['status']
+            self.status_old2 = self.AC.variables['current_temperature']
+            self.status_old3 = self.AC.variables['set_temperature']
+            self.status_old4 = self.AC.variables['set_humidity']
+            self.status_old5 = self.AC.variables['mode']
+
 
             # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 

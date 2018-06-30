@@ -144,11 +144,12 @@ def lighting_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.status_old = ""
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -157,10 +158,18 @@ def lighting_agent(config_path, **kwargs):
 
             self.StatusPublish(self.Light.variables)
 
-            self.publish_postgres()
+            # self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            # update firebase , posgres , azure
+            if (self.Light.variables['status'] == self.status_old):
+                pass
+            else:
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+
+            self.status_old = self.Light.variables['status']
+            print(self.status_old)
 
 
         @Core.periodic(60)
@@ -168,7 +177,7 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
             # update Azure IoT Hub
-            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
             try:

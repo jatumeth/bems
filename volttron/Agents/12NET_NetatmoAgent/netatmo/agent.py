@@ -169,16 +169,42 @@ def netatmoing_agent(config_path, **kwargs):
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
+            self.status_old = ""
+            self.status_old2 = ""
+            self.status_old3 = ""
+            self.status_old4 = ""
+            self.status_old5 = ""
+            self.status_old6 = ""
+            self.status_old7 = ""
 
             self.netatmo.getDeviceStatus()
 
             self.StatusPublish(self.netatmo.variables)
 
             # TODO update local postgres
-            self.publish_postgres()
+            # self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            if (self.netatmo.variables['noise'] != self.status_old or
+                    self.netatmo.variables['temperature'] != self.status_old2 or
+                    self.netatmo.variables['pressure'] != self.status_old3 or
+                    self.netatmo.variables['co2'] != self.status_old4 or
+                    self.netatmo.variables['humidity'] != self.status_old5 or
+                    self.netatmo.variables['outdoor_temperature'] != self.status_old6 or
+                    self.netatmo.variables['outdoor_humidity'] != self.status_old7):
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+
+            else:
+                pass
+
+            self.status_old = self.netatmo.variables['noise']
+            self.status_old2 = self.netatmo.variables['temperature']
+            self.status_old3 = self.netatmo.variables['pressure']
+            self.status_old4 = self.netatmo.variables['co2']
+            self.status_old5 = self.netatmo.variables['humidity']
+            self.status_old6 = self.netatmo.variables['outdoor_temperature']
+            self.status_old7 = self.netatmo.variables['outdoor_humidity']
 
         @Core.periodic(60)
         def deviceMonitorBehavior2(self):
@@ -186,7 +212,7 @@ def netatmoing_agent(config_path, **kwargs):
             self.netatmo.getDeviceStatus()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:
@@ -213,7 +239,7 @@ def netatmoing_agent(config_path, **kwargs):
 
 
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self,activity_type,username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/

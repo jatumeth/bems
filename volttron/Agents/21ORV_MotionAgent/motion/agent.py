@@ -153,6 +153,7 @@ def fibaroing_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.status_old = ""
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -164,11 +165,15 @@ def fibaroing_agent(config_path, **kwargs):
 
             # self.publish_postgres()
 
-            # update firebase
-            self.publish_firebase()
+            if (self.fibaro.variables['status'] == self.status_old):
+                pass
+            else:
+                self.publish_firebase()
+                self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
-            # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            self.status_old = self.fibaro.variables['status']
+            print(self.status_old)
 
         @Core.periodic(60)
         def deviceMonitorBehavior2(self):
@@ -176,7 +181,7 @@ def fibaroing_agent(config_path, **kwargs):
             self.fibaro.getDeviceStatus()
 
             # update Azure IoT Hub
-            self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
 
@@ -197,7 +202,7 @@ def fibaroing_agent(config_path, **kwargs):
 
 
 
-        def publish_azure_iot_hub(self):
+        def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
             here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
