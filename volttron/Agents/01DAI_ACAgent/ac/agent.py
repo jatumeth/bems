@@ -151,6 +151,11 @@ def ac_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.status_old = ""
+            self.status_old2 = ""
+            self.status_old3 = ""
+            self.status_old4 = ""
+            self.status_old5 = ""
             #os.system("python '/home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py';")
             sp.Popen('python /home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py', shell=True)
         @Core.periodic(device_monitor_time)
@@ -165,7 +170,7 @@ def ac_agent(config_path, **kwargs):
 
             # update firebase
             # update firebase , posgres , azure
-            if (self.AC.variables['status'] != self.status_old or
+            if(self.AC.variables['status'] != self.status_old or
                     self.AC.variables['current_temperature'] != self.status_old2 or
                     self.AC.variables['set_temperature'] != self.status_old3 or
                     self.AC.variables['set_humidity'] != self.status_old4 or
