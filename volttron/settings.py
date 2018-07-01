@@ -113,8 +113,8 @@ CHANGE = {
 
 POSTGRES = {
     'postgres':{
-        'url':'http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/api/v2.0/devices/',
-        'Authorization':'Token 5aecc823567f49f3b0a2f2d8e25e439ce5fd4682',
+        'url':'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/',
+        'Authorization':'Token 8f46cea7a3f072b6c0f3bc44e90ef423376bfcb1',
     }
 }
 
