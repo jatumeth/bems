@@ -70,22 +70,23 @@ def mqttsub_agent(config_path, **kwargs):
             while True:
                 try:
                     msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
+                    print msg
                     if msg.body is not None:
                         commsg = eval(msg.body)
-                        print("message MQTT received datas")
+                        # print("message MQTT received datas")
                         type_msg = commsg.get('type', None)
                         if type_msg.startswith('scene'): # TODO : Recheck condition again
-                            print('Found scene')
+                            # print('Found scene')
                             self.VIPPublishApplication(commsg, type_msg)
 
                         elif type_msg == 'devicecontrol':
                             # Execute Device Control Function
-                            print("Device Cintrol Event")
+                            # print("Device Cintrol Event")
                             self.VIPPublishDevice(commsg)
 
                         elif type_msg == 'login':
                             # Execute Token Stored Function
-                            print("Renew Token Event")
+                            # print("Renew Token Event")
                             self.VIPPublishApplication(commsg, type_msg)
                             # TODO : Pub message again to Notifier agent to Store TOKEN VALUE
                             self.vip.pubsub.publish('pubsub',
@@ -95,28 +96,30 @@ def mqttsub_agent(config_path, **kwargs):
 
                         elif type_msg == 'automationcreate':
                             # Execute Create Automation Function
-                            print("Create Automation Event")
+                            # print("Create Automation Event")
                             self.VIPPublishApplication(commsg, type_msg)
 
                         elif type_msg == 'automationdelete':
                             # Execute Delete Automation Function
-                            print("Delete Automation Event")
+                            # print("Delete Automation Event")
                             self.VIPPublishApplication(commsg, type_msg)
 
                         elif type_msg == 'automationupdate':
                             # Execute Update Automation Function
-                            print("Update Automation Event")
+                            # print("Update Automation Event")
                             self.VIPPublishApplication(commsg, type_msg)
 
                         else:
-                            print "---------------------------------------"
-                            print('Any Topic :')
-                            print servicebus_topic
-                            print commsg
-                            print "---------------------------------------"
+                            pass
+                            # print "---------------------------------------"
+                            # print('Any Topic :')
+                            # print servicebus_topic
+                            # print commsg
+                            # print "---------------------------------------"
                     else :
-                        print servicebus_topic
-                        print "No body message"
+                        pass
+                        # print servicebus_topic
+                        # print "No body message"
 
                 except Exception as er:
                     print er
@@ -125,8 +128,8 @@ def mqttsub_agent(config_path, **kwargs):
             # TODO this is example how to write an app to control AC
             topic = str('/ui/agent/update/hive/999/' + str(commsg['device']))
             message = json.dumps(commsg)
-            print ("topic {}".format(topic))
-            print ("message {}".format(message))
+            # print ("topic {}".format(topic))
+            # print ("message {}".format(message))
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
@@ -135,8 +138,8 @@ def mqttsub_agent(config_path, **kwargs):
         def VIPPublishApplication(self, commsg, type_msg):
             topic = str('/ui/agent/update/hive/999/') + str(type_msg)
             message = json.dumps(commsg)
-            print ("topic {}".format(topic))
-            print ("message {}".format(message))
+            # print ("topic {}".format(topic))
+            # print ("message {}".format(message))
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
