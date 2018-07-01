@@ -3,9 +3,9 @@
         "exec": "sceneagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "scene", 
-    "backend_url": "http://peahivebackend3-peahivebackendmobiledev.azurewebsites.net/", 
+    "backend_url": "https://peahivemobilebackends.azurewebsites.net",
     "ipaddress": "http://192.168.1.30:49153", 
     "message": "this is a lighting agent", 
     "scene_api": "api/v2.0/scenes", 
-    "token": "65ca620413e99731d78c699ba414fd04f80cd9f1"
+    "token": "8f46cea7a3f072b6c0f3bc44e90ef423376bfcb1"
 }
