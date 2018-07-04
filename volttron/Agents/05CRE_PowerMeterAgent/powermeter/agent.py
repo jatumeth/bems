@@ -227,37 +227,39 @@ def Powermetering_agent(config_path, **kwargs):
                 #             'grid_reactivePower'] == None):
                 #     return
 
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("dt").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
-                # db.child('hiveC83A35CDBEAB').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("TransID(ID)").set(
+                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("TransID(ID)").set(
                     self.Powermeter.variables['grid_transid'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Date(D)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Date(D)").set(
                     self.Powermeter.variables['grid_date'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Time(T)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Time(T)").set(
                     self.Powermeter.variables['grid_time'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("UxTime(UT)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("UxTime(UT)").set(
                     self.Powermeter.variables['grid_uxtime'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("DeviceID(DID)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("DeviceID(DID)").set(
                     self.Powermeter.variables['grid_device_id'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Voltage(V)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Voltage(V)").set(
                     float(self.Powermeter.variables['grid_voltage']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Current(A)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Current(A)").set(
                     float(self.Powermeter.variables['grid_current']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("EarthLeak(EL)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("EarthLeak(EL)").set(
                     self.Powermeter.variables['grid_earth_leak'])
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("inverter_activePower").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("inverter_activePower").set(
                     float(self.Powermeter.variables['grid_activePower']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("ReactivePower(Var)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("ReactivePower(Var)").set(
                     float(self.Powermeter.variables['grid_reactivePower']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Powerfactor").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Powerfactor").set(
                     float(self.Powermeter.variables['grid_powerfactor']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("AccumulatedEnergy(Wh)").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("AccumulatedEnergy(Wh)").set(
                     float(self.Powermeter.variables['grid_accumulated_energy']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("Kvarh").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("Kvarh").set(
                     float(self.Powermeter.variables['grid_kvarh']))
-                db.child('hiveC83A35CDBEAB').child(agent_id).child("device_type").set(
+                db.child(gateway_id).child('devices').child(agent_id).child("device_type").set(
                     self.Powermeter.variables['device_type'])
+                db.child(gateway_id).child('devices').child(agent_id).child("ActivePower(W)").set(
+                    self.Powermeter.variables['grid_activePower'])
 
 
                 print "---------------update firebase ok"

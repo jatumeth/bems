@@ -122,8 +122,12 @@ class API:
 
     def convertPostMsg(self, postmsg):
         msgToDevice = {}
-        if 'status' in postmsg.keys():
+        if ('status' in postmsg.keys()):
+
             msgToDevice['command'] = self.get_variable('model').capitalize() + str(postmsg['status'].lower().capitalize())
+            print msgToDevice
+        if 'STATUS' in postmsg.keys():
+            msgToDevice['command'] = self.get_variable('model').capitalize() + str(postmsg['STATUS'].lower().capitalize())
             print msgToDevice
         return msgToDevice
 

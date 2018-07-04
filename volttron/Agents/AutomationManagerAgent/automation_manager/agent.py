@@ -234,6 +234,7 @@ def automation_manager_agent(config_path, **kwargs):
                       ";volttron-ctl install " +
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
+                      ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))
 
         def remove_automation_agent(self, automation_id):

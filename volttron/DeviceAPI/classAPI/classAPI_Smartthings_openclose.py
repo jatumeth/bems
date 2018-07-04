@@ -119,6 +119,7 @@ class API:
         conve_json = json.loads(data)
 
         self.set_variable('device_contact', str(conve_json["contact"]).upper())
+        self.set_variable('status', str(conve_json["contact"]).upper())
         self.set_variable('device_type', str(conve_json["type"]).upper())
         self.set_variable('unitTime', str(conve_json["unitTime"]))
         self.set_variable('device_label', str(conve_json["label"]).upper())

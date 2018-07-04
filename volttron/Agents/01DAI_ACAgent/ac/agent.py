@@ -283,7 +283,7 @@ def ac_agent(config_path, **kwargs):
             if 'mode' in message:
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            time.sleep(2)
 
 
     Agent.__name__ = '01DAI_ACAgent'

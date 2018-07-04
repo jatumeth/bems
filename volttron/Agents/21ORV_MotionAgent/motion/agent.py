@@ -154,6 +154,8 @@ def fibaroing_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.status_old = ""
+            self.fibaro.getDeviceStatus()
+            self.publish_firebase()
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):

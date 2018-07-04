@@ -2,7 +2,7 @@
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "1PV221445K1200200",
+    "agent_id": "05CRE0699639095",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
     "heartbeat_period": 5,

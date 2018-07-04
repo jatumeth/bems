@@ -42,7 +42,7 @@ def scenecontrol_agent(config_path, **kwargs):
 
 
     # DATABASES
-    automation_id = get_config('automation_id')
+    automation_id = get_config('agentid')
     db_host = settings.DATABASES['default']['HOST']
     db_port = settings.DATABASES['default']['PORT']
     db_database = settings.DATABASES['default']['NAME']
@@ -55,9 +55,13 @@ def scenecontrol_agent(config_path, **kwargs):
     cur.execute("""SELECT * FROM automation """)
     rows = cur.fetchall()
     for row in rows:
+        print row[0]
+        automation_id = automation_id.replace('automation_','')
+        print automation_id
         if int(automation_id) == int(row[0]):
             triger_device = row[2]
             triger_device_str = ((triger_device).replace("['", '', 1)).replace("']", '', 1)
+            triger_device_str = ((triger_device).replace('["', '', 1)).replace('"]', '', 1)
             topic_tricker = '/agent/zmq/update/hive/999/' + triger_device_str
             print "<<<< subscribe topic >>>>>"
             print topic_tricker
@@ -93,6 +97,7 @@ def scenecontrol_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.load_config()
+            self.status_old = ""
 
 
         @PubSub.subscribe('pubsub', topic_tricker)
@@ -104,14 +109,19 @@ def scenecontrol_agent(config_path, **kwargs):
             print(" Automation set device = {}".format(self.triger_device))
             print(" Automation set event = {}".format(self.triger_event))
             print(" Automation set value = {}".format(self.triger_value))
+            print message
             convert_msg = json.loads(message)
-            triger_event_now = convert_msg[self.triger_event]
-            print(" value reading now is value = {}".format(convert_msg[self.triger_event]))
-
+            triger_event_now = convert_msg[(self.triger_event).lower()]
+            print(" value reading now is value = {}".format(convert_msg[(self.triger_event).lower()]))
+            if self.triger_value == 'CLOSE':
+                self.triger_value = 'CLOSED'
             if triger_event_now == self.triger_value:
                 print(" Automation set value == value reading now ")
                 print(" go to step [[[  2  ]]] check condition event ")
-                self.conditionevent()
+                # self.conditionevent()
+                if self.status_old != self.triger_value:
+                    self.devicecontrol()
+            self.status_old = triger_event_now
 
 
 
@@ -146,6 +156,9 @@ def scenecontrol_agent(config_path, **kwargs):
             print ">>"
             print "<<<<<< step 2 check condition event>>>>>>>>"
 
+            print '>> condition value == condition now'
+            print(" go to step [[[  3  ]]] device control ")
+
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
 
@@ -156,7 +169,7 @@ def scenecontrol_agent(config_path, **kwargs):
                 rows = self.cur.fetchall()
                 for row in rows :
                     self.scene_id_now = row[0]
-                    self.scene_name_now = row[1]
+                    self.scene_name_now = row[2]
                     print(" condition now = {}".format(self.scene_name_now))
                     print(" condition in automation seting  = {}".format(self.scene_name_now))
 
@@ -189,6 +202,9 @@ def scenecontrol_agent(config_path, **kwargs):
                         {'Type': 'HiVE Scene Control'}, message)
             except Exception as Error:
                 print('Reload Config to Agent')
+            import time
+
+
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)

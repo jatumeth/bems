@@ -75,6 +75,7 @@ def scenecontrol_agent(config_path, **kwargs):
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self._agent_id = self.config.get('agentid')
             self.url = self.config.get('backend_url') + self.config.get('scene_api')
+            print self.url
             self.token = self.config.get('token')
 
         @Core.receiver('onstart')
@@ -92,24 +93,54 @@ def scenecontrol_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
 
             msg = json.loads(message)
+
+            tasks = self.sceneconf[str(msg['scene_id'])]
+
+
+
+            task_list = json.loads(tasks['tasks'])
+            print('task_list: {}'.format(task_list))
+            for task in task_list:
+                topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])
+                print type(task['command'])
+
+                for k, v in task['command'].items():
+                    if k == 'isLock':
+                        print "0000000000000000000000000"
+                        task['command']['isLock'] = str(task['command']['isLock'] )
+
+                message = json.dumps(task['command'])
+                print type(message)
+                print ("topic {}".format(topic))
+                print ("message {} \n".format(message))
+
+
+
+                self.vip.pubsub.publish(
+                    'pubsub', topic,
+                    {'Type': 'HiVE Scene Control'}, message)
+
             try:
-                tasks = self.sceneconf[str(msg['scene_id'])]
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
 
-                task_list = json.loads(tasks['tasks'])
-                print('task_list: {}'.format(task_list))
-                for task in task_list:
-                    topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])
-                    message = json.dumps(task['command'])
-                    print ("topic {}".format(topic))
-                    print ("message {} \n".format(message))
-                    self.vip.pubsub.publish(
-                        'pubsub', topic,
-                        {'Type': 'HiVE Scene Control'}, message)
+                self.cur = self.conn.cursor()
 
-            except Exception as Error:
-                print("Error get Scene_id: {}".format(Error))
-                print('Reload Scene Config to Agent')
-                self.reload_config()
+                self.cur.execute("""
+                   UPDATE active_scene
+                   SET scene_id=%s, scene_name=%s
+                   WHERE scene=%s
+                """, (msg['scene_id'], '9', '1'))
+
+                # self.cur.execute("""UPDATE active_scene SET scene_id=%s WHERE scene='1' """, ('1555'))
+                self.conn.commit()
+                self.conn.close()
+            except Exception as er:
+                print("Error in insertdb : {}".format(er))
+            # except Exception as Error:
+            #     print("Error get Scene_id: {}".format(Error))
+            #     print('Reload Scene Config to Agent')
+            #     self.reload_config()
 
         @PubSub.subscribe('pubsub', topic_agent_reload)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
