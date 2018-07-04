@@ -229,7 +229,7 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.setDeviceStatus(message)
             # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-            time.sleep(2)
+            time.sleep(4)
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
