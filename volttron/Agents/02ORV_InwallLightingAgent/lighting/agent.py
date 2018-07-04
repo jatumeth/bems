@@ -130,27 +130,23 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
             self.StatusPublish(self.Light.variables)
-
-
             # update firebase , posgres , azure
             if(self.Light.variables['device_status'] ==  self.status_old):
                 pass
             else:
                 self.publish_firebase()
                 self.publish_postgres()
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+                # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
             self.status_old = self.Light.variables['device_status']
             print(self.status_old)
-                # self.publish_postgres()
-                # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         # @Core.periodic(60)
         # def deviceMonitorBehavior2(self):
-        #
-        #     self.Light.getDeviceStatus()
-        #     # update Azure IoT Hub
-        #     # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+        # #
+        # #     self.Light.getDeviceStatus()
+        # #     # update Azure IoT Hub
+        #     self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
 
         def publish_firebase(self):
@@ -187,6 +183,7 @@ def lighting_agent(config_path, **kwargs):
             print x
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('--------------update azure--------------')
+
         def publish_postgres(self):
 
             postgres_url = settings.POSTGRES['postgres']['url']
@@ -231,8 +228,8 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['device_status'] = str(message['device_status'])
 
             self.Light.setDeviceStatus(message)
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
-
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            time.sleep(4)
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)

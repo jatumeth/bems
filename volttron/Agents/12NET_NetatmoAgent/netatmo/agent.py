@@ -174,8 +174,6 @@ def netatmoing_agent(config_path, **kwargs):
             self.status_old3 = ""
             self.status_old4 = ""
             self.status_old5 = ""
-            self.status_old6 = ""
-            self.status_old7 = ""
 
             self.netatmo.getDeviceStatus()
 
@@ -188,9 +186,7 @@ def netatmoing_agent(config_path, **kwargs):
                     self.netatmo.variables['temperature'] != self.status_old2 or
                     self.netatmo.variables['pressure'] != self.status_old3 or
                     self.netatmo.variables['co2'] != self.status_old4 or
-                    self.netatmo.variables['humidity'] != self.status_old5 or
-                    self.netatmo.variables['outdoor_temperature'] != self.status_old6 or
-                    self.netatmo.variables['outdoor_humidity'] != self.status_old7):
+                    self.netatmo.variables['humidity'] != self.status_old5 ):
                 self.publish_firebase()
                 self.publish_postgres()
                 self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
@@ -203,8 +199,6 @@ def netatmoing_agent(config_path, **kwargs):
             self.status_old3 = self.netatmo.variables['pressure']
             self.status_old4 = self.netatmo.variables['co2']
             self.status_old5 = self.netatmo.variables['humidity']
-            self.status_old6 = self.netatmo.variables['outdoor_temperature']
-            self.status_old7 = self.netatmo.variables['outdoor_humidity']
 
         @Core.periodic(60)
         def deviceMonitorBehavior2(self):
@@ -212,9 +206,11 @@ def netatmoing_agent(config_path, **kwargs):
             self.netatmo.getDeviceStatus()
 
             # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
+            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
         def publish_firebase(self):
+
+
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
                 # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.netatmo.variables['device_status'])
@@ -227,12 +223,12 @@ def netatmoing_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("DATE_MIN_TEMP").set(self.netatmo.variables['date_min_temp'])
                 db.child(gateway_id).child('devices').child(agent_id).child("MAX_TEMP").set(self.netatmo.variables['max_temp'])
                 db.child(gateway_id).child('devices').child(agent_id).child("MIN_TEMP").set(self.netatmo.variables['min_temp'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_TEMPERATURE").set(self.netatmo.variables['outdoor_temperature'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_HUMIDITY").set(self.netatmo.variables['outdoor_humidity'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_DATE_MAX_TEMP").set(self.netatmo.variables['outdoor_date_max_temp'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_DATE_MIN_TEMP").set(self.netatmo.variables['outdoor_date_min_temp'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_MAX_TEMP").set(self.netatmo.variables['outdoor_max_temp'])
-                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_MIN_TEMP").set(self.netatmo.variables['outdoor_min_temp'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_TEMPERATURE").set(self.netatmo.variables['temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_HUMIDITY").set(self.netatmo.variables['humidity'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_DATE_MAX_TEMP").set(self.netatmo.variables['temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_DATE_MIN_TEMP").set(self.netatmo.variables['temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_MAX_TEMP").set(self.netatmo.variables['temperature'])
+                db.child(gateway_id).child('devices').child(agent_id).child("OUTDOOR_MIN_TEMP").set(self.netatmo.variables['temperature'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.netatmo.variables['device_type'])
             except Exception as er:
                 print er
@@ -256,10 +252,8 @@ def netatmoing_agent(config_path, **kwargs):
             x["pressure"] = self.netatmo.variables['pressure']
             x["temperature"] = self.netatmo.variables['temperature']
             x["co2"] = self.netatmo.variables['co2']
-            x["outdoor_temperature"] = self.netatmo.variables['outdoor_temperature']
-            x["outdoor_humidity"] = self.netatmo.variables['outdoor_humidity']
-            x["device_type"] = 'weathersensor'
 
+            x["device_type"] = 'weathersensor'
             x["activity_type"] = 'weather'
             x["username"] = 'arm'
             x["device_name"] = 'MY NETATMO'

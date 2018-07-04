@@ -6,7 +6,7 @@
     "agent_id": "01DAI1200101",
     "api": "classAPI_broadlink",
     "building_name": "hive",
-    "device_monitor_time": 2,
+    "device_monitor_time": 10,
     "macaddress": "1200138",
     "model": "AC123",
     "type": "AC",

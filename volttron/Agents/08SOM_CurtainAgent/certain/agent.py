@@ -167,8 +167,8 @@ def curtain_agent(config_path, **kwargs):
 
                 pass
             else:
-                self.publish_firebase()
-                self.publish_postgres()
+                #self.publish_firebase()
+                #self.publish_postgres()
                 self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
             self.status_old = self.Certain.variables['device_status']

@@ -152,13 +152,8 @@ def Doorlock_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Light.getDeviceStatus()
-
             self.StatusPublish(self.Light.variables)
 
-            # TODO update local postgres
-            # self.publish_postgres()
-
-            #update
 
             if(self.Light.variables['status'] == self.status_old):
 
@@ -166,13 +161,9 @@ def Doorlock_agent(config_path, **kwargs):
             else:
                 self.publish_firebase()
                 self.publish_postgres()
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
+                # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
             self.status_old = self.Light.variables['status']
-
             print(self.status_old)
-
-
 
         def publish_firebase(self):
             try:
@@ -246,8 +237,7 @@ def Doorlock_agent(config_path, **kwargs):
                 self.Light.variables['status'] = str(message['status'])
 
             self.Light.setDeviceStatus((message))
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
-
+            time.sleep(2)
 
     Agent.__name__ = 'DoorlockAgent'
     return DoorlockAgent(config_path, **kwargs)

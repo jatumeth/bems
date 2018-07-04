@@ -250,7 +250,7 @@ def main():
     AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
 
     #
-    # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
+    AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
     # time.sleep(5)
     AC.getDeviceStatus()
     # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})

@@ -185,15 +185,44 @@ class API:
     def convertPostMsg(self, postmsg):
         msgToDevice = {}
         print
+        try:
+            if postmsg['status'] == 'LOCKED':
+                msgToDevice['command'] = "lock"
+            elif postmsg['status'] == 'UNLOCKED':
+                msgToDevice['command'] = "unlock"
+            elif postmsg['status'] == 'LOCK':
+                msgToDevice['command'] = "lock"
+            elif postmsg['status'] == 'UNLOCK':
+                msgToDevice['command'] = "unlock"
+        except:
+            print ""
 
-        if postmsg['status'] == 'LOCKED':
-            msgToDevice['command'] = "lock"
-        elif postmsg['status'] == 'UNLOCKED':
-            msgToDevice['command'] = "unlock"
-        elif postmsg['status'] == 'LOCK':
-            msgToDevice['command'] = "lock"
-        elif postmsg['status'] == 'UNLOCK':
-            msgToDevice['command'] = "unlock"
+        try:
+            if postmsg['STATUS'] == 'LOCKED':
+                msgToDevice['command'] = "lock"
+            elif postmsg['STATUS'] == 'UNLOCKED':
+                msgToDevice['command'] = "unlock"
+            elif postmsg['STATUS'] == 'LOCK':
+                msgToDevice['command'] = "lock"
+            elif postmsg['STATUS'] == 'UNLOCK':
+                msgToDevice['command'] = "unlock"
+        except:
+            print ""
+
+
+
+        try:
+            if postmsg['isLock'] == 'true':
+                msgToDevice['command'] = "lock"
+            elif postmsg['isLock'] == 'false':
+                msgToDevice['command'] = "unlock"
+            elif postmsg['isLock'] == 'True':
+                msgToDevice['command'] = "lock"
+            elif postmsg['isLock'] == 'False':
+                msgToDevice['command'] = "unlock"
+        except:
+            print ""
+
         return msgToDevice
 
     # ----------------------------------------------------------------------
@@ -206,21 +235,21 @@ def main():
     Yale = API(model='Yale', type='tv', api='API3', agent_id='09YAL_YaleAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/locks/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = '893f8352-d1ca-4363-b9ee-e71708caa713')
 
 
-    # Yale.setDeviceStatus({"command": "unlock"})
+    Yale.setDeviceStatus({"isLock": "true"})
     #{"command":"lock"}
     # {"command":"unlock"}
     # time.sleep(10)
+    # #
+    # Yale.getDeviceStatus()
+    # for i in range (1,20):
+    #     Yale.setDeviceStatus({"STATUS": "UNLOCKED"})
     #
-    Yale.getDeviceStatus()
-    for i in range (1,20):
-        Yale.setDeviceStatus({"status": "LOCKED"})
-
-        time.sleep(10)
-
-        Yale.setDeviceStatus({"status": "UNLOCKED"})
-
-        time.sleep(10)
+    #     time.sleep(10)
     #
+    #     # Yale.setDeviceStatus({"status": "UNLOCKED"})
+    #
+    #     time.sleep(10)
+    # #
     # time.sleep(10)
     #
     # Yale.setDeviceStatus({"status": "ON"})
