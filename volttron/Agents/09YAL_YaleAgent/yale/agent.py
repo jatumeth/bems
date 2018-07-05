@@ -237,7 +237,7 @@ def Doorlock_agent(config_path, **kwargs):
                 self.Light.variables['status'] = str(message['status'])
 
             self.Light.setDeviceStatus((message))
-            time.sleep(2)
+            time.sleep(4)
 
     Agent.__name__ = 'DoorlockAgent'
     return DoorlockAgent(config_path, **kwargs)

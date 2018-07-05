@@ -169,7 +169,7 @@ class API:
                 _data2 =   json.dumps({"command": "TwoOff"})
                 print (_data2)
                 print "sending requests put"
-                r3 = requests.put(url, headers=headers, data=_data, timeout=20);
+                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
 
                 # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 _data3 =   json.dumps({"command": "OneOff"})
@@ -180,24 +180,25 @@ class API:
 
                 print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
-
+                print _data
                 time.sleep(10)
+                print "-------------------------sucess-------------------------"
 
-                _data3 =  json.dumps({"command": "OneOff"})
-                print (_data3)
-                print "sending requests put"
-                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-
-                _data2 =   json.dumps({"command": "TwoOff"})
-                print (_data2)
-                print "sending requests put"
-                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
-
-                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                _data3 =   json.dumps({"command": "OneOff"})
-                print (_data3)
-                print "sending requests put"
-                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                # _data3 =  json.dumps({"command": "OneOff"})
+                # print (_data3)
+                # print "sending requests put"
+                # r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                #
+                # _data2 =   json.dumps({"command": "TwoOff"})
+                # print (_data2)
+                # print "sending requests put"
+                # r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                #
+                # # _data3 = json.dumps(self.convertPostMsg(postmsg2))
+                # _data3 =   json.dumps({"command": "OneOff"})
+                # print (_data3)
+                # print "sending requests put"
+                # r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
 
             except:
