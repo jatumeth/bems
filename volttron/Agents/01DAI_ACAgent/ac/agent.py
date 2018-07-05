@@ -10,6 +10,7 @@ from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
+import settings
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
@@ -21,7 +22,7 @@ import pyrebase
 import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
-import settings
+
 
 
 utils.setup_logging()
@@ -157,7 +158,7 @@ def ac_agent(config_path, **kwargs):
             self.status_old4 = ""
             self.status_old5 = ""
             #os.system("python '/home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py';")
-            sp.Popen('python /home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py', shell=True)
+            # sp.Popen('python /home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py', shell=True)
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
@@ -211,8 +212,8 @@ def ac_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = 'Token 8f46cea7a3f072b6c0f3bc44e90ef423376bfcb1'
 
 
             m = MultipartEncoder(
@@ -283,7 +284,8 @@ def ac_agent(config_path, **kwargs):
             if 'mode' in message:
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
-            time.sleep(2)
+            time.sleep(4)
+
 
 
     Agent.__name__ = '01DAI_ACAgent'

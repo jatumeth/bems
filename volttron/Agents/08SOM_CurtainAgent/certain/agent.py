@@ -150,38 +150,40 @@ def curtain_agent(config_path, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.status_old = ""
             self.status_old2 = ""
-
-        @Core.periodic(device_monitor_time)
-        def deviceMonitorBehavior(self):
-            print ""
             self.Certain.getDeviceStatus()
-            self.StatusPublish(self.Certain.variables)
-            #
+
+        # @Core.periodic(device_monitor_time)
+        # def deviceMonitorBehavior(self):
+        #     print ""
+        #     pass
+            # self.Certain.getDeviceStatus()
             # self.StatusPublish(self.Certain.variables)
+            # #
+            # # self.StatusPublish(self.Certain.variables)
+            # #
+            # #
+            # # self.publish_postgres()
+            # #
+            # # update firebase , posgres , azure
+            # if (self.Certain.variables['device_status'] == self.status_old):
             #
+            #     pass
+            # else:
+            #     #self.publish_firebase()
+            #     #self.publish_postgres()
+            #     self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
             #
-            # self.publish_postgres()
+            # self.status_old = self.Certain.variables['device_status']
             #
-            # update firebase , posgres , azure
-            if (self.Certain.variables['device_status'] == self.status_old):
-
-                pass
-            else:
-                #self.publish_firebase()
-                #self.publish_postgres()
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
-            self.status_old = self.Certain.variables['device_status']
-
-            print(self.status_old)
+            # print(self.status_old)
 
 
 
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-
-            self.Certain.getDeviceStatus()
+        # @Core.periodic(60)
+        # def deviceMonitorBehavior2(self):
+        #
+        #     self.Certain.getDeviceStatus()
             # update Azure IoT Hub
             # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
@@ -201,6 +203,8 @@ def curtain_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("DIM").set(
+                    self.Certain.variables['device_status'])
+                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
                     self.Certain.variables['device_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
                     self.Certain.variables['device_type'])
@@ -272,8 +276,23 @@ def curtain_agent(config_path, **kwargs):
             self.Certain.setDeviceStatus((message))
             self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message2['username']))
 
-            # self.Certain.getDeviceStatus()
-            # self.publish_firebase()
+            try:
+                if message2['dim'] == '0':
+                    self.Certain.variables['device_status'] = "OFF"
+                elif message2['dim'] == '100':
+                    self.Certain.variables['device_status'] = "ON"
+            except:
+                pass
+
+            try:
+                self.Certain.variables['device_status'] = message2['status']
+            except:
+                pass
+
+            self.publish_firebase()
+            self.publish_postgres()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+
 
     Agent.__name__ = 'curtain'
     return curtain(config_path, **kwargs)
