@@ -143,23 +143,23 @@ def scheduler_agent(config_path, **kwargs):
 
                 if date_set.__eq__(set(on_dates)):
                     # if True is mean it running on everyday
-                    schedule.every().day.at(str(time_ind)).do(self.schedule_trigger())  # Time format is "13:00"
+                    schedule.every().day.at(str(time_ind)).do(self.devicecontrol)  # Time format is "13:00"
                 else:  # Else Statement for not everyday in week execute.
                     for on_date in on_dates:
                         if on_date == 'MO':
-                            schedule.every().monday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().monday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'TU':
-                            schedule.every().tuesday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().tuesday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'WE':
-                            schedule.every().wednesday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().wednesday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'TH':
-                            schedule.every().thursday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().thursday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'FR':
-                            schedule.every().friday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().friday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'SA':
-                            schedule.every().saturday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().saturday.at(str(time_ind)).do(self.devicecontrol)
                         elif on_date == 'SU':
-                            schedule.every().sunday.at(str(time_ind)).do(self.devicecontrol())
+                            schedule.every().sunday.at(str(time_ind)).do(self.devicecontrol)
                         else:
                             print('Somthing went wrong on Scheduler Task')
 
