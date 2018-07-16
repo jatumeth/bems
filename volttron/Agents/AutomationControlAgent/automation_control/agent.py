@@ -80,6 +80,14 @@ def scenecontrol_agent(config_path, **kwargs):
             self.num_of_scene = None
             self.token = None
             self.url = None
+            self.status_old = None
+            self.triger_value = None
+            self.triger_device = None
+            self.triger_event = None
+            self.triger_value = None
+            self.condition_event = None
+            self.condition_value = None
+            self.devicecontrols = None
             self.automation_id = automation_id
             # self.reload_config()  # Reload Scene when Agent Start
 
@@ -98,7 +106,6 @@ def scenecontrol_agent(config_path, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.load_config()
             self.status_old = ""
-
 
         @PubSub.subscribe('pubsub', topic_tricker)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
@@ -123,15 +130,13 @@ def scenecontrol_agent(config_path, **kwargs):
                     self.devicecontrol()
             self.status_old = triger_event_now
 
-
-
         def load_config(self): # reload scene configuration to Agent Variable
 
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn
             self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM automation """)
+            self.cur.execute("""SELECT * FROM automations """)  # TODO : add where condition automation-ID matched
             rows = self.cur.fetchall()
 
             for row in rows :

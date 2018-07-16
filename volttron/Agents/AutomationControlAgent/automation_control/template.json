@@ -1,0 +1,29 @@
+{'type': 'automationcreate',
+  'automationconfig': {
+                        'condition_event': " ['SCHEDULE']",
+                        'automation_id': 204,
+                        'trigger_device': "['SCHEDULER']",
+                        'action_tasks': '[
+                                            { "device_id": "00001",
+                                              "command":{  "status": "OFF", "temp": 25}
+                                            },
+                                            {"device_id": "00002",
+                                              "command": {"dim": 70}
+                                            },
+                                            {"device_id": "00003",
+                                             "command": {"isLock": true}
+                                            },
+                                            {"device_id": "00004",
+                                              "command": {"status": "OFF"}
+                                            }
+                                         ]',
+
+
+
+
+                        'condition_value':'{"time":["12:00"], "day":[\'MO\',\'TU\',\'WE\',\'TH\',\'FR\',\'SA\',\'SU\']}',
+                        'trigger_event': 'DATETIME',
+                        'automation_name': 'scheduler',
+                        'trigger_value': '{"time":["12:00"], "day":[\'MO\',\'TU\',\'WE\',\'TH\',\'FR\',\'SA\',\'SU\']}'
+  }
+}
