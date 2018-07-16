@@ -278,7 +278,10 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['brightness'] = message['brightness']
 
             self.Light.setDeviceStatus(message)
-            time.sleep(2)
+            time.sleep(3)
+            self.Light.getDeviceStatus()
+            self.publish_firebase()
+            self.publish_postgres()
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)

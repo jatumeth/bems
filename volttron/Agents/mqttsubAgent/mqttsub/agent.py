@@ -73,6 +73,7 @@ def mqttsub_agent(config_path, **kwargs):
                     print msg
                     if msg.body is not None:
                         commsg = eval(msg.body)
+                        print commsg
                         # print("message MQTT received datas")
                         type_msg = commsg.get('type', None)
                         if type_msg.startswith('scene'): # TODO : Recheck condition again

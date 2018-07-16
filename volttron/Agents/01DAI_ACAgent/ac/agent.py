@@ -285,6 +285,9 @@ def ac_agent(config_path, **kwargs):
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
             time.sleep(4)
+            self.AC.getDeviceStatus()
+            self.publish_firebase()
+            self.publish_postgres()
 
 
 

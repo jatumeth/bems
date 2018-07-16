@@ -238,6 +238,9 @@ def Doorlock_agent(config_path, **kwargs):
 
             self.Light.setDeviceStatus((message))
             time.sleep(4)
+            self.Light.getDeviceStatus()
+            self.publish_firebase()
+            self.publish_postgres()
 
     Agent.__name__ = 'DoorlockAgent'
     return DoorlockAgent(config_path, **kwargs)

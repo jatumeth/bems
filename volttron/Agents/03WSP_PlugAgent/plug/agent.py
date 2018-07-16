@@ -255,7 +255,10 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['status'] = str(message['status'])
 
             self.Light.setDeviceStatus((message))
-            self.publish_azure_iot_hub(activity_type='devicecontrol', username=str(message['username']))
+            time.sleep(3)
+            self.Light.getDeviceStatus()
+            self.publish_firebase()
+            self.publish_postgres()
 
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
