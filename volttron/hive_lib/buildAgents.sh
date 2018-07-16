@@ -145,7 +145,6 @@ volttron-pkg package Agents/ScenesetupAgent
 
 volttron-pkg configure ~/.volttron/packaged/setupsceneagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/ScenesetupAgent/1KR221445K1200138.config.json
 
-
 volttron-ctl install ~/.volttron/packaged/setupsceneagent-0.1-py2-none-any.whl --tag scenesetup
 
 #scene

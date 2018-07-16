@@ -222,14 +222,25 @@ def lighting_agent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
 
-
             message = json.loads(message)
             if 'device_status' in message:
                 self.Light.variables['device_status'] = str(message['device_status'])
 
             self.Light.setDeviceStatus(message)
+
+            try:
+
+                if message['status'] == 'ON':
+                    self.Light.variables['device_status'] = "ON"
+                elif message['status'] == 'OFF':
+                    self.Light.variables['device_status'] = "OFF"
+            except:
+                pass
+
             # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
             time.sleep(4)
+            self.publish_firebase()
+            self.publish_postgres()
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
