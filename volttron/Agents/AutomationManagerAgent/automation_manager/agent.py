@@ -115,7 +115,13 @@ def automation_manager_agent(config_path, **kwargs):
             msg = json.loads(message)
             conf = msg.get('automationconfig', None)
             self.insertdb(conf)
-            self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
+            if str(conf.get('condition_event')).__contains__('SCHEDULE'):
+                self.build_scheduler_agent(automation_id=str(conf.get('automation_id')))
+
+            else:
+                self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
             self.publish_agentupdate_topic()  # Pub Message to HiVEPlatfom Agent
 
         @PubSub.subscribe('pubsub', topic_automation_delete)  # On Automation delete
@@ -135,7 +141,12 @@ def automation_manager_agent(config_path, **kwargs):
             automation_id = conf.get('automation_id')
             self.updatedb(conf)
             self.remove_automation_agent(automation_id)
-            self.build_automation_agent(automation_id)
+            if str(conf.get('condition_event')).__contains__('SCHEDULE'):
+                self.build_scheduler_agent(automation_id=str(conf.get('automation_id')))
+
+            else:
+                self.build_automation_agent(automation_id=str(conf.get('automation_id')))
+
             self.publish_agentupdate_topic()  # Pub Message to HiVEPlatfom Agent
 
         def updatedb(self, conf):
@@ -233,6 +244,28 @@ def automation_manager_agent(config_path, **kwargs):
                       " ~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                       ";volttron-ctl install " +
                       "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
+                      "--tag automation_{}".format(automation_id) +
+                      ";volttron-ctl enable --tag automation_{}".format(automation_id) +
+                      ";volttron-ctl start --tag automation_{}".format(automation_id))
+
+        def build_scheduler_agent(self, automation_id):
+            print("Schedule Agent Building")
+            #  get PATH Environment
+            home_path = expanduser("~")
+            json_path = '/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json'
+            self.automation_control_path = home_path + json_path
+            launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
+            #  Update new agentID to variable (agentID is relate to automation_id)
+            launcher.update({'agentid': 'automation_{}'.format(automation_id)})
+            #  dump new config to file
+            json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
+            print(" >>> Change config file successful")
+
+            os.system("volttron-pkg package Agents/AutomationSchedulerAgent;" +
+                      "volttron-pkg configure ~/.volttron/packaged/automation_scheduleragent-3.2-py2-none-any.whl" +
+                      " ~/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json" +
+                      ";volttron-ctl install " +
+                      "~/.volttron/packaged/automation_scheduleragent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))

@@ -114,8 +114,6 @@ def scenecontrol_agent(config_path, **kwargs):
                 print ("topic {}".format(topic))
                 print ("message {} \n".format(message))
 
-
-
                 self.vip.pubsub.publish(
                     'pubsub', topic,
                     {'Type': 'HiVE Scene Control'}, message)
