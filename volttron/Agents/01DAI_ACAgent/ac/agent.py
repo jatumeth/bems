@@ -213,7 +213,7 @@ def ac_agent(config_path, **kwargs):
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
-            postgres_Authorization = 'Token 8f46cea7a3f072b6c0f3bc44e90ef423376bfcb1'
+            postgres_Authorization = 'Token 420afbbf66341d0c6167698087235d12df041836'
 
 
             m = MultipartEncoder(
