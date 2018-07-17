@@ -129,14 +129,15 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Light.getDeviceStatus()
-            self.StatusPublish(self.Light.variables)
+
             # update firebase , posgres , azure
             if(self.Light.variables['device_status'] ==  self.status_old):
                 pass
             else:
                 self.publish_firebase()
                 self.publish_postgres()
-                # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+                self.StatusPublish(self.Light.variables)
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
             self.status_old = self.Light.variables['device_status']
             print(self.status_old)
@@ -228,18 +229,10 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['device_status'] = str(message['device_status'])
             self.Light.setDeviceStatus(message)
 
-            try:
-                if message['status'] == 'ON':
-                    self.Light.variables['device_status'] = "ON"
-                elif message['status'] == 'OFF':
-                    self.Light.variables['device_status'] = "OFF"
-            except:
-                pass
-
             #step request status if change update firebase
             # or status not change delay time for update firebase
 
-            time.sleep(3)
+            time.sleep(2)
             self.Light.getDeviceStatus()
             # update firebase , posgres , azure
             if(self.Light.variables['device_status'] ==  self.status_old):
@@ -249,7 +242,7 @@ def lighting_agent(config_path, **kwargs):
                     time.sleep(1)
                     self.Light.getDeviceStatus()
                     if (self.Light.variables['device_status'] == self.status_old):
-                        time.sleep(1)
+                        time.sleep(2)
                     else:
                         self.publish_firebase()
                         self.publish_postgres()

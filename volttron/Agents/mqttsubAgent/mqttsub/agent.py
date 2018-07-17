@@ -75,7 +75,7 @@ def mqttsub_agent(config_path, **kwargs):
                         commsg = eval(msg.body)
                         print commsg
                         # print("message MQTT received datas")
-                        type_msg = commsg.get('type', None)
+                        type_msg = str(commsg.get('type', None))
                         if type_msg.startswith('scene'): # TODO : Recheck condition again
                             # print('Found scene')
                             self.VIPPublishApplication(commsg, type_msg)
@@ -123,6 +123,7 @@ def mqttsub_agent(config_path, **kwargs):
                         # print "No body message"
 
                 except Exception as er:
+                    print "tggggg"
                     print er
 
         def VIPPublishDevice(self,commsg):

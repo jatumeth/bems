@@ -244,6 +244,12 @@ class API:
                         _red = int(float(msg[0]))
                         _green = int(float(msg[1]))
                         _blue = int(float(msg[2]))
+                    else:
+                        msg = postmsg.get('color').replace('(', '').replace(')', '').split(',')
+                        _red = int(float(msg[0]))
+                        _green = int(float(msg[1]))
+                        _blue = int(float(msg[2]))
+
                     _xyY = rgb_cie.ColorHelper.getXYPointFromRGB(_red, _green, _blue)
                     msgToDevice['xy'] = [_xyY.x, _xyY.y]
                     # msgToDevice['bri']= int(round(_xyY.y*255,0))
@@ -305,7 +311,8 @@ def main():
                                                                        PhilipsHue.get_variable('address')))
 
     PhilipsHue.getDeviceStatus()
-    # # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
+    # PhilipsHue.setDeviceStatus({"status": "ON"})
+    PhilipsHue.setDeviceStatus({"status": "ON", "color": u'(15, 250, 20)'})
     # for i in range(1, 100):
     #     import random
     #     print(random.randint(0, 255))

@@ -9,6 +9,7 @@ import json
 import psycopg2.extras
 import psycopg2
 import sys
+from datetime import *
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -41,16 +42,16 @@ def scheduler_agent(config_path, **kwargs):
         conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                 password=db_password)
         cur = conn.cursor()
-        cur.execute("""SELECT * FROM automation WHERE automation_id = {}""".format(automation_id.replace('automation_' ,'')))
+        cur.execute("""SELECT * FROM automations WHERE automation_id = {}""".format(automation_id.replace('automation_' ,'')))
         rows = cur.fetchall()
         for row in rows:
             # print row[0]
             automation_id = automation_id.replace('automation_','')
             # print automation_id
             # if int(automation_id) == int(row[0]):
-            trigger_device = row[2]  # In this case row[2] is 'SCHEDULER'
-            condition_value = row[6]
-            action_task = row[7]
+            trigger_device = row[3]  # In this case row[2] is 'SCHEDULER'
+            condition_value = row[7]
+            action_task = row[8]
     
         conn.close()
     except Exception as Err:
@@ -86,7 +87,7 @@ def scheduler_agent(config_path, **kwargs):
             self.load_config()
             self.schedule()
             
-        @Core.periodic(60)  # Every 60 sec do a schedule.run_pending
+        @Core.periodic(10)  # Every 60 sec do a schedule.run_pending
         def scheduler_handle(self):
             print('Scheduler is handeling ...')
             schedule.run_pending()  # pending for next exec task
@@ -102,12 +103,12 @@ def scheduler_agent(config_path, **kwargs):
 
             for row in rows:
                 if int(self.automation_id) == int(row[0]):
-                    self.trigger_device = row[2]
-                    self.trigger_event = row[3]
-                    self.trigger_value = row[4]
-                    self.condition_event = row[5]
-                    self.condition_value = row[6]
-                    self.devicecontrols = (json.loads((row[7])))
+                    self.trigger_device = row[3]
+                    self.trigger_event = row[4]
+                    self.trigger_value = row[5]
+                    self.condition_event = row[6]
+                    self.condition_value = row[7]
+                    self.devicecontrols = (json.loads((row[8])))
                     # print(" trigger_device = {}".format(self.trigger_device))
                     # print(" trigger_event = {}".format(self.trigger_event))
                     # print(" trigger_value = {}".format(self.trigger_value))
@@ -135,31 +136,34 @@ def scheduler_agent(config_path, **kwargs):
 
         def schedule(self):
             print('Set Schedule Task')
-            condition = self.condition_value
-            time_trriger = condition.get('time')
-            on_dates = condition.get('day')
+            tmp = self.condition_value
+            condition = json.loads(tmp)
+            sche = condition.get('SCHEDULE')
+            m1 = sche.get('time')
+            time_trigger = [(datetime.strptime(m1, '%I:%M %p')).strftime('%H:%M')]
+            on_dates = sche.get('day')
             date_set = {'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'}
-            for time_ind in time_trriger:
+            for time_ind in time_trigger:
 
                 if date_set.__eq__(set(on_dates)):
                     # if True is mean it running on everyday
-                    schedule.every().day.at(str(time_ind)).do(self.devicecontrol)  # Time format is "13:00"
+                    schedule.every().day.at(time_ind).do(self.devicecontrol)  # Time format is "13:00"
                 else:  # Else Statement for not everyday in week execute.
                     for on_date in on_dates:
                         if on_date == 'MO':
-                            schedule.every().monday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().monday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'TU':
-                            schedule.every().tuesday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().tuesday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'WE':
-                            schedule.every().wednesday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().wednesday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'TH':
-                            schedule.every().thursday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().thursday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'FR':
-                            schedule.every().friday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().friday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'SA':
-                            schedule.every().saturday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().saturday.at(time_ind).do(self.devicecontrol)
                         elif on_date == 'SU':
-                            schedule.every().sunday.at(str(time_ind)).do(self.devicecontrol)
+                            schedule.every().sunday.at(time_ind).do(self.devicecontrol)
                         else:
                             print('Somthing went wrong on Scheduler Task')
 

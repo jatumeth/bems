@@ -164,7 +164,7 @@ def automation_manager_agent(config_path, **kwargs):
                 self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
                                              user=db_user, password=db_password)
                 self.cur = self.conn.cursor()
-                self.cur.execute("""UPDATE automation SET automation_name=%s,
+                self.cur.execute("""UPDATE automations SET automation_name=%s,
                                     condition_event=%s, condition_value=%s,
                                     trigger_device=%s, trigger_event=%s,
                                     trigger_value=%s, action_tasks=%s
@@ -182,7 +182,7 @@ def automation_manager_agent(config_path, **kwargs):
                 self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
                                              user=db_user, password=db_password)
                 self.cur = self.conn.cursor()
-                self.cur.execute("""DELETE FROM automation 
+                self.cur.execute("""DELETE FROM automations 
                                     WHERE automation_id ={};""".format(conf.get('automation_id')))
                 self.conn.commit()
                 self.conn.close()
@@ -208,7 +208,7 @@ def automation_manager_agent(config_path, **kwargs):
 
                 self.cur = self.conn.cursor()
                 self.cur.execute(
-                    """INSERT INTO automation (automation_id, automation_name, condition_event, 
+                    """INSERT INTO automations (automation_id, automation_name, condition_event, 
                                                 condition_value, trigger_device, trigger_event, 
                                                 trigger_value, action_tasks) 
                                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
@@ -239,11 +239,11 @@ def automation_manager_agent(config_path, **kwargs):
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
-            os.system("volttron-pkg package Agents/AutomationControlAgent;" +
-                      "volttron-pkg configure ~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
-                      " ~/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
+            os.system("volttron-pkg package /home/hive/workspace/hive_os/volttron/Agents/AutomationControlAgent;" +
+                      "volttron-pkg configure /home/hive/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
+                      " /home/hive/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                       ";volttron-ctl install " +
-                      "~/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
+                      "/home/hive/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))
@@ -261,11 +261,11 @@ def automation_manager_agent(config_path, **kwargs):
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
-            os.system("volttron-pkg package Agents/AutomationSchedulerAgent;" +
-                      "volttron-pkg configure ~/.volttron/packaged/automation_scheduleragent-3.2-py2-none-any.whl" +
-                      " ~/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json" +
+            os.system("volttron-pkg package /home/hive/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent;" +
+                      "volttron-pkg configure /home/hive/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl" +
+                      " /home/hive/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json" +
                       ";volttron-ctl install " +
-                      "~/.volttron/packaged/automation_scheduleragent-3.2-py2-none-any.whl " +
+                      "/home/hive/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))

@@ -176,6 +176,9 @@ volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl -
 volttron-pkg package Agents/AutomationControlAgent
 
 
+
+
+
 ## RUN Lighting Agent
 #volttron-pkg package ~/workspace/bemoss_os/Agents/MultiBuilding/
 #volttron-pkg configure /tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiBuilding/multibuildingagent.launch.json
