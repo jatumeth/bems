@@ -11,7 +11,7 @@
     "device": "dc53a370-ed35-4228-9dc2-b0b022f28624",
     "bearer": "Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39",
     "building_name": "hive",
-    "device_monitor_time": 30,
+    "device_monitor_time": 5,
     "macaddress": "221445K1200138",
     "model": "one",
     "type": "02ORV",
