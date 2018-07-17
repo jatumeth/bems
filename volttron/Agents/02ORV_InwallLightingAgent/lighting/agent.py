@@ -205,6 +205,7 @@ def lighting_agent(config_path, **kwargs):
                                       })
             print r.status_code
             print('-------------------update postgres---------------')
+
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
@@ -225,11 +226,9 @@ def lighting_agent(config_path, **kwargs):
             message = json.loads(message)
             if 'device_status' in message:
                 self.Light.variables['device_status'] = str(message['device_status'])
-
             self.Light.setDeviceStatus(message)
 
             try:
-
                 if message['status'] == 'ON':
                     self.Light.variables['device_status'] = "ON"
                 elif message['status'] == 'OFF':
@@ -237,10 +236,31 @@ def lighting_agent(config_path, **kwargs):
             except:
                 pass
 
-            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-            time.sleep(4)
-            self.publish_firebase()
-            self.publish_postgres()
+            #step request status if change update firebase
+            # or status not change delay time for update firebase
+
+            time.sleep(3)
+            self.Light.getDeviceStatus()
+            # update firebase , posgres , azure
+            if(self.Light.variables['device_status'] ==  self.status_old):
+                time.sleep(1)
+                self.Light.getDeviceStatus()
+                if (self.Light.variables['device_status'] == self.status_old):
+                    time.sleep(1)
+                    self.Light.getDeviceStatus()
+                    if (self.Light.variables['device_status'] == self.status_old):
+                        time.sleep(1)
+                    else:
+                        self.publish_firebase()
+                        self.publish_postgres()
+                else:
+                    self.publish_firebase()
+                    self.publish_postgres()
+            else:
+                self.publish_firebase()
+                self.publish_postgres()
+
+            self.status_old = self.Light.variables['device_status']
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
