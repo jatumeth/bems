@@ -84,6 +84,7 @@ def scenecontrol_agent(config_path, **kwargs):
                 self.vip.heartbeat.start_with_period(self._heartbeat_period)
                 self.vip.health.set_status(STATUS_GOOD, self._message)
             self.resync_scene()
+            self.checkactivescence()
 
         @PubSub.subscribe('pubsub', topic_scenecontrol)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -100,13 +101,15 @@ def scenecontrol_agent(config_path, **kwargs):
 
             task_list = json.loads(tasks['tasks'])
             print('task_list: {}'.format(task_list))
+
+
+
             for task in task_list:
                 topic = str('/ui/agent/update/hive/999/') + str(task['device_id'])
                 print type(task['command'])
 
                 for k, v in task['command'].items():
                     if k == 'isLock':
-                        print "0000000000000000000000000"
                         task['command']['isLock'] = str(task['command']['isLock'] )
 
                 message = json.dumps(task['command'])
@@ -123,22 +126,18 @@ def scenecontrol_agent(config_path, **kwargs):
                                              user=db_user, password=db_password)
 
                 self.cur = self.conn.cursor()
-
                 self.cur.execute("""
                    UPDATE active_scene
                    SET scene_id=%s, scene_name=%s
                    WHERE scene=%s
-                """, (msg['scene_id'], '9', '1'))
+                """, (msg['scene_id'], '1', '1'))
 
-                # self.cur.execute("""UPDATE active_scene SET scene_id=%s WHERE scene='1' """, ('1555'))
                 self.conn.commit()
                 self.conn.close()
+
             except Exception as er:
                 print("Error in insertdb : {}".format(er))
-            # except Exception as Error:
-            #     print("Error get Scene_id: {}".format(Error))
-            #     print('Reload Scene Config to Agent')
-            #     self.reload_config()
+
 
         @PubSub.subscribe('pubsub', topic_agent_reload)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
@@ -228,6 +227,46 @@ def scenecontrol_agent(config_path, **kwargs):
                 self.conn.close()
             except Exception as er:
                 print("Error in insertdb : {}".format(er))
+
+        def createactivescence(self):
+
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+
+                self.cur = self.conn.cursor()
+                self.cur.execute("""TRUNCATE TABLE active_scene;""")
+                self.conn.commit()
+                self.conn.close()
+
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+                self.cur = self.conn.cursor()
+
+                self.cur.execute(
+                    """INSERT INTO active_scene (scene, scene_name) VALUES (%s, %s);""",
+                    ('1', '1'))
+                self.conn.commit()
+                self.conn.close()
+
+        def checkactivescence(self):
+
+            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                         user=db_user, password=db_password)
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM active_scene """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                self.createrow1 = True
+                numrow1 = 0
+                if int(row[1]) == '1':
+                    self.createrow1 = False
+                    numrow1 = numrow1+1
+            self.conn.close()
+
+            if self.createrow1 == True:
+                self.createactivescence()
+            if numrow1 > 1:
+                self.createactivescence()
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)

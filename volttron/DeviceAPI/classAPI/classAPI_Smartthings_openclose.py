@@ -120,6 +120,7 @@ class API:
 
         self.set_variable('device_contact', str(conve_json["contact"]).upper())
         self.set_variable('status', str(conve_json["contact"]).upper())
+        self.set_variable('OPENCLOSE', str(conve_json["contact"]).upper())
         self.set_variable('device_type', str(conve_json["type"]).upper())
         self.set_variable('unitTime', str(conve_json["unitTime"]))
         self.set_variable('device_label', str(conve_json["label"]).upper())
@@ -134,6 +135,7 @@ class API:
 
         print(" the current status is as follows:")
         print(" device_contact = {}".format(self.get_variable('device_contact')))
+        print(" OPENCLOSE = {}".format(self.get_variable('OPENCLOSE')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" device_type= {}".format(self.get_variable('device_type')))
         print(" device_label= {}".format(self.get_variable('device_label')))
