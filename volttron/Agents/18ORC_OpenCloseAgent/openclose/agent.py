@@ -176,13 +176,6 @@ def opencloseing_agent(config_path, **kwargs):
             self.status_old = self.openclose.variables['device_contact']
             print(self.status_old)
 
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-
-            self.openclose.getDeviceStatus()
-
-            # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
             try:

@@ -116,6 +116,7 @@ class API:
         conve_json = json.loads(data)
         print conve_json
         self.set_variable('status', str(conve_json["motion"]).upper())
+        self.set_variable('MOTION', str(conve_json["motion"]).upper())
         self.set_variable('type', str(conve_json["type"]).upper())
         self.set_variable('unitTime', str(conve_json["unitTime"]))
         self.set_variable('label', str(conve_json["label"]).upper())
@@ -127,6 +128,7 @@ class API:
         print ""
         print(" the current status is as follows:")
         print(" STATUS = {}".format(self.get_variable('status')))
+        print(" MOTION = {}".format(self.get_variable('MOTION')))
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" TYPE = {}".format(self.get_variable('type')))
         print(" LABEL = {}".format(self.get_variable('label')))

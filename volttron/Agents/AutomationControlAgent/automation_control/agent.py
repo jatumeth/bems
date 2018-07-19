@@ -52,14 +52,13 @@ def scenecontrol_agent(config_path, **kwargs):
     conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                             password=db_password)
     cur = conn.cursor()
-    cur.execute("""SELECT * FROM automation """)
+    cur.execute("""SELECT * FROM automations """)
     rows = cur.fetchall()
     for row in rows:
-        print row[0]
         automation_id = automation_id.replace('automation_','')
         print automation_id
         if int(automation_id) == int(row[0]):
-            triger_device = row[2]
+            triger_device = row[3]
             triger_device_str = ((triger_device).replace("['", '', 1)).replace("']", '', 1)
             triger_device_str = ((triger_device).replace('["', '', 1)).replace('"]', '', 1)
             topic_tricker = '/agent/zmq/update/hive/999/' + triger_device_str
@@ -109,6 +108,13 @@ def scenecontrol_agent(config_path, **kwargs):
 
         @PubSub.subscribe('pubsub', topic_tricker)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
+
+            convert_msg = json.loads(message)
+            triger_event_now = convert_msg[(self.triger_event)]
+            print(" value reading now is value = {}".format(convert_msg[(self.triger_event)]))
+            if self.triger_value == 'CLOSE':
+                self.triger_value = 'CLOSED'
+
             print ">>"
             print ">>"
             print "<<<<<< step 1 subscribe triger >>>>>>>>"
@@ -117,17 +123,18 @@ def scenecontrol_agent(config_path, **kwargs):
             print(" Automation set event = {}".format(self.triger_event))
             print(" Automation set value = {}".format(self.triger_value))
             print message
-            convert_msg = json.loads(message)
-            triger_event_now = convert_msg[(self.triger_event).lower()]
-            print(" value reading now is value = {}".format(convert_msg[(self.triger_event).lower()]))
-            if self.triger_value == 'CLOSE':
-                self.triger_value = 'CLOSED'
+
             if triger_event_now == self.triger_value:
                 print(" Automation set value == value reading now ")
                 print(" go to step [[[  2  ]]] check condition event ")
-                # self.conditionevent()
+
                 if self.status_old != self.triger_value:
                     self.devicecontrol()
+                    if str(self.condition_event) == '[]':
+                        self.devicecontrol()
+                    elif str(self.condition_event) == '["SCENE"]':
+                        self.conditionevent()
+
             self.status_old = triger_event_now
 
         def load_config(self): # reload scene configuration to Agent Variable
@@ -141,19 +148,18 @@ def scenecontrol_agent(config_path, **kwargs):
 
             for row in rows :
                 if int(self.automation_id) == int(row[0]):
-                    self.triger_device = row[2]
-                    self.triger_event = row[3]
-                    self.triger_value = row[4]
-                    self.condition_event = row[5]
-                    self.condition_value = row[6]
-                    self.devicecontrols = (json.loads((row[7])))
+                    self.triger_device = row[3]
+                    self.triger_event = row[4]
+                    self.triger_value = row[5]
+                    self.condition_event = row[6]
+                    self.condition_value = row[7]
+                    self.devicecontrols = (json.loads((row[8])))
                     print(" triger_device = {}".format(self.triger_device))
                     print(" triger_event = {}".format(self.triger_event))
                     print(" triger_value = {}".format(self.triger_value))
                     print(" condition_event  = {}".format(self.condition_event))
                     print(" condition_value = {}".format(self.condition_value))
                     print(" devicecontrols = {}".format(self.devicecontrols))
-
             self.conn.close()
 
         def conditionevent(self):
@@ -167,29 +173,23 @@ def scenecontrol_agent(config_path, **kwargs):
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
 
-            if self.condition_event == 'SCENE':
-                self.conn = conn
-                self.cur = self.conn.cursor()
-                self.cur.execute("""SELECT * FROM active_scene """)
-                rows = self.cur.fetchall()
-                for row in rows :
-                    self.scene_id_now = row[0]
-                    self.scene_name_now = row[2]
-                    print(" condition now = {}".format(self.scene_name_now))
-                    print(" condition in automation seting  = {}".format(self.scene_name_now))
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM active_scene """)
+            rows = self.cur.fetchall()
 
-                    if str(self.condition_value) == str(self.scene_name_now):
-                        print '>> condition value == condition now'
-                        print(" go to step [[[  3  ]]] device control ")
-                        self.devicecontrol()
-                    else:
-                        print '>> condition value != condition now'
-                        print ""
-                        print(" go to step [[[  1  ]]] for subscribe triger")
-                        print ""
+            loadcondition_value = json.loads(self.condition_value)
+            sceneidcondition = loadcondition_value.get('SCENE')
 
-            self.conn.close()
 
+            for row in rows :
+                if str(row[0]) == str(sceneidcondition):
+                    print(" condition now = {}".format(row[0]))
+                    print(" condition in automation seting  = {}".format(sceneidcondition))
+                    print '>> condition value == condition now'
+                    print(" go to step [[[  3  ]]] device control ")
+                    self.devicecontrol()
+            conn.close()
 
         def devicecontrol(self):
             print ">>"
