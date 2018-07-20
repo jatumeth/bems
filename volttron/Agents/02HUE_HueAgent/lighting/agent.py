@@ -74,29 +74,9 @@ def lighting_agent(config_path, **kwargs):
     url = get_config('url')
     api = get_config('api')
     username = get_config('username')
-    address = "http://192.168.1.101:80"
-    # _address = address.replace('http://', '')
-    # _address = address.replace('https://', '')
-    # try:  # validate whether or not address is an ip address
-    #     socket.inet_aton(_address)
-    #     ip_address = _address
-    # except socket.error:
-    #     ip_address = None
-    # identifiable = get_config('identifiable')
-
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
+    address = get_config('address')
+    address = get_config('address')
+    address = get_config('address')
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -143,16 +123,6 @@ def lighting_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
@@ -183,18 +153,10 @@ def lighting_agent(config_path, **kwargs):
 
             else:
                 pass
-
             self.status_old = self.Light.variables['status']
             self.status_old2 = self.Light.variables['brightness']
             self.status_old3 = self.Light.variables['color']
-            print(self.status_old)
-            print(self.status_old2)
-            print(self.status_old3)
-        # @Core.periodic(60)
-        # def deviceMonitorBehavior2(self):
-        #     self.Light.getDeviceStatus()
-        #     # update Azure IoT Hub
-        #     # self.publish_azure_iot_hub(activity_type='devicemonitor', username=str(agent_id))
+
 
         def publish_firebase(self):
             try:
@@ -270,15 +232,14 @@ def lighting_agent(config_path, **kwargs):
 
             if 'status' in message:
                 self.Light.variables['status'] = str(message['status'])
-
             if 'color' in message:
                 self.Light.variables['color'] = message['color']
-
             if 'brightness' in message:
                 self.Light.variables['brightness'] = message['brightness']
 
+
             self.Light.setDeviceStatus(message)
-            time.sleep(3)
+            time.sleep(2)
             self.Light.getDeviceStatus()
             self.publish_firebase()
             self.publish_postgres()
