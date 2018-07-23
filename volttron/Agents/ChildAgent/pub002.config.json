@@ -3,7 +3,7 @@
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "pub002", 
-    "agentid": "childagent_39", 
+    "agentid": "childagent_170", 
     "api": "classAPI_Smartthings_Inwall", 
     "bearer": "Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035", 
     "building_name": "hive", 

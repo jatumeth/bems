@@ -6,7 +6,8 @@ from volttron.platform.vip.agent import Agent, Core, PubSub
 from volttron.platform.agent import utils
 import importlib
 import json
-
+import os, sys
+from os.path import expanduser
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -24,13 +25,13 @@ def lighting_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    agent_id = get_config('agent_id')
+    agent_id = get_config('agentid')
     message = get_config('message')
     model = get_config('model')
     api = get_config('api')
     identifiable = get_config('identifiable')
     # construct _topic_Agent_UI based on data obtained from DB
-    topic_device_control = '/agent/zmq/update/hive/999/'
+    topic_device_control = '/ui/agent/update/'+agent_id
     send_notification = True
 
 
@@ -48,8 +49,7 @@ def lighting_agent(config_path, **kwargs):
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Light = self.apiLib.API(model=self.model, agent_id=self._agent_id)
-            self.count = None
-            self.msg_log = None
+            self.count = 0
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -59,24 +59,26 @@ def lighting_agent(config_path, **kwargs):
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
-            # _log.debug("VERSION IS: {}".format(self.core.version()))
-            self.count = 0
-            self.msg_log = {}
+            _log.debug("VERSION IS: {}".format(self.core.version()))
 
-        @PubSub.subscribe('pubsub', topic_device_control)
-        def match_device_control(self, peer, sender, bus, topic, headers, message):
+
+        @Core.periodic(15)
+        def deviceMonitorBehavior(self):
             self.count += 1
-            # print(str(self.count) + "  From : " + str(json.loads(message)[1]))
+            msg = ["I'm ", str(self.Light.variables['agent_id']), str(self.count)]
+            self.StatusPublish(msg)
 
-            self.msg_log.update({str(json.loads(message)[1]): str(json.loads(message)[-1])})
-            f = open('./archive.json','w')
-            f.write(json.dumps(self.msg_log, sort_keys=True, indent=4))
-            f.close()
-            # print "Topic: {topic}".format(topic=topic)
-            # print "Headers: {headers}".format(headers=headers)
-            # print "Message: {message}\n".format(message=message)
+        def StatusPublish(self, commsg):
+            # TODO this is example how to write an app to control AC
 
+            topic = str('/agent/zmq/update/hive/999/' + str(self._agent_id))
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
