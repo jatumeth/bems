@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-
-
+from __future__ import absolute_import
 from datetime import datetime
 import logging
 import sys
-import os
-import subprocess as sp
+import settings
 from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
-import settings
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
@@ -23,8 +20,6 @@ import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
 
-
-
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -32,17 +27,21 @@ DEFAULT_HEARTBEAT_PERIOD = 20
 DEFAULT_MONITORING_TIME = 20
 DEFAULT_MESSAGE = 'HELLO'
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
 try:
     config = {
-      "apiKey": "AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ",
-      "authDomain": "hive-rt-mobile-backend.fi+rebaseapp.com",
-      "databaseURL": "https://hive-rt-mobile-backend.firebaseio.com",
-      "storageBucket": "bucket.appspot.com",
+      "apiKey": apiKeyconfig,
+      "authDomain": authDomainconfig,
+      "databaseURL": dataBaseconfig,
+      "storageBucket": stoRageconfig,
     }
     firebase = pyrebase.initialize_app(config)
     db = firebase.database()
 except Exception as er:
-
     print er
 
 # Step1: Agent Initialization
@@ -54,9 +53,6 @@ def ac_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
-    # List of all keywords for a ac agent
-    agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
-    log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
 
     agent_id = get_config('agent_id')
     message = get_config('message')
@@ -65,38 +61,12 @@ def ac_agent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    if model == "Philips hue bridge":
-        hue_username = get_config('username')
-    else:
-        hue_username = ''
     device_type = get_config('type')
-    # device = get_config('device')
-    # bearer = get_config('bearer')
-    # url = get_config('url')
     api = get_config('api')
     address = get_config('ipaddress')
     _address = address.replace('http://', '')
     _address = address.replace('https://', '')
-    try:  # validate whether or not address is an ip address
-        socket.inet_aton(_address)
-        ip_address = _address
-    except socket.error:
-        ip_address = None
     identifiable = get_config('identifiable')
-
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_ac = settings.DATABASES['default']['TABLE_ac']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -104,13 +74,6 @@ def ac_agent(config_path, **kwargs):
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
 
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class DaikinAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -125,10 +88,6 @@ def ac_agent(config_path, **kwargs):
             self._heartbeat_period = heartbeat_period
             self.model = model
             self.device_type = device_type
-            # self.url = url
-            # self.device = device
-            # self.bearer = bearer
-            # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.AC = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id
                                 )
@@ -137,16 +96,6 @@ def ac_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
@@ -157,8 +106,7 @@ def ac_agent(config_path, **kwargs):
             self.status_old3 = ""
             self.status_old4 = ""
             self.status_old5 = ""
-            #os.system("python '/home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py';")
-            # sp.Popen('python /home/pea/workspace/hive_os/volttron/hive_lib/broadlink-http-rest/server.py', shell=True)
+
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
@@ -169,8 +117,6 @@ def ac_agent(config_path, **kwargs):
             # TODO update local postgres
             # self.publish_postgres()
 
-            # update firebase
-            # update firebase , posgres , azure
             if(self.AC.variables['status'] != self.status_old or
                     self.AC.variables['current_temperature'] != self.status_old2 or
                     self.AC.variables['set_temperature'] != self.status_old3 or
@@ -179,7 +125,6 @@ def ac_agent(config_path, **kwargs):
                 self.publish_firebase()
                 self.publish_postgres()
                 self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
             else:
                 pass
 
@@ -189,14 +134,6 @@ def ac_agent(config_path, **kwargs):
             self.status_old4 = self.AC.variables['set_humidity']
             self.status_old5 = self.AC.variables['mode']
 
-
-            # self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
-        # @Core.periodic(60)
-        # def deviceMonitorBehavior2(self):
-        #
-        #     self.AC.getDeviceStatus()
-        #     self.publish_azure_iot_hub()
 
         def publish_firebase(self):
 
@@ -284,11 +221,42 @@ def ac_agent(config_path, **kwargs):
             if 'mode' in message:
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
-            time.sleep(4)
-            self.AC.getDeviceStatus()
-            self.publish_firebase()
-            self.publish_postgres()
 
+            time.sleep(2)
+            self.AC.getDeviceStatus()
+            if(self.AC.variables['status'] != self.status_old or
+                    self.AC.variables['current_temperature'] != self.status_old2 or
+                    self.AC.variables['set_temperature'] != self.status_old3 or
+                    self.AC.variables['set_humidity'] != self.status_old4 or
+                    self.AC.variables['mode'] != self.status_old5):
+                self.publish_firebase()
+                self.publish_postgres()
+            else:
+                time.sleep(1)
+                self.AC.getDeviceStatus()
+                if (self.AC.variables['status'] != self.status_old or
+                        self.AC.variables['current_temperature'] != self.status_old2 or
+                        self.AC.variables['set_temperature'] != self.status_old3 or
+                        self.AC.variables['set_humidity'] != self.status_old4 or
+                        self.AC.variables['mode'] != self.status_old5):
+                    self.publish_firebase()
+                    self.publish_postgres()
+                else:
+                    time.sleep(1)
+                    self.AC.getDeviceStatus()
+                    if (self.AC.variables['status'] != self.status_old or
+                            self.AC.variables['current_temperature'] != self.status_old2 or
+                            self.AC.variables['set_temperature'] != self.status_old3 or
+                            self.AC.variables['set_humidity'] != self.status_old4 or
+                            self.AC.variables['mode'] != self.status_old5):
+                        self.publish_firebase()
+                        self.publish_postgres()
+                    else:
+                        pass
+            self.status_old = self.AC.variables['status']
+            self.status_old2 = self.AC.variables['current_temperature']
+            self.status_old3 = self.AC.variables['set_temperature']
+            self.status_old4 = self.AC.variables['set_humidity']
 
 
     Agent.__name__ = '01DAI_ACAgent'

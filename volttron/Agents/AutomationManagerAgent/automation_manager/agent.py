@@ -173,6 +173,8 @@ def automation_manager_agent(config_path, **kwargs):
                                                                  trigger_event, trigger_value,
                                                                  action_tasks, automation_id))
 
+                print('ff')
+
                 self.conn.commit()
                 self.conn.close()
 
