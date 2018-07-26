@@ -140,7 +140,12 @@ def scheduler_agent(config_path, **kwargs):
             condition = json.loads(tmp)
             sche = condition.get('SCHEDULE')
             m1 = sche.get('time')
-            time_trigger = [(datetime.strptime(m1, '%I:%M %p')).strftime('%H:%M')]
+
+            if datetime.strptime(m1, '%I:%M %p'):
+                time_trigger = [(datetime.strptime(m1, '%I:%M %p')).strftime('%H:%M')]
+            else:
+                time_trigger = [m1]
+
             on_dates = sche.get('day')
             date_set = {'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'}
             for time_ind in time_trigger:
