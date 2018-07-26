@@ -36,6 +36,12 @@ authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
 
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
+
 try:
     config = {
         "apiKey": apiKeyconfig,
@@ -83,48 +89,18 @@ def Powermetering_agent(config_path, **kwargs):
     api = get_config('api')
     address = get_config('ipaddress')
     device_id = get_config('device_id')
-
-    # try:  # validate whether or not address is an ip address
-    #     socket.inet_aton(_address)
-    #     ip_address = _address
-    # except socket.error:
-    #     ip_address = None
     identifiable = get_config('identifiable')
 
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_Powermetering = settings.DATABASES['default']['TABLE_Powermetering']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
-    # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/' + _topic_Agent_UI_tail
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
 
-    # 5. @params notification_info
-    send_notification = True
-
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class PowermeteringAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
         """
-
         def __init__(self, config_path, **kwargs):
             super(PowermeteringAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
@@ -134,28 +110,14 @@ def Powermetering_agent(config_path, **kwargs):
             self.model = model
             self.device_type = device_type
             self.url = url
-            # self.device = device
             self.device_id = device_id
-            # self.bearer = bearer
-            # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Powermeter = self.apiLib.API(model=self.model, type=self.device_type, agent_id=self._agent_id,
                                               url=self.url, device_id=self.device_id)
-
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
@@ -166,11 +128,8 @@ def Powermetering_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Powermeter.getDeviceStatus()
-
             self.StatusPublish(self.Powermeter.variables)
-
             # self.publish_postgres()
-
             # update firebase
             # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
             #         self.Powermeter.variables['grid_current'] == 'None') or
@@ -190,12 +149,9 @@ def Powermetering_agent(config_path, **kwargs):
             else:
                 self.publish_firebase()
 
-
         @Core.periodic(30)
         def deviceMonitorBehavior2(self):
-
             self.Powermeter.getDeviceStatus()
-
             # update Azure IoT Hub
             # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (self.Powermeter.variables['grid_current'] == 'None') or
             #
@@ -233,15 +189,8 @@ def Powermetering_agent(config_path, **kwargs):
         def publish_firebase(self):
             try:
 
-                # if (self.Powermeter.variables['grid_voltage'] == None or self.Powermeter.variables[
-                #     'grid_current'] == None or
-                #         self.Powermeter.variables['grid_activePower'] == None or self.Powermeter.variables[
-                #             'grid_reactivePower'] == None):
-                #     return
-
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
-                # db.child(gateway_id).child('devices').child(agent_id).child("device_status").set(self.Powermeter.variables['device_status'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TransID(ID)").set(
                     self.Powermeter.variables['grid_transid'])
                 db.child(gateway_id).child('devices').child(agent_id).child("Date(D)").set(
@@ -272,8 +221,6 @@ def Powermetering_agent(config_path, **kwargs):
                     self.Powermeter.variables['device_type'])
                 db.child(gateway_id).child('devices').child(agent_id).child("ActivePower(W)").set(
                     self.Powermeter.variables['grid_activePower'])
-
-
                 print "---------------update firebase ok"
             except Exception as er:
                 print er
@@ -299,27 +246,11 @@ def Powermetering_agent(config_path, **kwargs):
             x["username"] = 'arm'
             x["device_name"] = 'Etrix Power Meter'
             x["device_type"] = 'powermeter'
-
-            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (self.Powermeter.variables['grid_current'] == 'None') or
-            #         (self.Powermeter.variables['grid_activePower'] == 'None')or
-            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
-            #     ):
-            #     print('5555555555555555555555555555555555')
-            #     pass
-            # else:
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-                # print("Update to azure iot hub")
-
-            # if (self.Powermeter.variables['grid_voltage']==None or self.Powermeter.variables['grid_current']==None or
-            #         self.Powermeter.variables['grid_activePower']==None or self.Powermeter.variables['grid_reactivePower']==None):
-            #     return
-
 
         def publish_postgres(self):
-
             postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-
+            postgres_Authorization = 'Token '+self.api_token
             m = MultipartEncoder(
                 fields={
                     "device_id": str(self.Powermeter.variables['agent_id']),
@@ -331,7 +262,6 @@ def Powermetering_agent(config_path, **kwargs):
                     "grid_reactivepower": str(self.Powermeter.variables['grid_reactivePower']),
                 }
             )
-
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
@@ -339,13 +269,24 @@ def Powermetering_agent(config_path, **kwargs):
                                       })
             print r.status_code
 
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token = row[1]
+            self.conn.close()
+
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Powermeter.variables['agent_id']))
             message = json.dumps(commsg)
             print ("topic {}".format(topic))
             print ("message {}".format(message))
-
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)

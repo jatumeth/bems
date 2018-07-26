@@ -32,6 +32,12 @@ authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
 
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
+
 try:
     config = {
       "apiKey": apiKeyconfig,
@@ -68,12 +74,13 @@ def ac_agent(config_path, **kwargs):
     _address = address.replace('https://', '')
     identifiable = get_config('identifiable')
 
+
+
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
-
 
     class DaikinAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -101,6 +108,7 @@ def ac_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.gettoken()
             self.status_old = ""
             self.status_old2 = ""
             self.status_old3 = ""
@@ -150,7 +158,7 @@ def ac_agent(config_path, **kwargs):
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
-            postgres_Authorization = 'Token 420afbbf66341d0c6167698087235d12df041836'
+            postgres_Authorization = 'Token '+self.api_token
 
 
             m = MultipartEncoder(
@@ -183,6 +191,17 @@ def ac_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
 
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token =  row[1]
+            self.conn.close()
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u

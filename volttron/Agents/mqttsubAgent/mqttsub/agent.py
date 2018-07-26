@@ -24,6 +24,13 @@ from volttron.platform.agent import utils, matching
 from uuid import getnode as get_mac
 import fcntl, socket, struct
 import settings
+from os.path import expanduser
+import psycopg2.extras
+import psycopg2
+
+import json
+from os.path import expanduser
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -48,6 +55,15 @@ def mqttsub_agent(config_path, **kwargs):
         shared_access_key_name=shared_access_key_name,
         shared_access_key_value=shared_access_key_value)
 
+
+    # DATABASES
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
+    gateway_id = 'hivecdf12345'
+
     class mqttsubAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
@@ -69,6 +85,7 @@ def mqttsub_agent(config_path, **kwargs):
 
             while True:
                 try:
+
                     msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
                     print msg
                     if msg.body is not None:
@@ -86,14 +103,20 @@ def mqttsub_agent(config_path, **kwargs):
                             self.VIPPublishDevice(commsg)
 
                         elif type_msg == 'login':
-                            # Execute Token Stored Function
-                            # print("Renew Token Event")
+
                             self.VIPPublishApplication(commsg, type_msg)
                             # TODO : Pub message again to Notifier agent to Store TOKEN VALUE
                             self.vip.pubsub.publish('pubsub',
                                                     '/ui/agent/update/notifier',
                                                     message=json.dumps(commsg),
                                                     )
+
+                            home_path = expanduser("~")
+                            json_path = '/workspace/hive_os/volttron/token.json'
+                            automation_control_path = home_path + json_path
+                            launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
+                            #  Update new agentID to variable (agentID is relate to automation_id)
+                            self.updatetoken(commsg)
 
                         elif type_msg == 'automationcreate':
                             # Execute Create Automation Function
@@ -117,14 +140,51 @@ def mqttsub_agent(config_path, **kwargs):
                             # print servicebus_topic
                             # print commsg
                             # print "---------------------------------------"
-                    else :
+                    else:
                         pass
                         # print servicebus_topic
                         # print "No body message"
 
                 except Exception as er:
-                    print "tggggg"
                     print er
+
+        def updatetoken(self,commsg):
+            try:
+
+                conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                        password=db_password)
+                self.conn = conn
+                self.cur = self.conn.cursor()
+                self.cur.execute("""SELECT * FROM token """)
+                rows = self.cur.fetchall()
+
+                nullrow = True
+                for row in rows:
+                    if row[0] == gateway_id:
+                        nullrow = False
+                        self.api_token = row[1]
+                self.conn.close()
+                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                                             user=db_user, password=db_password)
+                self.cur = self.conn.cursor()
+
+                if nullrow == True:
+                    self.cur.execute(
+                        """INSERT INTO token (gateway_id, login_token, expo_token) 
+                                                    VALUES (%s, %s, %s);""",
+                        (servicebus_topic, commsg['token'], commsg['token']))
+
+                self.cur.execute("""
+                   UPDATE token
+                   SET login_token=%s, expo_token=%s
+                   WHERE gateway_id=%s
+                """, (commsg['token'], commsg['token'],servicebus_topic))
+
+                self.conn.commit()
+                self.conn.close()
+
+            except Exception as er:
+                print("Error in insertdb : {}".format(er))
 
         def VIPPublishDevice(self,commsg):
             # TODO this is example how to write an app to control AC

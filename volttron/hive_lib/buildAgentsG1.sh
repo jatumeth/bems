@@ -1,22 +1,6 @@
 #!/bin/bash
 
-#
-#__author__ = "Teerapong Ponmat"
-#__credits__ = ""
-#__version__ = "5.0"
-#__maintainer__ = "HiVE Team"
-#__email__ = "peahive@gmail.com"
-#__website__ = "www.peahive.github.io"
-#__created__ = "2018-04-4 12:04:50"
-#__lastUpdated__ = "2018-04-4 11:23:33"
 
-cd ~/workspace/hive_os/volttron/
-. env/bin/activate
-volttron -vv 2>&1 | tee ~/workspace/hive_os/volttron/log/volttron.log &
-
-sudo chmod 777 -R /.volttron/agents/
-sudo rm -rf ~/.volttron/agents/*
-cd ~/workspace/hive_os/
 
 
 #Inwall Agent
@@ -87,7 +71,7 @@ volttron-pkg package Agents/21ORV_MotionAgent
 volttron-pkg configure ~/.volttron/packaged/motionagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/21ORV_MotionAgent/21ORV23451231.config.json
 
 volttron-ctl install ~/.volttron/packaged/motionagent-0.1-py2-none-any.whl --tag motion
-volttron-ctl enable --tag motion
+
 
 
 #Daikin Agent
@@ -139,56 +123,6 @@ volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/works
 
 volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
 
-#scene setup
-
-volttron-pkg package Agents/ScenesetupAgent
-
-volttron-pkg configure ~/.volttron/packaged/setupsceneagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/ScenesetupAgent/1KR221445K1200138.config.json
-
-volttron-ctl install ~/.volttron/packaged/setupsceneagent-0.1-py2-none-any.whl --tag scenesetup
-
-#scene
-
-volttron-pkg package Agents/SceneAgent
-
-volttron-pkg configure ~/.volttron/packaged/sceneagentagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/SceneAgent/sceneconfig.json
 
 
-volttron-ctl install ~/.volttron/packaged/sceneagentagent-0.1-py2-none-any.whl --tag scene
-
-#automation
-
-volttron-pkg package Agents/AutomationManagerAgent
-
-volttron-pkg configure ~/.volttron/packaged/automation_manageragent-3.2-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/AutomationManagerAgent/automationmanageragent.launch.json
-
-
-volttron-ctl install ~/.volttron/packaged/automation_manageragent-3.2-py2-none-any.whl --tag auto
-
-#powermeter2
-volttron-pkg package Agents/05CRE_PowerMeterAgent
-
-volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0699639095.config.json
-
-volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter2
-
-
-volttron-pkg package Agents/AutomationControlAgent
-
-
-
-
-
-## RUN Lighting Agent
-#volttron-pkg package ~/workspace/bemoss_os/Agents/MultiBuilding/
-#volttron-pkg configure /tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/MultiBuilding/multibuildingagent.launch.json
-#volttron-ctl install multibuildingagent=/tmp/volttron_wheels/multibuildingagent-0.1-py2-none-any.whl
-#
-## Run network agent
-#volttron-pkg package ~/workspace/bemoss_os/Agents/NetworkAgent/
-#volttron-pkg configure /tmp/volttron_wheels/networkagent-0.1-py2-none-any.whl ~/workspace/bemoss_os/Agents/NetworkAgent/networkagent.launch.json
-#volttron-ctl install networkagent=/tmp/volttron_wheels/networkagent-0.1-py2-none-any.whl
-
-
-
-echo "HiVE OS installation complete!"
+echo "GGG!"
