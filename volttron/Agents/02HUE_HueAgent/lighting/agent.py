@@ -84,13 +84,11 @@ def lighting_agent(config_path, **kwargs):
     print(topic_device_control)
     gateway_id = 'hivecdf12345'
 
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
+    db_host = settings.DATABASES['default']['HOST']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
 
     class LightingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -107,13 +105,10 @@ def lighting_agent(config_path, **kwargs):
             self.device_type = device_type
             self.username = username
             self.address = address
-            print "----------------"
-            print address
             self.user = url
             self.url = url
             self.device = device
             self.bearer = bearer
-
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
@@ -127,6 +122,7 @@ def lighting_agent(config_path, **kwargs):
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
+            self.gettoken()
             self.status_old = ""
             self.status_old2 = ""
             self.status_old3 = ""
@@ -135,14 +131,10 @@ def lighting_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
-
             self.Light.getDeviceStatus()
-
             self.StatusPublish(self.Light.variables)
-
             # TODO update local postgres
             # self.publish_postgres()
-
             # update firebase , posgres , azure
             if (self.Light.variables['status'] != self.status_old or
                     self.Light.variables['brightness'] != self.status_old2 or
@@ -150,13 +142,11 @@ def lighting_agent(config_path, **kwargs):
                 self.publish_firebase()
                 self.publish_postgres()
                 self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
             else:
                 pass
             self.status_old = self.Light.variables['status']
             self.status_old2 = self.Light.variables['brightness']
             self.status_old3 = self.Light.variables['color']
-
 
         def publish_firebase(self):
             try:
@@ -189,13 +179,13 @@ def lighting_agent(config_path, **kwargs):
             x["device_type"] = 'lighting'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('-----------------Azure_update---------------')
+
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Light.variables['agent_id']))
             message = json.dumps(commsg)
             print ("topic {}".format(topic))
             print ("message {}".format(message))
-
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
@@ -203,8 +193,7 @@ def lighting_agent(config_path, **kwargs):
         def publish_postgres(self):
 
             postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-
+            postgres_Authorization = 'Token '+self.api_token
             m = MultipartEncoder(
                 fields={
                     "status": str(self.Light.variables['status']),
@@ -215,13 +204,24 @@ def lighting_agent(config_path, **kwargs):
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
             )
-
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token =  row[1]
+            self.conn.close()
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -236,8 +236,6 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['color'] = message['color']
             if 'brightness' in message:
                 self.Light.variables['brightness'] = message['brightness']
-
-
             self.Light.setDeviceStatus(message)
             time.sleep(2)
             self.Light.getDeviceStatus()
