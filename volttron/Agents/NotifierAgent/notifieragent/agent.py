@@ -22,6 +22,14 @@ import pprint
 import psycopg2
 import sys
 
+from exponent_server_sdk import DeviceNotRegisteredError
+from exponent_server_sdk import PushClient
+from exponent_server_sdk import PushMessage
+from exponent_server_sdk import PushResponseError
+from exponent_server_sdk import PushServerError
+from requests.exceptions import ConnectionError
+from requests.exceptions import HTTPError
+
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -42,7 +50,7 @@ def notifier_agent(config_path, **kwargs):
 
     agent_id = get_config('agent_id')
     topic_update_token = '/ui/agent/update/notifier'
-    topic_device_notify = '/agent/update/hive/999/devicealeart'
+    topic_device_notify = '/agent/update/hive/999/devicealeart/'
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -66,6 +74,7 @@ def notifier_agent(config_path, **kwargs):
             self._message = self.config.get('message', DEFAULT_MESSAGE)
             self._heartbeat_period = self.config.get('heartbeat_period',
                                                      DEFAULT_HEARTBEAT_PERIOD)
+            self.acknowlage = None
             _log.info("init attribute to Agent")
 
         @Core.receiver('onsetup')
@@ -90,29 +99,19 @@ def notifier_agent(config_path, **kwargs):
         @PubSub.subscribe('pubsub', topic_device_notify)
         def match_device_alert(self, peer, sender, bus, topic, headers, message):
             print("Aleart Event on Device Occur")
-            #  TODO : make a request for notification here. {Hint : Use Expo Token ti identity mobile devices}
+            #  TODO : make a request for notification here. {Hint : Use Expo Token to identity mobile devices}
             msg = json.loads(message)
-            try:
-                response = requests.post(
-                    url=self.endpoint_expo,
-                    headers={
-                        "Content-Type": "application/json",
-                    },
-                    data=json.dumps({
-                        "body": "Message : {}".format(msg.get('body', None)), # TODO : Change Key of Msg
-                        "to": "{}".format(self.expo_token),
-                        "title": "{}".format(msg.get('title', None)), #  TODO : Change Key
-                        "sound": "default"
-                    })  
-                )
 
-                if response.status_code == 200:
-                    self.vip.pubsub.publish('pubsub',topic='agent/update/notified/'+msg.get('sender'))
+            try:
+                response = self.send_push_message(token=msg.get('noti_token'), message=msg.get('message'))
+                if response.status == u'ok':
+                    # Pub topic acknowlage notification
+                    self.vip.pubsub.publish('pubsub', topic='agent/update/notified/'+msg.get('sender'))
 
             except Exception as Err :
                 print('Error : {}'.format(Err))
 
-        @PubSub.subscribe('pubsub', topic_update_token)
+        @PubSub.subscribe('pubsub', topic_update_token)  # This topic match when mobile user logged-in
         def match_token_reload(self, peer, sender, bus, topic, headers, message):
             print('Message Recived')
             print(' >>> Reload Token')
@@ -125,32 +124,30 @@ def notifier_agent(config_path, **kwargs):
             config_dict = self.config
             json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
 
-        # def get_expo_token(self):
-        #     print("Get Expo Token ...")
-        #     # TODO  : call get expo_token from API Here
-        #     try:
-        #         url = self.url
-        #         response = requests.get(url=url,
-        #                                 headers={"Authorization": "Token {token}".format(token=self.token),
-        #                                          "Content-Type": "application/json; charset=utf-8"
-        #                                          },
-        #                                 data=json.dumps({}))
-        #
-        #         self.expo_token = (json.loads(response.content)).get('expo_token')
-        #         self.config.update({'expo_token': self.expo_token,
-        #                             'token': self.token})
-        #
-        #         #  Try to dumps new configuration to json config file
-        #         config_dict = self.config
-        #         json.dump(config_dict, open(config_path, 'w'), sort_keys=True, indent=4)
-        #
-        #     except response.status_code != 200 :
-        #         print('STATUS CODE INVALID')
-        #         if json.loads(response.content).get('detail').__contains__('Invalid token'):
-        #             print('Token Invalid')
-        #
-        #     except Exception as err :
-        #         print("Exception Error : {}".format(err))
+        # Expo and Login Token is update when Mobile User logged-in
+        # Function to Handle expo notification
+        def send_push_message(self, token, message, extra=None):
+            try:
+                response = PushClient().publish(
+                    PushMessage(to=token,
+                                body=message,
+                                data=extra))
+                if response.status == u'ok':
+                    print('Notification Complete')
+                    # TODO :  Make a Acknownlage Routine
+                    self.acknowlage = True
+
+            except PushServerError as exc:
+                # Encountered some likely formatting/validation error.
+                print(exc)
+                # TODO : Handle Push Server Error
+
+            except (ConnectionError, HTTPError) as exc:
+                # Encountered some Connection or HTTP error - retry a few times in
+                print(exc)
+                # TODO : Handle Connection Error
+
+            return response
 
     Agent.__name__ = 'notifierAgent'
     return NotifierAgent(config_path, **kwargs)
