@@ -11,7 +11,7 @@
     "device": "cb26f6a2-dd75-4c54-b3c1-21991c00bde5",
     "bearer": "Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035",
     "building_name": "hive",
-    "device_monitor_time": 20,
+    "device_monitor_time": 1,
     "macaddress": "221445K1200138",
     "model": "one",
     "type": "20FIB",

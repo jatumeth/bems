@@ -19,6 +19,9 @@ import pyrebase
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+import psycopg2
+import psycopg2.extras
+
 
 
 utils.setup_logging()
@@ -32,6 +35,13 @@ apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
 authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
+
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
+
 
 try:
     config = {
@@ -151,21 +161,12 @@ def netatmoing_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.gettoken()
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -262,8 +263,8 @@ def netatmoing_agent(config_path, **kwargs):
 
 
         def publish_postgres(self):
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = 'Token '+self.api_token
 
             m = MultipartEncoder(
                 fields={
@@ -283,7 +284,17 @@ def netatmoing_agent(config_path, **kwargs):
                                       })
             print r.status_code
 
-
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token = row[1]
+            self.conn.close()
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
