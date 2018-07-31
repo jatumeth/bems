@@ -219,6 +219,11 @@ class API:
                     msgToDevice['on'] = True
                 elif postmsg.get('status') == "OFF":
                     msgToDevice['on'] = False
+            if str(k) == 'STATUS':
+                if postmsg.get('STATUS') == "ON":
+                    msgToDevice['on'] = True
+                elif postmsg.get('STATUS') == "OFF":
+                    msgToDevice['on'] = False
             elif str(k) == 'brightness':
                 msgToDevice['bri'] = int(round(float(postmsg.get('brightness')) * 255.0 / 100.0, 0))
             elif str(k) == 'color':
@@ -312,7 +317,7 @@ def main():
 
     PhilipsHue.getDeviceStatus()
     # PhilipsHue.setDeviceStatus({"status": "ON"})
-    PhilipsHue.setDeviceStatus({"status": "ON", "color": u'(15, 250, 20)'})
+    PhilipsHue.setDeviceStatus({"STATUS": "ON", "color": u'(15, 250, 20)'})
     # for i in range(1, 100):
     #     import random
     #     print(random.randint(0, 255))

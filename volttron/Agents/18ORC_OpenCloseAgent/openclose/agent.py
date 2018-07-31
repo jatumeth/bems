@@ -268,6 +268,7 @@ def opencloseing_agent(config_path, **kwargs):
             print r.status_code
 
         def gettoken(self):
+            self.api_token = '89eff42e99c895fe1e1083e04af3bda412e685d7'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn

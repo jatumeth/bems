@@ -202,8 +202,6 @@ def fibaroing_agent(config_path, **kwargs):
             except Exception as er:
                 print er
 
-
-
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
             '''
