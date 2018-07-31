@@ -35,6 +35,7 @@
 # BATTELLE for the UNITED STATES DEPARTMENT OF ENERGY
 # under Contract DE-AC05-76RL01830
 # }}}
+#home/pea/   to home/pea/
 
 from __future__ import absolute_import
 from datetime import datetime
@@ -241,11 +242,11 @@ def automation_manager_agent(config_path, **kwargs):
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
-            os.system("volttron-pkg package /home/hive/workspace/hive_os/volttron/Agents/AutomationControlAgent;" +
-                      "volttron-pkg configure /home/hive/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
-                      " /home/hive/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
+            os.system("volttron-pkg package /home/pea/workspace/hive_os/volttron/Agents/AutomationControlAgent;" +
+                      "volttron-pkg configure /home/pea/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl" +
+                      " /home/pea/workspace/hive_os/volttron/Agents/AutomationControlAgent/automationcontrolagent.launch.json" +
                       ";volttron-ctl install " +
-                      "/home/hive/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
+                      "/home/pea/.volttron/packaged/automation_controlagent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))
@@ -263,11 +264,11 @@ def automation_manager_agent(config_path, **kwargs):
             json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
             print(" >>> Change config file successful")
 
-            os.system("volttron-pkg package /home/hive/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent;" +
-                      "volttron-pkg configure /home/hive/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl" +
-                      " /home/hive/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json" +
+            os.system("volttron-pkg package /home/pea/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent;" +
+                      "volttron-pkg configure /home/pea/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl" +
+                      " /home/pea/workspace/hive_os/volttron/Agents/AutomationSchedulerAgent/automationscheduleragent.launch.json" +
                       ";volttron-ctl install " +
-                      "/home/hive/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl " +
+                      "/home/pea/.volttron/packaged/scheduler_controlagent-3.2-py2-none-any.whl " +
                       "--tag automation_{}".format(automation_id) +
                       ";volttron-ctl enable --tag automation_{}".format(automation_id) +
                       ";volttron-ctl start --tag automation_{}".format(automation_id))
