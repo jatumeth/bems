@@ -19,6 +19,8 @@ import pyrebase
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+import psycopg2
+import psycopg2.extras
 
 
 utils.setup_logging()
@@ -32,6 +34,11 @@ apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
 authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
 
 try:
     config = {
@@ -114,6 +121,7 @@ def Doorlock_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.gettoken()
             self.status_old = ""
 
         @Core.periodic(device_monitor_time)
@@ -160,8 +168,8 @@ def Doorlock_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = 'Token '+self.api_token
 
             m = MultipartEncoder(
                 fields={
@@ -191,6 +199,17 @@ def Doorlock_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'},message)
 
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token =  row[1]
+            self.conn.close()
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

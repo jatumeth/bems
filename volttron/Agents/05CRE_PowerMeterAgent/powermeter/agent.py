@@ -20,7 +20,8 @@ import urllib3
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-
+import psycopg2
+import psycopg2.extras
 
 urllib3.disable_warnings()
 
@@ -123,7 +124,7 @@ def Powermetering_agent(config_path, **kwargs):
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-
+            self.gettoken()
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
 
@@ -249,8 +250,9 @@ def Powermetering_agent(config_path, **kwargs):
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):
-            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
+
             m = MultipartEncoder(
                 fields={
                     "device_id": str(self.Powermeter.variables['agent_id']),

@@ -33,6 +33,12 @@ authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
 
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
+
 try:
     config = {
       "apiKey": apiKeyconfig,
@@ -155,6 +161,7 @@ def opencloseing_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.status_old = ""
+            self.gettoken()
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -234,12 +241,19 @@ def opencloseing_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = 'Token '+self.api_token
+
+            status = False
+            if self.openclose.variables['device_contact'] == 'CLOSED':
+                status = False
+
+            if self.openclose.variables['device_contact'] == 'OPEN' and self.flag == False:
+                status == True
 
             m = MultipartEncoder(
                 fields={
-                    "motion": str(self.openclose.variables['device_contact']),
+                    "open": str(status),
                     "device_id": str(self.openclose.variables['agent_id']),
                     "device_type": "openclosesensor",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
@@ -252,6 +266,18 @@ def opencloseing_agent(config_path, **kwargs):
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+
+        def gettoken(self):
+            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+                                    password=db_password)
+            self.conn = conn
+            self.cur = self.conn.cursor()
+            self.cur.execute("""SELECT * FROM token """)
+            rows = self.cur.fetchall()
+            for row in rows:
+                if row[0] == gateway_id:
+                    self.api_token = row[1]
+            self.conn.close()
 
 
         @PubSub.subscribe('pubsub', topic_device_control)
