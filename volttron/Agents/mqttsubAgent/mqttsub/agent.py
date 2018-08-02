@@ -49,7 +49,7 @@ def mqttsub_agent(config_path, **kwargs):
     service_namespace = settings.AZURE['servicebus']['service_namespace']
     shared_access_key_name = settings.AZURE['servicebus']['shared_access_key_name']
     shared_access_key_value = settings.AZURE['servicebus']['shared_access_key_value']
-    servicebus_topic = settings.AZURE['servicebus']['topic']
+    servicebus_topic = settings.gateway_id
     sbs = ServiceBusService(
         service_namespace=service_namespace,
         shared_access_key_name=shared_access_key_name,
@@ -62,8 +62,7 @@ def mqttsub_agent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-    gateway_id = 'hivecdf12345'
-
+    gateway_id = settings.gateway_id
     class mqttsubAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
