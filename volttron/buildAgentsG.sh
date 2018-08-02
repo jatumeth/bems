@@ -98,10 +98,10 @@ volttron-ctl install ~/.volttron/packaged/sceneagentagent-0.1-py2-none-any.whl -
 volttron-ctl enable --tag scene
 
 
-##air
-#volttron-pkg package Agents/01DAI_ACAgent
-#volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200101.config.json
-#volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
+#air
+volttron-pkg package Agents/01DAI_ACAgent
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200101.config.json
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
 
 
 echo "GGG!"
