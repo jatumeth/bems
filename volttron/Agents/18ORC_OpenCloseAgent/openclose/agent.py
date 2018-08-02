@@ -108,7 +108,7 @@ def opencloseing_agent(config_path, **kwargs):
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
     print(topic_device_control)
-    gateway_id = 'hivecdf12345'
+    gateway_id = settings.gateway_id
 
     # 5. @params notification_info
     send_notification = True
