@@ -179,7 +179,6 @@ def fibaroing_agent(config_path, **kwargs):
                 self.publish_firebase()
                 self.publish_postgres()
                 self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
             else:
                 pass
 
@@ -189,15 +188,6 @@ def fibaroing_agent(config_path, **kwargs):
             self.status_old4 = self.fibaro.variables['TAMPER']
             self.status_old5 = self.fibaro.variables['BATTERY']
             self.status_old6 = self.fibaro.variables['HUMIDITY']
-
-
-        @Core.periodic(60)
-        def deviceMonitorBehavior2(self):
-
-            self.fibaro.getDeviceStatus()
-
-            # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
 
         def publish_firebase(self):
 
