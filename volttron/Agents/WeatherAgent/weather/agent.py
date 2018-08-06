@@ -76,20 +76,6 @@ def weathering_agent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
 
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_weathering = settings.DATABASES['default']['TABLE_weathering']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
@@ -154,7 +140,7 @@ def weathering_agent(config_path, **kwargs):
             # self.publish_local_postgres()
 
             # update firebase
-            # self.publish_firebase()
+            self.publish_firebase()
 
             # update Azure IoT Hub
             # self.publish_azure_iot_hub()

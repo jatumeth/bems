@@ -125,22 +125,10 @@ def Powermetering_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.gettoken()
+
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
-
             self.Powermeter.getDeviceStatus()
-            self.StatusPublish(self.Powermeter.variables)
-            # self.publish_postgres()
-            # update firebase
-            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
-            #         self.Powermeter.variables['grid_current'] == 'None') or
-            #         (self.Powermeter.variables['grid_activePower'] == 'None') or
-            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
-            #         ):
-            #     print("Data: None ")
-            #     # pass
-            # else:
-            #     print("Update to firebase")
             if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
                     self.Powermeter.variables['grid_current'] == 'None') or
                     (self.Powermeter.variables['grid_activePower'] == 'None') or
@@ -149,29 +137,8 @@ def Powermetering_agent(config_path, **kwargs):
                 pass
             else:
                 self.publish_firebase()
-
-        @Core.periodic(30)
-        def deviceMonitorBehavior2(self):
-            self.Powermeter.getDeviceStatus()
-            # update Azure IoT Hub
-            # if ((self.Powermeter.variables['grid_voltage'] == 'None') or (self.Powermeter.variables['grid_current'] == 'None') or
-            #
-            #         (self.Powermeter.variables['grid_activePower'] == 'None')or
-            #         (self.Powermeter.variables['grid_reactivePower'] == 'None')
-            #     ):
-            #     # print("Data: None")
-            #     pass
-            # else:
-            #     print("Update to azure iot hub")
-            if ((self.Powermeter.variables['grid_voltage'] == 'None') or (
-                    self.Powermeter.variables['grid_current'] == 'None') or
-                    (self.Powermeter.variables['grid_activePower'] == 'None') or
-                    (self.Powermeter.variables['grid_reactivePower'] == 'None')
-            ):
-                pass
-            else:
-                self.publish_firebase()
-                self.publish_postgres()
+                # TODO remove comment before make a PR
+                # self.publish_postgres()
                 self.publish_azure_iot_hub()
                 self.StatusPublish(self.Powermeter.variables)
 
@@ -186,10 +153,8 @@ def Powermetering_agent(config_path, **kwargs):
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
 
-
         def publish_firebase(self):
             try:
-
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("TransID(ID)").set(
