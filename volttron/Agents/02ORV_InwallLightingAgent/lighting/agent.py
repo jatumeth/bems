@@ -150,13 +150,6 @@ def lighting_agent(config_path, **kwargs):
             self.status_old = self.Light.variables['device_status']
             print(self.status_old)
 
-        # @Core.periodic(60)
-        # def deviceMonitorBehavior2(self):
-        # #
-        # #     self.Light.getDeviceStatus()
-        # #     # update Azure IoT Hub
-        #     self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
 
         def publish_firebase(self):
 
@@ -254,16 +247,20 @@ def lighting_agent(config_path, **kwargs):
             #step request status if change update firebase
             # or status not change delay time for update firebase
             print self.status_old
-            time.sleep(2)
+            time.sleep(1)
+            print "1"
             self.Light.getDeviceStatus()
             # update firebase , posgres , azure
             if(self.Light.variables['device_status'] ==  self.status_old):
                 time.sleep(1)
+                print "2"
                 self.Light.getDeviceStatus()
                 if (self.Light.variables['device_status'] == self.status_old):
                     time.sleep(1)
+                    print "3"
                     self.Light.getDeviceStatus()
                     if (self.Light.variables['device_status'] == self.status_old):
+                        print "4"
                         time.sleep(2)
                     else:
                         self.publish_firebase()
@@ -276,6 +273,9 @@ def lighting_agent(config_path, **kwargs):
                 self.publish_postgres()
 
             self.status_old = self.Light.variables['device_status']
+            print "status old____________________________"
+            print self.status_old
+            print "status old____________________________"
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
