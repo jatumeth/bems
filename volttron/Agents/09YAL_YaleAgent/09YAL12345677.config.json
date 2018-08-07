@@ -1,0 +1,20 @@
+{
+    "agent": {
+        "exec": "yaleagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "09YAL1234567",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a doorlock agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_yale",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/locks/",
+    "device": "893f8352-d1ca-4363-b9ee-e71708caa713",
+    "bearer": "Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39",
+    "building_name": "hive",
+    "device_monitor_time": 10,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "09YAL",
+    "vendor": "yale",
+    "zone_id": 999
+}

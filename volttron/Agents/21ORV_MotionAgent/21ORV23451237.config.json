@@ -1,0 +1,20 @@
+{
+    "agent": {
+        "exec": "fibaroagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "21ORV23451231",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a lighting agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_Smartthings_Motion",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/motions/",
+    "device": "d7652ff5-0c70-4adb-9b4a-adaa8e79f23c",
+    "bearer": "Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39",
+    "building_name": "hive",
+    "device_monitor_time": 1,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "21ORV",
+    "vendor": "phillip",
+    "zone_id": 999
+}
