@@ -189,10 +189,9 @@ def lighting_agent(config_path, **kwargs):
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
-
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
             m = MultipartEncoder(
                 fields={

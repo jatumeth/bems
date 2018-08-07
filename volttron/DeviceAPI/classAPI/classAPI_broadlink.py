@@ -60,6 +60,8 @@ class API:
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
+        self.status = 'ON'
+        self.stemp = '25'
 
     def renewConnection(self):
         pass
@@ -97,7 +99,12 @@ class API:
 
         getDeviceStatusResult = True
 
-        print 'pass'
+        self.set_variable('status', self.status)
+        self.set_variable('current_temperature', self.stemp)
+        self.set_variable('set_temperature', self.stemp)
+        self.set_variable('set_humidity', 'none')
+        self.set_variable('mode', 'none')
+
 
     def getDeviceStatusJson(self, data):
 
@@ -117,41 +124,35 @@ class API:
             # _data = _data.encode(encoding='utf_8')
 
             _data = postmsg
+
             try:
                 tempchange = False
                 for k, v in _data.items():
-                    if k == 'tempDir':
+                    if k == 'status':
                         tempchange = True
-                        if (_data['tempDir']) == "UP":
-                            command ='acmitsuup'
-                            print 'acmitsu temp up'
-                        elif (_data['tempDir']) == "DOWN":
-                            command = 'acmitsudown'
-                            print 'acmitsu temp down'
-                    else:
-                        print ""
+                        if _data['status'] == 'ON':
+                            command = 'sendon'
+                        if _data['status'] == 'on':
+                            command = 'sendon'
+                        if _data['status'] == 'OFF':
+                            command = 'sendoff'
+                        if _data['status'] == 'off':
+                            command = 'sendoff'
+                        self.status = _data['status']
+
             except Exception as er:
                 print er
-
-
-            if tempchange == False:
-                status = str(_data['status']).upper()
-                if status == 'ON':
-                    command = 'ACON'
-                    print'acmitsu turn on'
-                elif status == 'OFF':
-                    command = 'ACOFF'
-                    print'acmitsu turn off'
-                elif status == 'TEMP25':
-                    command = 'ACHITEMP'
-                    print'acmitsu turn 25'
-                elif status == 'TEMP20':
-                    command = 'ACLOWTEMP'
-                    print'acmitsu turn 20'
-
-
-
+            try:
+                tempchange = False
+                for k, v in _data.items():
+                    if k == 'stemp':
+                        tempchange = True
+                        self.stemp = _data['stemp']
+                        command ='temp'+_data['stemp'].replace('.','')
+            except Exception as er:
+                print er
             url = "http://localhost:8080/sendCommand/"+str(command)
+            print url
 
             try:
                 response = requests.get(
@@ -196,11 +197,12 @@ def main():
 
     import time
     # broadlink.setDeviceStatus({"status": "OFF", "device": "1DAIK", "tempDir": "UP", "mode": "3"})
-    # broadlink.getDeviceStatus()
+    broadlink.getDeviceStatus()
     #
     # time.sleep(10)
     #
-    broadlink.setDeviceStatus({"status": "ON"})
+    # broadlink.setDeviceStatus({"status": "OFF"})
+    # broadlink.setDeviceStatus({'stemp':'20.5'})
 
     # broadlink.setDeviceStatus({"status": "TEMP25"})
     # broadlink.setDeviceStatus({"status": "TEMP20"})

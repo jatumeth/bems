@@ -165,11 +165,8 @@ class API:
     def setDeviceStatus(self, postmsg):
         self.getDeviceStatus()
         setDeviceStatusResult = True
-
         postmsg = str(postmsg)
-
         print(" postmsg = {}".format(postmsg))
-
         if self.isPostMsgValid(postmsg) == True:  # check if the data is valid
 
             status = format(self.get_variable('status'))
@@ -214,13 +211,8 @@ class API:
                 stemp = dict(stemp)
             except:
                 stemp = '25'
-
-
-
             data=str("pow="+status+"&stemp="+stemp+"&mode="+mode+"&shum=0&f_rate=B&f_dir=3")
             print data
-
-
             try:
                 print "sending requests put"
                 r = requests.post(

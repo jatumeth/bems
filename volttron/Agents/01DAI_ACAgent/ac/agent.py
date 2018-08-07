@@ -110,11 +110,11 @@ def ac_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.gettoken()
-            self.status_old = ""
-            self.status_old2 = ""
-            self.status_old3 = ""
-            self.status_old4 = ""
-            self.status_old5 = ""
+            self.status_old = "none"
+            self.status_old2 = "none"
+            self.status_old3 = "none"
+            self.status_old4 = "none"
+            self.status_old5 = "none"
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
