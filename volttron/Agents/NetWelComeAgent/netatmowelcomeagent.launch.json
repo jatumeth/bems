@@ -1,0 +1,16 @@
+{
+    "agent": {
+        "exec": "netwelcomeagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agentid": "netWelcome",
+    "automation_id": "30", 
+    "message": "hello from welcome agent",
+    "username": "peahive@gmail.com",
+    "password": "28Sep1960",
+    "grant_type": "password",
+    "client_id": "5a8ab6e43164802f5f8b49fe",
+    "scope": "read_camera",
+    "client_secret": "eFtLEV6Fe3rt3AdAdBM7fJQL0gwCfNWSYmxwysWsTEL3v"
+
+
+}
