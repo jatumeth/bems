@@ -190,19 +190,26 @@ class API:
             self.set_variable("max_temp", _max_temperature)  # C
             _min_temperature = float(_theJSON["body"]["devices"][0]["dashboard_data"]["min_temp"])
             self.set_variable("min_temp", _min_temperature)  # C
+            self.set_variable("device_type", 'weather station')  # C
+        except:
+            print "Error! Netatmo Indoor @getDeviceStatusJson"
+
+        try:
             _outdoor_temperature = float(_theJSON["body"]["modules"][0]["dashboard_data"]["Temperature"])
             self.set_variable("outdoor_temperature", _outdoor_temperature)  # C
             self.set_variable("outdoor_humidity", _theJSON["body"]["modules"][0]["dashboard_data"]["Humidity"])  # %
-            self.set_variable("outdoor_date_max_temp", _theJSON["body"]["modules"][0]["dashboard_data"]["date_max_temp"])
-            self.set_variable("outdoor_date_min_temp", _theJSON["body"]["modules"][0]["dashboard_data"]["date_min_temp"])
+            self.set_variable("outdoor_date_max_temp",
+                              _theJSON["body"]["modules"][0]["dashboard_data"]["date_max_temp"])
+            self.set_variable("outdoor_date_min_temp",
+                              _theJSON["body"]["modules"][0]["dashboard_data"]["date_min_temp"])
             _outdoor_max_temperature = float(_theJSON["body"]["modules"][0]["dashboard_data"]["max_temp"])
             self.set_variable("outdoor_max_temp", _outdoor_max_temperature)  # C
             _outdoor_min_temperature = float(_theJSON["body"]["modules"][0]["dashboard_data"]["min_temp"])
             self.set_variable("outdoor_min_temp", _outdoor_min_temperature)  # C
-            self.set_variable("device_type", 'weather station')  # C
-
         except:
-            print "Error! Netatmo @getDeviceStatusJson"
+            print "Error! Netatmo Outdoor @getDeviceStatusJson"
+
+
 
     def printDeviceStatus(self):
         print " Netatmo indoor device"
