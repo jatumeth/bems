@@ -44,17 +44,21 @@ pip install azure.servicebus
 
 #install postgreSQL
 #Download the package lists from the repositories and update them
-../sudo apt-get update
+sudo apt-get update
+sudo apt install python-pip
+pip install --upgrade pip
+pip install psycopg2
+
 #Download and install the dependencies of the postgresql database
-../sudo apt-get install postgresql postgresql-contrib python-yaml --assume-yes
+sudo apt-get install postgresql postgresql-contrib python-yaml --assume-yes
 #Create the bemossdb database
-../sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
-../sudo -u postgres psql -c "DROP DATABASE IF EXISTS hiveosdb"
-../sudo -u postgres createdb hiveosdb -O admin
-../sudo -u postgres psql -d hiveosdb -c "create extension hstore;"
+sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
+sudo -u postgres psql -c "DROP DATABASE IF EXISTS hiveosdb"
+sudo -u postgres createdb hiveosdb -O admin
+sudo -u postgres psql -d hiveosdb -c "create extension hstore;"
 
 pip install psycopg2-binary
-cd ~/workspace/hive_os/volttron/hive_lib
+cd ~/workspace/hive_os/volttron/
 python platform_initiator.py
 
 
