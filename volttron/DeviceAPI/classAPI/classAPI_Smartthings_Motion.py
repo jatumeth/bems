@@ -140,7 +140,7 @@ class API:
 def main():
 
 
-   Motion = API(model='Motion',type='motionSensors',api='API3', agent_id='MotionAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/motions/', bearer = 'Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39',device = 'd7652ff5-0c70-4adb-9b4a-adaa8e79f23c')
+   Motion = API(model='Motion',type='motionSensors',api='API3', agent_id='MotionAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/motions/', bearer = 'Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9',device = 'd7652ff5-0c70-4adb-9b4a-adaa8e79f23c')
 
    Motion.getDeviceStatus()
 

@@ -77,6 +77,8 @@ def lighting_agent(config_path, **kwargs):
     address = get_config('address')
     address = get_config('address')
     address = get_config('address')
+    address = "http://192.168.1.121:80"
+
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id

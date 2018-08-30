@@ -142,6 +142,7 @@ def Powermetering_agent(config_path, **kwargs):
                 self.publish_azure_iot_hub()
                 self.StatusPublish(self.Powermeter.variables)
 
+
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
             topic = str('/agent/zmq/update/hive/999/' + str(self.Powermeter.variables['agent_id']))
@@ -149,8 +150,20 @@ def Powermetering_agent(config_path, **kwargs):
             print ("topic {}".format(topic))
             print ("message {}".format(message))
 
+            self.StatusPublish(self.Powermeter.variables)
+
+            self.publish_postgres()
+
+            # update firebase
+            self.publish_firebase()
+
+
+        @Core.periodic(5)
+        def deviceMonitorBehavior2(self):
+
+            self.Powermeter.getDeviceStatus()
             self.vip.pubsub.publish(
-                'pubsub', topic,
+                # 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def publish_firebase(self):

@@ -308,29 +308,17 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.104:80',
-                     username='WqAz1yrwGBEiQQTcDpnpBQSLPxc21ftuJkCt418b', agent_id='02ORV_InwallLightingAgent')
+    PhilipsHue = API(model='Philips Hue', type='wifiLight', api='API3', address='http://192.168.1.124:80',
+                     username='CK2MFw7Tr4ji9i3Qt5d0KfRMv50Ndh5r69Ucehkx', agent_id='02ORV_InwallLightingAgent')
     print("{0}agent is initialzed for {1} using API={2} at {3}".format(PhilipsHue.get_variable('type'),
                                                                        PhilipsHue.get_variable('model'),
                                                                        PhilipsHue.get_variable('api'),
                                                                        PhilipsHue.get_variable('address')))
 
-    PhilipsHue.getDeviceStatus()
-    # PhilipsHue.setDeviceStatus({"status": "ON"})
-    PhilipsHue.setDeviceStatus({"STATUS": "OFF", "color": u'(15, 250, 20)'})
-    # for i in range(1, 100):
-    #     import random
-    #     print(random.randint(0, 255))
-    #     x = []
-    #     for i in range(0, 3):
-    #         x.append(random.randint(0, 255))
-    #     # print(tuple(x))
-    #     random_color = str(tuple(x))
-    #     random_brightness = random.randint(0, 100)
-    #     PhilipsHue.setDeviceStatus({"status": "ON", "color": random_color, "device": "2HUEH0017881cab4b", "brightness": random_brightness})
-    #     time.sleep(1)
+#     PhilipsHue.setDeviceStatus({"status": "ON"})
+    # PhilipsHue.setDeviceStatus({"STATUS": "ON", "color": u'(15, 250, 20)'})
+    # # PhilipsHue.setDeviceStatus({"status": "ON", "device": "hue1"})
 
-    # PhilipsHue.identifyDevice()    # PhilipsHue.identifyDevice()
 
 
 if __name__ == "__main__": main()
