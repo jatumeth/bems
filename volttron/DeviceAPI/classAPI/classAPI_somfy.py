@@ -289,7 +289,7 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = 'b206da55-dfce-46c0-9471-6b22d2555da8')
-    # Somfy.getDeviceStatus()
+    Somfy.getDeviceStatus()
 
     # Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
     # Somfy.setDeviceStatus({"DIM": "0"})

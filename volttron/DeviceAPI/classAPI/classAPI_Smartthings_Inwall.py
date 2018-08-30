@@ -137,11 +137,11 @@ class API:
 def main():
 
     # -------------Kittchen----------------
-    RelaySW = API(model='two', type='ac', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
-                  bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='4b4358d4-9b91-4161-bbe0-1677aa04148f')
+    RelaySW = API(model='two', type='ac', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/',
+                  bearer='Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9', device='dc53a370-ed35-4228-9dc2-b0b022f28624')
 
     RelaySW.getDeviceStatus()
-    RelaySW.setDeviceStatus({"status": "ON"})
+    RelaySW.setDeviceStatus({"status": "OFF"})
     #
     # time.sleep(5)
     #

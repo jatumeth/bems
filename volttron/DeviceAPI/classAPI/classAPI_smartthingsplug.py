@@ -196,7 +196,7 @@ def main():
     #               bearer='Bearer ebb37dd7-d048-4cf6-bc41-1fbe9f510ea7', device='4cd29bf3-57d8-4c2b-bcc6-7abb6635fac8')
 
     # -------------Kittchen----------------
-    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/', bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='62aa412e-dd11-4ab4-81ec-9d194220f95b')
+    RelaySW = API(model='RelaySW', type='tv', api='API3', agent_id='RelaySWAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/', bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='bc33dc14-933d-4b48-b62b-c82d884582f4')
     # RelaySW.getDeviceStatus()
 
     RelaySW.setDeviceStatus({"status": "ON"})

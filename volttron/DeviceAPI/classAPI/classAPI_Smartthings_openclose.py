@@ -147,7 +147,7 @@ class API:
 def main():
 
 
-    OpenClose = API(model='OpenClose',type='contactSensors',api='API3', agent_id='18ORC_OpenCloseAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/contactSensors/', bearer = 'Bearer 80a03a69-b41f-45bb-bf0b-4acae4b63035',device = '46867502-f4d9-4962-88b3-e97b952e82a6')
+    OpenClose = API(model='OpenClose',type='contactSensors',api='API3', agent_id='18ORC_OpenCloseAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/contactSensors/', bearer = 'Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9',device = '46867502-f4d9-4962-88b3-e97b952e82a6')
     OpenClose.getDeviceStatus()
 
 

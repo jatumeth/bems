@@ -34,7 +34,7 @@ volttron-ctl enable --tag yale
 
 #OpenClose Agent
 volttron-pkg package Agents/18ORC_OpenCloseAgent
-volttron-pkg configure ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/18ORC_OpenCloseAgent/18OPC23451231.config.json
+volttron-pkg configure ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/18ORC_OpenCloseAgent/18OPC23451237.config.json
 volttron-ctl install ~/.volttron/packaged/opencloseagent-0.1-py2-none-any.whl --tag openclose
 volttron-ctl enable --tag openclose
 
@@ -74,7 +74,7 @@ volttron-ctl enable --tag mqtt
 
 #powermeter1
 volttron-pkg package Agents/05CRE_PowerMeterAgent
-volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0250883398.config.json
+volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0250883397.config.json
 volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter1
 volttron-ctl enable --tag powermeter1
 
@@ -102,6 +102,9 @@ volttron-ctl enable --tag scene
 volttron-pkg package Agents/01DAI_ACAgent
 volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200101.config.json
 volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
+
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200100.config.json
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag daikin
 
 
 echo "GGG!"

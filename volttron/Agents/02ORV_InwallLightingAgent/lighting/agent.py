@@ -150,7 +150,6 @@ def lighting_agent(config_path, **kwargs):
             self.status_old = self.Light.variables['device_status']
             print(self.status_old)
 
-
         def publish_firebase(self):
 
             try:

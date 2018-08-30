@@ -201,7 +201,7 @@ def main():
     #
     # time.sleep(10)
     #
-    # broadlink.setDeviceStatus({"status": "OFF"})
+    broadlink.setDeviceStatus({"status": "ON"})
     # broadlink.setDeviceStatus({'stemp':'20.5'})
 
     # broadlink.setDeviceStatus({"status": "TEMP25"})
