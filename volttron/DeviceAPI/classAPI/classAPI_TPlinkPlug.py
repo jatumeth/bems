@@ -62,6 +62,7 @@ class API:
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
+        self.newtoken()
 
     def renewConnection(self):
         pass
@@ -98,7 +99,7 @@ class API:
     def getDeviceStatus(self):
         deviceid = str(self.get_variable("deviceid"))
 
-        self.opentoken()
+        # self.opentoken()
         try:
             r0 = requests.post(
                 url="https://wap.tplinkcloud.com/",
@@ -274,27 +275,27 @@ class API:
         find_token = json.loads(response.text)
         self.token=(find_token['result']['token']).encode("utf-8")
 
-        conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
+        # conn = psycopg2.connect(host="localhost", port="5432", user="admin", password="admin", dbname="bemossdb")
 
-        cur = conn.cursor()
-        cur.execute("SELECT * from information_schema.tables where table_name=%s", ("plug_tplink_token",))
-        if bool(cur.rowcount):
-            pass
-        else:
-            cur.execute('''CREATE TABLE plug_tplink_token(id SERIAL PRIMARY KEY NOT NULL,
-                    accesstoken VARCHAR(50) NOT NULL, time TIMESTAMP);''')
-            print "create new database plug_tplink_token"
-            conn.commit()
-            cur.execute('INSERT INTO plug_tplink_token (id, accesstoken, time) VALUES (%s, %s ,%s)',
-                        ('1', 'aaa', datetime.datetime.now()))
-            conn.commit()
-
-        cur = conn.cursor()
-        cur.execute('UPDATE plug_tplink_token SET accesstoken=%s WHERE id=%s', (self.token, "1"))
-        conn.commit()
-        cur = conn.cursor()
-        cur.execute('UPDATE plug_tplink_token SET time=%s WHERE id=%s', (datetime.datetime.now(), "1"))
-        conn.commit()
+        # cur = conn.cursor()
+        # cur.execute("SELECT * from information_schema.tables where table_name=%s", ("plug_tplink_token",))
+        # if bool(cur.rowcount):
+        #     pass
+        # else:
+        #     cur.execute('''CREATE TABLE plug_tplink_token(id SERIAL PRIMARY KEY NOT NULL,
+        #             accesstoken VARCHAR(50) NOT NULL, time TIMESTAMP);''')
+        #     print "create new database plug_tplink_token"
+        #     conn.commit()
+        #     cur.execute('INSERT INTO plug_tplink_token (id, accesstoken, time) VALUES (%s, %s ,%s)',
+        #                 ('1', 'aaa', datetime.datetime.now()))
+        #     conn.commit()
+        #
+        # cur = conn.cursor()
+        # cur.execute('UPDATE plug_tplink_token SET accesstoken=%s WHERE id=%s', (self.token, "1"))
+        # conn.commit()
+        # cur = conn.cursor()
+        # cur.execute('UPDATE plug_tplink_token SET time=%s WHERE id=%s', (datetime.datetime.now(), "1"))
+        # conn.commit()
 
     def opentoken(self):
 
@@ -310,9 +311,10 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='sisaengtham.hive@gmail.com',cloudPassword='212@hive',deviceid='8006F8228DA43DED7A097C69544EB173189410E1')
+    TPlinkPlug = API(model='TPlinkPlug', type='tv', api='API3', agent_id='TPlinkPlugAgent',cloudUserName='smarthome.pea@gmail.com',cloudPassword='28Sep1960',deviceid='8006E7877A3FE301BC47DEB0D4FBA67219E731A2')
 
-    # TPlinkPlug.setDeviceStatus({"status": "OFF"})
+    TPlinkPlug.setDeviceStatus({"status": "ON"})
+    time.sleep(10)
     TPlinkPlug.getDeviceStatus()
     #
     # time.sleep(10)
