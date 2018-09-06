@@ -53,6 +53,7 @@ from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import psycopg2
 from os.path import expanduser
+import pyrebase
 
 
 utils.setup_logging()
@@ -62,6 +63,22 @@ DEFAULT_MESSAGE = 'Consumption'
 DEFAULT_AGENTID = "consumption"
 DEFAULT_HEARTBEAT_PERIOD = 30
 
+apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
+authDomainconfig = settings.CHANGE['change']['authLight']
+dataBaseconfig = settings.CHANGE['change']['databaseLight']
+stoRageconfig = settings.CHANGE['change']['storageLight']
+
+try:
+    config = {
+        "apiKey": apiKeyconfig,
+        "authDomain": authDomainconfig,
+        "databaseURL": dataBaseconfig,
+        "storageBucket": stoRageconfig,
+    }
+    firebase = pyrebase.initialize_app(config)
+    db = firebase.database()
+except Exception as er:
+    print er
 
 def consumption_agent(config_path, **kwargs):
     config = utils.load_config(config_path)
@@ -73,10 +90,16 @@ def consumption_agent(config_path, **kwargs):
             return config.get(name, '')
 
     agent_id = get_config('agent_id')
+    print(agent_id)
     message = get_config('message')
     heartbeat_period = get_config('heartbeat_period')
     device_id = get_config('powermeter_device_id')
     topic_powermeter = '/agent/zmq/update/hive/999/' + device_id
+    print(topic_powermeter)
+    typecal = get_config('type_cal')
+    print(typecal)
+    print("type={}".format(typecal))
+    gateway_id = settings.gateway_id
 
     # DATABASES
     db_host = settings.DATABASES['default']['HOST']
@@ -103,31 +126,43 @@ def consumption_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             print('Set up')
 
-            self.first_time = 0
+            self.first_time = 1
             time_t = datetime.now()
+            self.this_month = time_t.month
+            self.max_energy = 0
+            self.max_bill = 0
 
             # Cumulative Data
-            self.grid_cum_energy = 0
-            self.load_cum_energy = 0
-            self.solar_cum_energy = 0
-            self.grid_cum_bill = 0
-            self.load_cum_bill = 0
-            self.solar_cum_bill = 0
+            self.grid_energy_month = 0
+            self.grid_bill_month = 0
+
+            # ----- Type 1.1 -----
+            self.kwh_1lv1 = 15.00
+            self.kwh_1lv2 = 25.00
+            self.kwh_1lv3 = 35.00
+            self.kwh_1lv4 = 100.00
+            self.kwh_1lv5 = 150.00
+            self.kwh_1lv6 = 400.00
+            self.price_1lv1 = 2.3488 # 1-15
+            self.price_1lv2 = 2.9882 # 16-25
+            self.price_1lv3 = 3.2405 # 26-35
+            self.price_1lv4 = 3.6237 # 36-100
+            self.price_1lv5 = 3.7171 # 101-150
+            self.price_1lv6 = 4.2218 # 151-400
+            self.price_1lv7 = 4.4217 # 401-
 
             # ----- Type 1.2 -----
-            self.kwh_lv1 = 150.00
-            self.kwh_lv2 = 400.00
-            self.price_lv1 = 3.2484
-            self.price_lv2 = 4.2218
-            self.price_lv3 = 4.4217
+            self.kwh_2lv1 = 150.00
+            self.kwh_2lv2 = 400.00
+            self.price_2lv1 = 3.2484 # 1-150
+            self.price_2lv2 = 4.2218 # 151-400
+            self.price_2lv3 = 4.4217 # 401-
 
             # ----- Type 1.3 -----
             self.start_peak_period = time_t.replace(hour=9, minute=0, second=0, microsecond=1).time()
             self.end_peak_period = time_t.replace(hour=22, minute=0, second=0, microsecond=0).time()
-            self.price_onpeak = 5.7982
-            self.price_offpeak = 2.6369
-            # --------------------
-
+            self.price_onpeak = 5.7982 # onpeak
+            self.price_offpeak = 2.6369 # offpeak
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -138,83 +173,61 @@ def consumption_agent(config_path, **kwargs):
         def match_topic_create(self, peer, sender, bus,  topic, headers, message):
             print("----- Consumption & Bill Agent -----")
             msg = json.loads(message)
+            print(msg)
 
+            # datetime now
+            time_n = datetime.now()
+
+            self.date_now = time_n.weekday()
             # self.date_now = datetime.strptime(str(msg['grid_date']),'%Y-%m-%d').weekday()
-            self.date_now = datetime.now().weekday()
             print("Weekday = {}".format(self.date_now))
 
+            self.time_now = time_n.time()
             # self.time_now = datetime.strptime(str(msg['grid_time']),'%H:%M:%S').time()
-            self.time_now = datetime.now().time()
             print("Time = {}".format(self.time_now))
 
-            # grid / load / solar data
-            self.grid_energy_acc = msg['1_accumulated_energy']
-            self.load_energy_acc = msg['grid_accumulated_energy']
-            self.solar_energy_acc = msg['2_accumulated_energy']
-            self.solar_energy_acc2 = msg['3_accumulated_energy']
-
+            # grid
+            self.grid_energy_acc = msg['grid_accumulated_energy']
             print("<Meter> Grid Accumulated Energy(Wh) = {}".format(self.grid_energy_acc))
-            print("<Meter> Load Accumulated Energy(Wh) = {}".format(self.load_energy_acc))
-            print("<Meter> Solar Accumulated Energy(Wh) = {}".format(self.solar_energy_acc))
-            print("<Meter> Solar2 Accumulated Energy(Wh) = {}".format(self.solar_energy_acc2))
 
             # Check data = None
-            if ((self.grid_energy_acc == 'None') | (self.load_energy_acc == 'None') | (self.solar_energy_acc == 'None')):
+            if (self.grid_energy_acc == 'None'):
                 self.grid_energy_now = 0
-                self.load_energy_now = 0
-                self.solar_energy_now = 0
-            else:
-                if (self.first_time == 0):
 
-                    self.first_time = 1
+            else:
+                if (self.first_time == 1):
 
                     self.grid_energy_now = 0
-                    self.load_energy_now = 0
-                    self.solar_energy_now = 0
-
                     self.grid_energy_acc_old = float(self.grid_energy_acc)
-                    self.load_energy_acc_old = float(self.load_energy_acc)
-                    # self.solar_energy_acc_old = float(self.solar_energy_acc)
-                    self.solar_energy_acc_old = float(self.solar_energy_acc) + float(self.solar_energy_acc2)
+                    self.first_time = 0
+                    self.month_now = time_n.month
+                    print("Month now = {}".format(self.month_now))
+
                 else:
                     self.grid_energy_acc_new = float(self.grid_energy_acc)
-                    self.load_energy_acc_new = float(self.load_energy_acc)
-                    # self.solar_energy_acc_new = float(self.solar_energy_acc)
-                    self.solar_energy_acc_new = float(self.solar_energy_acc) + float(self.solar_energy_acc2)
-
                     self.grid_energy_now = (self.grid_energy_acc_new - self.grid_energy_acc_old) / 1000
-                    self.load_energy_now = (self.load_energy_acc_new - self.load_energy_acc_old) / 1000
-                    self.solar_energy_now = (self.solar_energy_acc_new - self.solar_energy_acc_old) / 1000
-
-                    print("Grid Energy(kWh) = {}".format(self.grid_energy_now))
-                    print("Load Energy(kWh) = {}".format(self.load_energy_now))
-                    print("Solar Energy(kWh) = {}".format(self.solar_energy_now))
-
                     self.grid_energy_acc_old = self.grid_energy_acc_new
-                    self.load_energy_acc_old = self.load_energy_acc_new
-                    self.solar_energy_acc_old = self.solar_energy_acc_new
+                    self.month_now = time_n.month
+                    print("Grid Energy(kWh) = {}".format(self.grid_energy_now))
+                    print("Month now = {}".format(self.month_now))
 
-            self.grid_cum_energy += self.grid_energy_now
-            self.load_cum_energy += self.load_energy_now
-            self.solar_cum_energy += self.solar_energy_now
-            print("Grid Cumulated Energy(kWh) = {}".format(self.grid_cum_energy))
-            print("Load Cumulated Energy(kWh) = {}".format(self.load_cum_energy))
-            print("Solar Cumulated Energy(kWh) = {}".format(self.solar_cum_energy))
+            # Check New Month
+            if (self.month_now == self.this_month):
+                self.calculate_consumption()
 
-            # Calculate Consumption
-            self.calculate_consumption()
+            else: # new month
+                self.this_month = self.month_now
+                self.grid_energy_month = 0
+                self.grid_bill_month = 0
+                self.calculate_consumption()
 
-            # # Daily Data
-            # self.calculate_consumption_daily()
-            #
-            # # Monthly Data
-            # self.calculate_consumption_monthly()
-            #
-            # # Annual Data
-            # self.calculate_consumption_annual()
+                # check max value
+                if (self.grid_energy_month > self.max_energy):
+                    self.max_energy = self.grid_energy_month
+                    self.max_bill = self.grid_bill_month
 
             # Update to firebase
-            # self.publish_firebase()
+            self.publish_firebase()
 
             # Update to Azure IoT hub
             # self.publish_azure_iot_hub()
@@ -223,89 +236,107 @@ def consumption_agent(config_path, **kwargs):
             # self.update_local()
 
         def calculate_consumption(self):
-            # Type 1.2
-            self.calculate_consumption_1_2()
 
-            # Type 1.3
-            # self.calculate_consumption_1_3()
+            #  Monthly Energy
+            self.grid_energy_month += self.grid_energy_now
+            print("Monthly Grid Energy(kWh) = {}".format(self.grid_energy_month))
 
-            #  Cumulative Bill
-            self.grid_cum_bill += self.grid_bill_now
-            self.load_cum_bill += self.load_bill_now
-            self.solar_cum_bill += self.solar_bill_now
-            print("Grid Bill(Baht) = {}".format(self.grid_cum_bill))
-            print("Load Bill(Baht) = {}".format(self.load_cum_bill))
-            print("Solar Bill(Baht) = {}".format(self.solar_cum_bill))
+            if (typecal == "1.1"):
+                print("Type 1.1")
+                self.calculate_consumption_11()
 
+            elif (typecal == "1.2"):
+                print("Type 1.2")
+                self.calculate_consumption_12()
 
-        # --- Type 1.2 TOU ---
-        def calculate_consumption_1_2(self):
-            print("----- Type 1.2 -----")
+            elif (typecal == "1.3"):
+                print("Type 1.3")
+                self.calculate_consumption_13()
 
-            if (self.grid_cum_energy <= self.kwh_lv1):
-                self.grid_bill_now = self.grid_energy_now * self.price_lv1
-                self.load_bill_now = self.load_energy_now * self.price_lv1
-                self.solar_bill_now = self.solar_energy_now * self.price_lv1
-                print("Grid Price = {}".format(self.grid_bill_now))
-                print("Load Price = {}".format(self.load_bill_now))
-                print("Solar Price = {}".format(self.solar_bill_now))
-
-            elif ((self.grid_cum_energy > self.kwh_lv1) & (self.grid_cum_energy >= self.kwh_lv2)):
-                self.grid_bill_now = self.grid_energy_now * self.price_lv2
-                self.load_bill_now = self.load_energy_now * self.price_lv2
-                self.solar_bill_now = self.solar_energy_now * self.price_lv2
-                print("Grid Price = {}".format(self.grid_bill_now))
-                print("Load Price = {}".format(self.load_bill_now))
-                print("Solar Price = {}".format(self.solar_bill_now))
             else:
-                self.grid_bill_now = self.grid_energy_now * self.price_lv3
-                self.load_bill_now = self.load_energy_now * self.price_lv3
-                self.solar_bill_now = self.solar_energy_now * self.price_lv3
+                print("please choose type cal.")
+
+            #  Monthly Bill
+            self.grid_bill_month += self.grid_bill_now
+            print("Monthly Grid Bill(Baht) = {}".format(self.grid_bill_month))
+
+        # --- Type 1.1 ---
+        def calculate_consumption_11(self):
+            if (self.grid_energy_month <= self.kwh_1lv1):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv1
                 print("Grid Price = {}".format(self.grid_bill_now))
-                print("Load Price = {}".format(self.load_bill_now))
-                print("Solar Price = {}".format(self.solar_bill_now))
 
-            print("--------------------")
+            elif ((self.grid_energy_month > self.kwh_1lv1) & (self.grid_energy_month >= self.kwh_1lv2)):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv2
+                print("Grid Price = {}".format(self.grid_bill_now))
 
-        # --- Type 1.3 TOU ---
-        def calculate_consumption_1_3(self):
-            print("----- Type 1.3 -----")
+            elif ((self.grid_energy_month > self.kwh_1lv2) & (self.grid_energy_month >= self.kwh_1lv3)):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv3
+                print("Grid Price = {}".format(self.grid_bill_now))
 
+            elif ((self.grid_energy_month > self.kwh_1lv3) & (self.grid_energy_month >= self.kwh_1lv4)):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv4
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+            elif ((self.grid_energy_month > self.kwh_1lv4) & (self.grid_energy_month >= self.kwh_1lv5)):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv5
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+            elif ((self.grid_energy_month > self.kwh_1lv6) & (self.grid_energy_month >= self.kwh_1lv7)):
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv6
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+            else:
+                self.grid_bill_now = self.grid_energy_now * self.price_1lv7
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+        # --- Type 1.2 ---
+        def calculate_consumption_12(self):
+            if (self.grid_energy_month <= self.kwh_2lv1):
+                self.grid_bill_now = self.grid_energy_now * self.price_2lv1
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+            elif ((self.grid_energy_month > self.kwh_2lv1) & (self.grid_energy_month >= self.kwh_2lv2)):
+                self.grid_bill_now = self.grid_energy_now * self.price_2lv2
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+            else:
+                self.grid_bill_now = self.grid_energy_now * self.price_2lv3
+                print("Grid Price = {}".format(self.grid_bill_now))
+
+        # --- Type 1.3 ---
+        def calculate_consumption_13(self):
             if(self.date_now == 5 | self.date_now == 6):
                 self.grid_bill_now = self.grid_energy_now * self.price_offpeak
-                self.load_bill_now = self.load_energy_now * self.price_offpeak
-                self.solar_bill_now = self.solar_energy_now * self.price_offpeak
                 print("Grid Price = {}".format(self.grid_bill_now))
-                print("Load Price = {}".format(self.load_bill_now))
-                print("Solar Price = {}".format(self.solar_bill_now))
+
             else:
                 if ((self.time_now >= self.start_peak_period) & (self.time_now <= self.end_peak_period)):
                     self.grid_bill_now = self.grid_energy_now * self.price_onpeak
-                    self.load_bill_now = self.load_energy_now * self.price_onpeak
-                    self.solar_bill_now = self.solar_energy_now * self.price_onpeak
                     print("Grid Price = {}".format(self.grid_bill_now))
-                    print("Load Price = {}".format(self.load_bill_now))
-                    print("Solar Price = {}".format(self.solar_bill_now))
+
                 else:
                     self.grid_bill_now = self.grid_energy_now * self.price_offpeak
-                    self.load_bill_now = self.load_energy_now * self.price_offpeak
-                    self.solar_bill_now = self.solar_energy_now * self.price_offpeak
                     print("Grid Price = {}".format(self.grid_bill_now))
-                    print("Load Price = {}".format(self.load_bill_now))
-                    print("Solar Price = {}".format(self.solar_bill_now))
-            print("--------------------")
-
-        # --- Daily Data ---
-        # def calculate_consumption_daily(self):
-        #
-        # # --- Monthly Data ---
-        # def calculate_consumption_monthly(self):
-        #
-        # # --- Annual Data ---
-        # def calculate_consumption_annual(self):
 
 
+        def publish_firebase(self):
+            try:
+                # consumption - current energy(now)
+                db.child(gateway_id).child('energy').child('consumption').child('current').set(self.grid_energy_now)
+                # consumption - monthly energy
+                db.child(gateway_id).child('energy').child('consumption').child('monthly').set(self.grid_energy_month)
+                # consumption - max monthly energy
+                db.child(gateway_id).child('energy').child('consumption').child('max_monthly').set(self.max_energy)
+                # consumption - current bill(now)
+                db.child(gateway_id).child('energy').child('bill').child('current').set(self.grid_bill_now)
+                # consumption - monthly bill
+                db.child(gateway_id).child('energy').child('bill').child('monthly').set(self.grid_bill_month)
+                # consumption - max monthly bill
+                db.child(gateway_id).child('energy').child('bill').child('max_monthly').set(self.max_bill)
 
+            except Exception as er:
+                print er
 
     Agent.__name__ = 'consumption'
     return ConsumptionAgent(config_path, **kwargs)

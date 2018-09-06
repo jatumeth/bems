@@ -54,6 +54,14 @@ class API:
                              headers=headers, timeout=20);
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
+
+            print r.text
+            print r.text
+            print r.text
+            print r.text
+            print r.text
+            print r.text
+
             if r.status_code == 200:
                 getDeviceStatusResult = False
 
@@ -137,11 +145,14 @@ class API:
 def main():
 
     # -------------Kittchen----------------
-    RelaySW = API(model='two', type='ac', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/',
-                  bearer='Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9', device='dc53a370-ed35-4228-9dc2-b0b022f28624')
+    RelaySW = API(model='two', type='ac', api='API_orvibo2gang', agent_id='Orvibo Light',url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/',
+                  bearer='Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9', device='bad01ae7-a1fd-4488-baf7-e3163d84da81')
 
+
+    RelaySW.setDeviceStatus({"status": "ON"})
+    # time.sleep(5)
     RelaySW.getDeviceStatus()
-    RelaySW.setDeviceStatus({"status": "OFF"})
+
     #
     # time.sleep(5)
     #

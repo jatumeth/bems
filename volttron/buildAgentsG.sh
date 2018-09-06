@@ -1,8 +1,4 @@
 #!/bin/bash
-
-
-
-
 #Inwall Agent
 
 volttron-pkg package Agents/02ORV_InwallLightingAgent
@@ -106,5 +102,10 @@ volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag air
 volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200100.config.json
 volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag daikin
 
+#TPlink
+volttron-pkg package Agents/03WSP_TplinkPlugAgent
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/03WSP_TplinkPlugAgent/03WSP123491.config.json
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag tplink
+volttron-ctl enable --tag tplink
 
 echo "GGG!"

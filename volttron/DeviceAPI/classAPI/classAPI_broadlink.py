@@ -131,13 +131,13 @@ class API:
                     if k == 'status':
                         tempchange = True
                         if _data['status'] == 'ON':
-                            command = 'sendon'
+                            command = 'acon'
                         if _data['status'] == 'on':
-                            command = 'sendon'
+                            command = 'acon'
                         if _data['status'] == 'OFF':
-                            command = 'sendoff'
+                            command = 'acoff'
                         if _data['status'] == 'off':
-                            command = 'sendoff'
+                            command = 'acoff'
                         self.status = _data['status']
 
             except Exception as er:
