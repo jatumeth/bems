@@ -1,8 +1,4 @@
 #!/bin/bash
-
-
-
-
 #Inwall Agent
 
 volttron-pkg package Agents/02ORV_InwallLightingAgent
@@ -40,7 +36,7 @@ volttron-ctl enable --tag openclose
 
 #Curtain Agent
 volttron-pkg package Agents/08SOM_CurtainAgent
-volttron-pkg configure ~/.volttron/packaged/certainagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/08SOM_CurtainAgent/08SOM221445K.config.json
+volttron-pkg configure ~/.volttron/packaged/certainagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/08SOM_CurtainAgent/08SOM123457.config.json
 volttron-ctl install ~/.volttron/packaged/certainagent-0.1-py2-none-any.whl --tag curtain
 volttron-ctl enable --tag curtain
 
@@ -101,10 +97,15 @@ volttron-ctl enable --tag scene
 #air
 volttron-pkg package Agents/01DAI_ACAgent
 volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200101.config.json
-volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag aircon
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag saijo
 
 volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200100.config.json
 volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag daikin
 
+#TPlink
+volttron-pkg package Agents/03WSP_TplinkPlugAgent
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/03WSP_TplinkPlugAgent/03WSP123491.config.json
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag tplink
+volttron-ctl enable --tag tplink
 
 echo "GGG!"

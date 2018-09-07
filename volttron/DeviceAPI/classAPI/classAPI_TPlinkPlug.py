@@ -62,7 +62,7 @@ class API:
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval', 6000)
         self.only_white_bulb = None
-        self.newtoken()
+        # self.newtoken()
 
     def renewConnection(self):
         pass
@@ -98,7 +98,7 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         deviceid = str(self.get_variable("deviceid"))
-
+        self.token = '1a6b68f0-C5pG57e596E2MM9unb4O2Jf'
         # self.opentoken()
         try:
             r0 = requests.post(
@@ -154,7 +154,7 @@ class API:
             self.set_variable('power', power)
         except:
             print "newtoken"
-            self.newtoken()
+            # self.newtoken()
         self.printDeviceStatus()
 
     def getDeviceStatusJson(self, data):
