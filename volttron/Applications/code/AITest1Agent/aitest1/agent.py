@@ -161,6 +161,7 @@ def aitest1_agent(config_path, **kwargs):
 
         @Core.periodic(heartbeat_period)
         def StatusPublish(self):
+            print ""
             # TODO this is example how to write an app to control AC
             topic = topic_ac
             try:

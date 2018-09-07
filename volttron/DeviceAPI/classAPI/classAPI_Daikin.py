@@ -91,7 +91,7 @@ class API:
 
         try:
 # <<<<<<< HEAD
-            r = requests.get("http://192.168.1.108/aircon/get_control_info",
+            r = requests.get("http://192.168.1.109/aircon/get_control_info",
 # =======
 #             r = requests.get("http://192.168.1.104/aircon/get_control_info",
 # >>>>>>> a99c03c9be33d95d3138bd4c9c4d1d8ae68da8fe
@@ -101,7 +101,7 @@ class API:
             format(self.variables.get('agent_id', None), str(r.status_code))
 
 # <<<<<<< HEAD
-            q = requests.get("http://192.168.1.108/aircon/get_sensor_info",
+            q = requests.get("http://192.168.1.109/aircon/get_sensor_info",
 # =======
 #             q = requests.get("http://192.168.1.104/aircon/get_sensor_info",
 # >>>>>>> a99c03c9be33d95d3138bd4c9c4d1d8ae68da8fe
@@ -225,7 +225,7 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.post(
-                    "http://192.168.1.108/aircon/set_control_info",
+                    "http://192.168.1.109/aircon/set_control_info",
                     headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b "}, data= data, timeout=20)
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))

@@ -97,8 +97,6 @@ def consumption_agent(config_path, **kwargs):
     topic_powermeter = '/agent/zmq/update/hive/999/' + device_id
     print(topic_powermeter)
     typecal = get_config('type_cal')
-    print(typecal)
-    print("type={}".format(typecal))
     gateway_id = settings.gateway_id
 
     # DATABASES
@@ -242,15 +240,12 @@ def consumption_agent(config_path, **kwargs):
             print("Monthly Grid Energy(kWh) = {}".format(self.grid_energy_month))
 
             if (typecal == "1.1"):
-                print("Type 1.1")
                 self.calculate_consumption_11()
 
             elif (typecal == "1.2"):
-                print("Type 1.2")
                 self.calculate_consumption_12()
 
             elif (typecal == "1.3"):
-                print("Type 1.3")
                 self.calculate_consumption_13()
 
             else:
@@ -322,18 +317,32 @@ def consumption_agent(config_path, **kwargs):
 
         def publish_firebase(self):
             try:
-                # consumption - current energy(now)
-                db.child(gateway_id).child('energy').child('consumption').child('current').set(self.grid_energy_now)
-                # consumption - monthly energy
-                db.child(gateway_id).child('energy').child('consumption').child('monthly').set(self.grid_energy_month)
-                # consumption - max monthly energy
-                db.child(gateway_id).child('energy').child('consumption').child('max_monthly').set(self.max_energy)
-                # consumption - current bill(now)
-                db.child(gateway_id).child('energy').child('bill').child('current').set(self.grid_bill_now)
-                # consumption - monthly bill
-                db.child(gateway_id).child('energy').child('bill').child('monthly').set(self.grid_bill_month)
-                # consumption - max monthly bill
-                db.child(gateway_id).child('energy').child('bill').child('max_monthly').set(self.max_bill)
+                # # consumption - current energy(now)
+                # db.child(gateway_id).child('energy').child('consumption').child('current').set(self.grid_energy_now)
+                # # consumption - monthly energy
+                # db.child(gateway_id).child('energy').child('consumption').child('monthly').set(self.grid_energy_month)
+                # # consumption - max monthly energy
+                # db.child(gateway_id).child('energy').child('consumption').child('max_monthly').set(self.max_energy)
+                # # consumption - current bill(now)
+                # db.child(gateway_id).child('energy').child('bill').child('current').set(self.grid_bill_now)
+                # # consumption - monthly bill
+                # db.child(gateway_id).child('energy').child('bill').child('monthly').set(self.grid_bill_month)
+                # # consumption - max monthly bill
+                # db.child(gateway_id).child('energy').child('bill').child('max_monthly').set(self.max_bill)
+
+                # temp data
+                db.child(gateway_id).child('energy').child('daily_energy').child('gridimportenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('daily_energy').child('gridimportbill').set(self.grid_bill_month)
+                db.child(gateway_id).child('energy').child('daily_energy').child('loadenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('daily_energy').child('loadbill').set(self.grid_bill_month)
+                db.child(gateway_id).child('energy').child('monthly_energy').child('gridimportenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('monthly_energy').child('gridimportbill').set(self.grid_bill_month)
+                db.child(gateway_id).child('energy').child('monthly_energy').child('loadenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('monthly_energy').child('loadbill').set(self.grid_bill_month)
+                db.child(gateway_id).child('energy').child('annual_energy').child('gridimportenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('annual_energy').child('gridimportbill').set(self.grid_bill_month)
+                db.child(gateway_id).child('energy').child('annual_energy').child('loadenergy').set(self.grid_energy_month)
+                db.child(gateway_id).child('energy').child('annual_energy').child('loadbill').set(self.grid_bill_month)
 
             except Exception as er:
                 print er
