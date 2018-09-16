@@ -1,0 +1,23 @@
+{
+    "agent": {
+        "exec": "plugagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "03WSP1234568",
+    "ipaddress": "http://192.168.1.116:49153",
+    "message": "this is a lighting agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_TPlinkPlug",
+    "cloudUserName":"smarthome.pea@gmail.com",
+    "cloudPassword":"28Sep1960",
+
+
+    "deviceid": "8006CB52189173A2DFD2C03040307EA319B362FD",
+
+    "building_name": "hive",
+    "device_monitor_time": 2,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "03WSP",
+    "vendor": "phillip",
+    "zone_id": 999
+}
