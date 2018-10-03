@@ -27,7 +27,7 @@ import settings
 from os.path import expanduser
 import psycopg2.extras
 import psycopg2
-
+import sqlite3
 import json
 from os.path import expanduser
 
@@ -80,8 +80,8 @@ def mqttsub_agent(config_path, **kwargs):
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
-            _log.debug("VERSION IS: {}".format(self.core.version()))
 
+            _log.debug("VERSION IS: {}".format(self.core.version()))
             while True:
                 try:
 
@@ -116,6 +116,7 @@ def mqttsub_agent(config_path, **kwargs):
                             launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
                             #  Update new agentID to variable (agentID is relate to automation_id)
                             self.updatetoken(commsg)
+                            self.updatetokensqlite(commsg)
 
                         elif type_msg == 'automationcreate':
                             # Execute Create Automation Function
@@ -184,6 +185,51 @@ def mqttsub_agent(config_path, **kwargs):
 
             except Exception as er:
                 print("Error in insertdb : {}".format(er))
+
+        #SQL lite
+        def updatetokensqlite(self,commsg):
+            gg = home_path = expanduser("~")
+            path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+            conn = sqlite3.connect(gg + path)
+            cur = conn.cursor()
+            cur.execute("""SELECT * FROM token """)
+            rows = cur.fetchall()
+
+            nullrow = True
+            for row in rows:
+                if row[0] == gateway_id:
+                    nullrow = False
+
+            conn.close()
+
+
+            if nullrow == True:
+                conn = sqlite3.connect(gg + path)
+                cur = conn.cursor()
+                cur.execute(
+                                """insert into token(gateway_id, login_token, expo_token)
+                                          values(
+                                                  servicebus_topic,
+                                                  commsg['token'],
+                                                  commsg['token']
+                                          );""")
+                conn.commit()
+                conn.close()
+
+            conn = sqlite3.connect(gg + path)
+            cur = conn.cursor()
+            cur.execute("""
+               UPDATE token
+               SET login_token=?, expo_token=?
+               WHERE gateway_id=?
+            """,(commsg['token'], commsg['token'],servicebus_topic))
+
+            conn.commit()
+            conn.close()
+            print('wooooohooooooooo')
+            # except Exception as er:
+            #     print("Error in insertdb : {}".format(er))
+
 
         def VIPPublishDevice(self,commsg):
             # TODO this is example how to write an app to control AC
