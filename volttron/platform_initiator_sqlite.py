@@ -31,6 +31,12 @@ c.execute('''CREATE TABLE automation
        action_tasks   TEXT);''')
 print "Table automation created successfully"
 
+
+c.execute('''CREATE TABLE active_scene
+       (SCENE_ID SERIAL   PRIMARY KEY   NOT NULL,
+       SCENE_NAME   VARCHAR(30)   NOT NULL);''')
+print "Table active_scene created successfully"
+
 # Insert a row of data
 # c.execute("INSERT INTO stocks VALUES ('2006-01-05','BUY','RHAT',100,35.14)")
 

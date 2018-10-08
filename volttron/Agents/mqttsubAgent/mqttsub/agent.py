@@ -209,13 +209,12 @@ def mqttsub_agent(config_path, **kwargs):
                 cur.execute(
                                 """insert into token(gateway_id, login_token, expo_token)
                                           values(
-                                                  servicebus_topic,
-                                                  commsg['token'],
-                                                  commsg['token']
-                                          );""")
+                                                  ?,?,?
+                                          );""",(commsg['token'], commsg['token'],servicebus_topic))
                 conn.commit()
                 conn.close()
 
+            # update
             conn = sqlite3.connect(gg + path)
             cur = conn.cursor()
             cur.execute("""
