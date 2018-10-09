@@ -13,11 +13,8 @@ import importlib
 import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import pprint
-import psycopg2
 import sys
 import sqlite3
 from os.path import expanduser
@@ -78,38 +75,38 @@ def scencesetup_agent(config_path, **kwargs):
             msg = sceneconfig.get('scene_tasks')
             scene_id = sceneconfig.get('scene_id')
             print(type_msg)
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-            self.insertdb(scene_id, scene_name, scene_tasks=msg)
+            # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                              user=db_user, password=db_password)
+            # self.insertdb(scene_id, scene_name, scene_tasks=msg)
 
             self.insertsqlite(scene_id, scene_name, scene_tasks=msg)
 
         @PubSub.subscribe('pubsub', topic_scene_update)
         def match_scene_update(self, peer, sender, bus, topic, headers, message):
             print('Message incoming')
-            message_load = json.loads(message)
-            sceneconfig = message_load.get('sceneconfig')
-            type_msg = message_load.get('type', None)
-            scene_name = sceneconfig.get('scene_name')
-            msg = sceneconfig.get('scene_tasks')
-            scene_id = sceneconfig.get('scene_id')
-            print(type_msg)
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * from scenes""")
-            rows = self.cur.fetchall()
-            scene_id_set = set()
-            for row in rows:
-                scene_id_set.add(str(row[0]))
-
-            if set({str(scene_id)}).issubset(scene_id_set):
-                convertmsg = json.loads(msg)
-                self.updatedb(scene_id, scene_name, scene_task=convertmsg)
-
-            else:
-                self.insertdb(scene_id, scene_name, scene_task=msg)
+            # message_load = json.loads(message)
+            # sceneconfig = message_load.get('sceneconfig')
+            # type_msg = message_load.get('type', None)
+            # scene_name = sceneconfig.get('scene_name')
+            # msg = sceneconfig.get('scene_tasks')
+            # scene_id = sceneconfig.get('scene_id')
+            # print(type_msg)
+            # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                              user=db_user, password=db_password)
+            #
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * from scenes""")
+            # rows = self.cur.fetchall()
+            # scene_id_set = set()
+            # for row in rows:
+            #     scene_id_set.add(str(row[0]))
+            #
+            # if set({str(scene_id)}).issubset(scene_id_set):
+            #     convertmsg = json.loads(msg)
+            #     self.updatedb(scene_id, scene_name, scene_task=convertmsg)
+            #
+            # else:
+            #     self.insertdb(scene_id, scene_name, scene_task=msg)
 
         @PubSub.subscribe('pubsub', topic_scene_update)
         def match_scene_update(self, peer, sender, bus, topic, headers, message):
@@ -141,18 +138,18 @@ def scencesetup_agent(config_path, **kwargs):
         @PubSub.subscribe('pubsub', topic_scene_delete)
         def match_scene_delete(self, peer, sender, bus, topic, headers, message):
             print('Message incoming')
-            message_load = json.loads(message)
-            sceneconfig = message_load.get('sceneconfig')
-            type_msg = message_load.get('type', None)
-            scene_name = sceneconfig.get('scene_name')
-            msg = sceneconfig.get('scene_tasks')
-            scene_id = sceneconfig.get('scene_id')
-            print(type_msg)
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-            print(" >>> Delete Scene Function Executed")
-            self.deletedb(scene_id)
-            self.deletesqlite(scene_id)
+            # message_load = json.loads(message)
+            # sceneconfig = message_load.get('sceneconfig')
+            # type_msg = message_load.get('type', None)
+            # scene_name = sceneconfig.get('scene_name')
+            # msg = sceneconfig.get('scene_tasks')
+            # scene_id = sceneconfig.get('scene_id')
+            # print(type_msg)
+            # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                              user=db_user, password=db_password)
+            # print(" >>> Delete Scene Function Executed")
+            # self.deletedb(scene_id)
+            # self.deletesqlite(scene_id)
 
         def deletedb(self, scene_id):
             print 'Delete Scene id : {}'.format(scene_id)
