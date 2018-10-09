@@ -4,7 +4,7 @@
         "exec": "daikinagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     },
     "agent_id": "03WSP1234566",
-    "api": "classAPI_TVG",
+    "api": "classAPI_FanG",
     "building_name": "hive",
     "device_monitor_time": 20,
     "macaddress": "1200138",

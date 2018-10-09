@@ -81,14 +81,14 @@ def lighting_agent(config_path, **kwargs):
 
     # DATABASES
     # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
+    db_host = settings.DATABASES['default']['HOST']
 
 
 
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
+    db_port = settings.DATABASES['default']['PORT']
+    db_database = settings.DATABASES['default']['NAME']
+    db_user = settings.DATABASES['default']['USER']
+    db_password = settings.DATABASES['default']['PASSWORD']
     # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
     # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
     # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
@@ -175,7 +175,7 @@ def lighting_agent(config_path, **kwargs):
 
         def gettoken(self):
 
-            self.api_token = '89eff42e99c895fe1e1083e04af3bda412e685d7'
+            self.api_token = 'c8cb977c7622c312a93fa84d7e33e8b21bf6ed78'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn
@@ -201,7 +201,7 @@ def lighting_agent(config_path, **kwargs):
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
 
-            print str(self.Light.variables['device_status'])
+            print str(self.Light.variables['status'])
             print str(self.Light.variables['agent_id'])
 
             print postgres_Authorization
@@ -210,7 +210,7 @@ def lighting_agent(config_path, **kwargs):
 
             m = MultipartEncoder(
                 fields={
-                    "status": str(self.Light.variables['device_status']),
+                    "status": str(self.Light.variables['status']),
                     "device_id": str(self.Light.variables['agent_id']),
                     "device_type": "lighting",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),

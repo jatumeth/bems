@@ -98,7 +98,7 @@ class API:
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
         deviceid = str(self.get_variable("deviceid"))
-        self.token = '1a6b68f0-C5pG57e596E2MM9unb4O2Jf'
+        self.token = '1a6b68f0-C2zyDZoo7okhrde69E8nzSq'
         # self.opentoken()
         try:
             r0 = requests.post(
