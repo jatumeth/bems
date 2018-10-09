@@ -15,11 +15,8 @@ import random
 import json
 import requests
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import pprint
-import psycopg2
 import sys
 import sqlite3
 from os.path import expanduser
@@ -247,23 +244,23 @@ def scenecontrol_agent(config_path, **kwargs):
 
         def truncatedb(self):
 
-            gg = expanduser("~")
-            path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
-            conn = sqlite3.connect(gg + path)
-            cur = conn.cursor()
-            cur.execute(
-                """TRUNCATE TABLE scenes;""")
-            conn.commit()
-            conn.close()
-            print('wooooohoooooooooTRUNCATE')
-
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-
-            self.cur = self.conn.cursor()
-            self.cur.execute("""TRUNCATE TABLE scenes;""")
-            self.conn.commit()
-            self.conn.close()
+            # gg = expanduser("~")
+            # path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+            # conn = sqlite3.connect(gg + path)
+            # cur = conn.cursor()
+            # cur.execute(
+            #     """TRUNCATE TABLE scenes;""")
+            # conn.commit()
+            # conn.close()
+            # print('wooooohoooooooooTRUNCATE')
+            #
+            # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                              user=db_user, password=db_password)
+            #
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""TRUNCATE TABLE scenes;""")
+            # self.conn.commit()
+            # self.conn.close()
             print(' >>> truncate table scene Complete')
 
         def insertdb(self, scene_id, scene_name, scene_task):
@@ -282,15 +279,15 @@ def scenecontrol_agent(config_path, **kwargs):
                 print('wooooohoooooooooinsert')
 
 
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-
-                self.cur = self.conn.cursor()
-                self.cur.execute(
-                    """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
-                    (scene_id, scene_name, scene_task))
-                self.conn.commit()
-                self.conn.close()
+                # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                #                              user=db_user, password=db_password)
+                #
+                # self.cur = self.conn.cursor()
+                # self.cur.execute(
+                #     """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
+                #     (scene_id, scene_name, scene_task))
+                # self.conn.commit()
+                # self.conn.close()
             except Exception as er:
                 print("Error in insertdb : {}".format(er))
 
@@ -306,13 +303,13 @@ def scenecontrol_agent(config_path, **kwargs):
                 conn.close()
                 print('wooooohoooooooooactivescene')
 
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-
-                self.cur = self.conn.cursor()
-                self.cur.execute("""TRUNCATE TABLE active_scene;""")
-                self.conn.commit()
-                self.conn.close()
+                # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                #                              user=db_user, password=db_password)
+                #
+                # self.cur = self.conn.cursor()
+                # self.cur.execute("""TRUNCATE TABLE active_scene;""")
+                # self.conn.commit()
+                # self.conn.close()
 
                 gg = expanduser("~")
                 path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
@@ -325,35 +322,36 @@ def scenecontrol_agent(config_path, **kwargs):
                 conn.close()
                 print('wooooohooooooooactive_scene55555555555555555')
 
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-                self.cur = self.conn.cursor()
-
-                self.cur.execute(
-                    """INSERT INTO active_scene (scene, scene_name) VALUES (%s, %s);""",
-                    ('1', '1'))
-                self.conn.commit()
-                self.conn.close()
+                # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+                #                              user=db_user, password=db_password)
+                # self.cur = self.conn.cursor()
+                #
+                # self.cur.execute(
+                #     """INSERT INTO active_scene (scene, scene_name) VALUES (%s, %s);""",
+                #     ('1', '1'))
+                # self.conn.commit()
+                # self.conn.close()
 
         def checkactivescence(self):
+            print ""
 
-            self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                         user=db_user, password=db_password)
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM active_scene """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                self.createrow1 = True
-                numrow1 = 0
-                if int(row[1]) == '1':
-                    self.createrow1 = False
-                    numrow1 = numrow1+1
-            self.conn.close()
-
-            if self.createrow1 == True:
-                self.createactivescence()
-            if numrow1 > 1:
-                self.createactivescence()
+            # self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
+            #                              user=db_user, password=db_password)
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * FROM active_scene """)
+            # rows = self.cur.fetchall()
+            # for row in rows:
+            #     self.createrow1 = True
+            #     numrow1 = 0
+            #     if int(row[1]) == '1':
+            #         self.createrow1 = False
+            #         numrow1 = numrow1+1
+            # self.conn.close()
+            #
+            # if self.createrow1 == True:
+            #     self.createactivescence()
+            # if numrow1 > 1:
+            #     self.createactivescence()
 
     Agent.__name__ = 'scenecontrolAgent'
     return SceneControlAgent(config_path, **kwargs)
