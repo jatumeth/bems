@@ -158,21 +158,20 @@ def lighting_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.Light.getDeviceStatus()
-
             self.StatusPublish(self.Light.variables)
 
             # self.publish_postgres()
 
             # update firebase , posgres , azure
-            if (self.Light.variables['status'] == self.status_old):
-                pass
-            else:
-                self.publish_firebase()
-                # self.publish_postgres()
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
-            self.status_old = self.Light.variables['status']
-            print(self.status_old)
+            # if (self.Light.variables['status'] == self.status_old):
+            #     pass
+            # else:
+            #     self.publish_firebase()
+            #     # self.publish_postgres()
+            #     self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+            #
+            # self.status_old = self.Light.variables['status']
+            # print(self.status_old)
 
         def gettoken(self):
 
@@ -242,7 +241,6 @@ def lighting_agent(config_path, **kwargs):
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']
             x["device_type"] = 'plugload'
-            x["power"] = self.Light.variables['power']
             x["activity_type"] = activity_type
             x["username"] = username
             x["device_name"] = 'smartthing Plug'
@@ -272,10 +270,10 @@ def lighting_agent(config_path, **kwargs):
                 self.Light.variables['status'] = str(message['status'])
 
             self.Light.setDeviceStatus((message))
-            time.sleep(3)
-            self.Light.getDeviceStatus()
-            self.publish_firebase()
-            self.publish_postgres()
+            # time.sleep(3)
+            # self.Light.getDeviceStatus()
+            # self.publish_firebase()
+            # self.publish_postgres()
 
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
