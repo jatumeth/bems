@@ -63,13 +63,27 @@ class API:
     # ----------------------------------------------------------------------
     # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
-
         getDeviceStatusResult = True
         try:
+            ip = self.get_variable("ip")
+            response = requests.get(
+                url=str("http://"+ip+"/cm"),
+                params={
+                    "cmnd": 'state',
+                },
+                headers={
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Host": str(ip),
+                },
+                data=json.dumps({
 
-            print "start"
-            self.set_variable('device_type', str(conve_json["system"]['get_sysinfo']['type']))
-            self.set_variable('status', str(conve_json["status"]).upper())
+                })
+            )
+            rload = json.loads(response.text)
+            status = rload['POWER']
+            self.set_variable('device_type', str('Switch'))
+            self.set_variable('status', str(status))
+            self.set_variable('device_status', str(status))
             self.printDeviceStatus()
 
         except Exception as er:
@@ -90,11 +104,9 @@ class API:
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
-
-
         try:
+            status = postmsg['status']
             ip = self.get_variable("ip")
-            status = self.get_variable("status")
             if status == 'ON':
                 msg ='Power On'
             elif status == 'on':
@@ -107,9 +119,9 @@ class API:
                 msg = 'Power Off'
             elif status == 'off':
                 msg = 'Power Off'
-
+            print msg
             response = requests.get(
-                url=ip+"/cm",
+                url="http://"+ip+"/cm",
                 params={
                     "cmnd": msg,
                 },
@@ -123,14 +135,10 @@ class API:
             )
             print response
 
-
-        except:
-            print "er"
-
-
-        else:
-            print("The POST message is invalid, try again\n")
-        return setDeviceStatusResult
+        except Exception as er:
+            print er
+            print('ERROR: classAPI_Tplink failed to getDeviceStatus')
+            self.set_variable('offline_count',self.get_variable('offline_count')+1)
 
 
     # ----------------------------------------------------------------------
@@ -139,11 +147,14 @@ class API:
 def main():
 
     # -------------Kittchen----------------
-    TpG = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='plug',ip = '192.168.1.117',
+    TpG = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='plug',ip = '192.168.1.36',
                   port=9999)
 
 
-    TpG.setDeviceStatus({"status": "OFF"})
+    TpG.setDeviceStatus({"status": "ON"})
+    time.sleep(2)
+    TpG.getDeviceStatus()
+    TpG.getDeviceStatus()
     # time.sleep(5)
     # TpG.getDeviceStatus()
     #
