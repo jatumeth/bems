@@ -107,21 +107,20 @@ class API:
 
         if(str(conve_json["system"]['get_sysinfo']['relay_state'])=='0'):
             self.set_variable('device_status','off')
+            self.set_variable('status', 'OFF')
         elif(str(conve_json["system"]['get_sysinfo']['relay_state'])=='1'):
             self.set_variable('device_status','on')
+            self.set_variable('status', 'ON')
         else:
             print 'error'
 
-        # self.set_variable('device_status', str(conve_json["system"]['get_sysinfo']['relay_state']))
         self.set_variable('device_type', str(conve_json["system"]['get_sysinfo']['type']))
-        # self.set_variable('status', str(conve_json["status"]).upper())
-        # self.set_variable('power', str(conve_json["power"]))
 
     def printDeviceStatus(self):
         # now we can access the contents of the JSON like any other Python object
         print(" the current status is as follows:")
         print(" label = {}".format(self.get_variable('label')))
-        print(" status = {}".format(self.get_variable('device_status')))
+        print(" status = {}".format(self.get_variable('status')))
         # print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
@@ -187,13 +186,13 @@ class API:
 def main():
 
     # -------------Kittchen----------------
-    TpG = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='plug',ip = '192.168.1.166',
+    TpG = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='plug',ip = '192.168.1.49',
                   port=9999)
 
 
     # TpG.setDeviceStatus({"status": "off"})
     # time.sleep(5)
-    # TpG.getDeviceStatus()
+    TpG.getDeviceStatus()
     #
     # time.sleep(3)
     #
