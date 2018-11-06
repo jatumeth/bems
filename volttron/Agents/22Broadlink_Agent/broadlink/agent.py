@@ -210,14 +210,14 @@ def broadlink_agent(config_path, **kwargs):
             print "Headers: {headers}".format(headers=headers)
             print "Message: {message}\n".format(message=message)
             message = json.loads(message)
-            if 'status' in message:
-                self.broadlink.variables['status'] = str(message['status'])
-            if 'set_temperature' in message:
-                self.broadlink.variables['set_temperature'] = str(message['set_temperature'])
-            if 'set_humidity' in message:
-                self.broadlink.variables['set_humidity'] = str(message['set_humidity'])
-            if 'mode' in message:
-                self.broadlink.variables['mode'] = str(message['mode'])
+            # if 'status' in message:
+            #     self.broadlink.variables['status'] = str(message['status'])
+            # if 'set_temperature' in message:
+            #     self.broadlink.variables['set_temperature'] = str(message['set_temperature'])
+            # if 'set_humidity' in message:
+            #     self.broadlink.variables['set_humidity'] = str(message['set_humidity'])
+            # if 'mode' in message:
+            #     self.broadlink.variables['mode'] = str(message['mode'])
             self.broadlink.setDeviceStatus(message)
 
     Agent.__name__ = '22Boradlink_Agent'
