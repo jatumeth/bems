@@ -100,6 +100,13 @@ class API:
         print(" type= {}".format(self.get_variable('type')))
         print("---------------------------------------------")
 
+    def getDeviceStatusJson(self, data):
+
+        print "getdata"
+
+
+
+
 
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
@@ -112,52 +119,101 @@ class API:
 
             print(type(postmsg))
 
-            if postmsg.has_key('mode'):
+            if postmsg.has_key('mode') == False:
+                mode = 'send'
 
-                if postmsg.has_key('status'):
-                    print('Got Status Key')
-                    command = 'status'+postmsg.get('status')
-
-                elif postmsg.has_key('channel'):
-                    print('Got Channel Key')
-                    command = 'status'+postmsg.get('channel')
-                elif postmsg.has_key('stemp'):
-                    command = 'stemp'+postmsg.get('stemp')
-
+            if postmsg.has_key('mode') == True:
                 if postmsg.get('mode') == 'learn':
-                    print('Learn Mode Active')
-                    print('Send Request')
-                    remotename = postmsg.get('device')
-                    try:
-                        response = requests.get(
-                            url="http://localhost:8080/learnCommand/%s%s" % (remotename, command),
-                        )
-                        print('Response HTTP Status Code: {status_code}'.format(
-                            status_code=response.status_code))
-                        print('Response HTTP Response Body: {content}'.format(
-                            content=response.content))
-                        return '{status_code}'.format(status_code=response.status_code)
-
-                    except requests.exceptions.RequestException:
-                        print('HTTP Request status failed')
-
+                    mode = postmsg.get('mode')
                 elif postmsg.get('mode') == 'send':
+                    mode = postmsg.get('mode')
+                else:
+                    mode = 'send'
+            print mode
 
-                    print('Send Mode Active')
-                    print('Send Request')
-                    remotename = postmsg.get('device')
-                    try:
-                        response = requests.get(
-                            url="http://localhost:8080/sendCommand/%s%s" % (remotename, command),
-                        )
-                        print('Response HTTP Status Code: {status_code}'.format(
-                            status_code=response.status_code))
-                        print('Response HTTP Response Body: {content}'.format(
-                            content=response.content))
-                        return '{status_code}'.format(status_code=response.status_code)
+            if postmsg.has_key('status'):
+                print('Got Status Key')
+                command = 'status'+postmsg.get('status')
 
-                    except requests.exceptions.RequestException:
-                        print('HTTP Request failed')
+            elif postmsg.has_key('stemp'):
+                command = 'stemp'+str(postmsg.get('stemp'))
+
+                self.set_variable('stemp', str(postmsg.get('stemp')))
+
+                self.set_variable('status', postmsg.get('status'))
+
+            elif postmsg.has_key('channel'):
+                print('Got Channel Key')
+                command = 'status'+postmsg.get('channel')
+
+
+            if mode == 'learn':
+                print('Learn Mode Active')
+                print('Send Request')
+                remotename = str(postmsg.get('device'))[:5]
+                try:
+                    response = requests.get(
+                        url="http://localhost:8081/learnCommand/%s%s" % (remotename, command),
+                    )
+                    print('Response HTTP Status Code: {status_code}'.format(
+                        status_code=response.status_code))
+                    print('Response HTTP Response Body: {content}'.format(
+                        content=response.content))
+                    # return '{status_code}'.format(status_code=response.status_code)
+
+                except requests.exceptions.RequestException:
+                    print('HTTP Request status failed')
+
+                time.sleep(1)
+
+                try:
+                    response = requests.get(
+                        url="http://localhost:8080/learnCommand/%s%s" % (remotename, command),
+                    )
+                    print('Response HTTP Status Code: {status_code}'.format(
+                        status_code=response.status_code))
+                    print('Response HTTP Response Body: {content}'.format(
+                        content=response.content))
+                    # return '{status_code}'.format(status_code=response.status_code)
+
+                except requests.exceptions.RequestException:
+                    print('HTTP Request status failed')
+
+            elif mode == 'send':
+
+                print('Send Mode Active')
+                print('Send Request')
+                remotename = str(postmsg.get('device'))[:5]
+                print command
+
+                try:
+                    response = requests.get(
+                        url="http://localhost:8081/sendCommand/%s%s" % (remotename, command),
+                    )
+                    print('Response HTTP Status Code: {status_code}'.format(
+                        status_code=response.status_code))
+                    print('Response HTTP Response Body: {content}'.format(
+                        content=response.content))
+                    # return '{status_code}'.format(status_code=response.status_code)
+
+                except requests.exceptions.RequestException:
+                    print('HTTP Request failed')
+
+                time.sleep(1)
+                print "next"
+
+                try:
+                    response = requests.get(
+                        url="http://localhost:8080/sendCommand/%s%s" % (remotename, command),
+                    )
+                    print('Response HTTP Status Code: {status_code}'.format(
+                        status_code=response.status_code))
+                    print('Response HTTP Response Body: {content}'.format(
+                        content=response.content))
+                    # return '{status_code}'.format(status_code=response.status_code)
+
+                except requests.exceptions.RequestException:
+                    print('HTTP Request failed')
 
             else:
                 print("message gg")
@@ -188,12 +244,18 @@ def main():
 
     BroadLink = API(model='LGTV', type='tv', api='API3', agent_id='LGTVAgent')
     # BroadLink.getDeviceStatus()
-    # BroadLink.setDeviceStatus({"status": "OFF", "devices": "11LG134ea34e82c37",
-    #                            "mode": "send", "remote": "tv-01", "vender": "broadlink",
+    # BroadLink.setDeviceStatus({"status": "ON", "device": "01DAI0a4f437e63c2",
+    #                            "mode": "send", "remote": "AC", "vender": "broadlink"})
+
+    BroadLink.setDeviceStatus({"mode": "send", "device": "01DAI0a4f437e63c2", "status": "ON"})
+
+    # BroadLink.setDeviceStatus({"mode":"learn","stemp":27,"device":"01DAI0a4f437e63c2"})
+
+    # BroadLink.setDeviceStatus({"username": "pean1", "status": "ON", "stemp": 20, "mode": 3, "device": "01DAI0a4f437e63c2",
+    #  "type": "devicecontrol"})
+
+    # BroadLink.setDeviceStatus({"status": "ON", "device": "01DAI0a4f437e63c2", "remote": "AC", "vender": "broadlink",
     #                            "command": "on"})
-
-    # BroadLink.setDeviceStatus({"mode":"lear","temp":25,"deviceid":"dd","status":"on"})
-
 
 if __name__ == "__main__":
     main()

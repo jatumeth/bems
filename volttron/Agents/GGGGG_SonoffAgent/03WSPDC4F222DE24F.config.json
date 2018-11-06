@@ -2,8 +2,8 @@
     "agent": {
         "exec": "plugagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "03WSP1234591",
-    "ipaddress": "192.168.1.110",
+    "agent_id": "03WSPDC4F222DE24F",
+    "ipaddress": "192.168.1.34",
     "port":9999,
     "message": "this is a lighting agent",
     "heartbeat_period":5,
@@ -12,10 +12,10 @@
     "deviceid": "8006CB52189173A2DFD2C03040307EA319B362FD",
 
     "building_name": "hive",
-    "device_monitor_time": 10,
-    "macaddress": "221445K1200143",
+    "device_monitor_time": 30,
+    "macaddress": "DC4F222DE24F",
     "model": "one",
     "type": "03WSP",
-    "vendor": "phillip",
+    "vendor": "sonoff",
     "zone_id": 999
 }

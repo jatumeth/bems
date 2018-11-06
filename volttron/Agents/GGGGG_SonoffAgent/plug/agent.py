@@ -89,12 +89,7 @@ def lighting_agent(config_path, **kwargs):
     db_database = settings.DATABASES['default']['NAME']
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_lighting = settings.DATABASES['default']['TABLE_lighting']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
+
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -102,13 +97,6 @@ def lighting_agent(config_path, **kwargs):
     print(topic_device_control)
     gateway_id = settings.gateway_id
 
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class LightingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -146,7 +134,7 @@ def lighting_agent(config_path, **kwargs):
             # except:
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
-            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -160,24 +148,24 @@ def lighting_agent(config_path, **kwargs):
 
             self.Light.getDeviceStatus()
             #
-            # self.StatusPublish(self.Light.variables)
+            self.StatusPublish(self.Light.variables)
 
-            # self.publish_postgres()
+            self.publish_postgres()
 
             # update firebase , posgres , azure
-            # if (self.Light.variables['status'] == self.status_old):
-            #     pass
-            # else:
-            #     self.publish_firebase()
-            #     # self.publish_postgres()
-            #     self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-            #
-            # self.status_old = self.Light.variables['status']
-            # print(self.status_old)
+            if (self.Light.variables['status'] == self.status_old):
+                pass
+            else:
+                self.publish_firebase()
+                # self.publish_postgres()
+                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
+
+            self.status_old = self.Light.variables['status']
+            print(self.status_old)
 
         def gettoken(self):
 
-            self.api_token = 'c8cb977c7622c312a93fa84d7e33e8b21bf6ed78'
+            self.api_token = 'bbb4cec0db979f6db903754e9248362af8a9874b'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn
@@ -190,31 +178,23 @@ def lighting_agent(config_path, **kwargs):
             self.conn.close()
 
         def publish_firebase(self):
-            try:
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.Light.variables['label'])
-                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.Light.variables['status'])
+            # try:
+            db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+            db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.Light.variables['status'])
 
-            except Exception as er:
-                print er
+            # except Exception as er:
+            #     print er
 
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
 
-            print str(self.Light.variables['status'])
-            print str(self.Light.variables['agent_id'])
-
-            print postgres_Authorization
-            print postgres_Authorization
-            print postgres_Authorization
-
             m = MultipartEncoder(
                 fields={
                     "status": str(self.Light.variables['status']),
                     "device_id": str(self.Light.variables['agent_id']),
-                    "device_type": "lighting",
+                    "device_type": "plugload",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
             )
@@ -226,8 +206,6 @@ def lighting_agent(config_path, **kwargs):
                                       })
             print r.status_code
             print('-------------------update postgres---------------')
-
-
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
@@ -243,11 +221,10 @@ def lighting_agent(config_path, **kwargs):
             x["unixtime"] = int(time.time())
             x["device_status"] = self.Light.variables['status']
             x["device_type"] = 'plugload'
-            x["power"] = self.Light.variables['power']
             x["activity_type"] = activity_type
             x["username"] = username
             x["device_name"] = 'smartthing Plug'
-
+            print x
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def StatusPublish(self, commsg):
@@ -269,14 +246,14 @@ def lighting_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
 
             message = json.loads(message)
-            # if 'status' in message:
-            #     self.Light.variables['status'] = str(message['status'])
+            if 'status' in message:
+                self.Light.variables['status'] = str(message['status'])
 
             self.Light.setDeviceStatus((message))
-            # time.sleep(3)
-            # self.Light.getDeviceStatus()
-            # self.publish_firebase()
-            # self.publish_postgres()
+            time.sleep(2)
+            self.Light.getDeviceStatus()
+            self.publish_firebase()
+            self.publish_postgres()
 
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
