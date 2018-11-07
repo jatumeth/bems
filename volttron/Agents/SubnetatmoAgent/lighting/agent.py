@@ -80,34 +80,10 @@ def lighting_agent(config_path, **kwargs):
             self.count = None
             self.msg_log = None
 
-        @Core.receiver('onsetup')
-        def onsetup(self, sender, **kwargs):
-            # Demonstrate accessing a value from the config file
-            _log.info(self.config.get('message', DEFAULT_MESSAGE))
-            self.flag1 = True
-            self.flag2 = True
-            self.flag3 = True
-            # self.name = db.child('hivedevhub13').child('people').child('current_detected').get()
-            # self.namestart = (self.name.pyres)
-            self.track = False
-            self.peoplecheck = False
-            self.reset1 = True
-            self.reset2 = True
-            self.reset3 = True
-
-
-
-        @Core.receiver('onstart')
-        def onstart(self, sender, **kwargs):
-            # _log.debug("VERSION IS: {}".format(self.core.version()))
-            self.count = 0
-            self.msg_log = {}
-            # self.Publish1()
-
-        @Core.periodic(5)
-        def deviceMonitorBehavior(self):
-
-
+        def stream_handler(self, message):
+            print(message["event"])  # put
+            print(message["path"])  # /-K7yGTTEp7O549EzTYtI
+            print(message["data"])  # {'title': 'Pyrebase', "body": "etc..."}
             hue = db.child('hivedevhub13').child('devices').child('02HUE1234500').child('device_status').get()
             hue = (hue.pyres)
             print("huestatus = {}".format(hue))
@@ -138,26 +114,105 @@ def lighting_agent(config_path, **kwargs):
             print("number = {}".format(number))
 
             if self.peoplecheck == True:
-                if number < 1 and self.reset1 == True :
+                if number < 1 and self.reset1 == True:
                     self.offhue()
                     self.acoff()
                     self.reset1 = False
                     self.reset2 = True
                     self.reset3 = True
 
-                elif number < 3 and self.reset2 == True :
+                elif number < 3 and self.reset2 == True:
                     self.blue2()
                     self.acon()
                     self.reset1 = True
                     self.reset2 = False
                     self.reset3 = True
 
-                elif number > 5 and self.reset3 == True :
+                elif number > 5 and self.reset3 == True:
                     self.blue3()
                     self.acon()
                     self.reset1 = True
                     self.reset2 = True
                     self.reset3 = False
+
+
+
+        @Core.receiver('onsetup')
+        def onsetup(self, sender, **kwargs):
+            # Demonstrate accessing a value from the config file
+            _log.info(self.config.get('message', DEFAULT_MESSAGE))
+            self.flag1 = True
+            self.flag2 = True
+            self.flag3 = True
+            # self.name = db.child('hivedevhub13').child('people').child('current_detected').get()
+            # self.namestart = (self.name.pyres)
+            self.track = False
+            self.peoplecheck = False
+            self.reset1 = True
+            self.reset2 = True
+            self.reset3 = True
+            my_stream = db.child("hivedevhub13").child("people").stream(self.stream_handler)
+
+        @Core.receiver('onstart')
+        def onstart(self, sender, **kwargs):
+            # _log.debug("VERSION IS: {}".format(self.core.version()))
+            self.count = 0
+            self.msg_log = {}
+            # self.Publish1()
+
+        # @Core.periodic(5)
+        # def deviceMonitorBehavior(self):
+
+            # hue = db.child('hivedevhub13').child('devices').child('02HUE1234500').child('device_status').get()
+            # hue = (hue.pyres)
+            # print("huestatus = {}".format(hue))
+            #
+            # if hue == "OFF":
+            #     self.track = True
+            #     # self.name = 'unknownpeople'
+            #     # db.child('hivedevhub13').child('people').child('current_detected').set('unknownpeople')
+            #     self.peoplecheck = False
+            # if hue == "ON":
+            #     # self.name = 'unknown'
+            #     # db.child('hivedevhub13').child('people').child('current_detected').set('unknown')
+            #     self.track = False
+            #
+            # if self.track == True:
+            #     self.name = db.child('hivedevhub13').child('people').child('current_detected').get()
+            #     self.name = (self.name.pyres)
+            #     print("name = {}".format(self.name))
+            #     if self.name != 'unknown':
+            #         self.onhue()
+            #         self.acon()
+            #         self.peoplecheck = True
+            #
+            # number = db.child('hivedevhub13').child('people').child('number').get()
+            # number = (number.pyres)
+            #
+            # print self.peoplecheck
+            # print("number = {}".format(number))
+            #
+            # if self.peoplecheck == True:
+            #     if number < 1 and self.reset1 == True :
+            #         self.offhue()
+            #         self.acoff()
+            #         self.reset1 = False
+            #         self.reset2 = True
+            #         self.reset3 = True
+            #
+            #     elif number < 3 and self.reset2 == True :
+            #         self.blue2()
+            #         self.acon()
+            #         self.reset1 = True
+            #         self.reset2 = False
+            #         self.reset3 = True
+            #
+            #     elif number > 5 and self.reset3 == True :
+            #         self.blue3()
+            #         self.acon()
+            #         self.reset1 = True
+            #         self.reset2 = True
+            #         self.reset3 = False
 
 
 
