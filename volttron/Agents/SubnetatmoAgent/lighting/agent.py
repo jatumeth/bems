@@ -91,6 +91,7 @@ def lighting_agent(config_path, **kwargs):
             self.acoff()
 
         def stream_handler2(self, message):
+            
             print(message["event"])  # put
             print(message["path"])  # /-K7yGTTEp7O549EzTYtI
             print(message["data"])  # {'title': 'Pyrebase', "body": "etc..."}
