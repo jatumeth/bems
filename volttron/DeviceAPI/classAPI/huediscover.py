@@ -3,7 +3,7 @@ import requests
 import json
 import time
 
-url = 'http://192.168.1.126:80' + '/api/newdeveloper'
+url = 'http://192.168.1.111:80' + '/api/newdeveloper'
 req = requests.get(url)
 result = json.loads(req.content)
 message = json.dumps(result)
@@ -16,7 +16,7 @@ if no_name:
     cnt = 60
     while cnt > 0:
         body = {"devicetype": "my_hue_app#bemoss"}
-        url = 'http://192.168.1.126:80' + '/api'
+        url = 'http://192.168.1.111:80' + '/api'
 
         r = requests.post(url, json.dumps(body))
         print r.content
