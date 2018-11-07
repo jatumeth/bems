@@ -3,7 +3,7 @@
         "exec": "plugagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "03WSP1234568",
-    "ipaddress": "http://192.168.1.116:49153",
+    "ipaddress": "http://192.168.1.103:49153",
     "message": "this is a lighting agent",
     "heartbeat_period": 20,
     "api": "classAPI_TPlinkPlug",

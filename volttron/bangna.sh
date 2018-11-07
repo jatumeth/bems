@@ -4,23 +4,23 @@ volttron-pkg configure ~/.volttron/packaged/mqttsubagent-0.1-py2-none-any.whl ~/
 volttron-ctl install ~/.volttron/packaged/mqttsubagent-0.1-py2-none-any.whl --tag mqtt
 volttron-ctl enable --tag mqtt
 
-#fan
+#daikin
 volttron-pkg package Agents/01DAI_ACAgent
-volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/03WSP1234566.config.json
-volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag fan
-volttron-ctl enable --tag fan
+volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAI1200110.config.json
+volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag daikin
+volttron-ctl enable --tag daikin
 
-#plug
-volttron-pkg package Agents/03WSP_TplinkPlugAgent
-volttron-pkg configure ~/.volttron/packaged/plugagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/03WSP_TplinkPlugAgent/03WSP123568.config.json
-volttron-ctl install ~/.volttron/packaged/plugagent-0.1-py2-none-any.whl --tag tplink
-volttron-ctl enable --tag tplink
+#Hue
+volttron-pkg package Agents/02HUE_HueAgent
+volttron-pkg configure ~/.volttron/packaged/lightingagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/02HUE_HueAgent/02HUE1234500.config.json
+volttron-ctl install ~/.volttron/packaged/lightingagent-0.1-py2-none-any.whl --tag hue
+volttron-ctl enable --tag hue
 
-#powermeter1
-volttron-pkg package Agents/05CRE_PowerMeterAgent
-volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE532254311.config.json
-volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter1
-volttron-ctl enable --tag powermeter1
+#Tplink
+volttron-pkg package Agents/GGGGG_TplinkPlugAgent
+volttron-pkg configure ~/.volttron/packaged/plugagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/GGGGG_TplinkPlugAgent/03WSP123568.config.json
+volttron-ctl install ~/.volttron/packaged/plugagent-0.1-py2-none-any.whl --tag plug
+volttron-ctl enable --tag plug
 
 #Scenesetup
 volttron-pkg package Agents/ScenesetupAgent
