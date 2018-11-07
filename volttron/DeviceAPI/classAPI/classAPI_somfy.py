@@ -163,20 +163,21 @@ class API:
             _data = _data.encode(encoding='utf_8')
             print type(postmsg)
             print (_data)
-
+            _dataj = json.loads(_data)
 
             try:
-                _data2 =   json.dumps({"command": "TwoOff"})
-                print (_data2)
-                print "sending requests put"
-                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                if _dataj['command'] == 'OneOn':
+                    _data2 = json.dumps({"command": "TwoOff"})
+                    print (_data2)
+                    print "sending requests put"
+                    r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
 
-                # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                _data3 =   json.dumps({"command": "OneOff"})
-                print (_data3)
-                print "sending requests put"
-                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-
+                if _dataj['command'] == 'TwoOn':
+                    # _data3 = json.dumps(self.convertPostMsg(postmsg2))
+                    _data3 =   json.dumps({"command": "OneOff"})
+                    print (_data3)
+                    print "sending requests put"
+                    r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
                 print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
@@ -184,15 +185,18 @@ class API:
                 time.sleep(10)
                 print "-------------------------sucess-------------------------"
 
-                # _data3 =  json.dumps({"command": "OneOff"})
-                # print (_data3)
-                # print "sending requests put"
-                # r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                if _dataj['command'] == 'OneOn':
+                    _data3 =  json.dumps({"command": "OneOff"})
+                    print (_data3)
+                    print "sending requests put"
+                    r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
                 #
-                # _data2 =   json.dumps({"command": "TwoOff"})
-                # print (_data2)
-                # print "sending requests put"
-                # r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+
+                if _dataj['command'] == 'TwoOn':
+                    _data2 =   json.dumps({"command": "TwoOff"})
+                    print (_data2)
+                    print "sending requests put"
+                    r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
                 #
                 # # _data3 = json.dumps(self.convertPostMsg(postmsg2))
                 # _data3 =   json.dumps({"command": "OneOff"})
@@ -289,7 +293,7 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
     Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/', bearer = 'Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9',device = 'e7ba793c-7bce-40d3-94ae-d348be190175')
-    Somfy.getDeviceStatus()
+    # Somfy.getDeviceStatus()
 
     # Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
     # Somfy.setDeviceStatus({"DIM": "0"})
@@ -301,7 +305,7 @@ def main():
     #
     # time.sleep(10)
 
-    # Somfy.setDeviceStatus({"status": "OFF"})
+    Somfy.setDeviceStatus({"status": "ON"})
 
     # time.sleep(10)
     # #
