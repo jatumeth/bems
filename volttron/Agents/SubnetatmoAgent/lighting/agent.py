@@ -87,25 +87,17 @@ def lighting_agent(config_path, **kwargs):
             hue = db.child('hivedevhub13').child('devices').child('02HUE1234500').child('device_status').get()
             hue = (hue.pyres)
             print("huestatus = {}".format(hue))
+            self.onhue()
+            self.acoff()
 
-            if hue == "OFF":
-                self.track = True
-                # self.name = 'unknownpeople'
-                # db.child('hivedevhub13').child('people').child('current_detected').set('unknownpeople')
-                self.peoplecheck = False
-            if hue == "ON":
-                # self.name = 'unknown'
-                # db.child('hivedevhub13').child('people').child('current_detected').set('unknown')
-                self.track = False
+        def stream_handler2(self, message):
+            print(message["event"])  # put
+            print(message["path"])  # /-K7yGTTEp7O549EzTYtI
+            print(message["data"])  # {'title': 'Pyrebase', "body": "etc..."}
+            hue = db.child('hivedevhub13').child('devices').child('02HUE1234500').child('device_status').get()
+            hue = (hue.pyres)
+            print("huestatus = {}".format(hue))
 
-            if self.track == True:
-                self.name = db.child('hivedevhub13').child('people').child('current_detected').get()
-                self.name = (self.name.pyres)
-                print("name = {}".format(self.name))
-                if self.name != 'unknown':
-                    self.onhue()
-                    self.acon()
-                    self.peoplecheck = True
 
             number = db.child('hivedevhub13').child('people').child('number').get()
             number = (number.pyres)
@@ -136,7 +128,6 @@ def lighting_agent(config_path, **kwargs):
                     self.reset3 = False
 
 
-
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
@@ -151,7 +142,8 @@ def lighting_agent(config_path, **kwargs):
             self.reset1 = True
             self.reset2 = True
             self.reset3 = True
-            my_stream = db.child("hivedevhub13").child("people").stream(self.stream_handler)
+            my_stream = db.child("hivedevhub13").child("people").child('current_detected').stream(self.stream_handler)
+            my_stream2 = db.child("hivedevhub13").child("people").child('poeple').stream(self.stream_handler2)
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
