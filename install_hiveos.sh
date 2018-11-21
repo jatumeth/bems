@@ -6,8 +6,6 @@
 #
 #
 ###install IoT hub
-cd ~/workspace/hive_os/volttron
-python bootstrap.py
 
 cd ~/workspace/hive_os/volttron/hive_lib
 sudo git clone --recursive https://github.com/Azure/azure-iot-sdk-python.git
@@ -32,7 +30,6 @@ sudo cp ~/workspace/hive_os/volttron/DeviceAPI/__init__.py ~/workspace/hive_os/v
 sudo cp ~/workspace/hive_os/volttron/DeviceAPI/__init__.py ~/workspace/hive_os/volttron/hive_lib/azure-iot-sdk-python/device/samples
 ##Finish install IoT hub
 
-
 cd ~/workspace/hive_os/volttron
 . env/bin/activate
 #install fire base
@@ -47,15 +44,6 @@ pip install azure.servicebus
 sudo apt-get update
 sudo apt install python-pip
 pip install --upgrade pip
-pip install psycopg2
-
-#Download and install the dependencies of the postgresql database
-sudo apt-get install postgresql postgresql-contrib python-yaml --assume-yes
-#Create the bemossdb database
-sudo -u postgres psql -c "CREATE USER admin WITH PASSWORD 'admin';"
-sudo -u postgres psql -c "DROP DATABASE IF EXISTS hiveosdb"
-sudo -u postgres createdb hiveosdb -O admin
-sudo -u postgres psql -d hiveosdb -c "create extension hstore;"
 
 pip install psycopg2-binary
 cd ~/workspace/hive_os/volttron/
