@@ -1,0 +1,21 @@
+{
+    "agent": {
+        "exec": "plugagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "03WSP133577",
+    "ipaddress": "192.168.1.139",
+    "port":9999,
+    "message": "TP-Link plug agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_tplink_smartplug",
+
+    "deviceid": "8006CB521891F3C2DFD2C03040307EA319B362FD",
+
+    "building_name": "hive",
+    "device_monitor_time": 10,
+    "macaddress": "B04E26A6B1A7",
+    "model": "HS110",
+    "type": "03WSP",
+    "vendor": "TP-Link",
+    "zone_id": 999
+}
