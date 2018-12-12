@@ -97,7 +97,7 @@ class ListenerAgent(Agent):
             self.vip.heartbeat.start_with_period(self._heartbeat_period)
             self.vip.health.set_status(STATUS_GOOD, self._message)
 
-    @PubSub.subscribe('pubsub', '/agent/zmq/update/hive/999/12NET1234510')
+    @PubSub.subscribe('pubsub', '')
     def on_match(self, peer, sender, bus,  topic, headers, message):
         """Use match_all to receive all messages and print them out."""
         if sender == 'pubsub.compat':
@@ -105,8 +105,6 @@ class ListenerAgent(Agent):
         self._logfn(
             "Peer: %r, Sender: %r:, Bus: %r, Topic: %r, Headers: %r, "
             "Message: \n%s", peer, sender, bus, topic, headers,  pformat(message))
-        print "------------------------------"
-        print message
 
 
 def main(argv=sys.argv):
