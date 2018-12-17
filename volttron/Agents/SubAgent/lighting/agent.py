@@ -30,7 +30,7 @@ def lighting_agent(config_path, **kwargs):
     api = get_config('api')
     identifiable = get_config('identifiable')
     # construct _topic_Agent_UI based on data obtained from DB
-    topic_device_control = '/agent/zmq/update/hive/999/'
+    topic_device_control = '/agent/zmq/update/hive/provision'
     send_notification = True
 
 
@@ -65,18 +65,16 @@ def lighting_agent(config_path, **kwargs):
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
-            self.count += 1
-            # print(str(self.count) + "  From : " + str(json.loads(message)[1]))
 
-            self.msg_log.update({str(json.loads(message)[1]): str(json.loads(message)[-1])})
-            f = open('./archive.json','w')
-            f.write(json.dumps(self.msg_log, sort_keys=True, indent=4))
-            f.close()
-            # print "Topic: {topic}".format(topic=topic)
-            # print "Headers: {headers}".format(headers=headers)
-            # print "Message: {message}\n".format(message=message)
-
-
+            # self.count += 1
+            # # print(str(self.count) + "  From : " + str(json.loads(message)[1]))
+            # self.msg_log.update({str(json.loads(message)[1]): str(json.loads(message)[-1])})
+            # f = open('./archive.json','w')
+            # f.write(json.dumps(self.msg_log, sort_keys=True, indent=4))
+            # f.close()
+            print "Topic: {topic}".format(topic=topic)
+            print "Headers: {headers}".format(headers=headers)
+            print "Message: {message}\n".format(message=message)
 
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
