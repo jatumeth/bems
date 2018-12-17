@@ -106,7 +106,7 @@ def main():
 
     Fibaro = API(model='Fibaro', type='illuminance', api='API3', agent_id='20FIB_FibaroAgent',
                  url='https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/illuminances/',
-                 bearer='Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39', device='c82eeb98-e978-481f-8707-67275b5b91ee')
+                 bearer='Bearer 65ef23f6-d1ab-4c1c-ba56-0a035ab26a6c', device='0962e64f-3d23-4a5c-901a-cb678c52be00')
 
     Fibaro.getDeviceStatus()
 

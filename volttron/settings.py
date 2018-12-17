@@ -195,7 +195,7 @@ FIND_DEVICE_SETTINGS = {
 # TODO change servicebus
 AZURE = {
     'servicebus': {
-        'topic': 'hivedevhub13',
+        'topic': 'hivedevhub15',
         'service_namespace': 'peahiveservicebusv2',
         'shared_access_key_name': 'RootManageSharedAccessKey',
         'shared_access_key_value': 'F6hM22kIHgfzKmt2GF0NtGlrVZtapYHOG3gMb7doaM4=',

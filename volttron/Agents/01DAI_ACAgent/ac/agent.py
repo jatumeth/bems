@@ -105,6 +105,11 @@ def ac_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.status_old = "none"
+            self.status_old2 = "none"
+            self.status_old3 = "none"
+            self.status_old4 = "none"
+            self.status_old5 = "none"
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -193,6 +198,7 @@ def ac_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def gettoken(self):
+            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn

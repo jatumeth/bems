@@ -109,7 +109,7 @@ def scencesetup_agent(config_path, **kwargs):
             #     self.insertdb(scene_id, scene_name, scene_task=msg)
 
         @PubSub.subscribe('pubsub', topic_scene_update)
-        def match_scene_update(self, peer, sender, bus, topic, headers, message):
+        def match_scene_updatesql(self, peer, sender, bus, topic, headers, message):
             print('Message incoming')
             message_load = json.loads(message)
             sceneconfig = message_load.get('sceneconfig')

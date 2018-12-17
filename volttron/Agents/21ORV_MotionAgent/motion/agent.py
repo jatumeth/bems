@@ -149,6 +149,8 @@ def fibaroing_agent(config_path, **kwargs):
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.status_old = ""
+
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -228,6 +230,7 @@ def fibaroing_agent(config_path, **kwargs):
 
             postgres_url = settings.POSTGRES['postgres']['url']
             postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_Authorization = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
 
             m = MultipartEncoder(
                 fields={

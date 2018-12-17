@@ -126,6 +126,7 @@ def lighting_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.status_old = ""
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -227,7 +228,7 @@ def lighting_agent(config_path, **kwargs):
 
         def gettoken(self):
             
-            self.api_token = '89eff42e99c895fe1e1083e04af3bda412e685d7'
+            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn
