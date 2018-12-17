@@ -99,6 +99,11 @@ def mqttsub_agent(config_path, **kwargs):
                         elif type_msg == 'devicecontrol':
                             # Execute Device Control Function
                             # print("Device Cintrol Event")
+                            if commsg['device'] == 'provisioning':
+                                self.VIPPublishpro(commsg)
+                            elif commsg['device'] == 'discover':
+                                self.VIPPublishdis(commsg)
+
                             self.VIPPublishDevice(commsg)
 
                         elif type_msg == 'login':
@@ -250,6 +255,27 @@ def mqttsub_agent(config_path, **kwargs):
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'HiVE Application to Gateway'}, message)
+
+        def VIPPublishpro(self, commsg):
+            topic = str('/agent/zmq/update/hive/provision')
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'HiVE Application to Gateway'}, message)
+
+        def VIPPublishdis(self, commsg):
+            topic = str('/agent/zmq/update/hive/discover')
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
+
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'HiVE Application to Gateway'}, message)
+
 
     Agent.__name__ = 'mqttsubAgent'
     return mqttsubAgent(config_path, **kwargs)
