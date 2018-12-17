@@ -78,4 +78,18 @@ volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag dai
 volttron-ctl enable --tag daikin
 volttron-ctl start --tag daikin
 
+#weatherwunderground
+volttron-pkg package Agents/50WeatherAgent
+volttron-pkg configure ~/.volttron/packaged/weatheragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/50WeatherAgent/50Weather01.config.json
+volttron-ctl install ~/.volttron/packaged/weatheragent-0.1-py2-none-any.whl --tag weatherwunderground
+volttron-ctl enable --tag weatherwunderground
+volttron-ctl start --tag weatherwunderground
+
+#consumption
+volttron-pkg package Applications/code/ConsumptionAgent
+volttron-pkg configure ~/.volttron/packaged/consumptionagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Applications/code/ConsumptionAgent/E05CRE0250883398.launch.json
+volttron-ctl install ~/.volttron/packaged/consumptionagent-0.1-py2-none-any.whl --tag consumption
+volttron-ctl enable --tag consumption
+volttron-ctl start --tag consumption
+
 echo "GGG!"

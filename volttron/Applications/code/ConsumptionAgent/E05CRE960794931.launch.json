@@ -1,0 +1,11 @@
+{
+    "agent": {
+        "exec": "consumptionagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "Consumption",
+    "message": "hello from consumption agent",
+    "device_id": "05CRE960794931",
+    "type_consumption": "1.2",
+    "date_bill": 1,
+    "limit_bill": "0"
+}

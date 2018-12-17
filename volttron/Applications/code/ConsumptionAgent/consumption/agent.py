@@ -40,6 +40,8 @@ from __future__ import absolute_import
 import datetime
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from collections import OrderedDict
+import collections
 import logging
 import sys
 import settings
@@ -63,6 +65,7 @@ DEFAULT_MESSAGE = 'Consumption'
 DEFAULT_AGENTID = "consumption"
 DEFAULT_HEARTBEAT_PERIOD = 30
 
+# set up for firebase
 apiKeyconfig = settings.CHANGE['change']['apiKeyLight']
 authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
@@ -89,22 +92,15 @@ def consumption_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
+    # Config. file
     agent_id = get_config('agent_id')
-    print(agent_id)
-    message = get_config('message')
-    heartbeat_period = get_config('heartbeat_period')
-    device_id = get_config('powermeter_device_id')
-    topic_powermeter = '/agent/zmq/update/hive/999/' + device_id
-    print(topic_powermeter)
-    typecal = get_config('type_cal')
-    gateway_id = settings.gateway_id
 
-    # DATABASES
-    db_host = settings.DATABASES['default']['HOST']
-    db_port = settings.DATABASES['default']['PORT']
-    db_database = settings.DATABASES['default']['NAME']
-    db_user = settings.DATABASES['default']['USER']
-    db_password = settings.DATABASES['default']['PASSWORD']
+    device_id = get_config('device_id')
+    topic_device = '/agent/zmq/update/hive/999/' + device_id
+    type_consumption = get_config('type_consumption')
+    date_bill = get_config('date_bill')
+    limit_bill = get_config('limit_bill')
+    gateway_id = settings.gateway_id
 
     class ConsumptionAgent(Agent):
 
@@ -122,107 +118,158 @@ def consumption_agent(config_path, **kwargs):
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
-            print('Set up')
-
             self.first_time = 1
-            time_t = datetime.now()
-            self.this_month = time_t.month
-            self.max_energy = 0
-            self.max_bill = 0
+
+            self.max_energy_cum_monthly = 0
+            self.max_bill_cum_monthly = 0
+
+            # date for daily E&B & date for monthly E&B
+            time_n = datetime.now()
+            self.this_day = time_n.date()
+            print('this day = {}'.format(self.this_day))
+
+            if (date_bill <= self.this_day.day):
+                self.date_start = time_n.replace(day=date_bill).date()
+                self.date_end = self.date_start + relativedelta(months=+1) - relativedelta(days=+1)
+            else:
+                self.date_end = time_n.replace(day=date_bill-1).date()
+                self.date_start = self.date_end - relativedelta(months=+1) + relativedelta(days=+1)
+            print('date start = {}'.format(self.date_start))
+            print('date end = {}'.format(self.date_end))
+
+            # Total Data
+            self.total_energy = {'grid': 0, 'load': 0, 'solar': 0}
+            self.total_bill = {'grid': 0, 'load': 0, 'solar': 0}
 
             # Cumulative Data
-            self.grid_energy_month = 0
-            self.grid_bill_month = 0
+            self.energy_cum_daily = {'grid': 0, 'load': 0, 'solar': 0}
+            self.bill_cum_daily = {'grid': 0, 'load': 0, 'solar': 0}
+            self.energy_cum_monthly = {'grid': 0, 'load': 0, 'solar': 0}
+            self.bill_cum_monthly = {'grid': 0, 'load': 0, 'solar': 0}
 
-            # ----- Type 1.1 -----
-            self.kwh_1lv1 = 15.00
-            self.kwh_1lv2 = 25.00
-            self.kwh_1lv3 = 35.00
-            self.kwh_1lv4 = 100.00
-            self.kwh_1lv5 = 150.00
-            self.kwh_1lv6 = 400.00
-            self.price_1lv1 = 2.3488 # 1-15
-            self.price_1lv2 = 2.9882 # 16-25
-            self.price_1lv3 = 3.2405 # 26-35
-            self.price_1lv4 = 3.6237 # 36-100
-            self.price_1lv5 = 3.7171 # 101-150
-            self.price_1lv6 = 4.2218 # 151-400
-            self.price_1lv7 = 4.4217 # 401-
+            # percent type
+            self.percent_energy = {'grid': 0, 'load': 0, 'solar': 0}
+            self.percent_bill = {'grid': 0, 'load': 0, 'solar': 0}
 
-            # ----- Type 1.2 -----
-            self.kwh_2lv1 = 150.00
-            self.kwh_2lv2 = 400.00
-            self.price_2lv1 = 3.2484 # 1-150
-            self.price_2lv2 = 4.2218 # 151-400
-            self.price_2lv3 = 4.4217 # 401-
+            # bill type 1.1
+            self.price_1_1 = {'type':'step', 0:2.3488, 15:2.9882, 25:3.2405, 35:3.6237, 100:3.7171, 150:4.2218, 400:4.4217}
 
-            # ----- Type 1.3 -----
-            self.start_peak_period = time_t.replace(hour=9, minute=0, second=0, microsecond=1).time()
-            self.end_peak_period = time_t.replace(hour=22, minute=0, second=0, microsecond=0).time()
-            self.price_onpeak = 5.7982 # onpeak
-            self.price_offpeak = 2.6369 # offpeak
+            # bill type 1.2
+            self.price_1_2 = {'type':'step', 0:3.2484, 150:4.2218, 400:4.4217}
+
+            # bill type 1.3
+            self.price_1_3 = {'type': 'tou',
+                              'on': 5.7982, 'off': 2.6369,
+                              'tstart': datetime.now().replace(hour=9, minute=0, second=0, microsecond=1).time(),
+                              'tstop': datetime.now().replace(hour=22, minute=0, second=0, microsecond=0).time()}
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
-            print("On Start")
-            # self.build_automation_agent(55)
+            # type price
+            self.list_type_consumption = {'1.1': self.type_1_1(), '1.2': self.type_1_2(), '1.3': self.type_1_3()}
+            self.type_bill = self.list_type_consumption[type_consumption]
+            print('type bill = {}'.format(self.type_bill))
 
-        @PubSub.subscribe('pubsub', topic_powermeter)  # Calculate consumption
-        def match_topic_create(self, peer, sender, bus,  topic, headers, message):
-            print("----- Consumption & Bill Agent -----")
-            msg = json.loads(message)
-            print(msg)
+            # read from firebase
+            if (db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_grid').get().val() != None):
+                print('Read from firebase')
+                self.total_energy = {
+                    'grid': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_grid').get().val(),
+                    'load': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_load').get().val(),
+                    'solar': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_solar').get().val()
+                    }
 
-            # datetime now
-            time_n = datetime.now()
+                self.total_bill = {
+                    'grid': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_grid').get().val(),
+                    'load': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_load').get().val(),
+                    'solar': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_solar').get().val()
+                    }
 
-            self.date_now = time_n.weekday()
-            # self.date_now = datetime.strptime(str(msg['grid_date']),'%Y-%m-%d').weekday()
-            print("Weekday = {}".format(self.date_now))
+                print('Total energy = {}'.format(self.total_energy))
+                print('Total bill = {}'.format(self.total_bill))
 
-            self.time_now = time_n.time()
-            # self.time_now = datetime.strptime(str(msg['grid_time']),'%H:%M:%S').time()
-            print("Time = {}".format(self.time_now))
+                if ((datetime.strptime((db.child(gateway_id).child('energy').child(device_id).child('date').get()).val(), '%Y-%m-%d')).date() == self.this_day):
+                    self.energy_cum_daily = {
+                        'grid': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_grid').get().val(),
+                        'load': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_load').get().val(),
+                        'solar': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_solar').get().val()
+                        }
 
-            # grid
-            self.grid_energy_acc = msg['grid_accumulated_energy']
-            print("<Meter> Grid Accumulated Energy(Wh) = {}".format(self.grid_energy_acc))
+                    self.bill_cum_daily = {
+                        'grid': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_grid').get().val(),
+                        'load': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_load').get().val(),
+                        'solar': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_solar').get().val()
+                        }
 
-            # Check data = None
-            if (self.grid_energy_acc == 'None'):
-                self.grid_energy_now = 0
+                    print('Energy cum daily = {}'.format(self.energy_cum_daily))
+                    print('Bill cum daily = {}'.format(self.bill_cum_daily))
+
+                if ((datetime.strptime((db.child(gateway_id).child('energy').child(device_id).child('month').get()).val(), '%Y-%m-%d')).date() >= self.this_day):
+                    self.energy_cum_monthly = {
+                        'grid': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_grid').get().val(),
+                        'load': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_load').get().val(),
+                        'solar': db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_solar').get().val()
+                        }
+
+                    self.bill_cum_monthly = {
+                        'grid': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_grid').get().val(),
+                        'load': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_load').get().val(),
+                        'solar': db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_solar').get().val()
+                        }
+
+                    print('Energy cum monthly = {}'.format(self.energy_cum_monthly))
+                    print('Bill cum monthly = {}'.format(self.bill_cum_monthly))
 
             else:
-                if (self.first_time == 1):
+                print('Data is None')
 
-                    self.grid_energy_now = 0
-                    self.grid_energy_acc_old = float(self.grid_energy_acc)
+        @PubSub.subscribe('pubsub', topic_device)  # Calculate consumption
+        def match_topic_create(self, peer, sender, bus,  topic, headers, message):
+            msg = json.loads(message)
+
+            # choose type (power meter/inverter)
+            if (device_id[0:2] == '05'): # power meter (grid)
+                self.energy_acc = {'grid': float(msg['grid_accumulated_energy'])*0.001,
+                                   'load': float(msg['grid_accumulated_energy'])*0.001,
+                                   'solar': 0}
+                                   # 'load': float(msg['grid_accumulated_energy'])*0.001,
+                                   # 'solar': float(msg['grid_accumulated_energy'])*0.001}
+
+            elif (device_id[0:2] == '22'): # inverter waiting....
+                self.energy_acc = {'grid': float(msg['grid_accumulated_energy']),
+                                   'load': float(msg['load_accumulated_energy']),
+                                   'solar': float(msg['solar_accumulated_energy'])}
+
+            else:
+                print('please choose your device')
+                pass
+
+            #  this day / this month / this time
+            self.dt_now = datetime.now()
+            self.date_now = self.dt_now.date()
+            self.time_now = self.dt_now.time()
+
+            # check data
+            if (self.energy_acc['grid'] == 'None') | (self.energy_acc['load'] == 'None') | (self.energy_acc['solar'] == 'None'):
+                self.energy_now = {'grid': 0, 'load': 0, 'solar': 0}
+
+            else:
+                if (self.first_time == 1): # first time
+                    self.energy_now = {'grid': 0, 'load': 0, 'solar': 0}
+                    self.energy_old = self.energy_acc
                     self.first_time = 0
-                    self.month_now = time_n.month
-                    print("Month now = {}".format(self.month_now))
 
                 else:
-                    self.grid_energy_acc_new = float(self.grid_energy_acc)
-                    self.grid_energy_now = (self.grid_energy_acc_new - self.grid_energy_acc_old) / 1000
-                    self.grid_energy_acc_old = self.grid_energy_acc_new
-                    self.month_now = time_n.month
-                    print("Grid Energy(kWh) = {}".format(self.grid_energy_now))
-                    print("Month now = {}".format(self.month_now))
+                    self.energy_new = self.energy_acc
+                    self.energy_now = {key: self.energy_new[key] - self.energy_old[key] for key in self.energy_new.keys()}
+                    self.energy_old = self.energy_new
+                    print('Energy Now = {}'.format(self.energy_now))
 
-            # Check New Month
-            if (self.month_now == self.this_month):
-                self.calculate_consumption()
+            # check new day & month
+            self.check_new_date_month()
 
-            else: # new month
-                self.this_month = self.month_now
-                self.grid_energy_month = 0
-                self.grid_bill_month = 0
-                self.calculate_consumption()
-
-                # check max value
-                if (self.grid_energy_month > self.max_energy):
-                    self.max_energy = self.grid_energy_month
-                    self.max_bill = self.grid_bill_month
+            # percent grid/load/solar
+            self.total_percent_energy_bill()
 
             # Update to firebase
             self.publish_firebase()
@@ -230,122 +277,177 @@ def consumption_agent(config_path, **kwargs):
             # Update to Azure IoT hub
             # self.publish_azure_iot_hub()
 
-            # Update to Local
-            # self.update_local()
 
-        def calculate_consumption(self):
+        def check_new_date_month(self):
+            if (self.date_now >= self.date_start) & (self.date_now <= self.date_end): # same month
+                if (self.date_now == self.this_day): # same day
+                    self.energy_cum_daily = {key: self.energy_cum_daily[key] + self.energy_now[key] for key in self.energy_now.keys()}
+                    self.calculate_consumption(self.type_bill)
+                    self.energy_cum_monthly = {key: self.energy_cum_monthly[key] + self.energy_now[key] for key in self.energy_now.keys()}
+                    self.bill_cum_daily = {key: self.bill_cum_daily[key] + self.bill_now[key] for key in self.bill_now.keys()}
+                    self.bill_cum_monthly = {key: self.bill_cum_monthly[key] + self.bill_now[key] for key in self.bill_now.keys()}
 
-            #  Monthly Energy
-            self.grid_energy_month += self.grid_energy_now
-            print("Monthly Grid Energy(kWh) = {}".format(self.grid_energy_month))
+                elif (self.date_now > self.this_day): # new day
+                    self.energy_cum_daily = self.energy_now
+                    self.calculate_consumption(self.type_bill)
+                    self.energy_cum_monthly = {key: self.energy_cum_monthly[key] + self.energy_now[key] for key in self.energy_now.keys()}
+                    self.bill_cum_daily = self.bill_now
+                    self.bill_cum_monthly = {key: self.bill_cum_monthly[key] + self.bill_now[key] for key in self.bill_now.keys()}
 
-            if (typecal == "1.1"):
-                self.calculate_consumption_11()
-
-            elif (typecal == "1.2"):
-                self.calculate_consumption_12()
-
-            elif (typecal == "1.3"):
-                self.calculate_consumption_13()
-
-            else:
-                print("please choose type cal.")
-
-            #  Monthly Bill
-            self.grid_bill_month += self.grid_bill_now
-            print("Monthly Grid Bill(Baht) = {}".format(self.grid_bill_month))
-
-        # --- Type 1.1 ---
-        def calculate_consumption_11(self):
-            if (self.grid_energy_month <= self.kwh_1lv1):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv1
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_1lv1) & (self.grid_energy_month >= self.kwh_1lv2)):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv2
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_1lv2) & (self.grid_energy_month >= self.kwh_1lv3)):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv3
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_1lv3) & (self.grid_energy_month >= self.kwh_1lv4)):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv4
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_1lv4) & (self.grid_energy_month >= self.kwh_1lv5)):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv5
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_1lv6) & (self.grid_energy_month >= self.kwh_1lv7)):
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv6
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            else:
-                self.grid_bill_now = self.grid_energy_now * self.price_1lv7
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-        # --- Type 1.2 ---
-        def calculate_consumption_12(self):
-            if (self.grid_energy_month <= self.kwh_2lv1):
-                self.grid_bill_now = self.grid_energy_now * self.price_2lv1
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            elif ((self.grid_energy_month > self.kwh_2lv1) & (self.grid_energy_month >= self.kwh_2lv2)):
-                self.grid_bill_now = self.grid_energy_now * self.price_2lv2
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            else:
-                self.grid_bill_now = self.grid_energy_now * self.price_2lv3
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-        # --- Type 1.3 ---
-        def calculate_consumption_13(self):
-            if(self.date_now == 5 | self.date_now == 6):
-                self.grid_bill_now = self.grid_energy_now * self.price_offpeak
-                print("Grid Price = {}".format(self.grid_bill_now))
-
-            else:
-                if ((self.time_now >= self.start_peak_period) & (self.time_now <= self.end_peak_period)):
-                    self.grid_bill_now = self.grid_energy_now * self.price_onpeak
-                    print("Grid Price = {}".format(self.grid_bill_now))
+                    self.this_day = self.date_now
 
                 else:
-                    self.grid_bill_now = self.grid_energy_now * self.price_offpeak
-                    print("Grid Price = {}".format(self.grid_bill_now))
+                    print('ERROR: daily consumption(calculation)')
 
+            elif (self.date_now > self.date_end): # new month
+                if (self.bill_cum_monthly['grid'] > self.max_bill_cum_monthly):  # max value(bill)
+                    self.max_bill_cum_monthly = self.bill_cum_monthly['grid']
+
+                try:
+                    self.energy_cum_daily = self.energy_now
+                    self.energy_cum_monthly = self.energy_now
+
+                    self.calculate_consumption(self.type_bill)
+
+                    self.bill_cum_daily = self.bill_now
+                    self.bill_cum_monthly = self.bill_now
+
+                    self.date_start = self.date_now
+                    self.date_end = self.date_start + relativedelta(months=+1) - relativedelta(days=+1)
+
+                except Exception as er:
+                    print er
+
+            else:
+                print('ERROR: monthly consumption(calculation)')
+
+            print('Energy cum daily = {}'.format(self.energy_cum_daily))
+            print('Energy cum monthly = {}'.format(self.energy_cum_monthly))
+            print('Bill cum daily = {}'.format(self.bill_cum_daily))
+            print('Bill cum monthly = {}'.format(self.bill_cum_monthly))
+
+        def total_percent_energy_bill(self):
+            self.total_energy = {key: self.total_energy[key] + self.energy_now[key] for key in self.energy_now.keys()}
+            self.total_bill = {key: self.total_bill[key] + self.bill_now[key] for key in self.bill_now.keys()}
+            print('Total energy = {}'.format(self.total_energy))
+            print('Total bill = {}'.format(self.total_bill))
+
+            # if (self.energy_now['grid'] != 0):
+            #     self.percent_energy = {key: self.energy_now[key] / self.energy_now['load'] * 100 for key in self.energy_now.keys()}
+            #     self.percent_bill = {key: self.bill_now[key] / self.bill_now['load'] * 100 for key in self.bill_now.keys()}
+            #     print('Percent energy = {}'.format(self.percent_energy))
+            #     print('Percent bill = {}'.format(self.percent_bill))
+
+        # type consumption
+        def type_1_1(self):
+            return collections.OrderedDict(sorted(self.price_1_1.items(), key=lambda t: t[0]))
+        def type_1_2(self):
+            return collections.OrderedDict(sorted(self.price_1_2.items(), key=lambda t: t[0]))
+        def type_1_3(self):
+            return self.price_1_3
+
+        # calculate consumption function
+        def calculate_consumption(self, typeprice):
+            if (typeprice['type'] == 'step'):  # step
+                for i in range(0, len(typeprice)):
+                    try:
+                        if ((self.energy_cum_monthly['grid'] >= 0) | (self.energy_cum_monthly['grid'] > list(typeprice.keys())[i])) & (self.energy_cum_monthly['grid'] <= list(typeprice.keys())[i + 1]):
+                            self.bill_now = {key: self.energy_now[key] * typeprice[list(typeprice.keys())[i]] for key in self.energy_now.keys()}
+                            print('Bill Now = {}'.format(self.bill_now))
+                            break
+
+                    except:
+                        if (list(typeprice.keys())[i]) == (list(typeprice.keys())[-1]):
+                            self.bill_now = {key: self.energy_now[key] * typeprice[list(typeprice.keys())[i]] for key in self.energy_now.keys()}
+                            print('Bill Now = {}'.format(self.bill_now))
+                            break
+
+            elif (typeprice['type'] == 'tou'):  # tou
+                if ((self.date_now.weekday() == 5) | (self.date_now.weekday() == 6)):  # offpeak
+                    self.bill_now = {key: self.energy_now[key] * typeprice['off'] for key in self.energy_now.keys()}
+                    print('Bill Now = {}'.format(self.bill_now))
+
+                else:
+                    if ((self.time_now) >= typeprice['tstart']) & (self.time_now <= typeprice['tstop']):
+                        self.bill_now = {key: self.energy_now[key] * typeprice['on'] for key in self.energy_now.keys()}
+                        print('Bill Now = {}'.format(self.bill_now))
+
+                    else:
+                        self.bill_now = {key: self.energy_now[key] * typeprice['off'] for key in self.energy_now.keys()}
+                        print('Bill Now = {}'.format(self.bill_now))
+            else:
+                print("please choose price type")
 
         def publish_firebase(self):
             try:
-                # # consumption - current energy(now)
-                # db.child(gateway_id).child('energy').child('consumption').child('current').set(self.grid_energy_now)
-                # # consumption - monthly energy
-                # db.child(gateway_id).child('energy').child('consumption').child('monthly').set(self.grid_energy_month)
-                # # consumption - max monthly energy
-                # db.child(gateway_id).child('energy').child('consumption').child('max_monthly').set(self.max_energy)
-                # # consumption - current bill(now)
-                # db.child(gateway_id).child('energy').child('bill').child('current').set(self.grid_bill_now)
-                # # consumption - monthly bill
-                # db.child(gateway_id).child('energy').child('bill').child('monthly').set(self.grid_bill_month)
-                # # consumption - max monthly bill
-                # db.child(gateway_id).child('energy').child('bill').child('max_monthly').set(self.max_bill)
+                db.child(gateway_id).child('energy').child(device_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
+                db.child(gateway_id).child('energy').child(device_id).child('date').set(str(self.date_now))
+                db.child(gateway_id).child('energy').child(device_id).child('month').set(str(self.date_end))
 
-                # temp data
-                db.child(gateway_id).child('energy').child('daily_energy').child('gridimportenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('daily_energy').child('gridimportbill').set(self.grid_bill_month)
-                db.child(gateway_id).child('energy').child('daily_energy').child('loadenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('daily_energy').child('loadbill').set(self.grid_bill_month)
-                db.child(gateway_id).child('energy').child('monthly_energy').child('gridimportenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('monthly_energy').child('gridimportbill').set(self.grid_bill_month)
-                db.child(gateway_id).child('energy').child('monthly_energy').child('loadenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('monthly_energy').child('loadbill').set(self.grid_bill_month)
-                db.child(gateway_id).child('energy').child('annual_energy').child('gridimportenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('annual_energy').child('gridimportbill').set(self.grid_bill_month)
-                db.child(gateway_id).child('energy').child('annual_energy').child('loadenergy').set(self.grid_energy_month)
-                db.child(gateway_id).child('energy').child('annual_energy').child('loadbill').set(self.grid_bill_month)
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('current_grid').set(self.energy_now['grid'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('current_load').set(self.energy_now['load'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('current_solar').set(self.energy_now['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_grid').set(self.energy_cum_daily['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_load').set(self.energy_cum_daily['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('daily_solar').set(self.energy_cum_daily['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_grid').set(self.energy_cum_monthly['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_load').set(self.energy_cum_monthly['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('monthly_solar').set(self.energy_cum_monthly['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_grid').set(self.total_energy['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_load').set(self.total_energy['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('total_solar').set(self.total_energy['solar'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('percent_grid').set(self.percent_energy['grid'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('percent_load').set(self.percent_energy['load'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('percent_solar').set(self.percent_energy['solar'])
+                # db.child(gateway_id).child('energy').child(device_id).child('consumption_kwh').child('max_grid').set(self.max_energy_cum_monthly)
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('history_m_grid').set(self.max_bill_cum_monthly)
+
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('current_grid').set(self.bill_now['grid'])
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('current_load').set(self.bill_now['load'])
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('current_solar').set(self.bill_now['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_grid').set(self.bill_cum_daily['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_load').set(self.bill_cum_daily['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('daily_solar').set(self.bill_cum_daily['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_grid').set(self.bill_cum_monthly['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_load').set(self.bill_cum_monthly['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('monthly_solar').set(self.bill_cum_monthly['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_grid').set(self.total_bill['grid'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_load').set(self.total_bill['load'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('total_solar').set(self.total_bill['solar'])
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('percent_grid').set(self.percent_bill['grid'])
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('percent_load').set(self.percent_bill['load'])
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('percent_solar').set(self.percent_bill['solar'])
+                db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('max_grid').set(self.max_bill_cum_monthly)
+                # db.child(gateway_id).child('energy').child(device_id).child('bill_baht').child('history_m_grid').set(self.max_bill_cum_monthly)
 
             except Exception as er:
                 print er
+
+        # def publish_azure_iot_hub(self):
+        #     # TODO publish to Azure IoT Hub u
+        #     '''
+        #     here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
+        #     hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
+        #     def iothub_client_telemetry_sample_run():
+        #     '''
+        #     print('Publish Azure IoT Hub')
+        #
+        #     x = {}
+        #     x["device_id"] = agent_id
+        #     x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+        #     x["unixtime"] = int(time.time())
+        #
+        #     x["gridvoltage"] = self.Powermeter.variables['grid_voltage']
+        #     x["gridcurrent"] = self.Powermeter.variables['grid_current']
+        #     x["gridactivePower"] = self.Powermeter.variables['grid_activePower']
+        #     x["gridreactivePower"] = self.Powermeter.variables['grid_reactivePower']
+        #
+        #     x["activity_type"] = 'application'
+        #     x["username"] = 'arm'
+        #     x["device_name"] = 'Consumption'
+        #     x["device_type"] = 'energy'
+        #     discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+
 
     Agent.__name__ = 'consumption'
     return ConsumptionAgent(config_path, **kwargs)
