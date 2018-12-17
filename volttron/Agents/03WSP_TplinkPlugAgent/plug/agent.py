@@ -146,6 +146,8 @@ def lighting_agent(config_path, **kwargs):
             #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
             # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.status_old = ""
+
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -175,7 +177,7 @@ def lighting_agent(config_path, **kwargs):
 
         def gettoken(self):
 
-            self.api_token = 'c8cb977c7622c312a93fa84d7e33e8b21bf6ed78'
+            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
             conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                     password=db_password)
             self.conn = conn

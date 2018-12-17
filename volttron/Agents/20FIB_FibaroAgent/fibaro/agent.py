@@ -149,6 +149,13 @@ def fibaroing_agent(config_path, **kwargs):
             # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
+            self.status_old = ""
+            self.status_old2 = ""
+            self.status_old3 = ""
+            self.status_old4 = ""
+            self.status_old5 = ""
+            self.status_old6 = ""
+
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
@@ -163,9 +170,8 @@ def fibaroing_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.fibaro.getDeviceStatus()
-
-
             self.StatusPublish(self.fibaro.variables)
+
 
             # TODO update local postgres
             # self.publish_local_postgres()
@@ -242,6 +248,7 @@ def fibaroing_agent(config_path, **kwargs):
 
             postgres_url = settings.POSTGRES['postgres']['url']
             postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_Authorization = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
 
             m = MultipartEncoder(
                 fields={
@@ -267,6 +274,8 @@ def fibaroing_agent(config_path, **kwargs):
 
         def StatusPublish(self,commsg):
             # TODO this is example how to write an app to control AC
+
+
             topic = str('/agent/zmq/update/hive/999/' + str(self.fibaro.variables['agent_id']))
             message = json.dumps(commsg)
             print ("topic {}".format(topic))
