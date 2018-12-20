@@ -11,18 +11,20 @@ import json
 import subprocess
 import sys
 import socket
+import broadlink
+
 from volttron.platform.agent import utils
 from volttron.platform.vip.agent import Agent, Core, RPC
 
 _log = logging.getLogger(__name__)
 utils.setup_logging()
 __version__ = "0.1"
-DEVID="peaprov-agent"
-DFLTTOPIC="/agent/zmq/update/hive/provision"
+DEVID="peadisc-agent"
+DFLTTOPIC="/agent/zmq/update/hive/discovery"
 
 
 
-def provision(config_path, **kwargs):
+def discovery(config_path, **kwargs):
     """Parses the Agent configuration and returns an instance of
     the agent created using that configuration.
 
@@ -30,8 +32,8 @@ def provision(config_path, **kwargs):
     :type config_path: str
     :param kwargs: Dictionary passed to Agent creation.  
     :type kwargs: dict
-    :returns: Provision
-    :rtype: Provision
+    :returns: Discovery
+    :rtype: Discovery
     """
     try:
         config = utils.load_config(config_path)
@@ -43,19 +45,19 @@ def provision(config_path, **kwargs):
 
     topic = config.get('topic', )
     _log.debug("Topic is: "+topic)
-    return Provision(topic, **kwargs)
+    return Discovery(topic, **kwargs)
 
 
 
 
-class Provision(Agent):
+class Discovery(Agent):
     """
     Document agent constructor here.
     """
 
     def __init__(self, topic=DFLTTOPIC,
                  **kwargs):
-        super(Provision, self).__init__(**kwargs)
+        super(Discovery, self).__init__(**kwargs)
         _log.debug("vip_identity: " + self.core.identity)
         self.loplugs={}
 
@@ -98,14 +100,15 @@ class Provision(Agent):
         response={}
         if "command" in msg:
             try:
-                if msg["command"] == "provision":
-                    self._do_provision(msg)
-                elif msg["command"] == "scan":
-                    self._list_ssid()
+                if msg["command"] == "discovery":
+                    self._disc_broadlink(msg)
+                    self._disc_camera(msg)
+                    self._disc_sonoff(msg)
+                    self._disc_tplink(msg)
 
-            except:
+            except Exception as e:
                 topic = self.topic
-                message = json.dumps({"device": DEVID, "event": "error", "value":"Oops!"})
+                message = json.dumps({"device": DEVID, "event": "error", "value":str(e)})
                 self.vip.pubsub.publish(
                     'pubsub', topic,
                     {'Type': 'pub device status to ZMQ'}, message)
@@ -124,40 +127,81 @@ class Provision(Agent):
         #self.vip.pubsub.publish('pubsub', "some/random/topic", message="HI!")
 
         self._create_subscriptions(self.topic)
-
-
-    def _do_provision(self,msg):
+        
+    def _disc_camera(self,msg):
         #Example RPC call
         #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
-        _log.debug("Provisioning devices.")
-
-        output = subprocess.Popen("env -i python3 -m aioiotprov -j '%s' '%s'"%(msg["ssid"],msg["passphrase"]), shell=True, stdout=subprocess.PIPE)
+        _log.debug("Discovering Camera devices.")
+        if "username" in msg:
+            user=msg["username"]
+        else:
+            user = None
+        if "password" in msg:
+            passwd = msg["password"]
+        else:
+            passwd = ""
+        if user:
+            output = subprocess.Popen("env -i /usr/local/bin/camera-discovery -u '%s' -p '%s'"%(user,passwd), shell=True, stdout=subprocess.PIPE)
+        else:
+            output = subprocess.Popen("env -i /usr/local/bin/camera-discovery", shell=True, stdout=subprocess.PIPE)
         message = output.communicate()
-
-        topic = self.topic
-        _log.debug("Sending message: %s"%str(message))
-        self.vip.pubsub.publish(
-            'pubsub', topic,
-            {'Type': 'pub device status to ZMQ'}, message[0].strip())
-
-    def _list_ssid(self):
-        #Example RPC call
-        #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
-        _log.debug("Scanning for SSID.")
-
-        try:
-            output = subprocess.Popen("env -i python3 -m aioiotprov -l XX", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            message = output.communicate()
-
-            topic = self.topic
+        if message[0].strip() not in ["", "{}"]:
+            topic = self.topic + "/camera"
             _log.debug("Sending message: %s"%str(message))
             self.vip.pubsub.publish(
                 'pubsub', topic,
                 {'Type': 'pub device status to ZMQ'}, message[0].strip())
 
-        except Exception as e:
-            _log.debug("\n\nOpps %s\n%s"%(message,e))
-            raise
+
+
+    def _disc_sonoff(self,msg):
+        #Example RPC call
+        #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
+        _log.debug("Discovering Sonoff devices.")
+        output = subprocess.Popen("env -i /usr/local/bin/sonoff-discovery -p Sonoff", shell=True, stdout=subprocess.PIPE)
+        message = output.communicate()
+        if message[0].strip() not in ["", "{}"]:
+            topic = self.topic + "/sonoff"
+            _log.debug("Sending message: %s"%str(message))
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message[0].strip())
+
+
+    def _disc_tplink(self,msg):
+        #Example RPC call
+        #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
+        _log.debug("Discovering TP-Link devices.")
+        output = subprocess.Popen("env -i /usr/local/bin/tplink-discovery", shell=True, stdout=subprocess.PIPE)
+        message = output.communicate()
+        if message[0].strip() not in ["", "{}"]:
+            topic = self.topic + "/tp-link"
+            _log.debug("Sending message: %s"%str(message))
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message[0].strip())
+
+    def _disc_broadlink(self,msg):
+        #Example RPC call
+        #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
+        _log.debug("Discovering Broadlink devices.")
+        result = {}
+        devices = broadlink.discover(timeout=5)
+        for dev in devices:
+            try:
+                ip, port = dev.host
+                model = devices[0].type
+                mac = ":".join([ "%02x"%x for x in devices[0].mac[::-1]])
+                result[ip] = {"port": port, "mac address": mac, "model": model}
+            except:
+                pass
+        if result:
+            topic = self.topic + "/broadlink"
+            _log.debug("Sending message: %s"%str(result))
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, json.dumps(result))
+
 
 
     @Core.receiver("onstop")
@@ -178,7 +222,7 @@ class Provision(Agent):
 
 def main():
     """Main method called to start the agent."""
-    utils.vip_main(provision,
+    utils.vip_main(discovery,
                    version=__version__)
 
 

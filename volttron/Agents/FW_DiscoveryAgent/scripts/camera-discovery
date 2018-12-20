@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+#
+# This application look for ONVIF camera. If provided with user name
+# and password, it will try to get rtsp and ptz info.
+#
+# Copyright (c) 2018 François Wautier
+#
+
+import argparse
+import time
+from WSDiscovery import WSDiscovery, QName
+from onvif import ONVIFCamera, ONVIFError
+import urllib.parse
+import logging, json
+
+NBTRIES = 2
+ONVIF_TYPE = QName('http://www.onvif.org/ver10/network/wsdl', 'NetworkVideoTransmitter')
+
+#Needed arguments
+parser = argparse.ArgumentParser(description="Discover ONVIF camera")
+parser.add_argument("-u","--user", default='test',
+                    help="The user that will control access to the device")
+parser.add_argument("-p","--password", default='',
+                    help="The password that will control access to the device.")
+parser.add_argument("-t","--timeout", default=5, type=int,
+                    help="How long to wait for answer to discovery request.")
+parser.add_argument("-d","--debug", default=False, action="store_true",
+                    help="Print debug information.")
+
+try:
+    opts = parser.parse_args()
+except Exception as e:
+    parser.error("Error: " + str(e))
+    sys.exit(1)
+    
+if opts.debug:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.WARNING)
+
+#Start Discovery
+wsd = WSDiscovery()
+wsd.start()
+
+
+started = time.time()
+seen_services = []
+result = {}
+while time.time() - started < opts.timeout:
+    services = wsd.searchServices(types=[ONVIF_TYPE])
+    for service in services:
+        if service.getXAddrs()[0] in seen_services:
+            continue
+        seen_services.append(service.getXAddrs()[0])
+        parsed = urllib.parse.urlparse(service.getXAddrs()[0])
+        logging.debug(parsed)
+        parts =  parsed.netloc.split(':')
+        ip = parts[0]
+        if len(parts) > 1:
+            port = parts[1]
+        else:
+            port = 80
+        result[ip]={"info":{"ip":ip,"port":port,"path":parsed.path}}
+        
+wsd.stop()
+
+for ip, val in result.items():
+    cdef = val["info"]
+    try:
+        logging.debug("Trying ONVIFCamera({ip}, {port}, {user}, {passwd})".format(
+            ip=cdef["ip"], port=cdef["port"], user=opts.user, passwd=opts.password
+        ))
+        mycam = ONVIFCamera(cdef["ip"], cdef["port"], opts.user, opts.password)
+    except Exception as e:
+        logging.debug("Got error connecting to camera {}: {}".format(ip,e))
+        continue
+    
+    try:
+        params = mycam.devicemgmt.create_type('GetNetworkProtocols')
+        dev_services = mycam.devicemgmt.GetNetworkProtocols(params)
+        for asrv in dev_services:
+            if asrv.Name == "HTTP" and asrv.Enabled:
+                result[ip]["web interface"]={"ip":ip,"port":asrv.Port}
+            #print(" {}".format(asrv))
+    except Exception as e:
+        logging.debug("Error whilst retrieving protocols: {}".format(e))
+    try:
+        params = mycam.devicemgmt.create_type('GetNetworkInterfaces')
+        dev_services = mycam.devicemgmt.GetNetworkInterfaces(params)
+        result[ip]["mac addresses"]=[]
+        for asrv in dev_services:
+            try:
+                result[ip]["mac addresses"].append(asrv["Info"]["HwAddress"])
+            except:
+                pass
+    except Exception as e:
+        logging.debug("Error whilst retrieving interfaces: {}".format(e))
+    try:
+        media_service = mycam.create_media_service()
+        profiles = media_service.GetProfiles()
+        result[ip]["streams"]=[]
+        for profile in profiles:
+            tryme = NBTRIES #In DBell, the first call GetStreamUri end up in reset connection
+            while tryme:
+                tryme -= 1
+                try:
+                    streamdef = {"video":{}, "audio":{}, "stream":"", "ptz":{}}
+                    try:
+                        if 'VideoEncoderConfiguration' in profile and profile.VideoEncoderConfiguration:
+                            streamdef["video"]["encoding"] = profile.VideoEncoderConfiguration.Encoding
+                            streamdef["video"]["height"] = profile.VideoEncoderConfiguration.Resolution.Height
+                            streamdef["video"]["width"] = profile.VideoEncoderConfiguration.Resolution.Width
+                            streamdef["video"]["token"] = profile.VideoEncoderConfiguration.token
+                    except:
+                        pass
+                    try:
+                        if 'AudioEncoderConfiguration' in profile and profile.AudioEncoderConfiguration:
+                            streamdef["audio"]["encoding"] = profile.AudioEncoderConfiguration.Encoding
+                            streamdef["audio"]["bitrate"] = profile.AudioEncoderConfiguration.Bitrate
+                            streamdef["audio"]["size"] = profile.AudioEncoderConfiguration.SampleRate
+                            streamdef["audio"]["token"] = profile.AudioEncoderConfiguration.token
+                    except:
+                        pass
+
+                    try:
+                        if 'PTZConfiguration' in profile and profile.PTZConfiguration:
+                            streamdef["ptz"]["pan"] = [profile.PTZConfiguration.PanTiltLimits.Range.XRange.Min]
+                            streamdef["ptz"]["pan"] += [profile.PTZConfiguration.PanTiltLimits.Range.XRange.Max]
+                            streamdef["ptz"]["tilt"] = [profile.PTZConfiguration.PanTiltLimits.Range.YRange.Min]
+                            streamdef["ptz"]["tilt"] += [profile.PTZConfiguration.PanTiltLimits.Range.YRange.Max]
+                            streamdef["ptz"]["zoom"] = [profile.PTZConfiguration.ZoomLimits.Range.XRange.Min]
+                            streamdef["ptz"]["zoom"] += [profile.PTZConfiguration.ZoomLimits.Range.XRange.Max]
+                            streamdef["ptz"]["token"] = profile.PTZConfiguration.token
+                    except:
+                        pass
+
+                    params = media_service.create_type('GetStreamUri')
+                    params.ProfileToken = profile.token
+                    params.StreamSetup = {'Stream': 'RTP-Unicast', 'Transport': {'Protocol': 'RTSP'}}
+                    resp = media_service.GetStreamUri(params)
+                    streamdef["stream"]=resp.Uri
+                    result[ip]["streams"].append(streamdef)
+                    tryme = 0
+                except ONVIFError as e:
+                    logging.debug("Error whilst retrieving stream: {}".format(e))
+    except Exception as e:
+        logging.debug("Error whilst retrieving stream: {}".format(e))
+
+print(json.dumps(result))
