@@ -190,7 +190,7 @@ FIND_DEVICE_SETTINGS = {
     'findWiFiWeMo': True,
     'findBACnet': True,
     'findModbus': True,
-	
+    
 }
 # TODO change servicebus
 AZURE = {
