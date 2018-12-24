@@ -77,9 +77,9 @@ volttron-ctl enable --tag powermeter6
 volttron-ctl start --tag powermeter6
 
 #air
-volttron-pkg package Agents/01DAI_ACAgent
-volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/03WSP1234567.config.json
-volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag air
+volttron-pkg package Agents/22Broadlink_Agent
+volttron-pkg configure ~/.volttron/packaged/broadlinkagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/22Broadlink_Agent/03WSP1234567.config.json
+volttron-ctl install ~/.volttron/packaged/broadlinkagent-0.1-py2-none-any.whl --tag air
 volttron-ctl enable --tag air
 volttron-ctl start --tag air
 
