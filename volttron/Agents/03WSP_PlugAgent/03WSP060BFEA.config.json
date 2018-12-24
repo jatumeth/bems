@@ -2,14 +2,14 @@
     "agent": {
         "exec": "lightingagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
-    "agent_id": "03WSP123456",
+    "agent_id": "03WSP060BFEA",
     "ipaddress": "http://192.168.1.30:49153",
     "message": "this is a lighting agent",
     "heartbeat_period": 20,
     "api": "classAPI_smartthingsplug",
-    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/",
-    "device": "bc33dc14-933d-4b48-b62b-c82d884582f4",
-    "bearer": "Bearer 5f599c0a-190c-4235-9a65-fef4fce8eb39",
+    "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/6e7197d2-42d1-47fa-9572-54213a47a778/switches/",
+    "device": "04b150a3-878c-477a-aaed-3dfb7c10d638",
+    "bearer": "Bearer fe132119-a2f7-4078-82c3-586a3aa5ce87",
     "building_name": "hive",
     "device_monitor_time": 2,
     "macaddress": "221445K1200138",

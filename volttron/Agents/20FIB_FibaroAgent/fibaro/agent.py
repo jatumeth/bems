@@ -13,8 +13,8 @@ import importlib
 import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
+#import psycopg2
+#import psycopg2.extras
 import pyrebase
 import time
 import requests
