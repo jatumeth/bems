@@ -13,8 +13,6 @@ import settings
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-import psycopg2
-import psycopg2.extras
 
 
 utils.setup_logging()
@@ -92,13 +90,6 @@ def lighting_agent(config_path, **kwargs):
     print(topic_device_control)
     gateway_id = settings.gateway_id
 
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class LightingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -126,6 +117,7 @@ def lighting_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.gettoken()
             self.status_old = ""
 
         @Core.receiver('onstart')
@@ -194,10 +186,6 @@ def lighting_agent(config_path, **kwargs):
             print str(self.Light.variables['device_status'])
             print str(self.Light.variables['agent_id'])
 
-            print postgres_Authorization
-            print postgres_Authorization
-            print postgres_Authorization
-
             m = MultipartEncoder(
                 fields={
                     "status": str(self.Light.variables['device_status']),
@@ -228,17 +216,17 @@ def lighting_agent(config_path, **kwargs):
 
         def gettoken(self):
             
-            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token =  row[1]
-            self.conn.close()
+            self.api_token = '899e6eb101cbeed0bd32f03050d045f8d4fcb571'
+            # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                         password=db_password)
+            # self.conn = conn
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * FROM token """)
+            # rows = self.cur.fetchall()
+            # for row in rows:
+            #     if row[0] == gateway_id:
+            #         self.api_token =  row[1]
+            # self.conn.close()
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
