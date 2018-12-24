@@ -39,7 +39,7 @@ except:
         print "no eth0"
 
 # TODO change gateway_id
-gateway_id='hivec83a35cdbeab'
+gateway_id='hivecdf12345'
 print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {
@@ -195,7 +195,7 @@ FIND_DEVICE_SETTINGS = {
 # TODO change servicebus
 AZURE = {
     'servicebus': {
-        'topic': 'hivec83a35cdbeab',
+        'topic': 'hivecdf12345',
         'service_namespace': 'peahiveservicebusv2',
         'shared_access_key_name': 'RootManageSharedAccessKey',
         'shared_access_key_value': 'F6hM22kIHgfzKmt2GF0NtGlrVZtapYHOG3gMb7doaM4=',
