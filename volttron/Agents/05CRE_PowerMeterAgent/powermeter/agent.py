@@ -10,18 +10,12 @@ from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
-import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import urllib3
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-import psycopg2
-import psycopg2.extras
 
 urllib3.disable_warnings()
 
@@ -152,7 +146,7 @@ def Powermetering_agent(config_path, **kwargs):
 
             self.StatusPublish(self.Powermeter.variables)
 
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -250,16 +244,18 @@ def Powermetering_agent(config_path, **kwargs):
             print r.status_code
 
         def gettoken(self):
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token = row[1]
-            self.conn.close()
+
+            print "Canceled Pyycopg2"
+            # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                         password=db_password)
+            # self.conn = conn
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * FROM token """)
+            # rows = self.cur.fetchall()
+            # for row in rows:
+            #     if row[0] == gateway_id:
+            #         self.api_token = row[1]
+            # self.conn.close()
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC

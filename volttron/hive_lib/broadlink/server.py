@@ -186,6 +186,39 @@ def start(server_class=HTTPServer, handler_class=Server, port=8080):
     httpd.serve_forever()
 
 if __name__ == "__main__":
+    #
+    devices = broadlink.discover(timeout=5)
+    #
+    ip = '192.168.4.252'
+    try:
+        print (devices[0].host)[0]
+        if (devices[0].mac == bytearray(b'\xb7f\xe44\xea4')):
+            ip = (devices[0].host)[0]
+
+        print ip
+    except:
+        print 'er'
+
+    try:
+        print (devices[1].host)[0]
+        if (devices[1].mac == bytearray(b'\xb7f\xe44\xea4')):
+            ip = (devices[1].host)[0]
+
+        print ip
+    except:
+        print 'er'
+
+    import configparser
+
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    # print(config['DEFAULT']['path'])     # -> "/path/name/"
+    # config['DEFAULT']['path'] = '/var/shared/'    # update
+    config['BroadlinkRM']['ipaddress'] = ip  # create
+    config['BroadlinkA1']['ipaddress'] = ip
+
+    with open('settings.ini', 'w') as configfile:  # save
+        config.write(configfile)
 
     settingsFile = configparser.ConfigParser()
     settingsFile.optionxform = str
