@@ -215,6 +215,9 @@ def fibaroing_agent(config_path, **kwargs):
                     self.fibaro.variables['HUMIDITY'])
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
                     self.fibaro.variables['STATUS'])
+
+                db.child(gateway_id).child('global').child("indoor_temperature").set(self.fibaro.variables['TEMPERATURE'])
+
             except Exception as er:
                 print er
 
