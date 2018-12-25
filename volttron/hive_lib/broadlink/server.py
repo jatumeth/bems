@@ -187,42 +187,61 @@ def start(server_class=HTTPServer, handler_class=Server, port=8080):
 
 if __name__ == "__main__":
     #
-    devices = broadlink.discover(timeout=5)
     import configparser
-    config = configparser.ConfigParser()
-    config.read('settings.ini')
-
+    #time.sleep(5)
     try:
-        print (devices[0].host)[0]
-        if (devices[0].mac == bytearray(b'\xb7f\xe44\xea4')):
-            ip = (devices[0].host)[0]
+        devices = broadlink.discover(timeout=5)
+        ip = (devices[0].host)[0]
         print ip
-    except:
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        config['BroadlinkRM']['ipaddress'] = ip  # create
+        config['BroadlinkA1']['ipaddress'] = ip
+        with open('settings.ini', 'w') as configfile:  # save
+            config.write(configfile)
+    except Exception as er:
+        print er
+        print 'error1.1'
         ip = '192.168.1.1'
         try:
+            config = configparser.ConfigParser()
+            config.read('settings.ini')
             ip = config['BroadlinkRM']['ipaddress']
-        except:
-            print "error"
+            config['BroadlinkRM']['ipaddress'] = ip  # create
+            config['BroadlinkA1']['ipaddress'] = ip
+            with open('settings.ini', 'w') as configfile:  # save
+                config.write(configfile)
+        except Exception as er:
+            print er
+            print 'error1.2'
+            
+    time.sleep(5)
     try:
-        print (devices[1].host)[0]
-        if (devices[1].mac == bytearray(b'\xb7f\xe44\xea4')):
-            ip = (devices[1].host)[0]
+        devices = broadlink.discover(timeout=5)
+        ip = (devices[0].host)[0]
         print ip
-    except:
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        config['BroadlinkRM']['ipaddress'] = ip  # create
+        config['BroadlinkA1']['ipaddress'] = ip
+        with open('settings.ini', 'w') as configfile:  # save
+            config.write(configfile)
+    except Exception as er:
+        print er
+        print 'error2.1'
         ip = '192.168.1.1'
         try:
+            config = configparser.ConfigParser()
+            config.read('settings.ini')
             ip = config['BroadlinkRM']['ipaddress']
-        except:
-            print "error"
-
-    # print(config['DEFAULT']['path'])     # -> "/path/name/"
-    # config['DEFAULT']['path'] = '/var/shared/'    # update
-    config['BroadlinkRM']['ipaddress'] = ip  # create
-    config['BroadlinkA1']['ipaddress'] = ip
-
-    with open('settings.ini', 'w') as configfile:  # save
-        config.write(configfile)
-
+            config['BroadlinkRM']['ipaddress'] = ip  # create
+            config['BroadlinkA1']['ipaddress'] = ip
+            with open('settings.ini', 'w') as configfile:  # save
+                config.write(configfile)
+        except Exception as er:
+            print er
+            print 'error2.2'
+            
     settingsFile = configparser.ConfigParser()
     settingsFile.optionxform = str
     settingsFile.read(settings.settingsINI)
