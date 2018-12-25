@@ -209,12 +209,15 @@ def Powermetering_agent(config_path, **kwargs):
 
             x = {}
             x["device_id"] = self.Powermeter.variables['agent_id']
-            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-            x["unixtime"] = int(time.time())
+            # x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["date_time"] = "{} {}".format(self.Powermeter.variables['grid_date'], self.Powermeter.variables['grid_time'])
+            # x["unixtime"] = int(time.time())
+            x["unixtime"] = self.Powermeter.variables['grid_uxtime']
             x["gridvoltage"] = self.Powermeter.variables['grid_voltage']
             x["gridcurrent"] = self.Powermeter.variables['grid_current']
             x["gridactivePower"] = self.Powermeter.variables['grid_activePower']
             x["gridreactivePower"] = self.Powermeter.variables['grid_reactivePower']
+            x["accumulate_energy"] = self.Powermeter.variables['grid_accumulated_energy']
             x["activity_type"] = 'devicemonitor'
             x["username"] = 'arm'
             x["device_name"] = 'Etrix Power Meter'
