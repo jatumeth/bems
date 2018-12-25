@@ -18,7 +18,9 @@ import psycopg2.extras
 import pyrebase
 import time
 import requests
+import settings
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -90,15 +92,7 @@ def weathering_agent(config_path, **kwargs):
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
     print(topic_device_control)
-    gateway_id = 'hivecdf12345'
-
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
+    gateway_id = settings.gateway_id
 
     class weatheringAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -156,6 +150,7 @@ def weathering_agent(config_path, **kwargs):
             self.publish_azure_iot_hub()
             print('success')
 
+
         def publish_firebase(self):
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
@@ -167,6 +162,17 @@ def weathering_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("location").set(self.weather.variables['location'])
                 db.child(gateway_id).child('devices').child(agent_id).child("humidity").set(self.weather.variables['humidity'])
                 db.child(gateway_id).child('devices').child(agent_id).child("icon").set(self.weather.variables['icon'])
+
+                print self.weather.variables['humidity']
+                print self.weather.variables['temp_c']
+                print gateway_id
+                humid = self.weather.variables['humidity'].replace('%','')
+
+                db.child(gateway_id).child('global').child("humidity").set(humid)
+                db.child(gateway_id).child('global').child("outdoor_temperature").set(self.weather.variables['temp_c'])
+
+                print self.weather.variables['temp_c']
+                print humid
             except Exception as er:
                    print er
 
