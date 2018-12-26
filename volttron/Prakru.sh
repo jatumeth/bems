@@ -83,5 +83,11 @@ volttron-ctl install ~/.volttron/packaged/broadlinkagent-0.1-py2-none-any.whl --
 volttron-ctl enable --tag air
 volttron-ctl start --tag air
 
+#energy trading
+volttron-pkg package Agents/EnergyTradeAgent
+volttron-pkg configure ~/.volttron/packaged/energytradeagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/EnergyTradeAgent/sub001.config.json
+volttron-ctl install ~/.volttron/packaged/energytradeagent-0.1-py2-none-any.whl --tag trading
+volttron-ctl enable --tag trading
+volttron-ctl start --tag trading
 
 echo "GGG!"
