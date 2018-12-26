@@ -9,17 +9,10 @@ from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
-import importlib
-import random
 import json
-import requests
-import socket
-import psycopg2
-import psycopg2.extras
-import pyrebase
-import pprint
-import psycopg2
 import sys
+from os.path import expanduser
+import sqlite3
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -37,7 +30,6 @@ def scenecontrol_agent(config_path, **kwargs):
             kwargs.pop(name)
         except KeyError:
             return config.get(name, '')
-
     agent_id = get_config('agent_id')
 
 
@@ -49,11 +41,13 @@ def scenecontrol_agent(config_path, **kwargs):
     db_user = settings.DATABASES['default']['USER']
     db_password = settings.DATABASES['default']['PASSWORD']
     topic_tricker = ''
-    conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                            password=db_password)
+    gg = expanduser("~")
+    path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+    conn = sqlite3.connect(gg + path)
     cur = conn.cursor()
     cur.execute("""SELECT * FROM automations """)
     rows = cur.fetchall()
+
     for row in rows:
         automation_id = automation_id.replace('automation_','')
         print automation_id
@@ -64,9 +58,7 @@ def scenecontrol_agent(config_path, **kwargs):
             topic_tricker = '/agent/zmq/update/hive/999/' + triger_device_str
             print "<<<< subscribe topic >>>>>"
             print topic_tricker
-
     conn.close()
-
 
     class SceneControlAgent(Agent):
         def __init__(self, config_path, **kwargs):
@@ -123,7 +115,7 @@ def scenecontrol_agent(config_path, **kwargs):
             print(" Automation set event = {}".format(self.triger_event))
             print(" Automation set value = {}".format(self.triger_value))
             print message
-
+            print(" triger_event_now = {}".format(triger_event_now))
             if triger_event_now == self.triger_value:
                 print(" Automation set value == value reading now ")
                 print(" go to step [[[  2  ]]] check condition event ")
@@ -139,12 +131,12 @@ def scenecontrol_agent(config_path, **kwargs):
 
         def load_config(self): # reload scene configuration to Agent Variable
 
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM automations """)  # TODO : add where condition automation-ID matched
-            rows = self.cur.fetchall()
+            gg = expanduser("~")
+            path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+            conn = sqlite3.connect(gg + path)
+            cur = conn.cursor()
+            cur.execute("""SELECT * FROM automations """)
+            rows = cur.fetchall()
 
             for row in rows :
                 if int(self.automation_id) == int(row[0]):
@@ -160,7 +152,7 @@ def scenecontrol_agent(config_path, **kwargs):
                     print(" condition_event  = {}".format(self.condition_event))
                     print(" condition_value = {}".format(self.condition_value))
                     print(" devicecontrols = {}".format(self.devicecontrols))
-            self.conn.close()
+            conn.close()
 
         def conditionevent(self):
             print ">>"
@@ -170,17 +162,14 @@ def scenecontrol_agent(config_path, **kwargs):
             print '>> condition value == condition now'
             print(" go to step [[[  3  ]]] device control ")
 
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM active_scene """)
-            rows = self.cur.fetchall()
-
+            gg = expanduser("~")
+            path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+            conn = sqlite3.connect(gg + path)
+            cur = conn.cursor()
+            cur.execute("""SELECT * FROM active_scene """)
+            rows = cur.fetchall()
             loadcondition_value = json.loads(self.condition_value)
             sceneidcondition = loadcondition_value.get('SCENE')
-
 
             for row in rows :
                 if str(row[0]) == str(sceneidcondition):
