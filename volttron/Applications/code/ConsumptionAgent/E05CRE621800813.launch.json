@@ -4,7 +4,7 @@
     },
     "agent_id": "Consumption",
     "message": "hello from consumption agent",
-    "device_id": "05CRE124930529",
+    "device_id": "05CRE621800813",
     "type_consumption": "1.2",
     "date_bill": 1,
     "limit_bill": "0"
