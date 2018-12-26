@@ -10,11 +10,7 @@ from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
-import socket
-import pyrebase
-import pprint
 import sys
 import sqlite3
 from os.path import expanduser
@@ -103,10 +99,10 @@ def scencesetup_agent(config_path, **kwargs):
             #
             # if set({str(scene_id)}).issubset(scene_id_set):
             #     convertmsg = json.loads(msg)
-            #     self.updatedb(scene_id, scene_name, scene_task=convertmsg)
+            #     self.updatedb(scene_id, scene_name, scene_tasks=convertmsg)
             #
             # else:
-            #     self.insertdb(scene_id, scene_name, scene_task=msg)
+            #     self.insertdb(scene_id, scene_name, scene_tasks=msg)
 
         @PubSub.subscribe('pubsub', topic_scene_update)
         def match_scene_updatesql(self, peer, sender, bus, topic, headers, message):
@@ -118,6 +114,8 @@ def scencesetup_agent(config_path, **kwargs):
             msg = sceneconfig.get('scene_tasks')
             scene_id = sceneconfig.get('scene_id')
             print(type_msg)
+
+
             gg = expanduser("~")
             path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
             conn = sqlite3.connect(gg + path)
@@ -130,10 +128,10 @@ def scencesetup_agent(config_path, **kwargs):
 
             if set({str(scene_id)}).issubset(scene_id_set):
                 convertmsg = json.loads(msg)
-                self.updatesqlite(scene_id, scene_name, scene_task=convertmsg)
+                self.updatesqlite(scene_id, scene_name, scene_tasks=convertmsg)
 
             else:
-                self.insertsqlite(scene_id, scene_name, scene_task=msg)
+                self.insertsqlite(scene_id, scene_name, scene_tasks=msg)
 
         @PubSub.subscribe('pubsub', topic_scene_delete)
         def match_scene_delete(self, peer, sender, bus, topic, headers, message):
@@ -162,9 +160,9 @@ def scencesetup_agent(config_path, **kwargs):
             self.vip.pubsub.publish('pubsub', topic_agent_reload,
                                     {'Type': 'HiVE Scene Control'}, None)
 
-        def updatedb(self, scene_id, scene_name, scene_task):
+        def updatedb(self, scene_id, scene_name, scene_tasks):
             print 'Update Scene id : {}'.format(scene_id)
-            task = json.dumps(scene_task)
+            task = json.dumps(scene_tasks)
             self.cur = self.conn.cursor()
             self.cur.execute("""UPDATE scenes SET scene_name=%s, scene_tasks=%s WHERE scene_id=%s""",
                             (scene_name, task, str(scene_id)))
@@ -206,12 +204,12 @@ def scencesetup_agent(config_path, **kwargs):
 
 
 
-        def updatesqlite(self,scene_id, scene_name, scene_task):
+        def updatesqlite(self,scene_id, scene_name, scene_tasks):
             # print 'Insertsqlite Scene id : {}'.format(scene_id)
             gg = expanduser("~")
             path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
             conn = sqlite3.connect(gg + path)
-            task = json.dumps(scene_task)
+            task = json.dumps(scene_tasks)
             cur = conn.cursor()
             cur.execute("""
                            UPDATE scenes

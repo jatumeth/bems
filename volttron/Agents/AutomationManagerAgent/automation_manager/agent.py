@@ -50,9 +50,8 @@ from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
-import psycopg2
 from os.path import expanduser
-
+import sqlite3
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -162,34 +161,35 @@ def automation_manager_agent(config_path, **kwargs):
                 trigger_value = conf.get('trigger_value')
                 action_tasks = conf.get('action_tasks')
 
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-                self.cur = self.conn.cursor()
-                self.cur.execute("""UPDATE automations SET automation_name=%s,
-                                    condition_event=%s, condition_value=%s,
-                                    trigger_device=%s, trigger_event=%s,
-                                    trigger_value=%s, action_tasks=%s
-                                    WHERE automation_id=%s;""", (automation_name, condition_event,
-                                                                 condition_value, trigger_device,
-                                                                 trigger_event, trigger_value,
-                                                                 action_tasks, automation_id))
-
+                gg = expanduser("~")
+                path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+                conn = sqlite3.connect(gg + path)
+                cur = conn.cursor()
+                cur.execute("""
+                               UPDATE automations
+                               SET automation_name=?,
+                                    condition_event=?, condition_value=?,
+                                    trigger_device=?, trigger_event=?,
+                                    trigger_value=?, action_tasks=?
+                               WHERE automation_id=?
+                            """, (automation_name, condition_event,condition_value, trigger_device,trigger_event, trigger_value,action_tasks, automation_id))
+                conn.commit()
+                conn.close()
                 print('ff')
-
-                self.conn.commit()
-                self.conn.close()
 
         def deletedb(self, conf):
             if conf is not None:
-                # Delete Record where match automation ID
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-                self.cur = self.conn.cursor()
-                self.cur.execute("""DELETE FROM automations 
-                                    WHERE automation_id ={};""".format(conf.get('automation_id')))
-                self.conn.commit()
-                self.conn.close()
+                gg = expanduser("~")
+                path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+                conn = sqlite3.connect(gg + path)
+                cur = conn.cursor()
+                cur.execute("""
+                               DELETE FROM automations
+                               WHERE automation_id=?
+                            """, (conf.get('automation_id')))
 
+                conn.commit()
+                conn.close()
             else:
                 pass
 
@@ -206,20 +206,18 @@ def automation_manager_agent(config_path, **kwargs):
                 trigger_value = conf.get('trigger_value')
                 action_tasks = conf.get('action_tasks')
 
-                self.conn = psycopg2.connect(host=db_host, port=db_port, database=db_database,
-                                             user=db_user, password=db_password)
-
-                self.cur = self.conn.cursor()
-                self.cur.execute(
+                gg = expanduser("~")
+                path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
+                conn = sqlite3.connect(gg + path)
+                cur = conn.cursor()
+                cur.execute(
                     """INSERT INTO automations (automation_id, automation_name, condition_event, 
                                                 condition_value, trigger_device, trigger_event, 
-                                                trigger_value, action_tasks) 
-                                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                                                trigger_value, action_tasks) VALUES (?, ?, ?,?, ?, ?,?, ?);""",
                     (automation_id, automation_name, condition_event, condition_value,
                      trigger_device, trigger_event, trigger_value, action_tasks))
-
-                self.conn.commit()
-                self.conn.close()
+                conn.commit()
+                conn.close()
 
             else:
                 pass
