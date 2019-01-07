@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
+#
+# This application look for ONVIF camera. If provided with user name
+# and password, it will try to get rtsp and ptz info.
+#
+# Copyright (c) 2018 François Wautier
+#
+
+import asyncio
+import socket
+import json
+from struct import pack
+
+# Encryption and Decryption of TP-Link Smart Home Protocol
+# XOR Autokey Cipher with starting key = 171
+def encrypt(string):
+        key = 171
+        result = pack('>I', len(string))
+        for i in string:
+                a = key ^ ord(i)
+                key = a
+                result += bytes([a])
+        return result
+
+def decrypt(string):
+        key = 171
+        result = ""
+        for i in string:
+                a = key ^ i
+                key = i
+                result += chr(a)
+        return result
+
+DISCOVERY_QUERY = {"system": {"get_sysinfo": None},
+                    "emeter": {"get_realtime": None}}
+class BroadcastProtocol:
+
+    def __init__(self, loop):
+        self.loop = loop
+        self.count = 2
+
+    def connection_made(self, transport):
+        self.transport = transport
+        sock = transport.get_extra_info("socket")
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.broadcast()
+
+    def datagram_received(self, data, addr):
+        global result
+        newdata = json.loads(decrypt(data))
+        if addr[0] not in result:
+            try:
+                if newdata["system"]["get_sysinfo"]:
+                    result[addr[0]]= { "model":newdata["system"]["get_sysinfo"]["model"],
+                                    "mac address":newdata["system"]["get_sysinfo"]["mac"]}
+            except:
+                pass
+        #print('data received:', json.loads(decrypt(data)), addr)
+
+    def broadcast(self):
+        req = json.dumps(DISCOVERY_QUERY)
+        encrypted_req = encrypt(req)
+        self.transport.sendto(encrypted_req[4:], ('255.255.255.255', 9999))
+        self.count -= 1
+        if self.count:
+            self.loop.call_later(2, self.broadcast)
+
+async def sleepy():
+    await asyncio.sleep(5)
+
+result={}
+
+loop = asyncio.get_event_loop()
+coro = loop.create_datagram_endpoint(
+    lambda: BroadcastProtocol(loop), local_addr=('0.0.0.0', 9999))
+loop.run_until_complete(coro)
+loop.run_until_complete(sleepy())
+loop.close()
+print(json.dumps(result))
