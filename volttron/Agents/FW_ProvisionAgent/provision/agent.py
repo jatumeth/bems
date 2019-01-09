@@ -28,10 +28,8 @@ def provision(config_path, **kwargs):
 
     :param config_path: Path to a configuration file.
     :type config_path: str
-    :param kwargs: Dictionary passed to Agent creation.  
-    :type kwargs: dict
-    :returns: Provision
-    :rtype: Provision
+    :returns: Tplink
+    :rtype: Tplink
     """
     try:
         config = utils.load_config(config_path)

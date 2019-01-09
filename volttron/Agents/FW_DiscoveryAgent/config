@@ -1,7 +1,6 @@
 {
   # VOLTTRON config files are JSON with support for python style comments.
-  "topic": "/agent/zmq/update/hive/provision"
-  #"topic": "/agent/zmq/update/hive/discovery"
+  "topic": "/hiveos/service/discover"
   #"topic": "hivedevhub17"
   #"setting1": 2, #Integers
   #"setting2": "some/random/topic2", #strings

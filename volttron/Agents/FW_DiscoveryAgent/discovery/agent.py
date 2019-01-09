@@ -12,6 +12,9 @@ import subprocess
 import sys
 import socket
 import broadlink
+from threading import Thread
+from Queue import Queue
+
 
 from volttron.platform.agent import utils
 from volttron.platform.vip.agent import Agent, Core, RPC
@@ -20,7 +23,8 @@ _log = logging.getLogger(__name__)
 utils.setup_logging()
 __version__ = "0.1"
 DEVID="peadisc-agent"
-DFLTTOPIC="/agent/zmq/update/hive/discovery"
+DFLTTOPIC="/hiveos/service/discover"
+RUNCOUNTDOWN=5
 
 
 
@@ -63,6 +67,11 @@ class Discovery(Agent):
 
         self.default_config = {}
         self.topic = topic
+        self.dthread = None
+        self.dmsg = {}
+        self.dqueue = Queue()
+        self.dorun = 1
+
 
 
         #Set a default configuration to ensure that self.configure is called immediately to setup
@@ -94,17 +103,17 @@ class Discovery(Agent):
 
     def _handle_publish(self, peer, sender, bus, topic, headers,
                                 message):
-        _log.debug("Got message %s" % str(message))
+
+        #_log.debug("Got message %s" % str(message))
+
         msg = json.loads(message.decode("utf-8"))
         _log.debug("Got message %s" % str(msg))
         response={}
         if "command" in msg:
             try:
-                if msg["command"] == "discovery":
-                    self._disc_broadlink(msg)
-                    self._disc_camera(msg)
-                    self._disc_sonoff(msg)
-                    self._disc_tplink(msg)
+                if msg["command"] == "discover":
+                    self._do_discover(msg["parameter"])
+                    self.dorun = 1
 
             except Exception as e:
                 topic = self.topic
@@ -112,6 +121,34 @@ class Discovery(Agent):
                 self.vip.pubsub.publish(
                     'pubsub', topic,
                     {'Type': 'pub device status to ZMQ'}, message)
+                
+    @Core.periodic(60)
+    def _do_discover(self,msg={}):
+        self.dorun -= 1
+        if msg and not self.dmsg:
+            self.dmsg=msg
+        if self.dorun <= 0:
+            self.dorun = RUNCOUNTDOWN
+            if self.dthread is None:
+                self.dthread=Thread(target=self._do_discover_thread,)
+                self.dthread.setDaemon(True)
+                self.dthread.start()
+            
+    @Core.periodic(10)
+    def _do_flush(self,msg={}):
+        while not self.dqueue.empty():
+            topic, tmsg = self.dqueue.get()
+            _log.debug("Sending message: %s"%str(tmsg))
+            self.vip.pubsub.publish(
+                    'pubsub', topic,
+                    {'Type': 'pub device status to ZMQ'}, tmsg)
+        
+    def _do_discover_thread(self):
+        self._disc_broadlink(self.dmsg)
+        self._disc_camera(self.dmsg)
+        self._disc_sonoff(self.dmsg)
+        self._disc_tplink(self.dmsg)
+        self.dthread = None
 
     @Core.receiver("onstart")
     def onstart(self, sender, **kwargs):
@@ -147,13 +184,7 @@ class Discovery(Agent):
         message = output.communicate()
         if message[0].strip() not in ["", "{}"]:
             topic = self.topic + "/camera"
-            _log.debug("Sending message: %s"%str(message))
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'pub device status to ZMQ'}, message[0].strip())
-
-
-
+            self.dqueue.put((topic,message[0].strip()))
     def _disc_sonoff(self,msg):
         #Example RPC call
         #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
@@ -162,10 +193,7 @@ class Discovery(Agent):
         message = output.communicate()
         if message[0].strip() not in ["", "{}"]:
             topic = self.topic + "/sonoff"
-            _log.debug("Sending message: %s"%str(message))
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'pub device status to ZMQ'}, message[0].strip())
+            self.dqueue.put((topic,message[0].strip()))
 
 
     def _disc_tplink(self,msg):
@@ -176,10 +204,7 @@ class Discovery(Agent):
         message = output.communicate()
         if message[0].strip() not in ["", "{}"]:
             topic = self.topic + "/tp-link"
-            _log.debug("Sending message: %s"%str(message))
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'pub device status to ZMQ'}, message[0].strip())
+            self.dqueue.put((topic,message[0].strip()))
 
     def _disc_broadlink(self,msg):
         #Example RPC call
@@ -197,13 +222,8 @@ class Discovery(Agent):
                 pass
         if result:
             topic = self.topic + "/broadlink"
-            _log.debug("Sending message: %s"%str(result))
-            self.vip.pubsub.publish(
-                'pubsub', topic,
-                {'Type': 'pub device status to ZMQ'}, json.dumps(result))
-
-
-
+            self.dqueue.put((topic,json.dumps(result)))
+            
     @Core.receiver("onstop")
     def onstop(self, sender, **kwargs):
         """
