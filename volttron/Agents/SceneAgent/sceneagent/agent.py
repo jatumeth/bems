@@ -232,7 +232,7 @@ def scenecontrol_agent(config_path, **kwargs):
                     for scene in scenes:
                         self.insertdb(scene_id=scene.get('scene_id'),
                                       scene_name=scene.get('scene_name'),
-                                      scene_task=scene.get('scene_tasks'))
+                                      scene_tasks=scene.get('scene_tasks'))
 
                     self.reload_config()
 
@@ -263,9 +263,9 @@ def scenecontrol_agent(config_path, **kwargs):
             # self.conn.close()
             print(' >>> truncate table scene Complete')
 
-        def insertdb(self, scene_id, scene_name, scene_task):
+        def insertdb(self, scene_id, scene_name, scene_tasks):
             print 'insert'
-            # tasks = json.dumps(scene_task)
+            # tasks = json.dumps(scene_tasks)
             try:
                 gg = expanduser("~")
                 path = '/workspace/hive_os/volttron/hive_lib/sqlite.db'
@@ -273,7 +273,7 @@ def scenecontrol_agent(config_path, **kwargs):
                 cur = conn.cursor()
                 cur.execute(
                     """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (?, ?, ?);""",
-                    (scene_id, scene_name, scene_task))
+                    (scene_id, scene_name, scene_tasks))
                 conn.commit()
                 conn.close()
                 print('wooooohoooooooooinsert')
@@ -285,7 +285,7 @@ def scenecontrol_agent(config_path, **kwargs):
                 # self.cur = self.conn.cursor()
                 # self.cur.execute(
                 #     """INSERT INTO scenes (scene_id, scene_name, scene_tasks) VALUES (%s, %s, %s);""",
-                #     (scene_id, scene_name, scene_task))
+                #     (scene_id, scene_name, scene_tasks))
                 # self.conn.commit()
                 # self.conn.close()
             except Exception as er:

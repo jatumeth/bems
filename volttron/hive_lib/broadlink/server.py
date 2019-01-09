@@ -186,7 +186,62 @@ def start(server_class=HTTPServer, handler_class=Server, port=8080):
     httpd.serve_forever()
 
 if __name__ == "__main__":
-
+    #
+    import configparser
+    #time.sleep(5)
+    try:
+        devices = broadlink.discover(timeout=5)
+        ip = (devices[0].host)[0]
+        print ip
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        config['BroadlinkRM']['ipaddress'] = ip  # create
+        config['BroadlinkA1']['ipaddress'] = ip
+        with open('settings.ini', 'w') as configfile:  # save
+            config.write(configfile)
+    except Exception as er:
+        print er
+        print 'error1.1'
+        ip = '192.168.1.1'
+        try:
+            config = configparser.ConfigParser()
+            config.read('settings.ini')
+            ip = config['BroadlinkRM']['ipaddress']
+            config['BroadlinkRM']['ipaddress'] = ip  # create
+            config['BroadlinkA1']['ipaddress'] = ip
+            with open('settings.ini', 'w') as configfile:  # save
+                config.write(configfile)
+        except Exception as er:
+            print er
+            print 'error1.2'
+            
+    time.sleep(5)
+    try:
+        devices = broadlink.discover(timeout=5)
+        ip = (devices[0].host)[0]
+        print ip
+        config = configparser.ConfigParser()
+        config.read('settings.ini')
+        config['BroadlinkRM']['ipaddress'] = ip  # create
+        config['BroadlinkA1']['ipaddress'] = ip
+        with open('settings.ini', 'w') as configfile:  # save
+            config.write(configfile)
+    except Exception as er:
+        print er
+        print 'error2.1'
+        ip = '192.168.1.1'
+        try:
+            config = configparser.ConfigParser()
+            config.read('settings.ini')
+            ip = config['BroadlinkRM']['ipaddress']
+            config['BroadlinkRM']['ipaddress'] = ip  # create
+            config['BroadlinkA1']['ipaddress'] = ip
+            with open('settings.ini', 'w') as configfile:  # save
+                config.write(configfile)
+        except Exception as er:
+            print er
+            print 'error2.2'
+            
     settingsFile = configparser.ConfigParser()
     settingsFile.optionxform = str
     settingsFile.read(settings.settingsINI)

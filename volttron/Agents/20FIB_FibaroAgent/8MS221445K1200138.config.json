@@ -4,7 +4,7 @@
     },
     "agent_id": "20FIB1234568",
     "ipaddress": "http://192.168.1.30:49153",
-    "message": "this is a lighting agent",
+    "message": "this is a lighting agent1",
     "heartbeat_period": 20,
     "api": "classAPI_Smartthings_Fibaro",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/ee328927-8dc2-462e-84f3-c3b3d59ba93c/illuminances/",

@@ -39,11 +39,13 @@ def scheduler_agent(config_path, **kwargs):
         db_database = settings.DATABASES['default']['NAME']
         db_user = settings.DATABASES['default']['USER']
         db_password = settings.DATABASES['default']['PASSWORD']
+
         conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
                                 password=db_password)
         cur = conn.cursor()
         cur.execute("""SELECT * FROM automations WHERE automation_id = {}""".format(automation_id.replace('automation_' ,'')))
         rows = cur.fetchall()
+
         for row in rows:
             # print row[0]
             automation_id = automation_id.replace('automation_','')

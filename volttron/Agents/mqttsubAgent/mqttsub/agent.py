@@ -25,8 +25,8 @@ from uuid import getnode as get_mac
 import fcntl, socket, struct
 import settings
 from os.path import expanduser
-import psycopg2.extras
-import psycopg2
+#import psycopg2.extras
+#import psycopg2
 import sqlite3
 import json
 from os.path import expanduser
@@ -120,7 +120,7 @@ def mqttsub_agent(config_path, **kwargs):
                             automation_control_path = home_path + json_path
                             launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
                             #  Update new agentID to variable (agentID is relate to automation_id)
-                            self.updatetoken(commsg)
+#                            self.updatetoken(commsg)
                             self.updatetokensqlite(commsg)
 
                         elif type_msg == 'automationcreate':

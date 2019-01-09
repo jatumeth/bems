@@ -27,7 +27,6 @@ def provision(config_path, **kwargs):
     the agent created using that configuration.
 
     :param config_path: Path to a configuration file.
-
     :type config_path: str
     :returns: Tplink
     :rtype: Tplink

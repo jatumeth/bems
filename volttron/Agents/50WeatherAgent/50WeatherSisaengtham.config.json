@@ -1,0 +1,20 @@
+{
+    "agent": {
+        "exec": "weatheragent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "50WeatherSisaengtham",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a weather agent",
+    "heartbeat_period": 360,
+    "api": "classAPI_WeatherUnderground",
+    "url": "http://api.wunderground.com/api/380538e19b591277/geolookup/conditions/q/Thailand/Ubon.json",
+    "device": "d7652ff5-0c70-4adb-9b4a-adaa8e79f23c",
+    "bearer": "Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9",
+    "building_name": "hive",
+    "device_monitor_time": 360,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "50WE01",
+    "vendor": "wunderground",
+    "zone_id": 999
+}

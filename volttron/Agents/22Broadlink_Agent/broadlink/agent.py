@@ -12,9 +12,6 @@ from volttron.platform.messaging import headers as headers_mod
 import importlib
 import random
 import json
-import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -106,6 +103,12 @@ def broadlink_agent(config_path, **kwargs):
             # Demonstrate broadlinkcessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.gettoken()
+            self.status_old = "none"
+            self.status_old2 = "none"
+            self.status_old3 = "none"
+            self.status_old4 = "none"
+            self.status_old5 = "none"
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -120,8 +123,6 @@ def broadlink_agent(config_path, **kwargs):
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
             print "monitor"
-
-
 
         def publish_firebase(self):
 
@@ -170,16 +171,18 @@ def broadlink_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def gettoken(self):
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token =  row[1]
-            self.conn.close()
+
+            self.api_token = '899e6eb101cbeed0bd32f03050d045f8d4fcb571'
+            # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                         password=db_password)
+            # self.conn = conn
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * FROM token """)
+            # rows = self.cur.fetchall()
+            # for row in rows:
+            #     if row[0] == gateway_id:
+            #         self.api_token =  row[1]
+            # self.conn.close()
 
         def publish_azure_iot_hub(self, broadlinktivity_type, username):
             # TODO publish to Azure IoT Hub u

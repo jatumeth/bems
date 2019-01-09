@@ -10,18 +10,12 @@ from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
-import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import urllib3
 import time
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
-import psycopg2
-import psycopg2.extras
 
 urllib3.disable_warnings()
 
@@ -152,7 +146,7 @@ def Powermetering_agent(config_path, **kwargs):
 
             self.StatusPublish(self.Powermeter.variables)
 
-            self.publish_postgres()
+            # self.publish_postgres()
 
             # update firebase
             self.publish_firebase()
@@ -215,12 +209,15 @@ def Powermetering_agent(config_path, **kwargs):
 
             x = {}
             x["device_id"] = self.Powermeter.variables['agent_id']
-            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-            x["unixtime"] = int(time.time())
+            # x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
+            x["date_time"] = "{} {}".format(self.Powermeter.variables['grid_date'], self.Powermeter.variables['grid_time'])
+            # x["unixtime"] = int(time.time())
+            x["unixtime"] = self.Powermeter.variables['grid_uxtime']
             x["gridvoltage"] = self.Powermeter.variables['grid_voltage']
             x["gridcurrent"] = self.Powermeter.variables['grid_current']
             x["gridactivePower"] = self.Powermeter.variables['grid_activePower']
             x["gridreactivePower"] = self.Powermeter.variables['grid_reactivePower']
+            x["accumulate_energy"] = self.Powermeter.variables['grid_accumulated_energy']
             x["activity_type"] = 'devicemonitor'
             x["username"] = 'arm'
             x["device_name"] = 'Etrix Power Meter'
@@ -250,16 +247,18 @@ def Powermetering_agent(config_path, **kwargs):
             print r.status_code
 
         def gettoken(self):
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token = row[1]
-            self.conn.close()
+
+            print "Canceled Pyycopg2"
+            # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
+            #                         password=db_password)
+            # self.conn = conn
+            # self.cur = self.conn.cursor()
+            # self.cur.execute("""SELECT * FROM token """)
+            # rows = self.cur.fetchall()
+            # for row in rows:
+            #     if row[0] == gateway_id:
+            #         self.api_token = row[1]
+            # self.conn.close()
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC

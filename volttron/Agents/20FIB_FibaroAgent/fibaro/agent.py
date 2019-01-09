@@ -13,8 +13,8 @@ import importlib
 import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
+#import psycopg2
+#import psycopg2.extras
 import pyrebase
 import time
 import requests
@@ -215,6 +215,9 @@ def fibaroing_agent(config_path, **kwargs):
                     self.fibaro.variables['HUMIDITY'])
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
                     self.fibaro.variables['STATUS'])
+
+                db.child(gateway_id).child('global').child("indoor_temperature").set(self.fibaro.variables['TEMPERATURE'])
+
             except Exception as er:
                 print er
 

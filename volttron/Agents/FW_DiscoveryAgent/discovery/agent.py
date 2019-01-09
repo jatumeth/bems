@@ -15,6 +15,7 @@ import broadlink
 from threading import Thread
 from Queue import Queue
 
+
 from volttron.platform.agent import utils
 from volttron.platform.vip.agent import Agent, Core, RPC
 
@@ -24,6 +25,7 @@ __version__ = "0.1"
 DEVID="peadisc-agent"
 DFLTTOPIC="/hiveos/service/discover"
 RUNCOUNTDOWN=5
+
 
 
 def discovery(config_path, **kwargs):
@@ -71,6 +73,7 @@ class Discovery(Agent):
         self.dorun = 1
 
 
+
         #Set a default configuration to ensure that self.configure is called immediately to setup
         #the agent.
         self.vip.config.set_default("config", self.default_config)
@@ -100,7 +103,9 @@ class Discovery(Agent):
 
     def _handle_publish(self, peer, sender, bus, topic, headers,
                                 message):
+
         #_log.debug("Got message %s" % str(message))
+
         msg = json.loads(message.decode("utf-8"))
         _log.debug("Got message %s" % str(msg))
         response={}
@@ -145,8 +150,6 @@ class Discovery(Agent):
         self._disc_tplink(self.dmsg)
         self.dthread = None
 
-        
-
     @Core.receiver("onstart")
     def onstart(self, sender, **kwargs):
         """
@@ -182,9 +185,6 @@ class Discovery(Agent):
         if message[0].strip() not in ["", "{}"]:
             topic = self.topic + "/camera"
             self.dqueue.put((topic,message[0].strip()))
-
-
-
     def _disc_sonoff(self,msg):
         #Example RPC call
         #self.vip.rpc.call("some_agent", "some_method", arg1, arg2)
@@ -223,9 +223,7 @@ class Discovery(Agent):
         if result:
             topic = self.topic + "/broadlink"
             self.dqueue.put((topic,json.dumps(result)))
-
-
-
+            
     @Core.receiver("onstop")
     def onstop(self, sender, **kwargs):
         """

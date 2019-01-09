@@ -4,7 +4,7 @@
     },
     "agent_id": "02HUE1445K12",
     "ipaddress": "http://192.168.1.30:49153",
-    "message": "this is a lighting agent",
+    "message": "this is a lighting agent1",
     "heartbeat_period": 20,
     "api": "classAPI_Smartthings_Inwall",
     "url": "https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/314fe2f7-1724-42ed-86b6-4a8c03a08601/switches/",
