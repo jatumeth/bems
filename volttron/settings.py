@@ -40,7 +40,7 @@ except:
 
 # TODO change gateway_id
 # gateway_id='hivecdf12345'
-gateway_id='hivec83a35cdbeab'
+gateway_id='hivecdf12345'
 print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {
