@@ -100,10 +100,13 @@ def scenecontrol_agent(config_path, **kwargs):
 
         @PubSub.subscribe('pubsub', topic_tricker)
         def match_agent_reload(self, peer, sender, bus, topic, headers, message):
-
+            print ""
+            print ""
+            print ""
+            print ""
             convert_msg = json.loads(message)
             triger_event_now = convert_msg[(self.triger_event)]
-            print(" value reading now is value = {}".format(convert_msg[(self.triger_event)]))
+            # print(" value reading now is value = {}".format(convert_msg[(self.triger_event)]))
             if self.triger_value == 'CLOSE':
                 self.triger_value = 'CLOSED'
 
@@ -111,8 +114,8 @@ def scenecontrol_agent(config_path, **kwargs):
             print ">>"
             print "<<<<<< step 1 subscribe triger >>>>>>>>"
             print "--------------------"
-            print(" Automation set device = {}".format(self.triger_device))
-            print(" Automation set event = {}".format(self.triger_event))
+            # print(" Automation set device = {}".format(self.triger_device))
+            # print(" Automation set event = {}".format(self.triger_event))
             print(" Automation set value = {}".format(self.triger_value))
             print message
             print(" triger_event_now = {}".format(triger_event_now))
@@ -142,9 +145,9 @@ def scenecontrol_agent(config_path, **kwargs):
                 if int(self.automation_id) == int(row[0]):
                     self.triger_device = row[3]
                     self.triger_event = row[4]
-                    self.triger_value = row[5]
-                    self.condition_event = row[6]
-                    self.condition_value = row[7]
+                    self.triger_value = row[6]
+                    self.condition_event = row[7]
+                    self.condition_value = row[5]
                     self.devicecontrols = (json.loads((row[8])))
                     print(" triger_device = {}".format(self.triger_device))
                     print(" triger_event = {}".format(self.triger_event))
@@ -196,7 +199,6 @@ def scenecontrol_agent(config_path, **kwargs):
                         {'Type': 'HiVE Scene Control'}, message)
             except Exception as Error:
                 print('Reload Config to Agent')
-            import time
 
 
 
