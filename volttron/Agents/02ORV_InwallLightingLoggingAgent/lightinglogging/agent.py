@@ -115,7 +115,7 @@ def lighting_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(self.agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(self.agent_id).child("STATUS").set(
-                    self.device_status)  # 1111111111    +       #22222222222222222222
+                    self.device_status)
                 db.child(gateway_id).child('devices').child(self.agent_id).child("TYPE").set('lightinglogging')
                 print('------------------update firebase--------------------')
             except Exception as er:
@@ -150,7 +150,7 @@ def lighting_agent(config_path, **kwargs):
                 fields={
                     "status": str(self.device_status),
                     "device_id": str(self.agent_id),
-                    "device_type": "lightinglogging",
+                    "device_type": "lighting",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
             )
