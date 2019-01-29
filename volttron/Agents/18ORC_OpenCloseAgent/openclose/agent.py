@@ -10,11 +10,8 @@ from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import time
 import requests
@@ -71,52 +68,16 @@ def opencloseing_agent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    if model == "Philips hue bridge":
-        hue_username = get_config('username')
-    else:
-        hue_username = ''
     device_type = get_config('type')
     device = get_config('device')
     bearer = get_config('bearer')
     url = get_config('url')
     api = get_config('api')
-    address = get_config('ipaddress')
-    _address = address.replace('http://', '')
-    _address = address.replace('https://', '')
-    try:  # validate whether or not address is an ip address
-        socket.inet_aton(_address)
-        ip_address = _address
-    except socket.error:
-        ip_address = None
-    identifiable = get_config('identifiable')
-
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_opencloseing = settings.DATABASES['default']['TABLE_opencloseing']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
-
-    # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
     print(topic_device_control)
     gateway_id = settings.gateway_id
 
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class opencloseingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -145,16 +106,6 @@ def opencloseing_agent(config_path, **kwargs):
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
-
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
             self.status_old = ""
 
@@ -190,6 +141,8 @@ def opencloseing_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.openclose.variables['device_contact'])
                 db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(self.openclose.variables['device_type'])
+                print "---------------------update firebase-------------------------"
+
             except Exception as er:
                 print er
 
@@ -239,20 +192,19 @@ def opencloseing_agent(config_path, **kwargs):
             x["username"] = 'arm'
             x["device_name"] = 'MY Openclose'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+            print "---------------------update azureiot-------------------------"
 
         def publish_postgres(self):
 
-            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
+            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
 
             status = False
             if self.openclose.variables['device_contact'] == 'CLOSED':
                 status = False
-
             if self.openclose.variables['device_contact'] == 'OPEN' and self.flag == False:
                 status == True
-
             m = MultipartEncoder(
                 fields={
                     "open": str(status),
@@ -269,8 +221,10 @@ def opencloseing_agent(config_path, **kwargs):
                                       })
             print r.status_code
 
+            print "---------------------update postgreas-------------------------"
+
         def gettoken(self):
-            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            self.api_token = 'publish_postgres'
 
 
         @PubSub.subscribe('pubsub', topic_device_control)

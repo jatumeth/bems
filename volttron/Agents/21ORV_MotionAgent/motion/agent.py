@@ -163,7 +163,6 @@ def fibaroing_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.fibaro.getDeviceStatus()
-
             self.StatusPublish(self.fibaro.variables)
 
 
@@ -184,9 +183,6 @@ def fibaroing_agent(config_path, **kwargs):
 
             self.fibaro.getDeviceStatus()
 
-            # update Azure IoT Hub
-            # self.publish_azure_iot_hub()
-
         def publish_firebase(self):
 
             try:
@@ -201,6 +197,7 @@ def fibaroing_agent(config_path, **kwargs):
                     self.fibaro.variables['label'])
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
                     self.fibaro.variables['status'])
+                print('------------------update firebase--------------------')
             except Exception as er:
                 print er
 
@@ -218,12 +215,12 @@ def fibaroing_agent(config_path, **kwargs):
             x["device_status"] = self.fibaro.variables['status']
             x["unixtime"] = int(time.time())
             x["device_type"] = 'motionsensor'
-
             x["activity_type"] = 'motion'
             x["username"] = 'arm'
             x["device_name"] = 'MY Motion'
 
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
+            print('------------------iothub--------------------')
 
 
         def publish_postgres(self):
@@ -246,6 +243,7 @@ def fibaroing_agent(config_path, **kwargs):
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+            print('------------------pogres--------------------')
 
 
         def StatusPublish(self,commsg):

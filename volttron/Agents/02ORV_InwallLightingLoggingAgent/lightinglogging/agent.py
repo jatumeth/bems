@@ -27,6 +27,12 @@ authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
 
+db_host = settings.DATABASES['default']['HOST']
+db_port = settings.DATABASES['default']['PORT']
+db_database = settings.DATABASES['default']['NAME']
+db_user = settings.DATABASES['default']['USER']
+db_password = settings.DATABASES['default']['PASSWORD']
+
 try:
     config = {
       "apiKey": apiKeyconfig,
@@ -48,7 +54,29 @@ def lighting_agent(config_path, **kwargs):
         except KeyError:
             return config.get(name, '')
 
+    # List of all keywords for a ac agent
+    agentAPImapping = dict(status=[], brightness=[], color=[], saturation=[], power=[])
+    log_variables = dict(status='text', brightness='double', hexcolor='text', power='double', offline_count='int')
+
+    agent_id = get_config('agent_id')
+    message = get_config('message')
+    heartbeat_period = get_config('heartbeat_period')
+    device_monitor_time = config.get('device_monitor_time', DEFAULT_MONITORING_TIME)
+    building_name = get_config('building_name')
+    zone_id = get_config('zone_id')
+    model = get_config('model')
+    device_type = get_config('type')
+    device = get_config('device')
+    bearer = get_config('bearer')
+    url = get_config('url')
+    api = get_config('api')
+
+    # construct _topic_Agent_UI based on data obtained from DB
+    _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
+    topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
+    print(topic_device_control)
     gateway_id = settings.gateway_id
+
 
     class LightingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -58,6 +86,14 @@ def lighting_agent(config_path, **kwargs):
         def __init__(self, config_path, **kwargs):
             super(LightingAgent, self).__init__(**kwargs)
             self.config = utils.load_config(config_path)
+            self._agent_id = agent_id
+            self._message = message
+            self._heartbeat_period = heartbeat_period
+            self.model = model
+            self.device_type = device_type
+            self.url = url
+            self.device = device
+            self.bearer = bearer
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -65,6 +101,7 @@ def lighting_agent(config_path, **kwargs):
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
             self.gettoken()
+            self.status_old = ""
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -77,7 +114,8 @@ def lighting_agent(config_path, **kwargs):
 
                 db.child(gateway_id).child('devices').child(self.agent_id).child("dt").set(
                     datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(self.agent_id).child("STATUS").set(self.device_status) #1111111111    +       #22222222222222222222
+                db.child(gateway_id).child('devices').child(self.agent_id).child("STATUS").set(
+                    self.device_status)  # 1111111111    +       #22222222222222222222
                 db.child(gateway_id).child('devices').child(self.agent_id).child("TYPE").set('lightinglogging')
                 print('------------------update firebase--------------------')
             except Exception as er:
@@ -106,12 +144,12 @@ def lighting_agent(config_path, **kwargs):
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
-            postgres_Authorization = 'Token '+self.api_token
+            postgres_Authorization = 'Token ' + self.api_token
 
             m = MultipartEncoder(
                 fields={
                     "status": str(self.device_status),
-                    "device_id": str(self.agent_id ),
+                    "device_id": str(self.agent_id),
                     "device_type": "lightinglogging",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
@@ -125,9 +163,8 @@ def lighting_agent(config_path, **kwargs):
             print r.status_code
             print('-------------------update postgres---------------')
 
-
         def gettoken(self):
-            
+
             self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
 
         @PubSub.subscribe('pubsub', '/agent/zmq/update/hive/999/inwallswitchlog')
@@ -147,7 +184,6 @@ def lighting_agent(config_path, **kwargs):
 
             except Exception as er:
                 print er
-
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)
 
