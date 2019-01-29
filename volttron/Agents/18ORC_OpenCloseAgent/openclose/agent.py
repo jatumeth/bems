@@ -270,17 +270,7 @@ def opencloseing_agent(config_path, **kwargs):
             print r.status_code
 
         def gettoken(self):
-            self.api_token = '89eff42e99c895fe1e1083e04af3bda412e685d7'
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token = row[1]
-            self.conn.close()
+            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
 
 
         @PubSub.subscribe('pubsub', topic_device_control)

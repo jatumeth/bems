@@ -228,9 +228,8 @@ def fibaroing_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-            postgres_Authorization = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = '701308a85458bab3ec83d9a08e678c545b87ec67'
 
             m = MultipartEncoder(
                 fields={

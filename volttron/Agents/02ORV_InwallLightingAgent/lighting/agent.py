@@ -135,73 +135,21 @@ def lighting_agent(config_path, **kwargs):
             if(self.Light.variables['device_status'] ==  self.status_old):
                 pass
             else:
-                self.publish_firebase()
-                self.publish_postgres()
                 self.StatusPublish(self.Light.variables)
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-
+                self.LoggingPublish(self.Light.variables)
             self.status_old = self.Light.variables['device_status']
             print(self.status_old)
 
-        def publish_firebase(self):
+        def LoggingPublish(self, commsg):
+            print "send deta to logging agent"
+            topic = str('/agent/zmq/update/hive/999/inwallswitchlog')
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
-            try:
-
-                db.child(gateway_id).child('devices').child(agent_id).child("dt").set(
-                    datetime.now().replace(microsecond=0).isoformat())
-                db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(
-                    self.Light.variables['device_status'])
-                db.child(gateway_id).child('devices').child(agent_id).child("TYPE").set(
-                    self.Light.variables['device_type'])
-                print('------------------update firebase--------------------')
-            except Exception as er:
-                print er
-
-        def publish_azure_iot_hub(self, activity_type, username):
-            # TODO publish to Azure IoT Hub u
-            '''
-            here we need to use code from /home/kwarodom/workspace/hive_os/volttron/
-            hive_lib/azure-iot-sdk-python/device/samples/simulateddevices.py
-            def iothub_client_telemetry_sample_run():
-            '''
-            print(self.Light.variables)
-            x = {}
-            x["device_id"] = self.Light.variables['agent_id']
-            x["date_time"] = datetime.now().replace(microsecond=0).isoformat()
-            x["unixtime"] = int(time.time())
-            x["device_status"] = self.Light.variables['device_status']
-            x["activity_type"] = activity_type
-            x["username"] = username
-            x["device_name"] = 'In-wall'
-            x["device_type"] = "lighting"
-            print x
-            discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-            print('--------------update azure--------------')
-
-        def publish_postgres(self):
-
-            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
-            postgres_Authorization = 'Token '+self.api_token
-
-            print str(self.Light.variables['device_status'])
-            print str(self.Light.variables['agent_id'])
-
-            m = MultipartEncoder(
-                fields={
-                    "status": str(self.Light.variables['device_status']),
-                    "device_id": str(self.Light.variables['agent_id']),
-                    "device_type": "lighting",
-                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-                }
-            )
-
-            r = requests.put(postgres_url,
-                             data=m,
-                             headers={'Content-Type': m.content_type,
-                                      "Authorization": postgres_Authorization,
-                                      })
-            print r.status_code
-            print('-------------------update postgres---------------')
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'pub device status to ZMQ'}, message)
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -217,16 +165,6 @@ def lighting_agent(config_path, **kwargs):
         def gettoken(self):
             
             self.api_token = '899e6eb101cbeed0bd32f03050d045f8d4fcb571'
-            # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                         password=db_password)
-            # self.conn = conn
-            # self.cur = self.conn.cursor()
-            # self.cur.execute("""SELECT * FROM token """)
-            # rows = self.cur.fetchall()
-            # for row in rows:
-            #     if row[0] == gateway_id:
-            #         self.api_token =  row[1]
-            # self.conn.close()
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
@@ -258,14 +196,14 @@ def lighting_agent(config_path, **kwargs):
                         print "4"
                         time.sleep(2)
                     else:
-                        self.publish_firebase()
-                        self.publish_postgres()
+                        self.StatusPublish(self.Light.variables)
+                        self.LoggingPublish(self.Light.variables)
                 else:
-                    self.publish_firebase()
-                    self.publish_postgres()
+                    self.StatusPublish(self.Light.variables)
+                    self.LoggingPublish(self.Light.variables)
             else:
-                self.publish_firebase()
-                self.publish_postgres()
+                self.StatusPublish(self.Light.variables)
+                self.LoggingPublish(self.Light.variables)
 
             self.status_old = self.Light.variables['device_status']
             print "status old____________________________"

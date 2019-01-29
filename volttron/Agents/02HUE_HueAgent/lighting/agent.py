@@ -178,7 +178,7 @@ def lighting_agent(config_path, **kwargs):
             x["activity_type"] = activity_type
             x["username"] = username
             x["device_name"] = 'MY HUE'
-            x["device_type"] = 'lighting'
+            x["device_type"] = 'lightinglogging'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('-----------------Azure_update---------------')
 
@@ -199,7 +199,7 @@ def lighting_agent(config_path, **kwargs):
                 fields={
                     "status": str(self.Light.variables['status']),
                     "device_id": str(self.Light.variables['agent_id']),
-                    "device_type": "lighting",
+                    "device_type": "lightinglogging",
                     "brightness": str(self.Light.variables['brightness']),
                     "color": str(self.Light.variables['color']),
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),

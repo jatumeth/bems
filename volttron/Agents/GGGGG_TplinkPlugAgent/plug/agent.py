@@ -212,7 +212,7 @@ def lighting_agent(config_path, **kwargs):
                 fields={
                     "status": str(self.Light.variables['status']),
                     "device_id": str(self.Light.variables['agent_id']),
-                    "device_type": "lighting",
+                    "device_type": "lightinglogging",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
             )
