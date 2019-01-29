@@ -11,9 +11,6 @@ import socket
 import pyrebase
 import settings
 import time
-import requests
-from requests_toolbelt.multipart.encoder import MultipartEncoder
-
 
 utils.setup_logging()
 _log = logging.getLogger(__name__)
@@ -65,24 +62,11 @@ def lighting_agent(config_path, **kwargs):
     building_name = get_config('building_name')
     zone_id = get_config('zone_id')
     model = get_config('model')
-    if model == "Philips hue bridge":
-        hue_username = get_config('username')
-    else:
-        hue_username = ''
     device_type = get_config('type')
     device = get_config('device')
     bearer = get_config('bearer')
     url = get_config('url')
     api = get_config('api')
-    address = get_config('ipaddress')
-    _address = address.replace('http://', '')
-    _address = address.replace('https://', '')
-    try:  # validate whether or not address is an ip address
-        socket.inet_aton(_address)
-        ip_address = _address
-    except socket.error:
-        ip_address = None
-    identifiable = get_config('identifiable')
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -163,8 +147,8 @@ def lighting_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def gettoken(self):
-            
-            self.api_token = '899e6eb101cbeed0bd32f03050d045f8d4fcb571'
+
+            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):

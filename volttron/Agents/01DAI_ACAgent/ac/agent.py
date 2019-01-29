@@ -170,8 +170,8 @@ def ac_agent(config_path, **kwargs):
                     "device_id": str(self.AC.variables['agent_id']),
                     "device_type": "airconditioner",
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-                    # "current_temperature": str(self.AC.variables['current_temperature']),
-                    # "set_temperature": str(self.AC.variables['set_temperature']),
+                    "current_temperature": str(self.AC.variables['current_temperature']),
+                    "set_temperature": str(self.AC.variables['set_temperature']),
                     # "mode": str(self.AC.variables['mode']),
                 }
             )
