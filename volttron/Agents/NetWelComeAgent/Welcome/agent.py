@@ -168,7 +168,7 @@ def netwelcome_agent(config_path, **kwargs):
         #     x["activity_type"] = activity_type
         #     x["username"] = username
         #     x["device_name"] = 'In-wall'
-        #     x["device_type"] = "lighting"
+        #     x["device_type"] = "lightinglogging"
         #     print x
         #     discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
         #     print('--------------update azure--------------')
@@ -182,7 +182,7 @@ def netwelcome_agent(config_path, **kwargs):
         #         fields={
         #             "status": str(self.Light.variables['device_status']),
         #             "device_id": str(self.Light.variables['agent_id']),
-        #             "device_type": "lighting",
+        #             "device_type": "lightinglogging",
         #             "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
         #         }
         #     )

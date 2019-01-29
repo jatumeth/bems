@@ -12,7 +12,7 @@ m = MultipartEncoder(
         "brightness": "109",
         "room_id": "8",
         "network_status": "ONLINE",
-        "device_type": "lighting",
+        "device_type": "lightinglogging",
     }
     )
 

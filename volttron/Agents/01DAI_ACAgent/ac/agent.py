@@ -10,11 +10,8 @@ from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
-import random
 import json
 import socket
-import psycopg2
-import psycopg2.extras
 import pyrebase
 import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -198,17 +195,7 @@ def ac_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def gettoken(self):
-            self.api_token = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
-            conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-                                    password=db_password)
-            self.conn = conn
-            self.cur = self.conn.cursor()
-            self.cur.execute("""SELECT * FROM token """)
-            rows = self.cur.fetchall()
-            for row in rows:
-                if row[0] == gateway_id:
-                    self.api_token =  row[1]
-            self.conn.close()
+            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u

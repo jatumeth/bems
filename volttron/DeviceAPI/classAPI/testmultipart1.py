@@ -18,7 +18,7 @@ response = requests.put(
         "brightness": "100",
         "room_id": "8",
         "network_status": "ONLINE",
-        "device_type": "lighting",
+        "device_type": "lightinglogging",
     },
 )
 
