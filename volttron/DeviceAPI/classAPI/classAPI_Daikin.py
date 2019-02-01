@@ -36,7 +36,7 @@ expressed herein do not necessarily state or reflect those of the United States 
 VIRGINIA TECH – ADVANCED RESEARCH INSTITUTE
 under Contract DE-EE0006352
 
-#__author__ = "BEMOSS Team"
+#__author__ = "BEMOSS Teaam"
 #__credits__ = ""
 #__version__ = "2.0"
 #__maintainer__ = "BEMOSS Team"
