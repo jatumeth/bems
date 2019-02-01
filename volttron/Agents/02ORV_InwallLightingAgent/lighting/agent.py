@@ -16,7 +16,7 @@ utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
 DEFAULT_HEARTBEAT_PERIOD = 20
-DEFAULT_MONITORING_TIME = 20
+DEFAULT_MONITORING_TIME = 200
 DEFAULT_MESSAGE = 'HELLO'
 
 apiKeyconfig = settings.CHANGE['change']['apiKeyLight']

@@ -1,0 +1,3 @@
+#!/bin/bash
+for agent in `vctl status| sed /vip/\!d | sed s/vip// |awk '{ print $3}'` ;  do vctl remove --tag $agent; done
+

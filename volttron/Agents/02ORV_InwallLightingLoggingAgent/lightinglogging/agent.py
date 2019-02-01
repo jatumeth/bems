@@ -136,7 +136,7 @@ def lighting_agent(config_path, **kwargs):
             x["activity_type"] = 'devicemonitor'
             x["username"] = self.agent_id
             x["device_name"] = 'In-wall'
-            x["device_type"] = "lightinglogging"
+            x["device_type"] = "lighting"
             print x
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('--------------update azure--------------')

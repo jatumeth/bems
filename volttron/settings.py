@@ -40,7 +40,7 @@ except:
 
 # TODO change gateway_id
 # gateway_id='hivecdf12345'
-gateway_id='hivecdf12345'
+gateway_id='hivedevhub18'
 print('sending data to gateway: {}'.format(gateway_id))
 
 PLATFORM = {
@@ -196,10 +196,10 @@ FIND_DEVICE_SETTINGS = {
 # TODO change servicebus
 AZURE = {
     'servicebus': {
-        'topic': 'hivecdf12345',
+        'topic': 'hivedevhub18',
         'service_namespace': 'peahiveservicebusv2',
         'shared_access_key_name': 'RootManageSharedAccessKey',
         'shared_access_key_value': 'F6hM22kIHgfzKmt2GF0NtGlrVZtapYHOG3gMb7doaM4=',
-        'CONNECTION_STRING' : 'HostName=peahiveiotv2.azure-devices.net;DeviceId=hivecdf12345;SharedAccessKey=u/QZgiQ+isxKXTkkn4Hc3Oys6Ski1NjT5bTRkGTHvyw='
+        'CONNECTION_STRING' : 'HostName=peahiveiotv2.azure-devices.net;DeviceId=hivedevhub18;SharedAccessKey=p140uozLxStV4uWZhSpgVHR9sP7zDqQLShQGSxxTWWw='
     }
 }

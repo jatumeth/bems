@@ -1,0 +1,6 @@
+{
+  # VOLTTRON config files are JSON with support for python style comments.
+  "topic": "/hiveos/services/lifecycle",
+  "default location": "/home/hive/workspace/hive_os/volttron",
+  "csvfile": "/home/hive/workspace/hive_os/volttron/lightingswitch.csv"
+}
