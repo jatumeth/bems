@@ -59,31 +59,41 @@ def lighting_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             import os
             _log.debug("VERSION IS: {}".format(self.core.version()))
-            for ind in range(101, 201):
-                print('Build Agent ...')
-                self.build_agent(ind)
+            message = {"username": "hive6", "status": "ON", "device": "02ORVD6F0011B05C3Bo", "type": "devicecontrol"}
+            self.VIPPublishDevice(message)
 
-        def build_agent(self, index):
-            print(' >>> Build Agent Process')
-            #  get PATH Environment
-            home_path = expanduser("~")
-            json_path = '/workspace/hive_os/volttron/Agents/ChildAgent/pub002.config.json'
-            self.control_path = home_path+json_path
-            launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
-            #  Update new agentID to variable (agentID is relate to automation_id)
-            launcher.update({'agentid': 'childagent_{}'.format(index)})
-            #  dump new config to file
-            json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
-            print(" >>> Change config file successful")
+        def VIPPublishDevice(self, commsg):
+            # TODO this is example how to write an app to control AC
+            topic = str('/ui/agent/update/hive/999/02ORVD6F0011B05C3Bo')
+            message = json.dumps(commsg)
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
-            os.system("volttron-pkg package /home/peahive/workspace/hive_os/volttron/Agents/ChildAgent;" +
-                      "volttron-pkg configure /home/peahive/.volttron/packaged/childagent-0.1-py2-none-any.whl" +
-                      " /home/peahive/workspace/hive_os/volttron/Agents/ChildAgent/pub002.config.json" +
-                      ";volttron-ctl install " +
-                      "/home/peahive/.volttron/packaged/childagent-0.1-py2-none-any.whl " +
-                      "--tag childagent_{}".format(index) +
-                      ";volttron-ctl enable --tag childagent_{}".format(index) +
-                      ";volttron-ctl start --tag childagent_{}".format(index))
+            self.vip.pubsub.publish(
+                'pubsub', topic,
+                {'Type': 'HiVE Device to Gateway'}, message)
+
+        # def build_agent(self, index):
+        #     print(' >>> Build Agent Process')
+        #     #  get PATH Environment
+        #     home_path = expanduser("~")
+        #     json_path = '/workspace/hive_os/volttron/Agents/ChildAgent/pub002.config.json'
+        #     self.control_path = home_path+json_path
+        #     launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
+        #     #  Update new agentID to variable (agentID is relate to automation_id)
+        #     launcher.update({'agentid': 'childagent_{}'.format(index)})
+        #     #  dump new config to file
+        #     json.dump(launcher, open(home_path + json_path, 'w'), sort_keys=True, indent=4)
+        #     print(" >>> Change config file successful")
+        #
+        #     os.system("volttron-pkg package /home/peahive/workspace/hive_os/volttron/Agents/ChildAgent;" +
+        #               "volttron-pkg configure /home/peahive/.volttron/packaged/childagent-0.1-py2-none-any.whl" +
+        #               " /home/peahive/workspace/hive_os/volttron/Agents/ChildAgent/pub002.config.json" +
+        #               ";volttron-ctl install " +
+        #               "/home/peahive/.volttron/packaged/childagent-0.1-py2-none-any.whl " +
+        #               "--tag childagent_{}".format(index) +
+        #               ";volttron-ctl enable --tag childagent_{}".format(index) +
+        #               ";volttron-ctl start --tag childagent_{}".format(index))
 
     Agent.__name__ = '02ORV_InwallLightingAgent'
     return LightingAgent(config_path, **kwargs)

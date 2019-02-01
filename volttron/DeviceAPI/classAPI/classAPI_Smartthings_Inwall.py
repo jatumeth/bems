@@ -11,6 +11,7 @@ class API:
         self.debug = True
         self.set_variable('offline_count',0)
         self.set_variable('connection_renew_interval', 6000)
+        self.set_variable('device_status',0)
         self.only_white_bulb = None
 
     def renewConnection(self):
