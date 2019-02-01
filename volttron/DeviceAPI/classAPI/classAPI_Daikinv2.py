@@ -26,7 +26,7 @@ United States Government nor the United States Department of Energy, nor Virgini
 nor any jurisdiction or organization that has cooperated in the development of these materials, makes any warranty,
 express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness or
 any information, apparatus, product, software, or process disclosed, or represents that its use would not infringe
-privately owned rights.
+privately owned arights.
 
 Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or
 otherwise does not necessarily constitute or imply its endorsement, recommendation, favoring by the United States
@@ -143,29 +143,29 @@ class API:
         if set_humidity == '--':
             set_humidity = '70'
 
-        fanspeed = param['f_rate']
+        fan = param['f_rate']
         swing = param['f_dir']
 
-        if fanspeed == '3':
-            fanspeed = '1'
+        if fan == '3':
+            fan = '1'
 
-        if fanspeed == '4':
-            fanspeed = '2'
+        if fan == '4':
+            fan = '2'
 
-        if fanspeed == '5':
-            fanspeed = '3'
+        if fan == '5':
+            fan = '3'
 
-        if fanspeed == '6':
-            fanspeed = '4'
+        if fan == '6':
+            fan = '4'
 
-        if fanspeed == '7':
-            fanspeed = '5'
+        if fan == '7':
+            fan = '5'
 
-        if fanspeed == 'A':
-            fanspeed = 'AUTO'
+        if fan == 'A':
+            fan = 'AUTO'
 
-        if fanspeed == 'B':
-            fanspeed = 'SILENT'
+        if fan == 'B':
+            fan = 'SILENT'
 
 
         if swing == '0':
@@ -184,7 +184,7 @@ class API:
         self.set_variable('set_temperature', set_temperature)
         self.set_variable('set_humidity', set_humidity)
         self.set_variable('mode', strmode)
-        self.set_variable('fanspeed', fanspeed)
+        self.set_variable('fan', fan)
         self.set_variable('swing', swing)
 
     def printDeviceStatus(self):
@@ -196,7 +196,7 @@ class API:
         print(" set_temperature = {}".format(self.get_variable('set_temperature')))
         print(" set_humidity = {}".format(self.get_variable('set_humidity')))
         print(" mode = {}".format(self.get_variable('mode')))
-        print(" fanspeed = {}".format(self.get_variable('fanspeed')))
+        print(" fan = {}".format(self.get_variable('fan')))
         print(" swing = {}".format(self.get_variable('swing')))
         print("---------------------------------------------")
 
@@ -223,15 +223,16 @@ class API:
 
             for k, v in postmsg.items():
                 if k == 'status':
+                    stemp = str((postmsg['stemp']))
+                    data = 'stemp='+stemp
+
+                elif k == 'stemp':
                     if (postmsg['status']) == "ON":
                         status = "1"
                         data = 'pow=1'
                     elif (postmsg['status']) == "OFF":
                         status = "0"
                         data = 'pow=0'
-                elif k == 'stemp':
-                    stemp = str((postmsg['stemp']))
-                    data = 'stemp='+stemp
                 elif k == 'mode':
                     if (postmsg['mode']) == 'COLD':
                         data = 'mode=' + '1'
@@ -246,20 +247,20 @@ class API:
                     if (postmsg['mode']) == 'FAN':
                         data = 'mode=' + '0'
 
-                elif k == 'fanspeed':
-                    if (postmsg['fanspeed']) == '1':
+                elif k == 'fan':
+                    if (postmsg['fan']) == '1':
                         data = 'f_rate=' + ('3')
-                    elif (postmsg['fanspeed']) == '2':
+                    elif (postmsg['fan']) == '2':
                         data = 'f_rate=' + ('4')
-                    elif (postmsg['fanspeed']) == '3':
+                    elif (postmsg['fan']) == '3':
                         data = 'f_rate=' + ('5')
-                    elif (postmsg['fanspeed']) == '4':
+                    elif (postmsg['fan']) == '4':
                         data = 'f_rate=' + ('6')
-                    elif (postmsg['fanspeed']) == '5':
+                    elif (postmsg['fan']) == '5':
                         data = 'f_rate=' + ('7')
-                    elif (postmsg['fanspeed']) == 'AUTO':
+                    elif (postmsg['fan']) == 'AUTO':
                         data = 'f_rate=' + 'A'
-                    elif (postmsg['fanspeed']) == 'SILENT':
+                    elif (postmsg['fan']) == 'SILENT':
                         data = 'f_rate=' + 'B'
 
                 elif k == 'swing':
@@ -273,9 +274,11 @@ class API:
                         data = 'f_dir=' + '3'
 
         print "sending requests put"
+        print data
         r = requests.post((url+"/aircon/set_control_info?"+data),
-            headers={"Authorization": "Bearer daikin"}, data= 'pow=1', timeout=20);
+            headers={"Authorization": "Bearer daikin"}, data= '', timeout=20);
         print(" after send a POST request: {}".format(r.status_code))
+        print r
 
     def isPostMsgValid(self, postmsg):  # check validity of postmsg
         dataValidity = True
@@ -287,13 +290,14 @@ class API:
 def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
-
-    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent',url = 'http://192.168.1.101')
-    AC.setDeviceStatus({"status": "ON","stemp":"20","username": "hive5"})
-    # AC.setDeviceStatus({'status': 'ON', 'stemp':'23','device': '1DAIK1200138'})
+    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent', url='http://192.168.1.200', port=502, parity='E',
+             baudrate=9600, startregis=2006, startregisr=2012)
+    # AC.setDeviceStatus({'swing':'ON','device': '1DAIK1200138'})
+    # AC.setDeviceStatus({"status": "ON","username": "hive5"})
+    # AC.setDeviceStatus({'status': 'ON', 'stemp':'24','device': '1DAIK1200138'})
     # AC.setDeviceStatus({'status': 'ON', 'mode': 'COLD', 'device': '1DAIK1200138'})
     # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
-    time.sleep(6)
+    # time.sleep(6)
     AC.getDeviceStatus()
     # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})
     # AC.setDeviceStatus({'status': 'ON', 'stemp':'24','device': '1DAIK1200138'})

@@ -4,14 +4,12 @@ from datetime import datetime
 import logging
 import sys
 import settings
-from pprint import pformat
 from volttron.platform.messaging.health import STATUS_GOOD
 from volttron.platform.vip.agent import Agent, Core, PubSub, compat
 from volttron.platform.agent import utils
 from volttron.platform.messaging import headers as headers_mod
 import importlib
 import json
-import socket
 import pyrebase
 import time
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -29,11 +27,6 @@ authDomainconfig = settings.CHANGE['change']['authLight']
 dataBaseconfig = settings.CHANGE['change']['databaseLight']
 stoRageconfig = settings.CHANGE['change']['storageLight']
 
-db_host = settings.DATABASES['default']['HOST']
-db_port = settings.DATABASES['default']['PORT']
-db_database = settings.DATABASES['default']['NAME']
-db_user = settings.DATABASES['default']['USER']
-db_password = settings.DATABASES['default']['PASSWORD']
 
 try:
     config = {
@@ -67,15 +60,19 @@ def ac_agent(config_path, **kwargs):
     device_type = get_config('type')
     api = get_config('api')
     address = get_config('ipaddress')
-    _address = address.replace('http://', '')
-    _address = address.replace('https://', '')
-    identifiable = get_config('identifiable')
+
+    url= get_config("url")
+    port = get_config("port")
+    parity = get_config("parity")
+    baudrate = get_config("baudrate")
+    startregis = get_config("startregis")
+    startregisr = get_config("startregisr")
 
 
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
-    topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
+    topic_device_control = '/ui/agent/update/hive/999/'+agent_id
     print(topic_device_control)
 
     gateway_id = settings.gateway_id
@@ -93,9 +90,14 @@ def ac_agent(config_path, **kwargs):
             self._heartbeat_period = heartbeat_period
             self.model = model
             self.device_type = device_type
+            self.url = url
+            self.port = port
+            self.parity =parity
+            self.baudrate = baudrate
+            self.startregis = startregis
+            self.startregisr = startregisr
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.AC = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id
-                                )
+            self.AC = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,url = self.url,port = self.port,parity =self.parity,baudrate = self.baudrate,startregis = self.startregis,startregisr = self.startregisr)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -122,7 +124,6 @@ def ac_agent(config_path, **kwargs):
         def deviceMonitorBehavior(self):
 
             self.AC.getDeviceStatus()
-
             self.StatusPublish(self.AC.variables)
 
             # TODO update local postgres
@@ -131,7 +132,7 @@ def ac_agent(config_path, **kwargs):
             if(self.AC.variables['status'] != self.status_old or
                     self.AC.variables['current_temperature'] != self.status_old2 or
                     self.AC.variables['set_temperature'] != self.status_old3 or
-                    self.AC.variables['set_humidity'] != self.status_old4 or
+                    self.AC.variables['fan'] != self.status_old4 or
                     self.AC.variables['mode'] != self.status_old5):
                 self.publish_firebase()
                 self.publish_postgres()
@@ -142,7 +143,7 @@ def ac_agent(config_path, **kwargs):
             self.status_old = self.AC.variables['status']
             self.status_old2 = self.AC.variables['current_temperature']
             self.status_old3 = self.AC.variables['set_temperature']
-            self.status_old4 = self.AC.variables['set_humidity']
+            self.status_old4 = self.AC.variables['fan']
             self.status_old5 = self.AC.variables['mode']
 
 
@@ -155,6 +156,7 @@ def ac_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("SET_TEMPERATURE").set(self.AC.variables['set_temperature'])
                 db.child(gateway_id).child('devices').child(agent_id).child("SET_HUMIDITY").set(self.AC.variables['set_humidity'])
                 db.child(gateway_id).child('devices').child(agent_id).child("MODE").set(self.AC.variables['mode'])
+                db.child(gateway_id).child('devices').child(agent_id).child("FAN_SPEED").set(self.AC.variables['fan'])
             except Exception as er:
                 print er
 
@@ -172,6 +174,7 @@ def ac_agent(config_path, **kwargs):
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                     "current_temperature": str(self.AC.variables['current_temperature']),
                     "set_temperature": str(self.AC.variables['set_temperature']),
+                    "fan_speed": str(self.AC.variables['fan']),
                     # "mode": str(self.AC.variables['mode']),
                 }
             )
@@ -234,42 +237,42 @@ def ac_agent(config_path, **kwargs):
             if 'mode' in message:
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
-
-            time.sleep(2)
-            self.AC.getDeviceStatus()
-            if(self.AC.variables['status'] != self.status_old or
-                    self.AC.variables['current_temperature'] != self.status_old2 or
-                    self.AC.variables['set_temperature'] != self.status_old3 or
-                    self.AC.variables['set_humidity'] != self.status_old4 or
-                    self.AC.variables['mode'] != self.status_old5):
-                self.publish_firebase()
-                self.publish_postgres()
-            else:
-                time.sleep(1)
-                self.AC.getDeviceStatus()
-                if (self.AC.variables['status'] != self.status_old or
-                        self.AC.variables['current_temperature'] != self.status_old2 or
-                        self.AC.variables['set_temperature'] != self.status_old3 or
-                        self.AC.variables['set_humidity'] != self.status_old4 or
-                        self.AC.variables['mode'] != self.status_old5):
-                    self.publish_firebase()
-                    self.publish_postgres()
-                else:
-                    time.sleep(1)
-                    self.AC.getDeviceStatus()
-                    if (self.AC.variables['status'] != self.status_old or
-                            self.AC.variables['current_temperature'] != self.status_old2 or
-                            self.AC.variables['set_temperature'] != self.status_old3 or
-                            self.AC.variables['set_humidity'] != self.status_old4 or
-                            self.AC.variables['mode'] != self.status_old5):
-                        self.publish_firebase()
-                        self.publish_postgres()
-                    else:
-                        pass
-            self.status_old = self.AC.variables['status']
-            self.status_old2 = self.AC.variables['current_temperature']
-            self.status_old3 = self.AC.variables['set_temperature']
-            self.status_old4 = self.AC.variables['set_humidity']
+            print ""
+            # time.sleep(2)
+            # self.AC.getDeviceStatus()
+            # if(self.AC.variables['status'] != self.status_old or
+            #         self.AC.variables['current_temperature'] != self.status_old2 or
+            #         self.AC.variables['set_temperature'] != self.status_old3 or
+            #         self.AC.variables['fan'] != self.status_old4 or
+            #         self.AC.variables['mode'] != self.status_old5):
+            #     self.publish_firebase()
+            #     self.publish_postgres()
+            # else:
+            #     time.sleep(1)
+            #     self.AC.getDeviceStatus()
+            #     if (self.AC.variables['status'] != self.status_old or
+            #             self.AC.variables['current_temperature'] != self.status_old2 or
+            #             self.AC.variables['set_temperature'] != self.status_old3 or
+            #             self.AC.variables['fan'] != self.status_old4 or
+            #             self.AC.variables['mode'] != self.status_old5):
+            #         self.publish_firebase()
+            #         self.publish_postgres()
+            #     else:
+            #         time.sleep(1)
+            #         self.AC.getDeviceStatus()
+            #         if (self.AC.variables['status'] != self.status_old or
+            #                 self.AC.variables['current_temperature'] != self.status_old2 or
+            #                 self.AC.variables['set_temperature'] != self.status_old3 or
+            #                 self.AC.variables['fan'] != self.status_old4 or
+            #                 self.AC.variables['mode'] != self.status_old5):
+            #             self.publish_firebase()
+            #             self.publish_postgres()
+            #         else:
+            #             pass
+            # self.status_old = self.AC.variables['status']
+            # self.status_old2 = self.AC.variables['current_temperature']
+            # self.status_old3 = self.AC.variables['set_temperature']
+            # self.status_old4 = self.AC.variables['fan']
 
 
     Agent.__name__ = '01DAI_ACAgent'

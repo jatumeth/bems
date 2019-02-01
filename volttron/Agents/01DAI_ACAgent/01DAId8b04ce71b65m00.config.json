@@ -1,0 +1,21 @@
+{
+    "agent": {
+        "exec": "daikinagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    },
+    "agent_id": "01DAId8b04ce71b65m00",
+    "api": "classAPI_Modbus_Daikin",
+    "building_name": "hive",
+    "device_monitor_time": 60,
+    "macaddress": "120013a8",
+    "model": "AC123",
+    "type": "AC",
+    "vendor": "Daikin",
+    "zone_id": 999,
+    "url" : "192.168.1.103",
+    "port" : "502",
+    "parity" : "E",
+    "baudrate" : "9600",
+    "startregis" : "2000",
+    "startregisr" : "2000"
+
+}
