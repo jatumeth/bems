@@ -1,0 +1,20 @@
+{
+    "agent": {
+        "exec": "yaleagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
+    }, 
+    "agent_id": "08SOM24B001854A4DE",
+    "ipaddress": "http://192.168.1.30:49153",
+    "message": "this is a curtain agent",
+    "heartbeat_period": 20,
+    "api": "classAPI_somfy",
+    "url": "https://graph-na04-useast2.api.smartthings.com/api/smartapps/installations/3b56c793-4396-4edf-8df0-fb28b4162637/switches/",
+    "device": "26116b86-86c7-4cf0-833d-cb7bc3a01bc6",
+    "bearer": "Bearer 6beeec2b-2071-45b2-8b00-3de466c9caeb",
+    "building_name": "hive",
+    "device_monitor_time": 2,
+    "macaddress": "221445K1200138",
+    "model": "one",
+    "type": "08SOM",
+    "vendor": "somfy",
+    "zone_id": 999
+}
