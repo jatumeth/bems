@@ -93,9 +93,45 @@ def iothubsub_agent(config_path, **kwargs):
             print("Received Message [%d]:" % counter)
             print("    Data: <<<%s>>> & Size=%d" % (message_buffer[:size].decode('utf-8'), size))
             data = json.loads(message_buffer[:size].decode('utf-8'))
-            print(type(data))
-            print(data)
-            self.azure_queue.put(data)  # <----------------- check!!!
+            # print(type(data))
+            # print(data)
+            commsg = data['message']
+            type_msg = str(commsg.get('type', None))
+
+            if type_msg.startswith('scene'):  # TODO : Recheck condition again
+                # print('Found scene')
+                self.VIPPublishApplication(commsg, type_msg)
+
+            elif type_msg == 'service':
+                # Execute Device Control Function
+                # print("Device Cintrol Event")
+                if commsg['service'] == 'provisioning':
+                    self.VIPPublishpro(commsg)
+                elif commsg['service'] == 'discover':
+                    self.VIPPublishdis(commsg)
+
+            elif type_msg == 'devicecontrol':
+                self.VIPPublishDevice(commsg)
+
+            elif type_msg == 'automationcreate':
+                # Execute Create Automation Function
+                # print("Create Automation Event")
+                self.VIPPublishApplication(commsg, type_msg)
+
+            elif type_msg == 'automationdelete':
+                # Execute Delete Automation Function
+                # print("Delete Automation Event")
+                self.VIPPublishApplication(commsg, type_msg)
+
+            elif type_msg == 'automationupdate':
+                # Execute Update Automation Function
+                # print("Update Automation Event")
+                self.VIPPublishApplication(commsg, type_msg)
+
+            else:
+                pass
+
+            # self.azure_queue.put(data)  # <----------------- check!!!
             map_properties = message.properties()
             key_value_pair = map_properties.get_internals()
             print("    Properties: %s" % key_value_pair)
@@ -126,18 +162,6 @@ def iothubsub_agent(config_path, **kwargs):
 
             _log.debug("Starting Thread")
 
-            # don't use this is example from service bus
-            # while True:
-            #     try:
-            #         msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
-            #         _log.debug("Got Azure messages")
-            #         if msg.body is not None:
-            #             commsg = eval(msg.body)
-            #             self.azure_queue.put(commsg)
-            #     except:
-            #         _log.debug("Error whilst waiting for Azure message.")
-            #         pass
-
             try:
                 client = self.iothub_client_init()
 
@@ -159,60 +183,54 @@ def iothubsub_agent(config_path, **kwargs):
 
             self.print_last_message_time(client)
 
-        @Core.periodic(1)
-        def process_azure_messages(self):
-            # _log.debug("Looking for Azure messages")
-            while not self.azure_queue.empty():
-                try:
-                    print ("")
-                    msg = self.azure_queue.get()
-
-                    commsg = commsg['message']
-
-                    _log.debug("Processing Azure message : {}".format(commsg))
-                    # print("message MQTT received datas")
-                    type_msg = str(commsg.get('type', None))
-
-                    if type_msg.startswith('scene'):  # TODO : Recheck condition again
-                        # print('Found scene')
-                        self.VIPPublishApplication(commsg, type_msg)
-
-                    elif type_msg == 'service':
-                        # Execute Device Control Function
-                        # print("Device Cintrol Event")
-                        if commsg['service'] == 'provisioning':
-                            self.VIPPublishpro(commsg)
-                        elif commsg['service'] == 'discover':
-                            self.VIPPublishdis(commsg)
-
-                    elif type_msg == 'devicecontrol':
-                        self.VIPPublishDevice(commsg)
-
-                        home_path = expanduser("~")
-                        json_path = '/workspace/hive_os/volttron/token.json'
-                        automation_control_path = home_path + json_path
-                        launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
-                        #  Update new agentID to variable (agentID is relate to automation_id)
-
-                    elif type_msg == 'automationcreate':
-                        # Execute Create Automation Function
-                        # print("Create Automation Event")
-                        self.VIPPublishApplication(commsg, type_msg)
-
-                    elif type_msg == 'automationdelete':
-                        # Execute Delete Automation Function
-                        # print("Delete Automation Event")
-                        self.VIPPublishApplication(commsg, type_msg)
-
-                    elif type_msg == 'automationupdate':
-                        # Execute Update Automation Function
-                        # print("Update Automation Event")
-                        self.VIPPublishApplication(commsg, type_msg)
-
-                    else:
-                        pass
-                except Exception as er:
-                    print(er)
+        # @Core.periodic(1)
+        # def process_azure_messages(self):
+        #     # _log.debug("Looking for Azure messages")
+        #     while not self.azure_queue.empty():
+        #         try:
+        #             print ("")
+        #             msg = self.azure_queue.get()
+        #
+        #             commsg = commsg['message']
+        #
+        #             _log.debug("Processing Azure message : {}".format(commsg))
+        #             # print("message MQTT received datas")
+        #             type_msg = str(commsg.get('type', None))
+        #
+        #             if type_msg.startswith('scene'):  # TODO : Recheck condition again
+        #                 # print('Found scene')
+        #                 self.VIPPublishApplication(commsg, type_msg)
+        #
+        #             elif type_msg == 'service':
+        #                 # Execute Device Control Function
+        #                 # print("Device Cintrol Event")
+        #                 if commsg['service'] == 'provisioning':
+        #                     self.VIPPublishpro(commsg)
+        #                 elif commsg['service'] == 'discover':
+        #                     self.VIPPublishdis(commsg)
+        #
+        #             elif type_msg == 'devicecontrol':
+        #                 self.VIPPublishDevice(commsg)
+        #
+        #             elif type_msg == 'automationcreate':
+        #                 # Execute Create Automation Function
+        #                 # print("Create Automation Event")
+        #                 self.VIPPublishApplication(commsg, type_msg)
+        #
+        #             elif type_msg == 'automationdelete':
+        #                 # Execute Delete Automation Function
+        #                 # print("Delete Automation Event")
+        #                 self.VIPPublishApplication(commsg, type_msg)
+        #
+        #             elif type_msg == 'automationupdate':
+        #                 # Execute Update Automation Function
+        #                 # print("Update Automation Event")
+        #                 self.VIPPublishApplication(commsg, type_msg)
+        #
+        #             else:
+        #                 pass
+        #         except Exception as er:
+        #             print(er)
 
         def VIPPublishApplication(self, commsg, type_msg):
             topic = str('/ui/agent/update/hive/999/') + str(type_msg)

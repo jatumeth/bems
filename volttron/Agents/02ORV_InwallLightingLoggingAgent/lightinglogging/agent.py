@@ -107,6 +107,7 @@ def lighting_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.gettoken()
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         def publish_firebase(self):
 
@@ -137,7 +138,8 @@ def lighting_agent(config_path, **kwargs):
             x["username"] = self.agent_id
             x["device_name"] = 'In-wall'
             x["device_type"] = "lighting"
-            print x
+            x["color"] = "white"
+            x["brightness"] = "100"
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('--------------update azure--------------')
 
