@@ -129,7 +129,11 @@ class API:
         self.set_variable('set_temperature', stemp)
         self.set_variable('set_humidity', set_humidity)
         self.set_variable('mode', mode)
-        self.set_variable('fan', fan)
+
+        try:
+            self.set_variable('fan', fan)
+        except:
+            print "er"
         # self.set_variable('swing', swing)
 
         self.printDeviceStatus()
@@ -144,7 +148,13 @@ class API:
         print(" set_humidity = {}".format(self.get_variable('set_humidity')))
         print(" mode = {}".format(self.get_variable('mode')))
         print(" swing = {}".format(self.get_variable('swing')))
-        print(" fan = {}".format(self.get_variable('fan')))
+
+        try:
+            print(" fan = {}".format(self.get_variable('fan')))
+        except:
+            print "er"
+
+
         print("")
         print("---------------------------------------------")
 
