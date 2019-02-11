@@ -1,3 +1,11 @@
+/home/tpponmat/workspace/hive_os/volttron/Agents/
+
+volttron-pkg package Agents/02ORV_InwallLightingLoggingAgent
+volttron-pkg configure ~/.volttron/packaged/lightingloggingagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/02ORV_InwallLightingLoggingAgent/lighting.config
+volttron-ctl install ~/.volttron/packaged/lightingloggingagent-0.1-py2-none-any.whl --tag lightinglogging
+volttron-ctl enable --tag lightinglogging
+
+
 volttron-pkg package Agents/01DAI_ACAgent
 volttron-pkg configure ~/.volttron/packaged/acagent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/01DAI_ACAgent/01DAId8b04ce71b65m00.config.json
 volttron-ctl install ~/.volttron/packaged/acagent-0.1-py2-none-any.whl --tag 01DAId8b04ce71b65m00

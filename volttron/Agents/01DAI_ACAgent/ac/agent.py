@@ -109,6 +109,7 @@ def ac_agent(config_path, **kwargs):
             self.status_old3 = "none"
             self.status_old4 = "none"
             self.status_old5 = "none"
+            self.gettoken()
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
@@ -164,7 +165,13 @@ def ac_agent(config_path, **kwargs):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
+            print postgres_Authorization
 
+            try:
+                if self.AC.variables['fan'] == 'AUTO':
+                    self.AC.variables['fan'] = '5'
+            except:
+                self.AC.variables['fan'] = '5'
 
             m = MultipartEncoder(
                 fields={
@@ -178,13 +185,14 @@ def ac_agent(config_path, **kwargs):
                     # "mode": str(self.AC.variables['mode']),
                 }
             )
-
+            print m
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+            print "-------------- update postgrate api -----------------"
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -198,7 +206,9 @@ def ac_agent(config_path, **kwargs):
                 {'Type': 'pub device status to ZMQ'}, message)
 
         def gettoken(self):
-            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            self.api_token = 'b409cacf93c467986e4366940c1d56b7909d200f'
+            token = db.child(gateway_id).child('token').get().val()
+            self.api_token = token
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
