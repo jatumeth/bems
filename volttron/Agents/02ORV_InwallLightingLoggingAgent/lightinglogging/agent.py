@@ -107,6 +107,7 @@ def lighting_agent(config_path, **kwargs):
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
             self.gettoken()
+            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
         def publish_firebase(self):
 
@@ -137,7 +138,8 @@ def lighting_agent(config_path, **kwargs):
             x["username"] = self.agent_id
             x["device_name"] = 'In-wall'
             x["device_type"] = "lighting"
-            print x
+            x["color"] = "white"
+            x["brightness"] = "100"
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
             print('--------------update azure--------------')
 
@@ -154,7 +156,7 @@ def lighting_agent(config_path, **kwargs):
                     "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
                 }
             )
-
+            print m
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
@@ -164,8 +166,9 @@ def lighting_agent(config_path, **kwargs):
             print('-------------------update postgres---------------')
 
         def gettoken(self):
-
-            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            self.api_token = 'b409cacf93c467986e4366940c1d56b7909d200f'
+            token = db.child(gateway_id).child('token').get().val()
+            self.api_token = token
 
         @PubSub.subscribe('pubsub', '/agent/zmq/update/hive/999/inwallswitchlog')
         def match_logging(self, peer, sender, bus, topic, headers, message):
@@ -174,8 +177,11 @@ def lighting_agent(config_path, **kwargs):
             print "Message: {message}\n".format(message=message)
 
             message = json.loads(message)
+            print message
+
             try:
-                self.device_status = message['device_status']
+                self.device_status = message['status']
+                self.status = message['status']
                 self.agent_id = message['agent_id']
                 self.publish_postgres()
                 self.publish_azure_iot_hub()

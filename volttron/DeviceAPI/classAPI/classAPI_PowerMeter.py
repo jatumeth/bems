@@ -49,6 +49,7 @@ import time
 import json
 import urllib2
 import requests
+# import smappy as smappy
 
 #from bemoss_lib.utils import rgb_cie
 class API:
@@ -113,10 +114,10 @@ class API:
     def getDeviceStatus(self):
 
         try:
-            url_l = 'http://192.168.1.7/gateway/apipublic/logon'
+            url_l = 'http://192.168.1.132/gateway/apipublic/logon'
             head_l = "admin"
             requests.post(url_l, data=head_l)
-            request = requests.get("http://192.168.1.7/gateway/apipublic/reportInstantaneousValues")
+            request = requests.get("http://192.168.1.132/gateway/apipublic/reportInstantaneousValues")
             checkconnect = request.status_code
             print(" {0} Agent is querying its current status (status:{1}) please wait ...".format(self.variables.get('agent_id', None), str(checkconnect)))
 
@@ -127,7 +128,7 @@ class API:
                     self.printDeviceStatus()
             else:
                 print (" Received an error from server, cannot retrieve results")
-                url_l = 'http://192.168.1.7/gateway/apipublic/logon'
+                url_l = 'http://192.168.1.132/gateway/apipublic/logon'
                 head_l = "admin"
                 requests.post(url_l, data=head_l)
 
