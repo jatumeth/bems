@@ -73,8 +73,7 @@ def scenecontrol_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self._agent_id = self.config.get('agentid')
-            self.url = self.config.get('backend_url') + self.config.get('scene_api')
-            print self.url
+            self.url = 'https://peahivebackend.azurewebsites.net/api/v2.0/scenes/'
             self.token = self.config.get('token')
 
         @Core.receiver('onstart')
@@ -190,12 +189,10 @@ def scenecontrol_agent(config_path, **kwargs):
                 conf.update({str(id): {'tasks': tasks}})
             self.num_of_scene = str(len(conf))
             self.sceneconf1 = conf
-            print"444444444444444"
             print self.sceneconf1
             conn.commit()
             conn.close()
             print("woooohoooooooooupdate2")
-
 
             # conn = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
             #                         password=db_password)
