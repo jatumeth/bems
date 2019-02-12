@@ -119,7 +119,7 @@ class API:
 
         try:
             import smappy as smappy
-            ls = smappy.LocalSmappee(ip ='192.168.1.132')
+            ls = smappy.LocalSmappee(ip ='192.168.1.178')
             try:
                 ls.logon(password='admin')
             except:

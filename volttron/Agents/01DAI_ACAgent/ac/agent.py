@@ -208,7 +208,7 @@ def ac_agent(config_path, **kwargs):
         def gettoken(self):
             self.api_token = 'b409cacf93c467986e4366940c1d56b7909d200f'
             token = db.child(gateway_id).child('token').get().val()
-            self.api_token = token
+            self.api_token = str(token)
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
