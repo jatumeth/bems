@@ -51,14 +51,6 @@ def mqttsub_agent(config_path, **kwargs):
         shared_access_key_name=shared_access_key_name,
         shared_access_key_value=shared_access_key_value)
 
-    # DATABASES
-    db_host = settings.DATABASES['default']['HOST']
-    db_port = settings.DATABASES['default']['PORT']
-    db_database = settings.DATABASES['default']['NAME']
-    db_user = settings.DATABASES['default']['USER']
-    db_password = settings.DATABASES['default']['PASSWORD']
-    gateway_id = settings.gateway_id
-
     class mqttsubAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
         heartbeat period specified in the settings module.
@@ -112,6 +104,7 @@ def mqttsub_agent(config_path, **kwargs):
 
                     if type_msg.startswith('scene'):  # TODO : Recheck condition again
                         # print('Found scene')
+                        print("pub to sence agrnt")
                         self.VIPPublishApplication(commsg, type_msg)
 
                     elif type_msg == 'service':
@@ -123,27 +116,22 @@ def mqttsub_agent(config_path, **kwargs):
                             self.VIPPublishdis(commsg)
 
                     elif type_msg == 'devicecontrol':
-                        self.VIPPublishDevice(commsg)
+                        print "move device control to iot hub"
 
-                        home_path = expanduser("~")
-                        json_path = '/workspace/hive_os/volttron/token.json'
-                        automation_control_path = home_path + json_path
-                        launcher = json.load(open(home_path + json_path, 'r'))  # load config.json to variable
-                        #  Update new agentID to variable (agentID is relate to automation_id)
 
                     elif type_msg == 'automationcreate':
                         # Execute Create Automation Function
-                        # print("Create Automation Event")
+                        print("Create Automation Event")
                         self.VIPPublishApplication(commsg, type_msg)
 
                     elif type_msg == 'automationdelete':
                         # Execute Delete Automation Function
-                        # print("Delete Automation Event")
+                        print("Delete Automation Event")
                         self.VIPPublishApplication(commsg, type_msg)
 
                     elif type_msg == 'automationupdate':
                         # Execute Update Automation Function
-                        # print("Update Automation Event")
+                        print("Update Automation Event")
                         self.VIPPublishApplication(commsg, type_msg)
 
                     else:
@@ -154,8 +142,8 @@ def mqttsub_agent(config_path, **kwargs):
         def VIPPublishApplication(self, commsg, type_msg):
             topic = str('/ui/agent/update/hive/999/') + str(type_msg)
             message = json.dumps(commsg)
-            # print ("topic {}".format(topic))
-            # print ("message {}".format(message))
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
