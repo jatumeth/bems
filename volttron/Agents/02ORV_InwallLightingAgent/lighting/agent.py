@@ -91,10 +91,11 @@ def lighting_agent(config_path, **kwargs):
             self.url = url
             self.device = device
             self.bearer = bearer
+            self.gettoken()
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Light = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url)
+                                         bearer=self.smartthingtoken, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -149,6 +150,11 @@ def lighting_agent(config_path, **kwargs):
         def gettoken(self):
 
             self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+
+
+            self.smartthingtoken = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            smartthingtoken = db.child(gateway_id).child('smartthingtoken').get().val()
+            self.smartthingtoken = str(smartthingtoken)
 
         @PubSub.subscribe('pubsub', topic_device_control)
         def match_device_control(self, peer, sender, bus, topic, headers, message):
