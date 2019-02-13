@@ -1,0 +1,123 @@
+805e automation_controlagent-3.2 automation_controlagent-3.2_1 automation_349      running [2037]  GOOD
+6dea automation_controlagent-3.2 automation_controlagent-3.2_2 automation_350      running [2164]  GOOD
+2a2f automation_controlagent-3.2 automation_controlagent-3.2_3 automation_351      0               
+0f0c certainagent-0.1            certainagent-0.1_2            08SOM24B001004F026  running [4742]  GOOD
+33be certainagent-0.1            certainagent-0.1_3            08SOM24B001854A4DE  running [4138]  GOOD
+0a64 certainagent-0.1            certainagent-0.1_1            08SOM24B001856F95F  running [4799]  GOOD
+951f iotsubagent-0.1             iotsubagent-0.1_1             iothub              running [1895]  GOOD
+29e7 lightingagent-0.1           vip02ORVD6F000D3FC882o        02ORVD6F000D3FC882o running [4400]  GOOD
+c9c1 lightingagent-0.1           vip02ORVD6F000D3FC882t        02ORVD6F000D3FC882t running [7971]  GOOD
+6c65 lightingagent-0.1           vip02ORVD6F000D3FC8EFo        02ORVD6F000D3FC8EFo running [8025]  GOOD
+099c lightingagent-0.1           vip02ORVD6F000D3FC8EFt        02ORVD6F000D3FC8EFt running [4828]  GOOD
+9552 lightingagent-0.1           vip02ORVD6F000F59D07Do        02ORVD6F000F59D07Do running [8095]  GOOD
+9d25 lightingagent-0.1           vip02ORVD6F000F59D07Dt        02ORVD6F000F59D07Dt running [8149]  GOOD
+1066 lightingagent-0.1           vip02ORVD6F000F59D2C9o        02ORVD6F000F59D2C9o running [4697]  GOOD
+93a4 lightingagent-0.1           vip02ORVD6F000F59D2C9t        02ORVD6F000F59D2C9t running [8219]  GOOD
+ec96 lightingagent-0.1           vip02ORVD6F000F59D386o        02ORVD6F000F59D386o running [8275]  GOOD
+9bb9 lightingagent-0.1           vip02ORVD6F000F59D386t        02ORVD6F000F59D386t running [8319]  GOOD
+6011 lightingagent-0.1           vip02ORVD6F001025BA07o        02ORVD6F001025BA07o running [8361]  GOOD
+d178 lightingagent-0.1           vip02ORVD6F001025BA07t        02ORVD6F001025BA07t running [8414]  GOOD
+78da lightingagent-0.1           vip02ORVD6F001025C793o        02ORVD6F001025C793o running [8461]  GOOD
+38a3 lightingagent-0.1           vip02ORVD6F001025C793t        02ORVD6F001025C793t running [4016]  GOOD
+7d6c lightingagent-0.1           vip02ORVD6F0010EEDEC0o        02ORVD6F0010EEDEC0o running [8570]  GOOD
+6234 lightingagent-0.1           vip02ORVD6F0010EEDEC0t        02ORVD6F0010EEDEC0t running [8625]  GOOD
+a52b lightingagent-0.1           vip02ORVD6F0010EEE56Bo        02ORVD6F0010EEE56Bo running [9965]  GOOD
+c3f6 lightingagent-0.1           vip02ORVD6F0010EEE56Bt        02ORVD6F0010EEE56Bt running [8966]  GOOD
+57f6 lightingagent-0.1           vip02ORVD6F0011A42E9Eo        02ORVD6F0011A42E9Eo running [9021]  GOOD
+7d3b lightingagent-0.1           vip02ORVD6F0011A42E9Et        02ORVD6F0011A42E9Et running [9045]  GOOD
+1ce5 lightingagent-0.1           vip02ORVD6F0011A42F10o        02ORVD6F0011A42F10o running [4497]  GOOD
+5cb0 lightingagent-0.1           vip02ORVD6F0011A42F10t        02ORVD6F0011A42F10t running [9162]  GOOD
+e577 lightingagent-0.1           vip02ORVD6F0011A438CDo        02ORVD6F0011A438CDo running [11047] GOOD
+7dba lightingagent-0.1           vip02ORVD6F0011A438CDt        02ORVD6F0011A438CDt running [11101] GOOD
+d376 lightingagent-0.1           vip02ORVD6F0011A43C1Eo        02ORVD6F0011A43C1Eo running [11157] GOOD
+5a04 lightingagent-0.1           vip02ORVD6F0011A43C1Et        02ORVD6F0011A43C1Et running [11193] GOOD
+6509 lightingagent-0.1           vip02ORVD6F0011A6F76Do        02ORVD6F0011A6F76Do running [11242] GOOD
+6fae lightingagent-0.1           vip02ORVD6F0011A6F76Dt        02ORVD6F0011A6F76Dt running [11322] GOOD
+d682 lightingagent-0.1           vip02ORVD6F0011A6FC2Bo        02ORVD6F0011A6FC2Bo running [11359] GOOD
+c9ee lightingagent-0.1           vip02ORVD6F0011A6FC2Bt        02ORVD6F0011A6FC2Bt running [11419] GOOD
+d4f4 lightingagent-0.1           vip02ORVD6F0011A7003Bo        02ORVD6F0011A7003Bo running [11455] GOOD
+149c lightingagent-0.1           vip02ORVD6F0011A7003Bt        02ORVD6F0011A7003Bt running [4600]  GOOD
+f969 lightingagent-0.1           vip02ORVD6F0011A70200o        02ORVD6F0011A70200o running [11580] GOOD
+9a5e lightingagent-0.1           vip02ORVD6F0011A70200t        02ORVD6F0011A70200t running [11634] GOOD
+5211 lightingagent-0.1           vip02ORVD6F0011A70221o        02ORVD6F0011A70221o running [11690] GOOD
+a8d2 lightingagent-0.1           vip02ORVD6F0011A70221t        02ORVD6F0011A70221t running [11710] GOOD
+4db3 lightingagent-0.1           vip02ORVD6F0011A703C4o        02ORVD6F0011A703C4o running [11765] GOOD
+ffa8 lightingagent-0.1           vip02ORVD6F0011A703C4t        02ORVD6F0011A703C4t running [11820] GOOD
+ee63 lightingagent-0.1           lightingagent-0.1_3           02ORVD6F0011A70953o 0               
+ad97 lightingagent-0.1           vip02ORVD6F0011A70B60o        02ORVD6F0011A70B60o running [11874] GOOD
+19eb lightingagent-0.1           vip02ORVD6F0011A70B60t        02ORVD6F0011A70B60t running [4535]  GOOD
+79d6 lightingagent-0.1           vip02ORVD6F0011A70E1Eo        02ORVD6F0011A70E1Eo running [11982] GOOD
+f5ea lightingagent-0.1           vip02ORVD6F0011A70E1Et        02ORVD6F0011A70E1Et running [12021] GOOD
+40dc lightingagent-0.1           vip02ORVD6F0011A71230o        02ORVD6F0011A71230o running [3394]  GOOD
+61a0 lightingagent-0.1           vip02ORVD6F0011A71230t        02ORVD6F0011A71230t running [12119] GOOD
+0594 lightingagent-0.1           vip02ORVD6F0011A71246o        02ORVD6F0011A71246o running [4851]  GOOD
+feaa lightingagent-0.1           vip02ORVD6F0011A71246t        02ORVD6F0011A71246t running [12190] GOOD
+69cf lightingagent-0.1           lightingagent-0.1_4           02ORVD6F0011A7129Eo 0               
+cdcc lightingagent-0.1           vip02ORVD6F0011A7131Bo        02ORVD6F0011A7131Bo running [12246] GOOD
+2ddd lightingagent-0.1           vip02ORVD6F0011A7131Bt        02ORVD6F0011A7131Bt running [4212]  GOOD
+e482 lightingagent-0.1           vip02ORVD6F0011A71379o        02ORVD6F0011A71379o running [12316] GOOD
+cf96 lightingagent-0.1           vip02ORVD6F0011A71379t        02ORVD6F0011A71379t running [12370] GOOD
+23fc lightingagent-0.1           vip02ORVD6F0011A714A4o        02ORVD6F0011A714A4o running [4466]  GOOD
+da2d lightingagent-0.1           vip02ORVD6F0011A714A4t        02ORVD6F0011A714A4t running [12447] GOOD
+cc18 lightingagent-0.1           vip02ORVD6F0011A72D49o        02ORVD6F0011A72D49o running [12502] GOOD
+3cb7 lightingagent-0.1           vip02ORVD6F0011A72D49t        02ORVD6F0011A72D49t running [3516]  GOOD
+ef84 lightingagent-0.1           vip02ORVD6F0011A72EBEo        02ORVD6F0011A72EBEo running [12572] GOOD
+5be4 lightingagent-0.1           vip02ORVD6F0011A72EBEt        02ORVD6F0011A72EBEt running [12628] GOOD
+8b06 lightingagent-0.1           vip02ORVD6F0011A72F51o        02ORVD6F0011A72F51o running [12682] 
+e9b6 lightingagent-0.1           vip02ORVD6F0011A72F51t        02ORVD6F0011A72F51t running [12711] 
+4dae lightingagent-0.1           vip02ORVD6F0011A73056o        02ORVD6F0011A73056o 0               
+d669 lightingagent-0.1           vip02ORVD6F0011A73056t        02ORVD6F0011A73056t 0               
+6585 lightingagent-0.1           vip02ORVD6F0011A732D8o        02ORVD6F0011A732D8o 0               
+e60b lightingagent-0.1           vip02ORVD6F0011A732D8t        02ORVD6F0011A732D8t 0               
+5f9a lightingagent-0.1           vip02ORVD6F0011A736C8o        02ORVD6F0011A736C8o 0               
+0ee0 lightingagent-0.1           vip02ORVD6F0011A736C8t        02ORVD6F0011A736C8t running [4772]  GOOD
+7faa lightingagent-0.1           vip02ORVD6F0011A737B7o        02ORVD6F0011A737B7o 0               
+4060 lightingagent-0.1           vip02ORVD6F0011A737B7t        02ORVD6F0011A737B7t running [3466]  GOOD
+5862 lightingagent-0.1           vip02ORVD6F0011A74C62o        02ORVD6F0011A74C62o 0               
+d21c lightingagent-0.1           vip02ORVD6F0011A74C62t        02ORVD6F0011A74C62t 0               
+b6ae lightingagent-0.1           vip02ORVD6F0011A7584Do        02ORVD6F0011A7584Do 0               
+cac7 lightingagent-0.1           vip02ORVD6F0011A7584Dt        02ORVD6F0011A7584Dt 0               
+d38e lightingagent-0.1           vip02ORVD6F0011B04BA6o        02ORVD6F0011B04BA6o 0               
+3c30 lightingagent-0.1           vip02ORVD6F0011B04BA6t        02ORVD6F0011B04BA6t running [3699]  GOOD
+8ea5 lightingagent-0.1           vip02ORVD6F0011B04CE8o        02ORVD6F0011B04CE8o 0               
+4315 lightingagent-0.1           vip02ORVD6F0011B04CE8t        02ORVD6F0011B04CE8t running [2953]  GOOD
+d316 lightingagent-0.1           vip02ORVD6F0011B04DB7o        02ORVD6F0011B04DB7o 0               
+9ea4 lightingagent-0.1           vip02ORVD6F0011B04DB7t        02ORVD6F0011B04DB7t 0               
+c1cb lightingagent-0.1           vip02ORVD6F0011B052F2o        02ORVD6F0011B052F2o 0               
+2b38 lightingagent-0.1           vip02ORVD6F0011B052F2t        02ORVD6F0011B052F2t running [4287]  GOOD
+b147 lightingagent-0.1           vip02ORVD6F0011B053B8o        02ORVD6F0011B053B8o 0               
+5b3b lightingagent-0.1           vip02ORVD6F0011B053B8t        02ORVD6F0011B053B8t 0               
+166f lightingagent-0.1           vip02ORVD6F0011B0564Ao        02ORVD6F0011B0564Ao running [4570]  GOOD
+a258 lightingagent-0.1           vip02ORVD6F0011B0564At        02ORVD6F0011B0564At 0               
+76c5 lightingagent-0.1           vip02ORVD6F0011B05992o        02ORVD6F0011B05992o 0               
+a03d lightingagent-0.1           vip02ORVD6F0011B05992t        02ORVD6F0011B05992t 0               
+95e7 lightingagent-0.1           vip02ORVD6F0011B05A6Bo        02ORVD6F0011B05A6Bo 0               
+4c72 lightingagent-0.1           vip02ORVD6F0011B05A6Bt        02ORVD6F0011B05A6Bt 0               
+8dbf lightingagent-0.1           vip02ORVD6F0011B05B88o        02ORVD6F0011B05B88o 0               
+e9ee lightingagent-0.1           vip02ORVD6F0011B05B88t        02ORVD6F0011B05B88t 0               
+79c6 lightingagent-0.1           vip02ORVD6F0011B05C3Bo        02ORVD6F0011B05C3Bo 0               
+2db4 lightingagent-0.1           vip02ORVD6F0011B05C3Bt        02ORVD6F0011B05C3Bt running [4247]  GOOD
+767a lightingagent-0.1           vip02ORVD6F0011B05DFCo        02ORVD6F0011B05DFCo 0               
+6add lightingagent-0.1           vip02ORVD6F0011B05DFCt        02ORVD6F0011B05DFCt 0               
+a713 lightingagent-0.1           vip02ORVD6F0011B06ADDo        02ORVD6F0011B06ADDo 0               
+2eda lightingagent-0.1           vip02ORVD6F0011B06ADDt        02ORVD6F0011B06ADDt running [4174]  GOOD
+65f6 lightingagent-0.1           lightingagent-0.1_1           02ORVD6F0011B06C3Co 0               
+8adb lightingagent-0.1           lightingagent-0.1_2           02ORVD6F0011B06C3Ct 0               
+f682 lightingagent-0.1           vip02ORVD6F0011B07060o        02ORVD6F0011B07060o 0               
+37d3 lightingagent-0.1           vip02ORVD6F0011B07060t        02ORVD6F0011B07060t running [4098]  GOOD
+53dc lightingagent-0.1           vip02ORVD6F0011B0719Bo        02ORVD6F0011B0719Bo 0               
+bbf5 lightingagent-0.1           vip02ORVD6F0011B0719Bt        02ORVD6F0011B0719Bt 0               
+f742 lightingagent-0.1           vip02ORVD6F0011B074A4o        02ORVD6F0011B074A4o 0               
+47b2 lightingagent-0.1           vip02ORVD6F0011B074A4t        02ORVD6F0011B074A4t running [2901]  GOOD
+2505 lightingagent-0.1           vip02ORVD6F0011B07EC5o        02ORVD6F0011B07EC5o running [4433]  GOOD
+8abe lightingagent-0.1           vip02ORVD6F0011B07EC5t        02ORVD6F0011B07EC5t 0               
+7e48 lightingagent-0.1           vip02ORVD6F0011B1A470o        02ORVD6F0011B1A470o 0               
+2aec lightingagent-0.1           vip02ORVD6F0011B1A470t        02ORVD6F0011B1A470t running [4314]  GOOD
+57f2 lightingagent-0.1           vip02ORVD6F0011B1B63Ao        02ORVD6F0011B1B63Ao 0               
+5c9c lightingagent-0.1           vip02ORVD6F0011B1B63At        02ORVD6F0011B1B63At 0               
+f686 lightingagent-0.1           vip02ORVD6F0011B1D291o        02ORVD6F0011B1D291o 0               
+10df lightingagent-0.1           vip02ORVD6F0011B1D291t        02ORVD6F0011B1D291t running [4645]  GOOD
+e666 mqttsubagent-0.1            mqttsubagent-0.1_1            mqtt                running [1232]  GOOD
+f3b3 sceneagentagent-0.1         sceneagentagent-0.1_1         scene               running [1212]  GOOD
+ef6d setupsceneagent-0.1         setupsceneagent-0.1_1         scenesetup          running [1220]  GOOD
+0133 weatheragent-0.1            weatheragent-0.1_1            weather             running [4883]  GOOD
