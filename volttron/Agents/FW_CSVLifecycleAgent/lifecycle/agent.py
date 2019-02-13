@@ -25,8 +25,8 @@ DFLTTOPIC = "/hiveos/services/lifecycle"
 CONFIGDIR = "AgentConfig"
 DISCTRESH = 2
 DFLTLOC = "/home/pi/workspace/hive_os/volttron"
-DFLTCSVFILE = "lightswitch1.csv"
-AGENTNAME = "02ORV_InwallLightingAgent"
+DFLTCSVFILE = "motion.csv"
+AGENTNAME = "21ORV_MotionAgent"
 COUNTDOWN = 60
 zone_id = 999
 
@@ -234,9 +234,9 @@ class Lifecycle(Agent):
                 _log.debug("Process for {} should be configured.".format(devid))
                 configuration = {}
                 configuration["agent_id"]=devid
-                configuration["message"] = "this is a lighting switch agent",
+                configuration["message"] = "this is motion agent",
                 configuration["heartbeat_period"] = 300
-                configuration["api"] = "classAPI_Smartthings_Inwall"
+                configuration["api"] = "classAPI_Smartthings_Motion"
                 configuration["url"] =url 
                 configuration["device"] = uuid
                 configuration["zone_id"] = zone_id
@@ -341,3 +341,4 @@ if __name__ == '__main__':
         sys.exit(main())
     except KeyboardInterrupt:
         pass
+
