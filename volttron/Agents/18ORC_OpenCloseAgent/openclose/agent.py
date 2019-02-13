@@ -96,11 +96,12 @@ def opencloseing_agent(config_path, **kwargs):
             self.device = device
             self.bearer = bearer
             self.flag = None
+            self.gettoken()
 
             # initialize device object
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.openclose = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url)
+                                         bearer=self.smartthingtoken, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -225,6 +226,9 @@ def opencloseing_agent(config_path, **kwargs):
 
         def gettoken(self):
             self.api_token = 'publish_postgres'
+            self.smartthingtoken = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            smartthingtoken = db.child(gateway_id).child('smartthingtoken').get().val()
+            self.smartthingtoken = str(smartthingtoken)
 
 
         @PubSub.subscribe('pubsub', topic_device_control)
