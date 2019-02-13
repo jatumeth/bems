@@ -71,12 +71,6 @@ def curtain_agent(config_path, **kwargs):
     address = get_config('ipaddress')
     _address = address.replace('http://', '')
     _address = address.replace('https://', '')
-    try:  # validate whether or not address is an ip address
-        socket.inet_aton(_address)
-        ip_address = _address
-    except socket.error:
-        ip_address = None
-    identifiable = get_config('identifiable')
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
@@ -101,27 +95,34 @@ def curtain_agent(config_path, **kwargs):
             self.device = device
             self.bearer = bearer
             # initialize device object
+            self.gettoken()
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
             self.Certain = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,
-                                         bearer=self.bearer, device=self.device, url=self.url)
+                                         bearer=self.smartthingtoken, device=self.device, url=self.url)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            self.gettoken()
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-            self.status_old = ""
-            self.status_old2 = ""
-            self.Certain.getDeviceStatus()
+            self.gettoken()
+
+
+        def gettoken(self):
+
+            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            self.smartthingtoken = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            smartthingtoken = db.child(gateway_id).child('smartthingtoken').get().val()
+            self.smartthingtoken = str(smartthingtoken)
 
         # @Core.periodic(device_monitor_time)
         # def deviceMonitorBehavior(self):
-        #     print ""
-        #     pass
+
             # self.Certain.getDeviceStatus()
             # self.StatusPublish(self.Certain.variables)
             # #
@@ -199,8 +200,8 @@ def curtain_agent(config_path, **kwargs):
 
         def publish_postgres(self):
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            postgres_Authorization = 'Token ' + self.api_token
 
             m = MultipartEncoder(
                 fields={
