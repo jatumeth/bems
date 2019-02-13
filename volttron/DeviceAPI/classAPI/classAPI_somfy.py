@@ -166,44 +166,37 @@ class API:
             _dataj = json.loads(_data)
 
             try:
-                if _dataj['command'] == 'OneOn':
-                    _data2 = json.dumps({"command": "TwoOff"})
-                    print (_data2)
-                    print "sending requests put"
-                    r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                # if _dataj['command'] == 'OneOn':
+                #     _data2 = json.dumps({"command": "TwoOff"})
+                #     print (_data2)
+                #     print "sending requests put"
+                #     r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
+                #
+                # if _dataj['command'] == 'TwoOn':
+                #     # _data3 = json.dumps(self.convertPostMsg(postmsg2))
+                #     _data3 =   json.dumps({"command": "OneOff"})
+                #     print (_data3)
+                #     print "sending requests put"
+                #     r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
+                # print "sending requests put"
 
-                if _dataj['command'] == 'TwoOn':
-                    # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                    _data3 =   json.dumps({"command": "OneOff"})
-                    print (_data3)
-                    print "sending requests put"
-                    r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-
-                print "sending requests put"
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
                 print _data
-                time.sleep(10)
+                time.sleep(15)
+
                 print "-------------------------sucess-------------------------"
 
-                if _dataj['command'] == 'OneOn':
-                    _data3 =  json.dumps({"command": "OneOff"})
-                    print (_data3)
-                    print "sending requests put"
-                    r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-                #
+                # if _dataj['command'] == 'OneOn':
+                _data3 =  json.dumps({"command": "OneOff"})
+                print (_data3)
+                print "sending requests put"
+                r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
 
-                if _dataj['command'] == 'TwoOn':
-                    _data2 =   json.dumps({"command": "TwoOff"})
-                    print (_data2)
-                    print "sending requests put"
-                    r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
-                #
-                # # _data3 = json.dumps(self.convertPostMsg(postmsg2))
-                # _data3 =   json.dumps({"command": "OneOff"})
-                # print (_data3)
-                # print "sending requests put"
-                # r2 = requests.put(url, headers=headers, data=_data3, timeout=20);
-
+                # if _dataj['command'] == 'TwoOn':
+                _data2 =   json.dumps({"command": "TwoOff"})
+                print (_data2)
+                print "sending requests put"
+                r3 = requests.put(url, headers=headers, data=_data2, timeout=20);
 
             except:
                 print("ERROR: classAPI_Somfy connection failure! @ setDeviceStatus")
@@ -224,7 +217,7 @@ class API:
         try:
 
             if postmsg['DIM'] == '0':
-                msgToDevice['command'] = "OneOn"
+                msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 10
                 self.set_variable('device_status', '0')
 
@@ -241,7 +234,7 @@ class API:
                 self.set_variable('device_status', '50')
 
             elif postmsg['DIM'] == '100':
-                msgToDevice['command'] = "TwoOn"
+                msgToDevice['command'] = "OneOn"
                 # msgToDevice['time'] = 10
                 self.set_variable('device_status', '100')
         except:
@@ -250,7 +243,7 @@ class API:
         try:
             if postmsg['dim'] == '0':
 
-                msgToDevice['command'] = "OneOn"
+                msgToDevice['command'] = "TwoOn"
                 # msgToDevice['time'] = 10
                 self.set_variable('device_status', '0')
 
@@ -267,7 +260,7 @@ class API:
                 self.set_variable('device_status', '50')
 
             elif postmsg['dim'] == '100':
-                msgToDevice['command'] = "TwoOn"
+                msgToDevice['command'] = "OneOn"
                 # msgToDevice['time'] = 10
                 self.set_variable('device_status', '100')
         except:
@@ -292,8 +285,10 @@ def main():
     # create an object with initialized data from DeviceDiscovery Agent
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na02-useast1.api.smartthings.com/api/smartapps/installations/38eaa7c9-ec33-4fe9-99be-93981f5432d8/switches/', bearer = 'Bearer aa7dcd62-34e9-499d-91f0-6917b4135ef9',device = 'e7ba793c-7bce-40d3-94ae-d348be190175')
-    # Somfy.getDeviceStatus()
+
+
+    Somfy = API(model='Somfy', type='tv', api='API3', agent_id='SomfyAgent',url = 'https://graph-na04-useast2.api.smartthings.com/api/smartapps/installations/20d0a8e5-8098-4e4d-a50d-bfb3fb4fc1ec/switches/', bearer = 'Bearer 7f8fe6a1-c5d7-4c03-a9ef-d7517b21d709',device = '20cd9a5b-219e-4f80-88a9-810b074ac7c7')
+    Somfy.getDeviceStatus()
 
     # Somfy.setDeviceStatus({"device": "08SOM123456", "dim": "100", "type": "devicecontrol"})
     # Somfy.setDeviceStatus({"DIM": "0"})
@@ -305,7 +300,7 @@ def main():
     #
     # time.sleep(10)
 
-    Somfy.setDeviceStatus({"status": "ON"})
+    # Somfy.setDeviceStatus({"status": "OFF"})
 
     # time.sleep(10)
     # #
