@@ -115,7 +115,10 @@ def curtain_agent(config_path, **kwargs):
 
         def gettoken(self):
 
-            self.api_token = '701308a85458bab3ec83d9a08e678c545b87ec67'
+            self.api_token = 'b409cacf93c467986e4366940c1d56b7909d200f'
+            token = db.child(gateway_id).child('token').get().val()
+            self.api_token = str(token)
+
             self.smartthingtoken = '701308a85458bab3ec83d9a08e678c545b87ec67'
             smartthingtoken = db.child(gateway_id).child('smartthingtoken').get().val()
             self.smartthingtoken = str(smartthingtoken)
