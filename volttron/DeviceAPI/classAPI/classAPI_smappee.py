@@ -119,14 +119,15 @@ class API:
 
         try:
             import smappy as smappy
-            ls = smappy.LocalSmappee(ip ='192.168.1.178')
+            ls = smappy.LocalSmappee(ip='192.168.1.178')
             try:
                 ls.logon(password='admin')
             except:
                 print "er"
 
-            print ls.active_power()
-            activepower = ls.active_power()
+            # print ls.report_instantaneous_values()
+            data_meter = ls.report_instantaneous_values()
+            # print(data_meter)
             # self.set_variable('grid_voltage, grid_voltage)
             # self.set_variable('grid_current', grid_current)
             # self.set_variable('grid_earth_leak', grid_earth_leak)
@@ -134,8 +135,35 @@ class API:
             # self.set_variable('grid_powerfactor', load_powerfactor)
             # self.set_variable('grid_accumulated_energy', load_quadrant)
             # self.set_variable('grid_kvarh', load_phaseshift)
-            self.set_variable('grid_activePower', activepower)
+            # print("detail")
+            # print(type(data_meter['report']))
 
+            # self.set_variable('grid_activePower', activepower)
+
+            x = data_meter.get('report').replace("<BR>","").split(":")
+            ph1 = x[x.index('Phase 1') + 1].split(",")
+            ph2 = x[x.index('Phase 2') + 1].split(",")
+            ph3 = x[x.index('Phase 3') + 1].split(",")
+
+            for data in ph1:
+                if data.startswith(' activePower'):
+                    self.ph1ActPow = float(data.split('=')[-1].split(" ")[0])
+
+            for data in ph2:
+                if data.startswith(' activePower'):
+                    self.ph2ActPow = float(data.split('=')[-1].split(" ")[0])
+
+            for data in ph3:
+                if data.startswith(' activePower'):
+                    self.ph3ActPow = float(data.split('=')[-1].split(" ")[0])
+
+            self.sum_ActPow = self.ph1ActPow + self.ph2ActPow + self.ph3ActPow
+            # print(self.sum_ActPow)
+
+            self.set_variable('activepower_phase1', self.ph1ActPow)
+            self.set_variable('activepower_phase2', self.ph2ActPow)
+            self.set_variable('activepower_phase3', self.ph3ActPow)
+            self.set_variable('grid_activePower', self.sum_ActPow)
 
 
             # url_l = 'http://192.168.1.7/gateway/apipublic/logon'
@@ -172,7 +200,10 @@ class API:
         #
         # print ("current grid status--------------------------------")
         # print(" Current(A) = {}".format(self.get_variable('grid_current')))
-        print(" ActivePower(W) = {}".format(self.get_variable('grid_activePower')))
+        print(" ActivePower(W) Phase1 = {}".format(self.get_variable('activepower_phase1')))
+        print(" ActivePower(W) Phase2 = {}".format(self.get_variable('activepower_phase2')))
+        print(" ActivePower(W) Phase3 = {}".format(self.get_variable('activepower_phase3')))
+        print(" ActivePower(W) Sum = {}".format(self.get_variable('grid_activePower')))
         # print(" ReactivePower(Var) = {}".format(self.get_variable('grid_reactivePower')))
         # print(" ApparentPower(VA) = {}".format(self.get_variable('grid_apparentPower')))
         # print(" Powerfactor = {}".format(self.get_variable('grid_powerfactor')))

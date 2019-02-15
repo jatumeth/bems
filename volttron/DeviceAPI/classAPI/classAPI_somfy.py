@@ -182,7 +182,7 @@ class API:
 
                 r = requests.put(url, headers=headers, data=_data, timeout=20);
                 print _data
-                time.sleep(15)
+                time.sleep(17)
 
                 print "-------------------------sucess-------------------------"
 

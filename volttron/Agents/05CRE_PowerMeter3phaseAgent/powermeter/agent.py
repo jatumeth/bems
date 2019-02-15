@@ -195,8 +195,15 @@ def Powermetering_agent(config_path, **kwargs):
                 # db.child(gateway_id).child('devices').child(agent_id).child("ActivePower(W)").set(
                 #     self.Powermeter.variables['grid_activePower'])
                 print self.Powermeter.variables['grid_activePower']
-                power = int(self.Powermeter.variables['grid_activePower'])
-                db.child('hivedevhub18').child("energy").child('05CRE0250883398').child("realtime").child("grid_activePower").set(power)
+                power_sum = int(self.Powermeter.variables['grid_activePower'])
+                power_ph1 = int(self.Powermeter.variables['activepower_phase1'])
+                power_ph2 = int(self.Powermeter.variables['activepower_phase2'])
+                power_ph3 = int(self.Powermeter.variables['activepower_phase3'])
+                db.child('hivedevhub18').child("energy").child('05CRE0250883398').child("realtime").child("grid_activePower").set(power_sum)
+                db.child('hivedevhub18').child("energy").child('05CRE0250883398').child("realtime").child("grid_activePower_P1").set(power_ph1)
+                db.child('hivedevhub18').child("energy").child('05CRE0250883398').child("realtime").child("grid_activePower_P2").set(power_ph2)
+                db.child('hivedevhub18').child("energy").child('05CRE0250883398').child("realtime").child("grid_activePower_P3").set(power_ph3)
+
 
                 print "---------------update firebase ok"
             except Exception as er:
