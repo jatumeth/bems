@@ -92,11 +92,17 @@ def iothubsub_agent(config_path, **kwargs):
             size = len(message_buffer)
             print("Received Message [%d]:" % counter)
             print("    Data: <<<%s>>> & Size=%d" % (message_buffer[:size].decode('utf-8'), size))
-            data = json.loads(message_buffer[:size].decode('utf-8'))
+            commsg = json.loads(message_buffer[:size].decode('utf-8'))
             # print(type(data))
             # print(data)
-            commsg = data['message']
-            type_msg = str(commsg.get('type', None))
+            try:
+                commsg = commsg['message']
+            except:
+                print "error commsg['message']"
+            try:
+                type_msg = str(commsg.get('type', None))
+            except:
+                print "error type_msg"
 
             if type_msg.startswith('scene'):  # TODO : Recheck condition again
                 # print('Found scene')
@@ -235,8 +241,8 @@ def iothubsub_agent(config_path, **kwargs):
         def VIPPublishApplication(self, commsg, type_msg):
             topic = str('/ui/agent/update/hive/999/') + str(type_msg)
             message = json.dumps(commsg)
-            # print ("topic {}".format(topic))
-            # print ("message {}".format(message))
+            print ("topic {}".format(topic))
+            print ("message {}".format(message))
 
             self.vip.pubsub.publish(
                 'pubsub', topic,
