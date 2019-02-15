@@ -180,6 +180,7 @@ def curtain_agent(config_path, **kwargs):
                     self.Certain.variables['device_type'])
             except Exception as er:
                 print er
+                print "-------------firebase update iothub-------------"
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
@@ -199,12 +200,15 @@ def curtain_agent(config_path, **kwargs):
             x["device_name"] = 'NARAI-Certain'
             x["device_type"] = 'curtain'
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
-
+            print "------------- update iothub-------------"
 
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
+            print ""
+
             postgres_Authorization = 'Token ' + self.api_token
+            print postgres_Authorization
 
             m = MultipartEncoder(
                 fields={
@@ -215,12 +219,15 @@ def curtain_agent(config_path, **kwargs):
                 }
             )
 
+            print m
+
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
                                       "Authorization": postgres_Authorization,
                                       })
             print r.status_code
+            print "------------- update postgrate-------------"
         
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC
@@ -248,9 +255,9 @@ def curtain_agent(config_path, **kwargs):
 
             try:
                 if message2['dim'] == '0':
-                    self.Certain.variables['device_status'] = "OFF"
-                elif message2['dim'] == '100':
                     self.Certain.variables['device_status'] = "ON"
+                elif message2['dim'] == '100':
+                    self.Certain.variables['device_status'] = "OFF"
             except:
                 pass
 

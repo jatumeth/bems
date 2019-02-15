@@ -81,7 +81,7 @@ def mqttsub_agent(config_path, **kwargs):
 
             while True:
                 try:
-                    msg = sbs.receive_subscription_message(servicebus_topic, 'client1', peek_lock=False)
+                    msg = sbs.receive_subscription_message(servicebus_topic, 'client2', peek_lock=False)
                     _log.debug("Got Azure messages")
                     if msg.body is not None:
                         commsg = eval(msg.body)

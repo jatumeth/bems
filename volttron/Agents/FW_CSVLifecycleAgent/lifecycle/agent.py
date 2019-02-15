@@ -16,6 +16,8 @@ from Queue import Queue
 
 from volttron.platform.agent import utils
 from volttron.platform.vip.agent import Agent, Core, RPC
+import time
+
 
 _log = logging.getLogger(__name__)
 utils.setup_logging()
@@ -25,8 +27,8 @@ DFLTTOPIC = "/hiveos/services/lifecycle"
 CONFIGDIR = "AgentConfig"
 DISCTRESH = 2
 DFLTLOC = "/home/pi/workspace/hive_os/volttron"
-DFLTCSVFILE = "motion.csv"
-AGENTNAME = "21ORV_MotionAgent"
+DFLTCSVFILE = "openclose_new.csv"
+AGENTNAME = "18ORC_OpenCloseAgent"
 COUNTDOWN = 60
 zone_id = 999
 
@@ -151,6 +153,7 @@ class Lifecycle(Agent):
         with open(self.csvfile, 'rb') as csvfile:
             csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
             for row in csvreader:
+
                 try:
                     devid, uuid, url, bearer, model, devname = [ x.strip() for x in row ]
                 except:
@@ -229,20 +232,20 @@ class Lifecycle(Agent):
                     statusreply = subprocess.call(self.fileloc+'/env/bin/volttron-ctl remove --tag %s'%devid,shell=True)
                 else:
                     statusreply = subprocess.call(self.fileloc+'/env/bin/volttron-ctl stop --tag %s'%devid,shell=True)
-            
+
             if configme:
                 _log.debug("Process for {} should be configured.".format(devid))
                 configuration = {}
                 configuration["agent_id"]=devid
-                configuration["message"] = "this is motion agent",
+                configuration["message"] = "this is openclosed agent",
                 configuration["heartbeat_period"] = 300
-                configuration["api"] = "classAPI_Smartthings_Motion"
+                configuration["api"] = "classAPI_Smartthings_openclose"
                 configuration["url"] =url 
                 configuration["device"] = uuid
                 configuration["zone_id"] = zone_id
                 configuration["bearer"] = bearer
                 configuration["building_name"] =  "hive"
-                configuration["device_monitor_time"] = 300
+                configuration["device_monitor_time"] = 5
                 configuration["model"] = model
                 
                 #Let's now create the agent instance

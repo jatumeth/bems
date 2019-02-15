@@ -72,7 +72,7 @@ volttron-ctl enable --tag mqtt
 
 #powermeter1
 volttron-pkg package Agents/05CRE_PowerMeterAgent
-volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0250883397.config.json
+volttron-pkg configure ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl ~/workspace/hive_os/volttron/Agents/05CRE_PowerMeterAgent/05CRE0250883398.config.json
 volttron-ctl install ~/.volttron/packaged/powermeteragent-0.1-py2-none-any.whl --tag powermeter1
 volttron-ctl enable --tag powermeter1
 
