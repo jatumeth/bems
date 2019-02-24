@@ -63,10 +63,10 @@ DEVICES = {
 
 CHANGE = {
     'change':{
-        'apiKeyLight':'AIzaSyD4QZ7ko7uXpNK-VBF3Qthhm3Ypzi_bxgQ',
-        'authLight':'hive-rt-mobile-backend.firebaseapp.com',
-        'databaseLight': 'https://hive-rt-mobile-backend.firebaseio.com',
-        'storageLight':'bucket.appspot.com'
+        'apiKeyLight':'',
+        'authLight':'',
+        'databaseLight': '',
+        'storageLight':''
     }
 }
 
@@ -197,9 +197,9 @@ FIND_DEVICE_SETTINGS = {
 AZURE = {
     'servicebus': {
         'topic': '',
-        'service_namespace': 'peahiveservicebusv2',
-        'shared_access_key_name': 'RootManageSharedAccessKey',
-        'shared_access_key_value': 'F6hM22kIHgfzKmt2GF0NtGlrVZtapYHOG3gMb7doaM4=',
-        'CONNECTION_STRING' : 'HostName=peahiveiotv2.azure-devices.net;DeviceId=hivedevhub18;SharedAccessKey=p140uozLxStV4uWZhSpgVHR9sP7zDqQLShQGSxxTWWw='
+        'service_namespace': '',
+        'shared_access_key_name': '',
+        'shared_access_key_value': '',
+        'CONNECTION_STRING' : ''
     }
 }
