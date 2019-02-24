@@ -106,22 +106,11 @@ def ac_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
-            self.status_old = "none"
-            self.status_old2 = "none"
-            self.status_old3 = "none"
-            self.status_old4 = "none"
-            self.status_old5 = "none"
-            self.gettoken()
+
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-            self.gettoken()
-            self.status_old = "none"
-            self.status_old2 = "none"
-            self.status_old3 = "none"
-            self.status_old4 = "none"
-            self.status_old5 = "none"
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
@@ -132,26 +121,12 @@ def ac_agent(config_path, **kwargs):
             # TODO update local postgres
             # self.publish_postgres()
 
-            if(self.AC.variables['status'] != self.status_old or
-                    self.AC.variables['current_temperature'] != self.status_old2 or
-                    self.AC.variables['set_temperature'] != self.status_old3 or
-                    self.AC.variables['fan'] != self.status_old4 or
-                    self.AC.variables['mode'] != self.status_old5):
-                self.publish_firebase()
-                self.publish_postgres()
-                self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
-            else:
-                pass
-
-            self.status_old = self.AC.variables['status']
-            self.status_old2 = self.AC.variables['current_temperature']
-            self.status_old3 = self.AC.variables['set_temperature']
-            self.status_old4 = self.AC.variables['fan']
-            self.status_old5 = self.AC.variables['mode']
+            self.publish_firebase()
+            self.publish_postgres()
+            self.publish_azure_iot_hub(activity_type='devicemonitor', username=agent_id)
 
 
         def publish_firebase(self):
-
             try:
                 db.child(gateway_id).child('devices').child(agent_id).child("dt").set(datetime.now().replace(microsecond=0).isoformat())
                 db.child(gateway_id).child('devices').child(agent_id).child("STATUS").set(self.AC.variables['status'])
@@ -161,13 +136,13 @@ def ac_agent(config_path, **kwargs):
                 db.child(gateway_id).child('devices').child(agent_id).child("MODE").set(self.AC.variables['mode'])
                 db.child(gateway_id).child('devices').child(agent_id).child("FAN_SPEED").set(self.AC.variables['fan'])
             except Exception as er:
-                print er
+                print (er())
 
         def publish_postgres(self):
 
             postgres_url = 'https://peahivemobilebackends.azurewebsites.net/api/v2.0/devices/'
             postgres_Authorization = 'Token '+self.api_token
-            print postgres_Authorization
+            print (postgres_Authorization)
 
             try:
                 if self.AC.variables['fan'] == 'AUTO':
@@ -187,14 +162,14 @@ def ac_agent(config_path, **kwargs):
                     # "mode": str(self.AC.variables['mode']),
                 }
             )
-            print m
+            print (m)
             r = requests.put(postgres_url,
                              data=m,
                              headers={'Content-Type': m.content_type,
                                       "Authorization": postgres_Authorization,
                                       })
-            print r.status_code
-            print "-------------- update postgrate api -----------------"
+            print (r.status_code)
+            print ("-------------- update postgrate api -----------------")
 
         def StatusPublish(self, commsg):
             # TODO this is example how to write an app to control AC

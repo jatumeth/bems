@@ -84,33 +84,12 @@ def fibaroing_agent(config_path, **kwargs):
         ip_address = None
     identifiable = get_config('identifiable')
 
-    # DATABASES
-    # print settings.DEBUG
-    # db_host = settings.DATABASES['default']['HOST']
-    # db_port = settings.DATABASES['default']['PORT']
-    # db_database = settings.DATABASES['default']['NAME']
-    # db_user = settings.DATABASES['default']['USER']
-    # db_password = settings.DATABASES['default']['PASSWORD']
-    # db_table_fibaroing = settings.DATABASES['default']['TABLE_fibaroing']
-    # db_table_active_alert = settings.DATABASES['default']['TABLE_active_alert']
-    # db_table_bemoss_notify = settings.DATABASES['default']['TABLE_bemoss_notify']
-    # db_table_alerts_notificationchanneladdress = settings.DATABASES['default']['TABLE_alerts_notificationchanneladdress']
-    # db_table_temp_time_counter = settings.DATABASES['default']['TABLE_temp_time_counter']
-    # db_table_priority = settings.DATABASES['default']['TABLE_priority']
 
     # construct _topic_Agent_UI based on data obtained from DB
     _topic_Agent_UI_tail = building_name + '/' + str(zone_id) + '/' + agent_id
     topic_device_control = '/ui/agent/update/'+_topic_Agent_UI_tail
     print(topic_device_control)
     gateway_id = settings.gateway_id
-
-    # 5. @params notification_info
-    send_notification = True
-    # email_fromaddr = settings.NOTIFICATION['email']['fromaddr']
-    # email_username = settings.NOTIFICATION['email']['username']
-    # email_password = settings.NOTIFICATION['email']['password']
-    # email_mailServer = settings.NOTIFICATION['email']['mailServer']
-    # notify_heartbeat = settings.NOTIFICATION['heartbeat']
 
     class fibaroingAgent(Agent):
         """Listens to everything and publishes a heartbeat according to the
@@ -138,33 +117,13 @@ def fibaroing_agent(config_path, **kwargs):
             # Demonstrate accessing a value from the config file
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
 
-            # setup connection with db -> Connect to local postgres
-            # try:
-            #     self.con = psycopg2.connect(host=db_host, port=db_port, database=db_database, user=db_user,
-            #                                 password=db_password)
-            #     self.cur = self.con.cursor()  # open a cursor to perfomm database operations
-            #     _log.debug("{} connected to the db name {}".format(agent_id, db_database))
-            # except:
-            #     _log.error("ERROR: {} fails to connect to the database name {}".format(agent_id, db_database))
-            # connect to Azure IoT hub
+
             self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
-            self.status_old = ""
-            self.status_old2 = ""
-            self.status_old3 = ""
-            self.status_old4 = ""
-            self.status_old5 = ""
-            self.status_old6 = ""
 
         @Core.receiver('onstart')
         def onstart(self, sender, **kwargs):
             _log.debug("VERSION IS: {}".format(self.core.version()))
-            self.status_old = ""
-            self.status_old2 = ""
-            self.status_old3 = ""
-            self.status_old4 = ""
-            self.status_old5 = ""
-            self.status_old6 = ""
 
         @Core.periodic(device_monitor_time)
         def deviceMonitorBehavior(self):
