@@ -59,7 +59,7 @@ def ac_agent(config_path, **kwargs):
     model = get_config('model')
     device_type = get_config('type')
     api = get_config('api')
-    address = get_config('ipaddress')
+    ipaddress = get_config('ipaddress')
 
     url= get_config("url")
     port = get_config("port")
@@ -67,6 +67,7 @@ def ac_agent(config_path, **kwargs):
     baudrate = get_config("baudrate")
     startregis = get_config("startregis")
     startregisr = get_config("startregisr")
+
 
 
 
@@ -92,12 +93,13 @@ def ac_agent(config_path, **kwargs):
             self.device_type = device_type
             self.url = url
             self.port = port
+            self.ipaddress=ipaddress
             self.parity =parity
             self.baudrate = baudrate
             self.startregis = startregis
             self.startregisr = startregisr
             self.apiLib = importlib.import_module("DeviceAPI.classAPI." + api)
-            self.AC = self.apiLib.API(model=self.model, device_type=self.device_type, agent_id=self._agent_id,url = self.url,port = self.port,parity =self.parity,baudrate = self.baudrate,startregis = self.startregis,startregisr = self.startregisr)
+            self.AC = self.apiLib.API(model=self.model, ipaddress=self.ipaddress,device_type=self.device_type, agent_id=self._agent_id,url = self.url,port = self.port,parity =self.parity,baudrate = self.baudrate,startregis = self.startregis,startregisr = self.startregisr)
 
         @Core.receiver('onsetup')
         def onsetup(self, sender, **kwargs):
@@ -207,8 +209,8 @@ def ac_agent(config_path, **kwargs):
 
         def gettoken(self):
             self.api_token = 'b409cacf93c467986e4366940c1d56b7909d200f'
-            token = db.child(gateway_id).child('token').get().val()
-            self.api_token = str(token)
+            # token = db.child(gateway_id).child('token').get().val()
+            # self.api_token = str(token)
 
         def publish_azure_iot_hub(self, activity_type, username):
             # TODO publish to Azure IoT Hub u
@@ -248,41 +250,7 @@ def ac_agent(config_path, **kwargs):
                 self.AC.variables['mode'] = str(message['mode'])
             self.AC.setDeviceStatus(message)
             print ""
-            # time.sleep(2)
-            # self.AC.getDeviceStatus()
-            # if(self.AC.variables['status'] != self.status_old or
-            #         self.AC.variables['current_temperature'] != self.status_old2 or
-            #         self.AC.variables['set_temperature'] != self.status_old3 or
-            #         self.AC.variables['fan'] != self.status_old4 or
-            #         self.AC.variables['mode'] != self.status_old5):
-            #     self.publish_firebase()
-            #     self.publish_postgres()
-            # else:
-            #     time.sleep(1)
-            #     self.AC.getDeviceStatus()
-            #     if (self.AC.variables['status'] != self.status_old or
-            #             self.AC.variables['current_temperature'] != self.status_old2 or
-            #             self.AC.variables['set_temperature'] != self.status_old3 or
-            #             self.AC.variables['fan'] != self.status_old4 or
-            #             self.AC.variables['mode'] != self.status_old5):
-            #         self.publish_firebase()
-            #         self.publish_postgres()
-            #     else:
-            #         time.sleep(1)
-            #         self.AC.getDeviceStatus()
-            #         if (self.AC.variables['status'] != self.status_old or
-            #                 self.AC.variables['current_temperature'] != self.status_old2 or
-            #                 self.AC.variables['set_temperature'] != self.status_old3 or
-            #                 self.AC.variables['fan'] != self.status_old4 or
-            #                 self.AC.variables['mode'] != self.status_old5):
-            #             self.publish_firebase()
-            #             self.publish_postgres()
-            #         else:
-            #             pass
-            # self.status_old = self.AC.variables['status']
-            # self.status_old2 = self.AC.variables['current_temperature']
-            # self.status_old3 = self.AC.variables['set_temperature']
-            # self.status_old4 = self.AC.variables['fan']
+
 
 
     Agent.__name__ = '01DAI_ACAgent'

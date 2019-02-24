@@ -3,7 +3,7 @@
 import os
 import sys
 import json
-os.chdir(os.path.expanduser("~/workspace/hive_os/"))  # = ~/workspace/bemoss_os
+os.chdir(os.path.expanduser("~/workspace/bems/hive_os/"))  # = ~/workspace/bemoss_os
 os.system("service postgresql restart")
 current_working_directory = os.getcwd()
 sys.path.append(current_working_directory)

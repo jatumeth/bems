@@ -82,29 +82,19 @@ class API:
     1. getDeviceStatus() GET
     2. setDeviceStatus() SET
     '''
-
-    # ----------------------------------------------------------------------
-    # getDeviceStatus(), getDeviceStatusJson(data), printDeviceStatus()
     def getDeviceStatus(self):
+        ipaddress = str(self.get_variable("ipaddress"))
 
-        # getDeviceStatusResult = True
 
         try:
-# <<<<<<< HEAD
-            r = requests.get("http://192.168.1.106/aircon/get_control_info",
-# =======
-#             r = requests.get("http://192.168.1.104/aircon/get_control_info",
-# >>>>>>> a99c03c9be33d95d3138bd4c9c4d1d8ae68da8fe
+
+            r = requests.get(ipaddress+"/aircon/get_control_info",
                               timeout=20)
 
             print("{0} Agent is querying its current status (status:{1}) please wait ...".format(self.get_variable('agent_id'), r.status_code))
             format(self.variables.get('agent_id', None), str(r.status_code))
 
-# <<<<<<< HEAD
-            q = requests.get("http://192.168.1.106/aircon/get_sensor_info",
-# =======
-#             q = requests.get("http://192.168.1.104/aircon/get_sensor_info",
-# >>>>>>> a99c03c9be33d95d3138bd4c9c4d1d8ae68da8fe
+            q = requests.get(ipaddress+"/aircon/get_sensor_info",
                                timeout=20)
 
             if r.status_code == 200:
@@ -171,6 +161,7 @@ class API:
 
     # setDeviceStatus(postmsg), isPostmsgValid(postmsg), convertPostMsg(postmsg)
     def setDeviceStatus(self, postmsg):
+        ipaddress = str(self.get_variable("ipaddress"))
         self.getDeviceStatus()
         setDeviceStatusResult = True
         postmsg = str(postmsg)
@@ -225,7 +216,7 @@ class API:
             try:
                 print "sending requests put"
                 r = requests.post(
-                    "http://192.168.1.106/aircon/set_control_info",
+                    ipaddress+"/aircon/set_control_info",
                     headers={"Authorization": "Bearer b73d52c8-1b73-448e-9ff2-eda53d60944b "}, data= data, timeout=20)
                 print(" {0}Agent for {1} is changing its status with {2} please wait ..."
                       .format(self.variables.get('agent_id', None), self.variables.get('model', None), postmsg))
@@ -243,18 +234,12 @@ class API:
         return dataValidity
 
 
-# This main method will not be executed when this class is used as a module
+
 def main():
-    # create an object with initialized data from DeviceDiscovery Agent
-    # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
-    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent')
 
-    #
-    # AC.setDeviceStatus({'status': 'ON', 'device': '1DAIK1200138'})
-    # time.sleep(5)
+    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent',ipaddress='192.168.1.14')
 
-    # AC.setDeviceStatus({"status": "OFF", "device": "1DAIK", "mode": "COLD", "username":"hive5"})
-    # AC.setDeviceStatus({'status': 'ON', 'stemp': '23','device': '1DAIK1200100'})
+
     AC.getDeviceStatus()
 if __name__ == "__main__": main()
