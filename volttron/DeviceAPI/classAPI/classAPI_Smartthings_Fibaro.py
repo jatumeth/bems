@@ -85,7 +85,7 @@ class API:
         self.set_variable('STATUS', str(conve_json["motion"]).upper())
         self.set_variable('MOTION', str(conve_json["motion"]).upper())
         self.set_variable('TAMPER', str(conve_json["tamper"]).upper())
-        self.set_variable('HUMIDITY', float(conve_json["humidity"]))
+        self.set_variable('HUMIDITY', float(0))
         self.set_variable('unitTime', conve_json["unitTime"])
         self.set_variable('device_type', str(conve_json["type"]).upper())
 
