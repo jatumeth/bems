@@ -15,10 +15,10 @@ import json
 import socket
 #import psycopg2
 #import psycopg2.extras
-import pyrebase
+# import pyrebase
 import time
 import requests
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+# from requests_toolbelt.multipart.encoder import MultipartEncoder
 utils.setup_logging()
 _log = logging.getLogger(__name__)
 __version__ = '3.2'
@@ -118,7 +118,7 @@ def fibaroing_agent(config_path, **kwargs):
             _log.info(self.config.get('message', DEFAULT_MESSAGE))
 
 
-            self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
+            # self.iotmodul = importlib.import_module("hive_lib.azure-iot-sdk-python.device.samples.iothub_client_sample")
 
 
         @Core.receiver('onstart')
@@ -207,31 +207,32 @@ def fibaroing_agent(config_path, **kwargs):
             discovered_address = self.iotmodul.iothub_client_sample_run(bytearray(str(x), 'utf8'))
 
         def publish_postgres(self):
+            print "update post"
 
-            postgres_url = settings.POSTGRES['postgres']['url']
-            postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
-            postgres_Authorization = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
-
-            m = MultipartEncoder(
-                fields={
-                    "STATUS": str(self.fibaro.variables['STATUS']),
-                    "device_id": str(self.fibaro.variables['agent_id']),
-                    "device_type": "multisensor",
-                    "TAMPER": str(self.fibaro.variables['TAMPER']),
-                    "TEMPERATURE": str(self.fibaro.variables['TEMPERATURE']),
-                    "BATTERY": str(self.fibaro.variables['BATTERY']),
-                    "HUMIDITY": str(self.fibaro.variables['HUMIDITY']),
-                    "ILLUMINANCE": str(self.fibaro.variables['ILLUMINANCE']),
-                    "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
-                }
-            )
-
-            r = requests.put(postgres_url,
-                             data=m,
-                             headers={'Content-Type': m.content_type,
-                                      "Authorization": postgres_Authorization,
-                                      })
-            print r.status_code
+            # postgres_url = settings.POSTGRES['postgres']['url']
+            # postgres_Authorization = settings.POSTGRES['postgres']['Authorization']
+            # postgres_Authorization = 'ad1eb50802c61eb52d8311cf3d4590c7deacff2e'
+            #
+            # m = MultipartEncoder(
+            #     fields={
+            #         "STATUS": str(self.fibaro.variables['STATUS']),
+            #         "device_id": str(self.fibaro.variables['agent_id']),
+            #         "device_type": "multisensor",
+            #         "TAMPER": str(self.fibaro.variables['TAMPER']),
+            #         "TEMPERATURE": str(self.fibaro.variables['TEMPERATURE']),
+            #         "BATTERY": str(self.fibaro.variables['BATTERY']),
+            #         "HUMIDITY": str(self.fibaro.variables['HUMIDITY']),
+            #         "ILLUMINANCE": str(self.fibaro.variables['ILLUMINANCE']),
+            #         "last_scanned_time": datetime.now().replace(microsecond=0).isoformat(),
+            #     }
+            # )
+            #
+            # r = requests.put(postgres_url,
+            #                  data=m,
+            #                  headers={'Content-Type': m.content_type,
+            #                           "Authorization": postgres_Authorization,
+            #                           })
+            # print r.status_code
 
 
         def StatusPublish(self,commsg):
