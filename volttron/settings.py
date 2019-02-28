@@ -61,12 +61,20 @@ DEVICES = {
     'cassandra_update_time': 10
 }
 
+
+# apiKey: "",
+# authDomain: "",
+# databaseURL: "",
+# projectId: "updatetable-ce5d8",
+# storageBucket: "",
+# messagingSenderId: "1073280316561"
+
 CHANGE = {
     'change':{
-        'apiKeyLight':'',
-        'authLight':'',
-        'databaseLight': '',
-        'storageLight':''
+        'apiKeyLight':'AIzaSyDbwz3Nhbc47UwxZoF9_2Sy3x1ouPmWmJE',
+        'authLight':'updatetable-ce5d8.firebaseapp.com',
+        'databaseLight': 'https://updatetable-ce5d8.firebaseio.com',
+        'storageLight':'updatetable-ce5d8.appspot.com'
     }
 }
 
