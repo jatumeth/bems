@@ -369,7 +369,7 @@ def main():
     # requirements for instantiation1. model, 2.type, 3.api, 4. address
 
 
-    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent',url ='192.168.1.103',port=502,parity ='E',baudrate=9600,startregis=2006,startregisr=2012 )
+    AC = API(model='daikin', type='AC', api='API', agent_id='ACAgent',url ='192.168.1.104',port=502,parity ='E',baudrate=9600,startregis=2006,startregisr=2012 )
     # AC.setDeviceStatus({'swing':'ON','device': '1DAIK1200138'})
 
     # AC.setDeviceStatus({"status": "ON", "device": "1DAIK", "mode": "COLD", "username":"hive5"})

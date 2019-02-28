@@ -67,6 +67,7 @@ class API:
             ip = self.get_variable("ip")
             port = self.get_variable("port")
             r = '{"system":{"get_sysinfo":{}}}'
+            s = '{"emeter":{"get_realtime":{}}}'
             sock_tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock_tcp.connect((ip, port))
             sock_tcp.send(self.encrypt(r))
@@ -74,7 +75,6 @@ class API:
             sock_tcp.close()
             self.getDeviceStatusJson(self.decrypt(da[4:]))
             self.printDeviceStatus()
-
 
             if getDeviceStatusResult==True:
                 self.set_variable('offline_count', 0)
@@ -88,6 +88,9 @@ class API:
     def getDeviceStatusJson(self, data):
 
         conve_json = json.loads(data)
+
+        print(conve_json)
+
         self.set_variable('label', str(conve_json["system"]['get_sysinfo']['dev_name']))
 
         if(str(conve_json["system"]['get_sysinfo']['relay_state'])=='0'):
@@ -109,6 +112,7 @@ class API:
         print(" unitTime = {}".format(self.get_variable('unitTime')))
         print(" type= {}".format(self.get_variable('device_type')))
         print("---------------------------------------------")
+
 
     def setDeviceStatus(self, postmsg):
         setDeviceStatusResult = True
@@ -161,15 +165,18 @@ class API:
 
 def main():
 
-    tplinkplug = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='switch',ip = '192.168.1.117',
+    tplinkplug = API(model='TPlinkPlug', api='API3', agent_id='TPlinkPlugAgent',types='switch',ip = '192.168.1.104',
                   port=9999)
 
-    tplinkplug.getDeviceStatus()
-    tplinkplug.setDeviceStatus({"status": "on"})
-    time.sleep(2)
     tplinkplug.getDeviceStatus()
     tplinkplug.setDeviceStatus({"status": "off"})
     time.sleep(2)
     tplinkplug.getDeviceStatus()
+    tplinkplug.setDeviceStatus({"status": "on"})
+    time.sleep(2)
+    tplinkplug.getDeviceStatus()
+
+
+    time.sleep(2)
 
 if __name__ == "__main__": main()

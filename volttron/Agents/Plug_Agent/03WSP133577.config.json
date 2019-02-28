@@ -3,11 +3,11 @@
         "exec": "plugagent-0.1-py2.7.egg --config \"%c\" --sub \"%s\" --pub \"%p\""
     }, 
     "agent_id": "03WSP133577",
-    "ipaddress": "192.168.1.139",
+    "ipaddress": "192.168.1.104",
     "port":9999,
     "message": "TP-Link plug agent",
     "heartbeat_period": 20,
-    "api": "classAPI_tplink_smartplug",
+    "api": "classAPI_tplink_plug",
 
     "deviceid": "8006CB521891F3C2DFD2C03040307EA319B362FD",
 
